@@ -1,0 +1,1357 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model OutboxEvent {
+  id             BigInt    @id @default(autoincrement())
+  householdId    String?   @db.Uuid
+  topic          String
+  dedupeKey      String
+  payload        Json
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6)
+  processedAt    DateTime? @db.Timestamptz(6)
+  attempts       Int       @default(0)
+  nextAttemptAt  DateTime  @default(now()) @db.Timestamptz(6)
+  lastError      String?
+  deadLetteredAt DateTime? @db.Timestamptz(6)
+
+  @@unique([topic, dedupeKey], map: "OutboxEvent_topic_dedupeKey_open_uq", where: raw("((\"processedAt\" IS NULL) AND (\"deadLetteredAt\" IS NULL))"))
+  @@index([nextAttemptAt, id], map: "OutboxEvent_ready_ix", where: raw("((\"processedAt\" IS NULL) AND (\"deadLetteredAt\" IS NULL))"))
+}
+
+model Country {
+  id    String @id @db.Uuid
+  code  String @unique @db.Char(2)
+  name  String
+  users User[]
+}
+
+model Language {
+  id          String      @id @db.Uuid
+  code        String      @unique
+  name        String      @unique
+  isRtl       Boolean
+  foodAliases FoodAlias[]
+  locales     Locale[]
+  users       User[]
+}
+
+model Locale {
+  id         String   @id @db.Uuid
+  code       String   @unique
+  name       String
+  languageId String   @db.Uuid
+  language   Language @relation(fields: [languageId], references: [id], onUpdate: NoAction)
+  users      User[]
+}
+
+model Cuisine {
+  id                   String                 @id @db.Uuid
+  code                 String                 @unique
+  name                 String
+  Recipe               Recipe[]
+  UserPreferredCuisine UserPreferredCuisine[]
+}
+
+model FoodCategory {
+  id                      String                    @id @db.Uuid
+  code                    String                    @unique
+  name                    String
+  DietaryRule             DietaryRule[]
+  foods                   Food[]
+  HealthConditionDietRule HealthConditionDietRule[]
+  UserAllergyCategory     UserAllergyCategory[]
+  UserDislikedCategory    UserDislikedCategory[]
+}
+
+model SearchDocument {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceType           SearchDocumentSource
+  sourceId             String                 @db.Uuid
+  householdId          String?                @db.Uuid
+  content              String
+  embeddedContentHash  String?                @db.Char(64)
+  embedding            Unsupported("vector(384)")?
+  embeddingStatus      SearchEmbeddingStatus  @default(PENDING)
+  embeddingClaimedAt   DateTime?              @db.Timestamptz(6)
+  embeddingUpdatedAt   DateTime?              @db.Timestamptz(6)
+  lastEmbeddingError   String?
+  createdAt            DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime               @default(now()) @db.Timestamptz(6)
+
+  @@unique([sourceType, sourceId], map: "SearchDocument_source_uq")
+  @@index([updatedAt], map: "SearchDocument_embedding_pending_ix", where: raw("\"embeddingStatus\" IN ('PENDING', 'FAILED')"))
+  @@index([householdId, sourceType], map: "SearchDocument_scope_type_ix")
+}
+
+model Currency {
+  id             String          @id @db.Uuid
+  code           String          @unique @db.Char(3)
+  name           String
+  symbol         String
+  decimalPlaces  Int             @db.SmallInt
+  isActive       Boolean         @default(true)
+  productSources ProductSource[]
+  PurchaseOrder  PurchaseOrder[]
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model Food {
+  id                        String                      @id @db.Uuid
+  categoryId                String                      @db.Uuid
+  name                      String
+  defaultUnit               Unit
+  gramsPerPiece             Decimal?                    @db.Decimal(8, 2)
+  densityGPerMl             Decimal?                    @db.Decimal(6, 3)
+  archivedAt                DateTime?                   @db.Timestamptz(6)
+  createdAt                 DateTime                    @default(now()) @db.Timestamptz(6)
+  updatedAt                 DateTime                    @default(now()) @updatedAt @db.Timestamptz(6)
+  AIFoodDepletionPrediction AIFoodDepletionPrediction[]
+  DietaryRule               DietaryRule[]
+  category                  FoodCategory                @relation(fields: [categoryId], references: [id], onUpdate: NoAction)
+  aliases                   FoodAlias[]
+  FoodEvent                 FoodEvent[]
+  substitutionsOut          FoodSubstitution[]          @relation("FoodSubstitutionsOut")
+  substitutionsIn           FoodSubstitution[]          @relation("FoodSubstitutionsIn")
+  HealthConditionDietRule   HealthConditionDietRule[]
+  InventoryItem             InventoryItem[]
+  MealItem                  MealItem[]
+  nutrition                 NutritionProfile?
+  products                  Product[]
+  PurchaseOrderItem         PurchaseOrderItem[]
+  RecipeIngredient          RecipeIngredient[]
+  ShoppingListItem          ShoppingListItem[]
+  UserAllergy               UserAllergy[]
+  UserDislikedFood          UserDislikedFood[]
+  UserFoodPreference        UserFoodPreference[]
+
+  @@index([categoryId], map: "Food_category_ix")
+}
+
+model FoodAlias {
+  id              String   @id @db.Uuid
+  foodId          String   @db.Uuid
+  languageId      String   @db.Uuid
+  alias           String
+  aliasNormalized String?  @default(dbgenerated("normalize_food_alias(alias)"))
+  isPrimary       Boolean  @default(false)
+  food            Food     @relation(fields: [foodId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  language        Language @relation(fields: [languageId], references: [id], onUpdate: NoAction)
+
+  @@unique([languageId, aliasNormalized], map: "FoodAlias_language_normalized_uq")
+  @@unique([foodId, languageId], map: "FoodAlias_primary_language_uq", where: raw("\"isPrimary\""))
+  @@index([foodId], map: "FoodAlias_food_ix")
+}
+
+model NutritionProfile {
+  foodId          String   @id @db.Uuid
+  caloriesPer100g Decimal  @db.Decimal(8, 2)
+  proteinG        Decimal  @db.Decimal(8, 2)
+  carbsG          Decimal  @db.Decimal(8, 2)
+  fatG            Decimal  @db.Decimal(8, 2)
+  fiberG          Decimal  @db.Decimal(8, 2)
+  sugarG          Decimal  @db.Decimal(8, 2)
+  sodiumMg        Decimal  @db.Decimal(8, 2)
+  updatedAt       DateTime @default(now()) @db.Timestamptz(6)
+  food            Food     @relation(fields: [foodId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model FoodSubstitution {
+  id               String  @id @db.Uuid
+  originalFoodId   String  @db.Uuid
+  substituteFoodId String  @db.Uuid
+  ratio            Decimal @db.Decimal(6, 3)
+  notes            String?
+  originalFood     Food    @relation("FoodSubstitutionsOut", fields: [originalFoodId], references: [id], onUpdate: NoAction)
+  substituteFood   Food    @relation("FoodSubstitutionsIn", fields: [substituteFoodId], references: [id], onUpdate: NoAction)
+
+  @@unique([originalFoodId, substituteFoodId], map: "FoodSubstitution_pair_uq")
+}
+
+model Product {
+  id                String              @id @db.Uuid
+  foodId            String              @db.Uuid
+  brand             String?
+  name              String
+  barcode           String?             @unique(map: "Product_barcode_uq", where: raw("(barcode IS NOT NULL)"))
+  packageSize       Decimal             @db.Decimal(12, 3)
+  packageUnit       Unit
+  archivedAt        DateTime?           @db.Timestamptz(6)
+  InventoryItem     InventoryItem[]
+  food              Food                @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  sources           ProductSource[]
+  PurchaseOrderItem PurchaseOrderItem[]
+  ShoppingListItem  ShoppingListItem[]
+
+  @@unique([id, foodId], map: "Product_id_food_uq")
+  @@index([foodId], map: "Product_food_ix")
+}
+
+model ProductSource {
+  id              String          @id @db.Uuid
+  productId       String          @db.Uuid
+  sourceName      String
+  price           Decimal         @db.Decimal(14, 4)
+  currencyId      String          @db.Uuid
+  available       Boolean         @default(false)
+  leadTimeDays    Int?
+  sourceUrl       String?
+  priceObservedAt DateTime        @db.Timestamptz(6)
+  currency        Currency        @relation(fields: [currencyId], references: [id], onUpdate: NoAction)
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  PurchaseOrder   PurchaseOrder[]
+
+  @@unique([productId, sourceName], map: "ProductSource_pair_uq")
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model User {
+  id                                                              String                   @id @db.Uuid
+  email                                                           String
+  passwordHash                                                    String
+  name                                                            String
+  systemRole                                                      SystemRole               @default(USER)
+  countryId                                                       String                   @db.Uuid
+  localeId                                                        String                   @db.Uuid
+  preferredLanguageId                                             String                   @db.Uuid
+  timezone                                                        String
+  emailVerifiedAt                                                 DateTime?                @db.Timestamptz(6)
+  lastLoginAt                                                     DateTime?                @db.Timestamptz(6)
+  createdAt                                                       DateTime                 @default(now()) @db.Timestamptz(6)
+  updatedAt                                                       DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
+  deletedAt                                                       DateTime?                @db.Timestamptz(6)
+  AIPrediction                                                    AIPrediction[]
+  FoodEvent                                                       FoodEvent[]
+  memberships                                                     HouseholdMember[]
+  Image                                                           Image[]
+  PurchaseOrder                                                   PurchaseOrder[]
+  sessions                                                        Session[]
+  tokens                                                          Token[]
+  country                                                         Country                  @relation(fields: [countryId], references: [id], onUpdate: NoAction)
+  locale                                                          Locale                   @relation(fields: [localeId], references: [id], onUpdate: NoAction)
+  preferredLanguage                                               Language                 @relation(fields: [preferredLanguageId], references: [id], onUpdate: NoAction)
+  UserAllergy                                                     UserAllergy[]
+  UserAllergyCategory                                             UserAllergyCategory[]
+  UserDailyNutrition                                              UserDailyNutrition[]
+  UserDietaryPreference                                           UserDietaryPreference[]
+  UserDislikedCategory                                            UserDislikedCategory[]
+  UserDislikedFood                                                UserDislikedFood[]
+  UserFoodPreference                                              UserFoodPreference[]
+  UserGoal                                                        UserGoal?
+  UserHealthCondition                                             UserHealthCondition[]
+  UserNutritionTrend                                              UserNutritionTrend[]
+  UserPreference                                                  UserPreference?
+  UserPreferredCuisine                                            UserPreferredCuisine[]
+  UserProfile                                                     UserProfile?
+  UserSafetyProfileEvent_UserSafetyProfileEvent_actorUserIdToUser UserSafetyProfileEvent[] @relation("UserSafetyProfileEvent_actorUserIdToUser")
+  UserSafetyProfileEvent_UserSafetyProfileEvent_userIdToUser      UserSafetyProfileEvent[] @relation("UserSafetyProfileEvent_userIdToUser")
+  UserWeightLog                                                   UserWeightLog[]
+}
+
+model Household {
+  id                   String                 @id @db.Uuid
+  name                 String
+  timezone             String
+  createdAt            DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+  deletedAt            DateTime?              @db.Timestamptz(6)
+  AIPrediction         AIPrediction[]
+  FoodEvent            FoodEvent[]
+  invitations          HouseholdInvitation[]
+  members              HouseholdMember?
+  Image                Image[]
+  InventoryItem        InventoryItem[]
+  InventoryTransaction InventoryTransaction[]
+  Meal                 Meal[]
+  MealPlan             MealPlan[]
+  PurchaseOrder        PurchaseOrder[]
+  Recipe               Recipe[]
+  ShoppingList         ShoppingList[]
+}
+
+model HouseholdMember {
+  id              String                @id @db.Uuid
+  householdId     String                @unique(map: "HouseholdMember_one_active_owner_uq", where: raw("((role = 'OWNER'::\"HouseholdRole\") AND (\"leftAt\" IS NULL))")) @db.Uuid
+  userId          String                @db.Uuid
+  role            HouseholdRole
+  joinedAt        DateTime              @default(now()) @db.Timestamptz(6)
+  leftAt          DateTime?             @db.Timestamptz(6)
+  AIPrediction    AIPrediction[]
+  invitationsSent HouseholdInvitation[]
+  household       Household             @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  user            User                  @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  Meal            Meal[]
+
+  @@unique([householdId, userId], map: "HouseholdMember_household_user_uq")
+  @@index([userId], map: "HouseholdMember_user_active_ix", where: raw("(\"leftAt\" IS NULL)"))
+}
+
+model Token {
+  id         String               @id @db.Uuid
+  userId     String?              @db.Uuid
+  purpose    TokenPurpose
+  tokenHash  String               @unique
+  expiresAt  DateTime             @db.Timestamptz(6)
+  usedAt     DateTime?            @db.Timestamptz(6)
+  createdAt  DateTime             @default(now()) @db.Timestamptz(6)
+  invitation HouseholdInvitation?
+  user       User?                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([expiresAt], map: "Token_expiresAt_ix")
+  @@index([userId, purpose], map: "Token_user_purpose_open_ix", where: raw("(\"usedAt\" IS NULL)"))
+}
+
+model HouseholdInvitation {
+  id              String          @id @db.Uuid
+  householdId     String          @db.Uuid
+  invitedByUserId String          @db.Uuid
+  email           String
+  tokenId         String          @unique @db.Uuid
+  role            HouseholdRole
+  acceptedAt      DateTime?       @db.Timestamptz(6)
+  revokedAt       DateTime?       @db.Timestamptz(6)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  household       Household       @relation(fields: [householdId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  inviter         HouseholdMember @relation(fields: [householdId, invitedByUserId], references: [householdId, userId], onUpdate: NoAction, map: "HouseholdInvitation_inviter_fk")
+  token           Token           @relation(fields: [tokenId], references: [id], onUpdate: NoAction)
+
+  @@unique([householdId, email], map: "HouseholdInvitation_open_uq", where: raw("((\"acceptedAt\" IS NULL) AND (\"revokedAt\" IS NULL))"))
+  @@index([householdId], map: "HouseholdInvitation_household_ix")
+}
+
+model Session {
+  id               String    @id @db.Uuid
+  userId           String    @db.Uuid
+  familyId         String    @db.Uuid
+  refreshTokenHash String    @unique(map: "Session_refreshTokenHash_uq")
+  expiresAt        DateTime  @db.Timestamptz(6)
+  rotatedAt        DateTime? @db.Timestamptz(6)
+  revokedAt        DateTime? @db.Timestamptz(6)
+  lastUsedAt       DateTime? @db.Timestamptz(6)
+  userAgent        String?
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([expiresAt], map: "Session_expiresAt_ix")
+  @@index([familyId], map: "Session_familyId_ix")
+  @@index([userId], map: "Session_user_active_ix", where: raw("(\"revokedAt\" IS NULL)"))
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model FoodEvent {
+  id                   String                 @id @db.Uuid
+  householdId          String                 @db.Uuid
+  actorUserId          String?                @db.Uuid
+  foodId               String                 @db.Uuid
+  inventoryItemId      String?                @db.Uuid
+  type                 FoodEventType
+  origin               ItemOrigin
+  source               EventSource            @default(USER)
+  quantity             Decimal                @db.Decimal(12, 3)
+  unit                 Unit
+  occurredAt           DateTime               @default(now()) @db.Timestamptz(6)
+  idempotencyKey       String
+  createdAt            DateTime               @default(now()) @db.Timestamptz(6)
+  purchaseOrderItemId  String?                @db.Uuid
+  User                 User?                  @relation(fields: [actorUserId], references: [id], onUpdate: NoAction)
+  Food                 Food                   @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  Household            Household              @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  InventoryItem        InventoryItem?         @relation(fields: [inventoryItemId, householdId], references: [id, householdId], onUpdate: NoAction, map: "FoodEvent_item_household_fk")
+  PurchaseOrderItem    PurchaseOrderItem?     @relation("FoodEvent_PurchaseOrderItem_purchaseOrderItemId_householdIdToPurchaseOrderItem", fields: [purchaseOrderItemId, householdId], references: [id, householdId], onUpdate: NoAction, map: "FoodEvent_purchase_item_household_fk")
+  InventoryTransaction InventoryTransaction[]
+
+  @@unique([householdId, idempotencyKey], map: "FoodEvent_household_key_uq")
+  @@unique([id, householdId, origin], map: "FoodEvent_id_household_origin_uq")
+  @@index([householdId, occurredAt(sort: Desc), id(sort: Desc)], map: "FoodEvent_household_occurred_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model InventoryItem {
+  id                   String                 @id @db.Uuid
+  householdId          String                 @db.Uuid
+  foodId               String                 @db.Uuid
+  productId            String?                @db.Uuid
+  quantity             Decimal                @default(0) @db.Decimal(12, 3)
+  unit                 Unit
+  storageLocation      StorageLocation        @default(PANTRY)
+  purchaseDate         DateTime?              @db.Date
+  openedDate           DateTime?              @db.Date
+  estimatedExpiryAt    DateTime?              @db.Timestamptz(6)
+  freshnessScore       Decimal?               @db.Decimal(4, 3)
+  version              Int                    @default(1)
+  archivedAt           DateTime?              @db.Timestamptz(6)
+  createdAt            DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime               @default(now()) @db.Timestamptz(6)
+  FoodEvent            FoodEvent[]
+  FreshnessPrediction  FreshnessPrediction[]
+  Food                 Food                   @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  Household            Household              @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  Product              Product?               @relation(fields: [productId, foodId], references: [id, foodId], onUpdate: NoAction, map: "InventoryItem_product_food_fk")
+  InventoryTransaction InventoryTransaction[]
+
+  @@unique([id, householdId], map: "InventoryItem_id_household_uq")
+  @@index([householdId, estimatedExpiryAt], map: "InventoryItem_household_expiry_live_ix", where: raw("(\"archivedAt\" IS NULL)"))
+  @@index([householdId, foodId], map: "InventoryItem_household_food_live_ix", where: raw("(\"archivedAt\" IS NULL)"))
+  @@index([updatedAt], map: "InventoryItem_freshness_due_ix", where: raw("((\"freshnessScore\" IS NOT NULL) AND (\"archivedAt\" IS NULL))"))
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model InventoryTransaction {
+  id              String                   @id @db.Uuid
+  householdId     String                   @db.Uuid
+  inventoryItemId String                   @db.Uuid
+  foodEventId     String                   @db.Uuid
+  origin          ItemOrigin               @default(HOME)
+  movementType    InventoryTransactionType
+  quantityDelta   Decimal                  @db.Decimal(12, 3)
+  balanceAfter    Decimal                  @db.Decimal(12, 3)
+  idempotencyKey  String
+  createdAt       DateTime                 @default(now()) @db.Timestamptz(6)
+  FoodEvent       FoodEvent                @relation(fields: [foodEventId, householdId, origin], references: [id, householdId, origin], onUpdate: NoAction, map: "InventoryTransaction_event_household_origin_fk")
+  Household       Household                @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  InventoryItem   InventoryItem            @relation(fields: [inventoryItemId, householdId], references: [id, householdId], onUpdate: NoAction, map: "InventoryTransaction_item_household_fk")
+
+  @@unique([foodEventId, inventoryItemId], map: "InventoryTransaction_event_item_uq")
+  @@unique([householdId, idempotencyKey], map: "InventoryTransaction_household_key_uq")
+  @@index([createdAt], map: "InventoryTransaction_created_brin_ix", type: Brin)
+  @@index([inventoryItemId, createdAt, id], map: "InventoryTransaction_item_history_ix")
+}
+
+model migrations {
+  name      String   @id
+  checksum  String
+  appliedAt DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("_migrations")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Recipe {
+  id               String             @id @db.Uuid
+  householdId      String?            @db.Uuid
+  cuisineId        String?            @db.Uuid
+  name             String
+  description      String?
+  servings         Int
+  prepTimeMin      Int?
+  cookTimeMin      Int?
+  difficulty       RecipeDifficulty   @default(MEDIUM)
+  archivedAt       DateTime?          @db.Timestamptz(6)
+  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime           @default(now()) @db.Timestamptz(6)
+  PlannedMeal      PlannedMeal[]
+  Cuisine          Cuisine?           @relation(fields: [cuisineId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  Household        Household?         @relation(fields: [householdId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  RecipeIngredient RecipeIngredient[]
+  RecipeStep       RecipeStep[]
+
+  @@unique([id, householdId], map: "Recipe_id_household_uq")
+  @@index([id], map: "Recipe_global_live_ix", where: raw("((\"householdId\" IS NULL) AND (\"archivedAt\" IS NULL))"))
+  @@index([householdId, id], map: "Recipe_household_live_ix", where: raw("((\"householdId\" IS NOT NULL) AND (\"archivedAt\" IS NULL))"))
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RecipeIngredient {
+  id       String  @id @db.Uuid
+  recipeId String  @db.Uuid
+  foodId   String  @db.Uuid
+  quantity Decimal @db.Decimal(12, 3)
+  unit     Unit
+  optional Boolean @default(false)
+  Food     Food    @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  Recipe   Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([recipeId, foodId], map: "RecipeIngredient_recipe_food_uq")
+  @@index([foodId], map: "RecipeIngredient_food_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RecipeStep {
+  id          String @id @db.Uuid
+  recipeId    String @db.Uuid
+  stepNumber  Int
+  instruction String
+  durationMin Int?
+  Recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([recipeId, stepNumber], map: "RecipeStep_recipe_number_uq")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Meal {
+  id              String          @id @db.Uuid
+  householdId     String          @db.Uuid
+  userId          String          @db.Uuid
+  mealType        MealType
+  eatenAt         DateTime        @db.Timestamptz(6)
+  origin          ItemOrigin
+  name            String?
+  idempotencyKey  String
+  requestHash     String          @db.Char(64)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  Household       Household       @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  HouseholdMember HouseholdMember @relation(fields: [householdId, userId], references: [householdId, userId], onUpdate: NoAction, map: "Meal_member_fk")
+  MealItem        MealItem[]
+
+  @@unique([householdId, userId, idempotencyKey], map: "Meal_household_user_key_uq")
+  @@unique([id, householdId, origin], map: "Meal_id_household_origin_uq")
+  @@unique([id, householdId], map: "Meal_id_household_uq")
+  @@index([householdId, eatenAt(sort: Desc), id(sort: Desc)], map: "Meal_household_eaten_ix")
+  @@index([userId, eatenAt(sort: Desc), id(sort: Desc)], map: "Meal_user_eaten_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MealItem {
+  id                  String   @id @db.Uuid
+  mealId              String   @db.Uuid
+  householdId         String   @db.Uuid
+  foodId              String   @db.Uuid
+  quantity            Decimal  @db.Decimal(12, 3)
+  unit                Unit
+  quantityG           Decimal  @db.Decimal(10, 2)
+  calories            Decimal? @db.Decimal(8, 2)
+  proteinG            Decimal? @db.Decimal(8, 2)
+  carbsG              Decimal? @db.Decimal(8, 2)
+  fatG                Decimal? @db.Decimal(8, 2)
+  fiberG              Decimal? @db.Decimal(8, 2)
+  sugarG              Decimal? @db.Decimal(8, 2)
+  sodiumMg            Decimal? @db.Decimal(8, 2)
+  nutritionSnapshotAt DateTime @default(now()) @db.Timestamptz(6)
+  Food                Food     @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  Meal                Meal     @relation(fields: [mealId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "MealItem_meal_household_fk")
+
+  @@unique([mealId, foodId], map: "MealItem_meal_food_uq")
+  @@index([mealId], map: "MealItem_meal_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MealPlan {
+  id          String        @id @db.Uuid
+  householdId String        @db.Uuid
+  name        String
+  startDate   DateTime      @db.Date
+  endDate     DateTime      @db.Date
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  Household   Household     @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  PlannedMeal PlannedMeal[]
+
+  @@unique([id, householdId], map: "MealPlan_id_household_uq")
+  @@index([householdId, startDate, endDate], map: "MealPlan_household_range_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PlannedMeal {
+  id          String   @id @db.Uuid
+  mealPlanId  String   @db.Uuid
+  householdId String   @db.Uuid
+  recipeId    String   @db.Uuid
+  mealDate    DateTime @db.Date
+  mealType    MealType
+  servings    Decimal  @db.Decimal(5, 2)
+  MealPlan    MealPlan @relation(fields: [mealPlanId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "PlannedMeal_plan_household_fk")
+  Recipe      Recipe   @relation(fields: [recipeId], references: [id], onUpdate: NoAction)
+
+  @@unique([id, householdId], map: "PlannedMeal_id_household_uq")
+  @@unique([mealPlanId, mealDate, mealType, recipeId], map: "PlannedMeal_plan_date_type_recipe_uq")
+  @@index([householdId, mealDate, mealType], map: "PlannedMeal_household_date_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserDailyNutrition {
+  id         String   @id @db.Uuid
+  userId     String   @db.Uuid
+  date       DateTime @db.Date
+  calories   Decimal  @default(0) @db.Decimal(10, 2)
+  proteinG   Decimal  @default(0) @db.Decimal(10, 2)
+  carbsG     Decimal  @default(0) @db.Decimal(10, 2)
+  fatG       Decimal  @default(0) @db.Decimal(10, 2)
+  fiberG     Decimal  @default(0) @db.Decimal(10, 2)
+  sugarG     Decimal  @default(0) @db.Decimal(10, 2)
+  sodiumMg   Decimal  @default(0) @db.Decimal(10, 2)
+  mealCount  Int      @default(0)
+  isFinal    Boolean  @default(false)
+  computedAt DateTime @default(now()) @db.Timestamptz(6)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, date], map: "UserDailyNutrition_user_date_uq")
+  @@index([userId, date(sort: Desc)], map: "UserDailyNutrition_date_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PurchaseOrder {
+  id                                                                             String              @id @db.Uuid
+  householdId                                                                    String              @db.Uuid
+  createdByUserId                                                                String?             @db.Uuid
+  productSourceId                                                                String?             @db.Uuid
+  sourceName                                                                     String
+  status                                                                         PurchaseOrderStatus @default(DRAFT)
+  totalCost                                                                      Decimal             @default(0) @db.Decimal(14, 4)
+  currencyId                                                                     String              @db.Uuid
+  orderedAt                                                                      DateTime?           @db.Timestamptz(6)
+  confirmedAt                                                                    DateTime?           @db.Timestamptz(6)
+  deliveredAt                                                                    DateTime?           @db.Timestamptz(6)
+  idempotencyKey                                                                 String
+  requestHash                                                                    String              @db.Char(64)
+  createdAt                                                                      DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt                                                                      DateTime            @default(now()) @db.Timestamptz(6)
+  User                                                                           User?               @relation(fields: [createdByUserId], references: [id], onUpdate: NoAction)
+  Currency                                                                       Currency            @relation(fields: [currencyId], references: [id], onUpdate: NoAction)
+  Household                                                                      Household           @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  ProductSource                                                                  ProductSource?      @relation(fields: [productSourceId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  PurchaseOrderItem_PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder  PurchaseOrderItem[] @relation("PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder")
+  PurchaseOrderItem_PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder PurchaseOrderItem[] @relation("PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder")
+
+  @@unique([householdId, idempotencyKey], map: "PurchaseOrder_household_key_uq")
+  @@unique([id, currencyId], map: "PurchaseOrder_id_currency_uq")
+  @@unique([id, householdId], map: "PurchaseOrder_id_household_uq")
+  @@index([householdId, createdAt(sort: Desc), id(sort: Desc)], map: "PurchaseOrder_household_created_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PurchaseOrderItem {
+  id                                                                         String        @id @db.Uuid
+  purchaseOrderId                                                            String        @db.Uuid
+  householdId                                                                String        @db.Uuid
+  foodId                                                                     String        @db.Uuid
+  productId                                                                  String?       @db.Uuid
+  quantity                                                                   Decimal       @db.Decimal(12, 3)
+  receivedQuantity                                                           Decimal       @default(0) @db.Decimal(12, 3)
+  unit                                                                       Unit
+  unitPrice                                                                  Decimal       @db.Decimal(14, 4)
+  totalPrice                                                                 Decimal?      @default(dbgenerated("round((quantity * \"unitPrice\"), 4)")) @db.Decimal(14, 4)
+  currencyId                                                                 String        @db.Uuid
+  createdAt                                                                  DateTime      @default(now()) @db.Timestamptz(6)
+  FoodEvent                                                                  FoodEvent[]   @relation("FoodEvent_PurchaseOrderItem_purchaseOrderItemId_householdIdToPurchaseOrderItem")
+  Food                                                                       Food          @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  PurchaseOrder_PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder  PurchaseOrder @relation("PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder", fields: [purchaseOrderId, currencyId], references: [id, currencyId], onUpdate: NoAction, map: "PurchaseOrderItem_order_currency_fk")
+  PurchaseOrder_PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder PurchaseOrder @relation("PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder", fields: [purchaseOrderId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "PurchaseOrderItem_order_household_fk")
+  Product                                                                    Product?      @relation(fields: [productId, foodId], references: [id, foodId], onUpdate: NoAction, map: "PurchaseOrderItem_product_food_fk")
+
+  @@unique([id, householdId, foodId, unit], map: "PurchaseOrderItem_id_household_food_unit_uq")
+  @@unique([id, householdId], map: "PurchaseOrderItem_id_household_uq")
+  @@index([purchaseOrderId, id], map: "PurchaseOrderItem_order_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ShoppingList {
+  id               String             @id @db.Uuid
+  householdId      String             @db.Uuid
+  name             String
+  status           ShoppingListStatus @default(ACTIVE)
+  idempotencyKey   String
+  requestHash      String             @db.Char(64)
+  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime           @default(now()) @db.Timestamptz(6)
+  Household        Household          @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  ShoppingListItem ShoppingListItem[]
+
+  @@unique([householdId, idempotencyKey], map: "ShoppingList_household_key_uq")
+  @@unique([id, householdId], map: "ShoppingList_id_household_uq")
+  @@index([householdId, status, updatedAt(sort: Desc)], map: "ShoppingList_household_status_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ShoppingListItem {
+  id             String             @id @db.Uuid
+  shoppingListId String             @db.Uuid
+  householdId    String             @db.Uuid
+  foodId         String             @db.Uuid
+  productId      String?            @db.Uuid
+  quantity       Decimal            @db.Decimal(12, 3)
+  unit           Unit
+  status         ShoppingItemStatus @default(NEEDED)
+  idempotencyKey String
+  requestHash    String             @db.Char(64)
+  createdAt      DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime           @default(now()) @db.Timestamptz(6)
+  Food           Food               @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  ShoppingList   ShoppingList       @relation(fields: [shoppingListId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "ShoppingListItem_list_household_fk")
+  Product        Product?           @relation(fields: [productId, foodId], references: [id, foodId], onUpdate: NoAction, map: "ShoppingListItem_product_food_fk")
+
+  @@unique([householdId, idempotencyKey], map: "ShoppingListItem_household_key_uq")
+  @@unique([shoppingListId, foodId], map: "ShoppingListItem_needed_food_uq", where: raw("(status = 'NEEDED'::\"ShoppingItemStatus\")"))
+  @@index([shoppingListId, status, id], map: "ShoppingListItem_list_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model DietaryRule {
+  id                String            @id @db.Uuid
+  dietaryPreference DietaryPreference
+  ruleType          DietRuleType
+  targetType        DietRuleTarget
+  foodId            String?           @db.Uuid
+  categoryId        String?           @db.Uuid
+  isActive          Boolean           @default(true)
+  FoodCategory      FoodCategory?     @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  Food              Food?             @relation(fields: [foodId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@unique([dietaryPreference, ruleType, targetType, foodId, categoryId], map: "DietaryRule_target_uq")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model HealthCondition {
+  id                      String                    @id @db.Uuid
+  code                    String                    @unique
+  name                    String
+  conditionGroup          HealthConditionGroup
+  isChronic               Boolean                   @default(false)
+  archivedAt              DateTime?                 @db.Timestamptz(6)
+  HealthConditionDietRule HealthConditionDietRule[]
+  UserHealthCondition     UserHealthCondition[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model HealthConditionDietRule {
+  id                String          @id @db.Uuid
+  healthConditionId String          @db.Uuid
+  ruleType          DietRuleType
+  targetType        DietRuleTarget
+  foodId            String?         @db.Uuid
+  categoryId        String?         @db.Uuid
+  nutrient          NutrientKey?
+  maxPer100g        Decimal?        @db.Decimal(8, 2)
+  maxPerDay         Decimal?        @db.Decimal(10, 2)
+  isActive          Boolean         @default(true)
+  FoodCategory      FoodCategory?   @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  Food              Food?           @relation(fields: [foodId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  HealthCondition   HealthCondition @relation(fields: [healthConditionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([healthConditionId, ruleType, targetType, foodId, categoryId, nutrient], map: "HealthConditionDietRule_target_uq")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserAllergy {
+  id        String          @id @db.Uuid
+  userId    String          @db.Uuid
+  foodId    String          @db.Uuid
+  severity  AllergySeverity
+  notes     String?
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  Food      Food            @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  User      User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, foodId], map: "UserAllergy_user_food_uq")
+  @@index([foodId], map: "UserAllergy_food_ix")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserAllergyCategory {
+  id           String          @id @db.Uuid
+  userId       String          @db.Uuid
+  categoryId   String          @db.Uuid
+  severity     AllergySeverity
+  createdAt    DateTime        @default(now()) @db.Timestamptz(6)
+  FoodCategory FoodCategory    @relation(fields: [categoryId], references: [id], onUpdate: NoAction)
+  User         User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, categoryId], map: "UserAllergyCategory_user_category_uq")
+  @@index([categoryId], map: "UserAllergyCategory_category_ix")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserDietaryPreference {
+  id                String            @id @db.Uuid
+  userId            String            @db.Uuid
+  dietaryPreference DietaryPreference
+  createdAt         DateTime          @default(now()) @db.Timestamptz(6)
+  User              User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, dietaryPreference], map: "UserDietaryPreference_user_diet_uq")
+  @@index([dietaryPreference], map: "UserDietaryPreference_diet_ix")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserDislikedCategory {
+  id           String       @id @db.Uuid
+  userId       String       @db.Uuid
+  categoryId   String       @db.Uuid
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  FoodCategory FoodCategory @relation(fields: [categoryId], references: [id], onUpdate: NoAction)
+  User         User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, categoryId], map: "UserDislikedCategory_user_category_uq")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserDislikedFood {
+  id        String   @id @db.Uuid
+  userId    String   @db.Uuid
+  foodId    String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  Food      Food     @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, foodId], map: "UserDislikedFood_user_food_uq")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserFoodPreference {
+  id              String   @id @db.Uuid
+  userId          String   @db.Uuid
+  foodId          String   @db.Uuid
+  frequency       Int      @default(0)
+  preferenceScore Decimal  @default(0) @db.Decimal(4, 3)
+  updatedAt       DateTime @default(now()) @db.Timestamptz(6)
+  Food            Food     @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, foodId], map: "UserFoodPreference_user_food_uq")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserGoal {
+  id             String    @id @db.Uuid
+  userId         String    @unique(map: "UserGoal_active_uq", where: raw("(\"endedAt\" IS NULL)")) @db.Uuid
+  goalType       GoalType
+  targetWeightKg Decimal?  @db.Decimal(5, 2)
+  calorieTarget  Int?
+  proteinTargetG Int?
+  startedAt      DateTime  @default(now()) @db.Timestamptz(6)
+  endedAt        DateTime? @db.Timestamptz(6)
+  User           User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, startedAt(sort: Desc)], map: "UserGoal_history_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserHealthCondition {
+  id                String          @id @db.Uuid
+  userId            String          @db.Uuid
+  healthConditionId String          @db.Uuid
+  status            ConditionStatus @default(ACTIVE)
+  diagnosedAt       DateTime?       @db.Date
+  notes             String?
+  createdAt         DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime        @default(now()) @db.Timestamptz(6)
+  HealthCondition   HealthCondition @relation(fields: [healthConditionId], references: [id], onUpdate: NoAction)
+  User              User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, healthConditionId], map: "UserHealthCondition_user_condition_uq")
+  @@index([healthConditionId], map: "UserHealthCondition_condition_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserPreference {
+  id                  String            @id @db.Uuid
+  userId              String            @unique @db.Uuid
+  preferredDifficulty RecipeDifficulty?
+  maxPrepTimeMin      Int?
+  createdAt           DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime          @default(now()) @db.Timestamptz(6)
+  User                User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserPreferredCuisine {
+  id        String   @id @db.Uuid
+  userId    String   @db.Uuid
+  cuisineId String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  Cuisine   Cuisine  @relation(fields: [cuisineId], references: [id], onUpdate: NoAction)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, cuisineId], map: "UserPreferredCuisine_user_cuisine_uq")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserProfile {
+  id            String         @id @db.Uuid
+  userId        String         @unique @db.Uuid
+  heightCm      Decimal?       @db.Decimal(5, 1)
+  weightKg      Decimal?       @db.Decimal(5, 2)
+  birthDate     DateTime?      @db.Date
+  gender        Gender?
+  activityLevel ActivityLevel?
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime       @default(now()) @db.Timestamptz(6)
+  User          User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserSafetyProfileEvent {
+  id                                            String            @id @db.Uuid
+  userId                                        String            @db.Uuid
+  actorUserId                                   String?           @db.Uuid
+  entityType                                    SafetyEntityType
+  entityId                                      String            @db.Uuid
+  action                                        SafetyEventAction
+  snapshot                                      Json
+  occurredAt                                    DateTime          @default(now()) @db.Timestamptz(6)
+  User_UserSafetyProfileEvent_actorUserIdToUser User?             @relation("UserSafetyProfileEvent_actorUserIdToUser", fields: [actorUserId], references: [id], onUpdate: NoAction)
+  User_UserSafetyProfileEvent_userIdToUser      User              @relation("UserSafetyProfileEvent_userIdToUser", fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@index([userId, occurredAt(sort: Desc), id(sort: Desc)], map: "UserSafetyProfileEvent_history_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserWeightLog {
+  id         String   @id @db.Uuid
+  userId     String   @db.Uuid
+  weightKg   Decimal  @db.Decimal(5, 2)
+  measuredAt DateTime @default(now()) @db.Timestamptz(6)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, measuredAt], map: "UserWeightLog_user_measured_uq")
+  @@index([userId, measuredAt(sort: Desc)], map: "UserWeightLog_history_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AIFoodDepletionPrediction {
+  predictionId   String         @id @db.Uuid
+  predictionType PredictionType @default(FOOD_DEPLETION)
+  householdId    String         @db.Uuid
+  foodId         String         @db.Uuid
+  currentQty     Decimal        @db.Decimal(12, 3)
+  unit           Unit
+  avgDailyQty    Decimal        @db.Decimal(12, 3)
+  daysLeft       Decimal        @db.Decimal(8, 2)
+  runOutAt       DateTime       @db.Timestamptz(6)
+  Food           Food           @relation(fields: [foodId], references: [id], onUpdate: NoAction)
+  AIPrediction   AIPrediction   @relation(fields: [predictionId, predictionType, householdId], references: [id, predictionType, householdId], onDelete: Cascade, onUpdate: NoAction, map: "AIFoodDepletionPrediction_prediction_fk")
+
+  @@unique([predictionId, householdId], map: "AIFoodDepletionPrediction_household_food_uq")
+  // predictionId is already the PK; this redundant superset uniqueness mirrors the SQL composite FK target for Prisma's relation validator.
+  @@unique([predictionId, predictionType, householdId])
+  @@index([householdId, foodId], map: "AIFoodDepletionPrediction_food_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AIPrediction {
+  id                        String                     @id @db.Uuid
+  householdId               String                     @db.Uuid
+  userId                    String?                    @db.Uuid
+  predictionType            PredictionType
+  summary                   String?
+  confidence                Decimal                    @db.Decimal(4, 3)
+  modelVersion              String
+  inputHash                 String
+  generatedAt               DateTime                   @default(now()) @db.Timestamptz(6)
+  expiresAt                 DateTime                   @db.Timestamptz(6)
+  AIFoodDepletionPrediction AIFoodDepletionPrediction?
+  Household                 Household                  @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  HouseholdMember           HouseholdMember?           @relation(fields: [householdId, userId], references: [householdId, userId], onUpdate: NoAction, map: "AIPrediction_household_user_fk")
+  User                      User?                      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([id, householdId], map: "AIPrediction_id_household_uq")
+  @@unique([id, predictionType, householdId], map: "AIPrediction_id_type_household_uq")
+  @@unique([id, predictionType], map: "AIPrediction_id_type_uq")
+  @@unique([householdId, predictionType, userId, inputHash], map: "AIPrediction_input_uq")
+  @@index([expiresAt], map: "AIPrediction_expiry_ix")
+  @@index([householdId, predictionType, generatedAt(sort: Desc), id(sort: Desc)], map: "AIPrediction_household_type_generated_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model FreshnessPrediction {
+  id                    String        @id @db.Uuid
+  inventoryItemId       String        @db.Uuid
+  householdId           String        @db.Uuid
+  imageId               String        @db.Uuid
+  qualityScore          Decimal       @db.Decimal(4, 3)
+  confidence            Decimal       @db.Decimal(4, 3)
+  remainingQualityHours Int
+  predictedAt           DateTime      @default(now()) @db.Timestamptz(6)
+  Image                 Image         @relation(fields: [imageId, householdId], references: [id, householdId], onUpdate: NoAction, map: "FreshnessPrediction_image_fk")
+  InventoryItem         InventoryItem @relation(fields: [inventoryItemId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "FreshnessPrediction_item_fk")
+
+  @@unique([id, householdId], map: "FreshnessPrediction_id_household_uq")
+  @@index([inventoryItemId, predictedAt(sort: Desc), id(sort: Desc)], map: "FreshnessPrediction_item_time_ix")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Image {
+  id                  String                @id @db.Uuid
+  householdId         String                @db.Uuid
+  uploadedByUserId    String?               @db.Uuid
+  type                ImageType
+  storageKey          String                @unique
+  mimeType            String                @db.VarChar(64)
+  sizeBytes           BigInt
+  createdAt           DateTime              @default(now()) @db.Timestamptz(6)
+  FreshnessPrediction FreshnessPrediction[]
+  Household           Household             @relation(fields: [householdId], references: [id], onUpdate: NoAction)
+  User                User?                 @relation(fields: [uploadedByUserId], references: [id], onUpdate: NoAction)
+
+  @@unique([id, householdId], map: "Image_id_household_uq")
+  @@index([householdId, createdAt(sort: Desc)], map: "Image_household_created_ix")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserNutritionTrend {
+  id            String          @id @db.Uuid
+  userId        String          @db.Uuid
+  metric        NutritionMetric
+  period        TrendPeriod
+  avgValue      Decimal         @db.Decimal(10, 2)
+  changePercent Decimal?        @db.Decimal(6, 2)
+  calculatedAt  DateTime        @default(now()) @db.Timestamptz(6)
+  User          User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, metric, period], map: "UserNutritionTrend_user_metric_period_uq")
+}
+
+enum SystemRole {
+  USER
+  ADMIN
+}
+
+enum HouseholdRole {
+  OWNER
+  MEMBER
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+  HOUSEHOLD_INVITATION
+}
+
+enum Unit {
+  GRAM
+  KILOGRAM
+  MILLILITER
+  LITER
+  CUP
+  TABLESPOON
+  TEASPOON
+  PIECE
+}
+
+enum EventSource {
+  USER
+  RECEIPT
+  PHOTO
+  VOICE
+  SYSTEM
+  AI
+  N8N
+}
+
+enum FoodEventType {
+  PURCHASED
+  SCANNED
+  ADDED
+  OPENED
+  COOKED
+  EATEN
+  LEFTOVER
+  WASTED
+  EXPIRED
+  REMOVED
+}
+
+enum InventoryTransactionType {
+  PURCHASE_RECEIPT
+  ADD
+  CONSUMPTION
+  COOKED
+  DAMAGE_WASTE
+  STOCK_AUDIT_ADJUSTMENT
+  RETURN
+  REMOVE
+  EXPIRED
+}
+
+enum ItemOrigin {
+  HOME
+  AWAY
+  UNKNOWN
+}
+
+enum StorageLocation {
+  FRIDGE
+  FREEZER
+  PANTRY
+  COUNTER
+  OTHER
+}
+
+enum RecipeDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  OTHER
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  PLACED
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+enum ShoppingItemStatus {
+  NEEDED
+  PURCHASED
+  SKIPPED
+}
+
+enum ShoppingListStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+  LIFE_THREATENING
+}
+
+enum ConditionStatus {
+  ACTIVE
+  CONTROLLED
+  REMISSION
+  RESOLVED
+}
+
+enum DietRuleTarget {
+  FOOD
+  CATEGORY
+  NUTRIENT
+}
+
+enum DietRuleType {
+  AVOID
+  LIMIT
+  PREFER
+}
+
+enum DietaryPreference {
+  VEGETARIAN
+  VEGAN
+  HALAL
+  GLUTEN_FREE
+  DAIRY_FREE
+  KETO
+  LOW_CARB
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum GoalType {
+  LOSE_WEIGHT
+  GAIN_MUSCLE
+  MAINTAIN
+  CUSTOM
+}
+
+enum HealthConditionGroup {
+  METABOLIC
+  CARDIOVASCULAR
+  RENAL
+  DIGESTIVE
+  AUTOIMMUNE
+  OTHER
+}
+
+enum NutrientKey {
+  CALORIES
+  PROTEIN
+  CARBS
+  FAT
+  FIBER
+  SUGAR
+  SODIUM
+}
+
+enum SafetyEntityType {
+  ALLERGY_FOOD
+  ALLERGY_CATEGORY
+  HEALTH_CONDITION
+  DIETARY_PREFERENCE
+  DISLIKE_FOOD
+  DISLIKE_CATEGORY
+}
+
+enum SafetyEventAction {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+enum ImageType {
+  RECEIPT
+  FOOD
+  FRESHNESS
+  OTHER
+}
+
+enum NutritionMetric {
+  CALORIES
+  PROTEIN
+  CARBS
+  FAT
+  FIBER
+  SUGAR
+  SODIUM
+}
+
+enum PredictionType {
+  FOOD_DEPLETION
+  WASTE
+  CONSUMPTION
+  SUPPLY_NEED
+  STOCK_BALANCE
+  COST
+  NUTRITION_SIGNAL
+  MEAL_DEMAND
+  MEAL_PLAN_ADHERENCE
+  PREFERENCE_TREND
+  RECIPE_USAGE
+}
+
+enum TrendPeriod {
+  DAYS_7
+  DAYS_30
+  DAYS_90
+}
+
+enum RecommendationType {
+  SUPPLY_NEED
+}
+
+enum SearchDocumentSource {
+  FOOD
+  RECIPE
+  MEAL
+}
+
+enum SearchEmbeddingStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum RecommendationStatus {
+  DRAFT
+  ACTIVE
+  ACCEPTED
+  DISMISSED
+  EXPIRED
+}
+
+enum SafetyStatus {
+  PENDING
+  PASSED
+  BLOCKED
+}
+
+enum SafetyFilterType {
+  ALLERGY_FOOD
+  ALLERGY_CATEGORY
+  HEALTH_AVOID
+  HEALTH_LIMIT
+  HEALTH_PREFER
+  DISLIKE_FOOD
+  DISLIKE_CATEGORY
+  DIETARY
+}
+
+enum SafetyCheckResult {
+  PASSED
+  WARNED
+  FAILED
+}
+
+// PostgreSQL partial/NULLS NOT DISTINCT indexes and lifecycle triggers remain in the SQL migration.
+model AIRecommendation {
+  id                 String               @id @db.Uuid
+  householdId        String               @db.Uuid
+  userId             String?              @db.Uuid
+  type               RecommendationType
+  status             RecommendationStatus @default(DRAFT)
+  safetyStatus       SafetyStatus         @default(PENDING)
+  summary            String?              @db.Text
+  modelVersion       String               @db.Text
+  inputHash          String               @db.Text
+  sourcePredictionId String?              @db.Uuid
+  generatedAt        DateTime             @default(now()) @db.Timestamptz(6)
+  expiresAt          DateTime             @db.Timestamptz(6)
+  statusChangedAt    DateTime             @default(now()) @db.Timestamptz(6)
+  feedbackFoldedAt   DateTime?            @db.Timestamptz(6)
+
+  @@unique([id, householdId], map: "AIRecommendation_id_household_uq")
+  @@unique([id, type], map: "AIRecommendation_id_type_uq")
+  @@unique([id, type, householdId], map: "AIRecommendation_id_type_household_uq")
+  @@index([expiresAt], map: "AIRecommendation_expiry_ix")
+  @@map("AIRecommendation")
+}
+
+model AIShoppingRecommendation {
+  recommendationId   String             @id @db.Uuid
+  householdId        String             @db.Uuid
+  recommendationType RecommendationType  @default(SUPPLY_NEED)
+  foodId             String             @db.Uuid
+  suggestedQty       Decimal            @db.Decimal(12, 3)
+  unit               Unit
+  priority           String             @default("NORMAL") @db.Text
+
+  @@map("AIShoppingRecommendation")
+}
+
+model AIRecommendationSafetyCheck {
+  id               String            @id @db.Uuid
+  recommendationId String            @db.Uuid
+  filterType       SafetyFilterType
+  result           SafetyCheckResult
+  blockedFoodId    String?           @db.Uuid
+  createdAt        DateTime          @default(now()) @db.Timestamptz(6)
+
+  @@map("AIRecommendationSafetyCheck")
+}

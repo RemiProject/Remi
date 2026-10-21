@@ -1,0 +1,94 @@
+# Local infrastructure + (optional) the app itself.
+#   Infra only (develop on the host):  docker compose up -d db s3 mailpit
+#   Everything in containers:          docker compose --profile app up --build
+name: ai-kitchen
+
+services:
+  db:
+    image: pgvector/pgvector:pg18-trixie        # PostgreSQL 18 + pgvector 0.8.x
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kitchen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-ai_kitchen}
+      TZ: UTC
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c shared_buffers=256MB
+      -c effective_cache_size=768MB
+      -c work_mem=8MB
+      -c maintenance_work_mem=128MB
+      -c max_connections=100
+      -c random_page_cost=1.1
+      -c log_min_duration_statement=250
+      -c timezone=UTC
+      -c log_timezone=UTC
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"        # never expose the DB on 0.0.0.0
+    volumes:
+      - pgdata:/var/lib/postgresql                # PostgreSQL 18 images keep data under /var/lib/postgresql/18/...
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    shm_size: 256mb                               # parallel HNSW builds / big sorts
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  s3:                                             # local S3-compatible storage (production = real S3)
+    image: chrislusf/seaweedfs:${SEAWEEDFS_TAG:-latest}   # pin a tested tag in your .env
+    restart: unless-stopped
+    command: server -s3 -s3.config=/etc/seaweedfs/s3.json -dir=/data
+    ports:
+      - "127.0.0.1:8333:8333"
+    volumes:
+      - s3data:/data
+      - ./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+
+  mailpit:                                        # dev SMTP + web UI for every email template
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
+  migrate:                                        # one-shot: applies prisma/migrations/*.sql then exits
+    profiles: ["app"]
+    build: { context: ., target: runtime }
+    command: ["node", "scripts/migrate.mjs"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kitchen}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ai_kitchen}
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    profiles: ["app"]
+    build: { context: ., target: runtime }
+    restart: unless-stopped
+    env_file: .env
+    environment:                                  # container-network overrides
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kitchen}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ai_kitchen}
+      S3_ENDPOINT: http://s3:8333                 # server -> S3
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:      { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+      s3:      { condition: service_started }
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    stop_grace_period: 20s                        # lets enableShutdownHooks() drain requests and the outbox poller
+
+volumes:
+  pgdata:
+  s3data:
