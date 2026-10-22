@@ -10,9 +10,9 @@ Monorepo for the AI Kitchen graduation project.
 
 ## Backend status
 
-The backend implements the platform foundations and core flows for identity, catalog, inventory, recipes and meals, nutrition, shopping and purchasing, personal safety profiles, deterministic predictions, safety-gated recommendations, semantic search with pgvector, and notifications.
+Phases 0–10 core flows are implemented. Phase 11 hardening is underway. The API is available for frontend and mobile integration, and the latest local checks passed: lint, type-check, 58 unit tests, production build, database schema validation, and the documented Phase 5, 6, 7, 10, safety-category, RLS, query-baseline, and backup-restore checks.
 
-Phases 0–10 core implementation is in place. Phase 11 adds hardening and operations work; the backend README lists remaining production-readiness items. The API is available for frontend and mobile integration. Production launch still requires completion of the operational checks and loading reviewed catalog and nutrition data.
+The local catalog has 336 foods and 37 safety-category memberships. Nutrition, product, and recipe data still need reviewed data entry. Production launch also requires load and soak testing, point-in-time recovery validation, final access review, and environment-backed verification of email and object storage.
 
 ## Run the backend locally
 
@@ -33,10 +33,12 @@ pnpm start:dev
 
 The GraphQL endpoint is `http://localhost:3000/graphql`. Configure local database credentials and JWT secrets in `backend/.env` before starting the API.
 
+## Data entry
+
+CSV templates and all-or-nothing import instructions are in [backend/data/README.md](backend/data/README.md). Nutrition values must come from a reviewed, trusted source.
+
 ## Documentation
 
 - Backend setup, scripts, phase status, and handoff notes: [backend/README.md](backend/README.md)
 - GraphQL operations and payload examples: [backend/GRAPHQL_ENDPOINTS.md](backend/GRAPHQL_ENDPOINTS.md)
 - Architecture and database migrations: [backend/prisma/migrations](backend/prisma/migrations)
-
-Starter catalog records are for development. Nutrition values need a trusted, reviewed data source before production use.
