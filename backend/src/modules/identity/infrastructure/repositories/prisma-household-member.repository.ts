@@ -25,6 +25,10 @@ export class PrismaHouseholdMemberRepository implements HouseholdMemberRepositor
     await tx.householdMember.updateMany({ where: { householdId, userId, leftAt: null }, data: { leftAt: new Date() } });
   }
 
+  async setRole(tx: Tx, householdId: string, userId: string, role: HouseholdRole): Promise<void> {
+    await tx.householdMember.updateMany({ where: { householdId, userId, leftAt: null }, data: { role } });
+  }
+
   async listActive(db: Tx, householdId: string): Promise<MemberView[]> {
     const rows = await db.householdMember.findMany({
       where: { householdId, leftAt: null },

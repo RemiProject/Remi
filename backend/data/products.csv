@@ -1,0 +1,4 @@
+# Packaged products (barcode scanning + productSafetyCheck). Match key: barcode.
+# contains / may_contain: category codes from the label, separated by |  ("may contain traces of nuts" -> may_contain = TREE_NUTS).
+# Tags are replaced on every import of a barcode, so always list the full label.
+barcode,name,brand,food,package_size,package_unit,contains,may_contain

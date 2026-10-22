@@ -20,7 +20,7 @@ export class RecommendationService {
       const forecasts = await tx.$queryRaw<Array<{ predictionId: string; inputHash: string; foodId: string; foodName: string; daysLeft: number; quantity: string; unit: string; defaultUnit: string; categories: string[]; nutrients: Record<string, number> }>>`
         SELECT p.id AS "predictionId", p."inputHash", d."foodId", f.name AS "foodName", d."daysLeft"::float8 AS "daysLeft",
           d."currentQty"::text AS quantity, d.unit::text AS unit, f."defaultUnit"::text AS "defaultUnit",
-          ARRAY[f."categoryId"::text] AS categories,
+          food_safety_category_ids(f.id)::text[] AS categories,
           jsonb_strip_nulls(jsonb_build_object('CALORIES', n."caloriesPer100g", 'PROTEIN', n."proteinG", 'CARBS', n."carbsG", 'FAT', n."fatG", 'FIBER', n."fiberG", 'SUGAR', n."sugarG", 'SODIUM', n."sodiumMg")) AS nutrients
         FROM "AIPrediction" p JOIN "AIFoodDepletionPrediction" d ON d."predictionId" = p.id
         JOIN "Food" f ON f.id = d."foodId" LEFT JOIN "NutritionProfile" n ON n."foodId" = f.id
@@ -28,7 +28,7 @@ export class RecommendationService {
         ORDER BY d."daysLeft", d."foodId"`;
       for (const member of members) {
         await tx.$executeRaw`SELECT set_config('app.user_id', ${member.userId}, true)`;
-        await tx.$queryRaw`SELECT safety_lock(ARRAY[${member.userId}::uuid])`;
+        await tx.$executeRaw`SELECT safety_lock(ARRAY[${member.userId}::uuid])`;
         const profile = await this.loadProfile(tx, member.userId);
         const safetyHash = buildInputHash(profile);
         for (const forecast of forecasts) {
@@ -43,6 +43,9 @@ export class RecommendationService {
           if (!inserted.length) continue;
           await tx.$executeRaw`INSERT INTO "AIShoppingRecommendation" ("recommendationId", "householdId", "recommendationType", "foodId", "suggestedQty", unit, priority)
             VALUES (${recommendationId}::uuid, ${householdId}::uuid, 'SUPPLY_NEED', ${forecast.foodId}::uuid, ${forecast.quantity}::numeric, ${forecast.unit}::"Unit", ${forecast.daysLeft <= 3 ? 'HIGH' : forecast.daysLeft <= 7 ? 'NORMAL' : 'LOW'})`;
+          for (const reason of supplyReasons(forecast)) {
+            await tx.$executeRaw`INSERT INTO "AIRecommendationReason" (id, "recommendationId", code, message) VALUES (${newId()}::uuid, ${recommendationId}::uuid, ${reason.code}, ${reason.message})`;
+          }
           await tx.$executeRaw`INSERT INTO "OutboxEvent" ("householdId", topic, "dedupeKey", payload, "nextAttemptAt")
             VALUES (${householdId}::uuid, 'recommendation.safety.requested', ${recommendationId}, jsonb_build_object('recommendationId', ${recommendationId}::text, 'householdId', ${householdId}::text), now())
             ON CONFLICT (topic, "dedupeKey") WHERE "processedAt" IS NULL AND "deadLetteredAt" IS NULL DO NOTHING`;
@@ -58,13 +61,13 @@ export class RecommendationService {
       await tx.$executeRaw`SELECT set_config('app.user_id', ${owner[0].userId}, true)`;
       const rows = await tx.$queryRaw<Array<{ id: string; userId: string; foodId: string; foodName: string; categories: string[]; nutrients: Record<string, number> }>>`
         SELECT r.id, r."userId", d."foodId", f.name AS "foodName",
-          ARRAY[f."categoryId"::text] AS categories,
+          food_safety_category_ids(f.id)::text[] AS categories,
           jsonb_strip_nulls(jsonb_build_object('CALORIES', n."caloriesPer100g", 'PROTEIN', n."proteinG", 'CARBS', n."carbsG", 'FAT', n."fatG", 'FIBER', n."fiberG", 'SUGAR', n."sugarG", 'SODIUM', n."sodiumMg")) AS nutrients
         FROM "AIRecommendation" r JOIN "AIShoppingRecommendation" d ON d."recommendationId" = r.id
         JOIN "Food" f ON f.id = d."foodId" LEFT JOIN "NutritionProfile" n ON n."foodId" = f.id WHERE r.id = ${recommendationId}::uuid AND r."householdId" = ${householdId}::uuid AND r.status = 'DRAFT' AND r."safetyStatus" = 'PENDING'`;
       const row = rows[0];
       if (!row?.userId) return;
-      await tx.$queryRaw`SELECT safety_lock(ARRAY[${row.userId}::uuid])`;
+      await tx.$executeRaw`SELECT safety_lock(ARRAY[${row.userId}::uuid])`;
       await tx.$executeRaw`SELECT set_config('app.user_id', ${row.userId}, true)`;
       // Re-read after taking the shared safety lock; never use a snapshot captured before the lock.
       const stillOpen = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM "AIRecommendation" WHERE id = ${recommendationId}::uuid AND status = 'DRAFT' AND "safetyStatus" = 'PENDING'`;
@@ -106,7 +109,10 @@ export class RecommendationService {
         AND (${cursor?.generatedAt ?? null}::timestamptz IS NULL OR (r."generatedAt", r.id) < (${cursor?.generatedAt ?? null}::timestamptz, ${cursor?.id ?? null}::uuid))
       ORDER BY r."generatedAt" DESC, r.id DESC LIMIT ${take + 1}`, { householdId, userId });
     const hasNextPage = rows.length > take;
-    const items = rows.slice(0, take);
+    const page = rows.slice(0, take);
+    const reasons = page.length ? await this.transactions.run((tx) => tx.$queryRaw<Array<{ recommendationId: string; code: string; message: string }>>`
+      SELECT "recommendationId", code, message FROM "AIRecommendationReason" WHERE "recommendationId" = ANY(${page.map((row) => row.id)}::uuid[]) ORDER BY "recommendationId", code`, { householdId, userId }) : [];
+    const items = page.map((row) => ({ ...row, reasons: reasons.filter((reason) => reason.recommendationId === row.id) }));
     return { nodes: items, pageInfo: { hasNextPage, endCursor: items.length ? encodeRecommendationCursor(items[items.length - 1]) : null } };
   }
 
@@ -150,6 +156,7 @@ export class RecommendationService {
     const rows = await tx.$queryRaw<Array<{ snapshot: SafetyProfileSnapshot }>>`SELECT jsonb_build_object(
       'allergyFoodIds', COALESCE((SELECT jsonb_agg("foodId"::text ORDER BY "foodId") FROM "UserAllergy" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
       'allergyCategoryIds', COALESCE((SELECT jsonb_agg("categoryId"::text ORDER BY "categoryId") FROM "UserAllergyCategory" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
+      'severeAllergyCategoryIds', COALESCE((SELECT jsonb_agg("categoryId"::text ORDER BY "categoryId") FROM "UserAllergyCategory" WHERE "userId" = ${userId}::uuid AND severity IN ('SEVERE', 'LIFE_THREATENING')), '[]'::jsonb),
       'dislikedFoodIds', COALESCE((SELECT jsonb_agg("foodId"::text ORDER BY "foodId") FROM "UserDislikedFood" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
       'dislikedCategoryIds', COALESCE((SELECT jsonb_agg("categoryId"::text ORDER BY "categoryId") FROM "UserDislikedCategory" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
       'dietaryPreferences', COALESCE((SELECT jsonb_agg("dietaryPreference"::text ORDER BY "dietaryPreference") FROM "UserDietaryPreference" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
@@ -158,6 +165,16 @@ export class RecommendationService {
     ) AS snapshot`;
     return rows[0].snapshot;
   }
+}
+
+/** Reason codes are an open list the client translates; message is the English fallback. */
+function supplyReasons(forecast: { foodName: string; daysLeft: number }): Array<{ code: string; message: string }> {
+  const days = Math.max(0, forecast.daysLeft);
+  return [
+    { code: 'STOCK_RUNNING_LOW', message: `Your ${forecast.foodName} may run out in ${days.toFixed(1)} days.` },
+    { code: 'BASED_ON_CONSUMPTION', message: `Based on how fast your household has been using ${forecast.foodName}.` },
+    ...(days <= 3 ? [{ code: 'RUNS_OUT_SOON', message: 'Buy it soon: less than 3 days left.' }] : []),
+  ];
 }
 
 function encodeRecommendationCursor(row: { id: string; generatedAt: Date }): string {

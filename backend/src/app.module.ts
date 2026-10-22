@@ -17,6 +17,7 @@ import { ProfileModule } from './modules/profile/profile.module.js';
 import { PredictionsModule } from './modules/predictions/predictions.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { MediaModule } from './modules/media/media.module.js';
 import { AppConfigService } from './platform/config/app-config.service.js';
 import { ConfigModule } from './platform/config/config.module.js';
 import { DbModule } from './platform/db/db.module.js';
@@ -62,7 +63,8 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
       imports: [MetricsModule],
       inject: [AppConfigService, MetricsService],
       useFactory: (c: AppConfigService, metrics: MetricsService) => ({
-        autoSchemaFile: true,
+        // Dev writes the SDL to the repo so mobile/web can run codegen against it; production keeps it in memory.
+        autoSchemaFile: c.emitsGraphqlSchema ? 'schema.graphql' : true,
         sortSchema: true,
         introspection: c.env.GRAPHQL_INTROSPECTION,
         playground: false,
@@ -91,6 +93,7 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
     PredictionsModule,
     SearchModule,
     NotificationsModule,
+    MediaModule,
   ],
   controllers: [HealthController],
   providers: [LocalDateScalar, DecimalScalar, { provide: APP_GUARD, useClass: GqlThrottlerGuard }],

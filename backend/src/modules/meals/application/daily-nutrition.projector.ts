@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { newId } from '@/shared/ids.js';
 import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 import type { Tx } from '@/platform/db/tx-context.js';
@@ -13,9 +14,10 @@ export class DailyNutritionProjector implements OutboxHandlerPort<MealLoggedPayl
   private readonly logger = new Logger(DailyNutritionProjector.name);
   private timer?: NodeJS.Timeout;
 
-  constructor(private readonly transactions: TransactionRunner) {}
+  constructor(private readonly transactions: TransactionRunner, private readonly config: AppConfigService) {}
 
   onModuleInit(): void {
+    if (!this.config.runsBackgroundJobs) return;
     this.timer = setInterval(() => void this.projectRecent(), 60 * 60 * 1000);
     this.timer.unref?.();
     void this.projectRecent();

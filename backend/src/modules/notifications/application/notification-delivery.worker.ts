@@ -1,4 +1,5 @@
 import { Injectable, Logger, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
+import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { PrismaService } from '@/platform/db/prisma.service.js';
 import { EmailDeliveryChannel, NotificationProviderUnavailableError, PushDeliveryChannel, UnregisteredPushTokenError, type NotificationDeliveryInput } from './delivery-channel.js';
 
@@ -9,9 +10,9 @@ export class NotificationDeliveryWorker implements OnApplicationBootstrap, OnApp
   private stopping = false;
   private running: Promise<void> = Promise.resolve();
 
-  constructor(private readonly prisma: PrismaService, private readonly email: EmailDeliveryChannel, private readonly push: PushDeliveryChannel) {}
+  constructor(private readonly prisma: PrismaService, private readonly email: EmailDeliveryChannel, private readonly push: PushDeliveryChannel, private readonly config: AppConfigService) {}
 
-  onApplicationBootstrap(): void { this.schedule(); }
+  onApplicationBootstrap(): void { if (this.config.runsBackgroundJobs) this.schedule(); }
   async onApplicationShutdown(): Promise<void> {
     this.stopping = true;
     if (this.timer) clearTimeout(this.timer);

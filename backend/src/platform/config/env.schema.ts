@@ -35,6 +35,10 @@ export const envSchema = z
     EMAIL_VERIFICATION_REQUIRED: bool.default(false),
 
     ENABLE_OUTBOX_POLLER: bool.default(true),
+    // false on API replicas when a separate `worker` process (dist/worker.js) runs the outbox, jobs and workers
+    RUN_BACKGROUND_JOBS: bool.default(true),
+    // write schema.graphql to the working dir on boot (dev codegen); unset = on outside production
+    GRAPHQL_EMIT_SCHEMA: bool.optional(),
     OUTBOX_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(2000),
     OUTBOX_BATCH_SIZE: z.coerce.number().int().positive().default(10),
     OUTBOX_MAX_ATTEMPTS: z.coerce.number().int().positive().default(8),

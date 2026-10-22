@@ -9,6 +9,7 @@ export interface HouseholdMemberRepository {
   /** ON CONFLICT (householdId, userId) DO UPDATE SET leftAt = NULL — "rejoin clears leftAt". */
   joinOrRejoin(tx: Tx, member: { id: string; householdId: string; userId: string; role: HouseholdRole }): Promise<void>;
   markLeft(tx: Tx, householdId: string, userId: string): Promise<void>;
+  setRole(tx: Tx, householdId: string, userId: string, role: HouseholdRole): Promise<void>;
   listActive(db: Tx, householdId: string): Promise<MemberView[]>;
   listHouseholdsOfUser(db: Tx, userId: string): Promise<MyHouseholdView[]>;
   isActiveMemberByEmail(db: Tx, householdId: string, email: string): Promise<boolean>;

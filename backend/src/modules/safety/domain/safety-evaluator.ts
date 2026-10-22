@@ -10,7 +10,10 @@ export type RuleTarget = 'FOOD' | 'CATEGORY' | 'NUTRIENT';
 
 export interface SafetyIngredient {
   foodId: string;
+  /** Primary category + FoodCategoryMembership + product CONTAINS tags. */
   categoryIds: string[];
+  /** Product MAY_CONTAIN label tags ("may contain traces of …"). */
+  mayContainCategoryIds?: string[];
   nutrientsPer100g?: Partial<Record<'CALORIES' | 'PROTEIN' | 'CARBS' | 'FAT' | 'FIBER' | 'SUGAR' | 'SODIUM', number>>;
 }
 
@@ -26,6 +29,8 @@ export interface SafetyRule {
 export interface SafetyProfileSnapshot {
   allergyFoodIds: string[];
   allergyCategoryIds: string[];
+  /** Subset of allergyCategoryIds with SEVERE / LIFE_THREATENING severity: traces block instead of warn. */
+  severeAllergyCategoryIds?: string[];
   dislikedFoodIds: string[];
   dislikedCategoryIds: string[];
   dietaryPreferences: string[];
@@ -39,7 +44,10 @@ export interface SafetyFilterVerdict {
   blockedFoodIds: string[];
 }
 
-/** Pure safety gate. Any allergy is a hard block; dislike and configured limits only warn. */
+/**
+ * Pure safety gate. Any allergy is a hard block; dislike and configured limits only warn.
+ * "May contain" traces block only a severe allergy and warn for everything else (guide B17A).
+ */
 export class SafetyEvaluator {
   evaluate(profile: SafetyProfileSnapshot, ingredients: SafetyIngredient[]): SafetyFilterVerdict[] {
     const verdicts = new Map<SafetyFilter, { failed: Set<string>; warned: Set<string> }>();
@@ -66,6 +74,8 @@ export class SafetyEvaluator {
         if (!profile.dietaryPreferences.includes(dietaryPreference) || !matchesRule(rule, ingredient)) continue;
         (rule.ruleType === 'AVOID' ? verdicts.get('DIETARY')!.failed : verdicts.get('DIETARY')!.warned).add(ingredient.foodId);
       }
+
+      applyTraces(profile, ingredient, verdicts);
     }
 
     return SAFETY_FILTERS.map((filterType) => {
@@ -73,6 +83,29 @@ export class SafetyEvaluator {
       const result: SafetyResult = state.failed.size ? 'FAILED' : state.warned.size ? 'WARNED' : 'PASSED';
       return { filterType, result, blockedFoodIds: [...state.failed].sort() };
     });
+  }
+}
+
+function applyTraces(profile: SafetyProfileSnapshot, ingredient: SafetyIngredient, verdicts: Map<SafetyFilter, { failed: Set<string>; warned: Set<string> }>): void {
+  const traces = ingredient.mayContainCategoryIds ?? [];
+  if (!traces.length) return;
+  const traced = (categoryId?: string) => !!categoryId && traces.includes(categoryId);
+  for (const categoryId of traces) {
+    if (profile.allergyCategoryIds.includes(categoryId)) {
+      const severe = profile.severeAllergyCategoryIds?.includes(categoryId) ?? true; // unknown severity = fail closed
+      (severe ? verdicts.get('ALLERGY_CATEGORY')!.failed : verdicts.get('ALLERGY_CATEGORY')!.warned).add(ingredient.foodId);
+    }
+    if (profile.dislikedCategoryIds.includes(categoryId)) verdicts.get('DISLIKE_CATEGORY')!.warned.add(ingredient.foodId);
+  }
+  for (const condition of profile.healthConditions) {
+    if (condition.status === 'RESOLVED') continue;
+    for (const rule of condition.rules) {
+      if (rule.targetType !== 'CATEGORY' || rule.ruleType === 'PREFER' || !traced(rule.categoryId)) continue;
+      verdicts.get(rule.ruleType === 'AVOID' ? 'HEALTH_AVOID' : 'HEALTH_LIMIT')!.warned.add(ingredient.foodId);
+    }
+  }
+  for (const { dietaryPreference, rule } of profile.dietaryRules) {
+    if (profile.dietaryPreferences.includes(dietaryPreference) && rule.targetType === 'CATEGORY' && traced(rule.categoryId)) verdicts.get('DIETARY')!.warned.add(ingredient.foodId);
   }
 }
 

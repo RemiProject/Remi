@@ -1,4 +1,5 @@
 import { Injectable, Logger, type OnApplicationShutdown, type OnApplicationBootstrap } from '@nestjs/common';
+import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { OutboxHandler, type OutboxHandlerPort, type OutboxMessage } from '@/platform/outbox/outbox-handler.decorator.js';
 import { PredictionService } from './prediction.service.js';
 import { RecommendationService } from '@/modules/recommendations/application/recommendation.service.js';
@@ -35,9 +36,10 @@ export class PredictionMaintenanceJob implements OnApplicationBootstrap, OnAppli
   private timer?: NodeJS.Timeout;
   private stopping = false;
 
-  constructor(private readonly predictions: PredictionService) {}
+  constructor(private readonly predictions: PredictionService, private readonly config: AppConfigService) {}
 
   onApplicationBootstrap(): void {
+    if (!this.config.runsBackgroundJobs) return;
     this.timer = setInterval(() => {
       if (this.stopping) return;
       void this.runMaintenance();

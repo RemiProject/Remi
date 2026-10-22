@@ -1,0 +1,1239 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+enum ActivityLevel {
+  ACTIVE
+  LIGHT
+  MODERATE
+  SEDENTARY
+  VERY_ACTIVE
+}
+
+input AddToShoppingListInputType {
+  foodId: ID!
+  idempotencyKey: String!
+  productId: ID
+  quantity: Decimal!
+  shoppingListId: ID!
+  unit: Unit!
+}
+
+input AllergyInputType {
+  categoryId: ID
+  foodId: ID
+  notes: String
+  severity: AllergySeverity!
+}
+
+enum AllergySeverity {
+  LIFE_THREATENING
+  MILD
+  MODERATE
+  SEVERE
+}
+
+type AuthTokens {
+  accessToken: String!
+  expiresInSeconds: Int!
+  refreshToken: String!
+}
+
+type CatalogFoodCategory {
+  code: String!
+  id: ID!
+  name: String!
+}
+
+enum ConditionStatus {
+  ACTIVE
+  CONTROLLED
+  REMISSION
+  RESOLVED
+}
+
+input ConfirmImageUploadInput {
+  storageKey: String!
+  type: ImageType!
+}
+
+type Country {
+  code: String!
+  id: ID!
+  name: String!
+}
+
+input CreateHouseholdInput {
+  name: String!
+  timezone: String
+}
+
+input CreateMealPlanInputType {
+  endDate: LocalDate!
+  name: String!
+  startDate: LocalDate!
+}
+
+input CreatePurchaseOrderInputType {
+  currencyId: ID!
+  idempotencyKey: String!
+  items: [PurchaseOrderLineInputType!]!
+  productSourceId: ID
+  sourceName: String!
+}
+
+input CreateRecipeInputType {
+  cookTimeMin: Int
+  cuisineId: ID
+  description: String
+  difficulty: RecipeDifficulty! = MEDIUM
+  ingredients: [RecipeIngredientInputType!]!
+  name: String!
+  prepTimeMin: Int
+  servings: Int!
+  steps: [RecipeStepInputType!]!
+}
+
+input CreateShoppingListInputType {
+  idempotencyKey: String!
+  name: String!
+}
+
+type Cuisine {
+  code: String!
+  id: ID!
+  name: String!
+}
+
+type Currency {
+  code: String!
+  decimalPlaces: Int!
+  id: ID!
+  name: String!
+  symbol: String!
+}
+
+type CurrencyType {
+  code: String!
+  decimalPlaces: Int!
+  id: ID!
+  name: String!
+  symbol: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""Arbitrary-precision decimal serialized as a string"""
+scalar Decimal
+
+enum DietaryPreference {
+  DAIRY_FREE
+  GLUTEN_FREE
+  HALAL
+  KETO
+  LOW_CARB
+  VEGAN
+  VEGETARIAN
+}
+
+type Food {
+  aliases: [FoodAlias!]!
+  category: CatalogFoodCategory!
+  defaultUnit: Unit!
+  densityGPerMl: Decimal
+  gramsPerPiece: Decimal
+  id: ID!
+  name: String!
+  nutrition: NutritionProfile
+}
+
+type FoodAlias {
+  alias: String!
+  id: ID!
+  isPrimary: Boolean!
+  languageCode: String!
+}
+
+type FoodCategory {
+  code: String!
+  id: ID!
+  name: String!
+}
+
+type FoodConnection {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [Food!]!
+}
+
+type FoodDepletionPredictionType {
+  avgDailyQty: Decimal!
+  confidence: Decimal!
+  currentQty: Decimal!
+  daysLeft: Decimal!
+  expiresAt: DateTime!
+  foodId: ID!
+  foodName: String!
+  generatedAt: DateTime!
+  id: ID!
+  modelVersion: String!
+  runOutAt: DateTime!
+  unit: Unit!
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum GoalType {
+  CUSTOM
+  GAIN_MUSCLE
+  LOSE_WEIGHT
+  MAINTAIN
+}
+
+type HealthConditionCatalogType {
+  code: String!
+  conditionGroup: HealthConditionGroup!
+  id: ID!
+  isChronic: Boolean!
+  name: String!
+}
+
+enum HealthConditionGroup {
+  AUTOIMMUNE
+  CARDIOVASCULAR
+  DIGESTIVE
+  METABOLIC
+  OTHER
+  RENAL
+}
+
+input HealthConditionInputType {
+  diagnosedAt: String
+  healthConditionId: ID!
+  notes: String
+  status: ConditionStatus!
+}
+
+type Household {
+  id: ID!
+  name: String!
+  timezone: String!
+}
+
+type HouseholdMember {
+  email: String!
+  joinedAt: DateTime!
+  name: String!
+  role: HouseholdRole!
+  userId: ID!
+}
+
+enum HouseholdRole {
+  MEMBER
+  OWNER
+}
+
+type Image {
+  createdAt: DateTime!
+  id: ID!
+  mimeType: String!
+  sizeBytes: Int!
+  type: ImageType!
+
+  """Short-lived GET URL; re-query the image to refresh it"""
+  url: String!
+  urlExpiresAt: DateTime!
+}
+
+enum ImageType {
+  FOOD
+  FRESHNESS
+  OTHER
+  RECEIPT
+}
+
+type ImageUploadTicketType {
+  contentType: String!
+  expiresAt: DateTime!
+  storageKey: String!
+
+  """HTTP PUT the raw file bytes here with the same Content-Type"""
+  uploadUrl: String!
+}
+
+type InsufficientStockType {
+  available: Decimal!
+  unit: Unit!
+}
+
+input InventoryAdjustmentInput {
+  delta: Decimal!
+  idempotencyKey: String!
+  inventoryItemId: ID!
+}
+
+type InventoryConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [InventoryItemType!]!
+}
+
+type InventoryItemDetailType {
+  estimatedExpiryAt: DateTime
+  foodId: ID!
+  foodName: String!
+  id: ID!
+  quantity: Decimal!
+  storageLocation: StorageLocation!
+  transactions: InventoryTransactionConnectionType!
+  unit: Unit!
+  version: Int!
+}
+
+type InventoryItemType {
+  estimatedExpiryAt: DateTime
+  foodId: ID!
+  foodName: String!
+  id: ID!
+  quantity: Decimal!
+  storageLocation: StorageLocation!
+  unit: Unit!
+  version: Int!
+}
+
+type InventoryMovementType {
+  balanceAfter: Decimal!
+  inventoryItemId: ID!
+  quantityDelta: Decimal!
+}
+
+union InventoryMutationResult = InsufficientStockType | InventoryMutationSuccessType
+
+type InventoryMutationSuccessType {
+  balances: [InventoryMovementType!]!
+  eventId: ID!
+  foodId: ID!
+  quantity: Decimal!
+  replayed: Boolean!
+  unit: Unit!
+}
+
+input InventoryStockInput {
+  amount: Decimal!
+  estimatedExpiryAt: DateTime
+  foodId: ID!
+  idempotencyKey: String!
+  purchaseDate: LocalDate
+  storageLocation: StorageLocation
+  unit: Unit!
+}
+
+type InventoryTransactionConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [InventoryTransactionType!]!
+}
+
+type InventoryTransactionType {
+  balanceAfter: Decimal!
+  createdAt: DateTime!
+  eventId: ID!
+  id: ID!
+  movementType: String!
+  quantityDelta: Decimal!
+}
+
+type Invitation {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  role: HouseholdRole!
+}
+
+input InviteMemberInput {
+  email: String!
+  role: HouseholdRole! = MEMBER
+}
+
+type Language {
+  code: String!
+  id: ID!
+  isRtl: Boolean!
+  name: String!
+}
+
+"""ISO calendar date (YYYY-MM-DD)"""
+scalar LocalDate
+
+type Locale {
+  code: String!
+  id: ID!
+  languageCode: String!
+  name: String!
+}
+
+input LogFamilyMealInputType {
+  eatenAt: DateTime!
+  guestServings: Decimal
+  idempotencyKey: String!
+  items: [MealFoodInputType!]!
+  mealType: MealType!
+  name: String
+  origin: MealOrigin = HOME
+  shares: [MealMemberShareInputType!]!
+  totalServings: Decimal!
+}
+
+input LogMealInputType {
+  eatenAt: DateTime!
+  idempotencyKey: String!
+  items: [MealFoodInputType!]!
+  mealType: MealType!
+  name: String
+  origin: MealOrigin = HOME
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input LogoutInput {
+  refreshToken: String!
+}
+
+type Me {
+  email: String!
+  emailVerifiedAt: DateTime
+  id: ID!
+  languageCode: String!
+  name: String!
+  timezone: String!
+}
+
+input MealFoodInputType {
+  amount: Decimal!
+  foodId: ID!
+  unit: Unit!
+}
+
+type MealItemType {
+  calories: Decimal
+  carbsG: Decimal
+  fatG: Decimal
+  fiberG: Decimal
+  foodId: ID!
+  foodName: String!
+  nutritionSnapshotAt: DateTime!
+  proteinG: Decimal
+  quantity: Decimal!
+  quantityG: Decimal!
+  sodiumMg: Decimal
+  sugarG: Decimal
+  unit: Unit!
+}
+
+union MealLogResult = InsufficientStockType | MealLogSuccessType | SharesMismatchType
+
+type MealLogSuccessType {
+  meals: [MealTypeObject!]!
+  replayed: Boolean!
+}
+
+input MealMemberShareInputType {
+  servings: Decimal!
+  userId: ID!
+}
+
+enum MealOrigin {
+  AWAY
+  HOME
+  UNKNOWN
+}
+
+type MealPlanTypeObject {
+  endDate: LocalDate!
+  id: ID!
+  meals: [PlannedMealType!]!
+  name: String!
+  startDate: LocalDate!
+}
+
+enum MealType {
+  BREAKFAST
+  DINNER
+  LUNCH
+  OTHER
+  SNACK
+}
+
+type MealTypeObject {
+  eatenAt: DateTime!
+  id: ID!
+  items: [MealItemType!]!
+  mealType: MealType!
+  name: String
+  origin: MealOrigin!
+  userId: ID!
+}
+
+type MoneyType {
+  amount: Decimal!
+  currency: CurrencyType!
+}
+
+type Mutation {
+  """Returns the id of the joined household"""
+  acceptInvitation(input: TokenInput!): String!
+  acceptRecommendation(id: String!): Boolean!
+  addAllergy(input: AllergyInputType!): MyProfileType!
+  addStock(input: InventoryStockInput!): InventoryMutationResult!
+  addToShoppingList(input: AddToShoppingListInputType!): ShoppingListItemType!
+  adjustStock(input: InventoryAdjustmentInput!): InventoryMutationResult!
+
+  """
+  Step 2 of 2: validates the uploaded bytes and records the image. Idempotent per storageKey.
+  """
+  confirmImageUpload(input: ConfirmImageUploadInput!): Image!
+  consumeStock(input: InventoryStockInput!): InventoryMutationResult!
+
+  """Returns the new household id"""
+  createHousehold(input: CreateHouseholdInput!): String!
+  createMealPlan(input: CreateMealPlanInputType!): MealPlanTypeObject!
+  createPurchaseOrder(input: CreatePurchaseOrderInputType!): PurchaseOrderType!
+  createRecipe(input: CreateRecipeInputType!): RecipeType!
+  createShoppingList(input: CreateShoppingListInputType!): ShoppingListType!
+  deleteShoppingList(id: ID!): Boolean!
+  discardStock(input: InventoryStockInput!): InventoryMutationResult!
+  dismissRecommendation(id: String!): Boolean!
+
+  """Returns the invitation id. Requires x-household-id and the OWNER role"""
+  inviteMember(input: InviteMemberInput!): String!
+  leaveHousehold: Boolean!
+  logFamilyMeal(input: LogFamilyMealInputType!): MealLogResult!
+  logMeal(input: LogMealInputType!): MealLogResult!
+  login(input: LoginInput!): AuthTokens!
+
+  """Revoke the session for the given refresh token (this device)."""
+  logout(input: LogoutInput!): Boolean!
+
+  """Revoke every active session for the current user."""
+  logoutAll: Boolean!
+  markNotificationRead(id: String!): NotificationItemType!
+  planMeal(input: PlanMealInputType!): PlannedMealType!
+  receivePurchaseOrderItem(input: ReceivePurchaseOrderItemInputType!): PurchaseReceiptType!
+
+  """
+  Rotates the refresh token and returns a new access + refresh pair (Session-backed).
+  """
+  refreshAccessToken(input: RefreshAccessTokenInput!): AuthTokens!
+  regenerateRecommendations(type: RecommendationType!): Boolean!
+  register(input: RegisterInput!): RegisterResult!
+  registerDevice(appVersion: String, platform: UserDevicePlatform!, pushToken: String!): UserDeviceType!
+  removeAllergy(input: RemoveAllergyInputType!): Boolean!
+  removeMember(input: RemoveMemberInput!): Boolean!
+
+  """
+  Re-sends the verification email to the logged-in user. No-op when already verified.
+  """
+  requestEmailVerification: Boolean!
+
+  """
+  Step 1 of 2: get a presigned PUT URL, upload the bytes, then call confirmImageUpload.
+  """
+  requestImageUpload(input: RequestImageUploadInput!): ImageUploadTicketType!
+  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  revokeDevice(id: String!): Boolean!
+  revokeInvitation(input: RevokeInvitationInput!): Boolean!
+  setDietaryPreferences(input: SetDietaryPreferencesInputType!): MyProfileType!
+  setGoal(input: SetGoalInputType!): UserGoalType!
+  setHealthConditions(input: SetHealthConditionsInputType!): MyProfileType!
+
+  """
+  OWNER only. The current owner becomes a MEMBER; the target member becomes the OWNER.
+  """
+  transferOwnership(input: TransferOwnershipInput!): Boolean!
+  transitionPurchaseOrder(input: TransitionPurchaseOrderInputType!): PurchaseOrderType!
+  updateNotificationPreference(channel: NotificationChannel!, isEnabled: Boolean!, quietHoursEnd: String, quietHoursStart: String, type: NotificationType!): NotificationPreferenceType!
+  updateProfile(input: UpdateProfileInputType!): UserProfileDataType!
+  updateShoppingList(input: UpdateShoppingListInputType!): ShoppingListType!
+  updateShoppingListItem(input: UpdateShoppingItemInputType!): ShoppingListItemType!
+  verifyEmail(input: TokenInput!): Boolean!
+}
+
+type MyHousehold {
+  household: Household!
+  joinedAt: DateTime!
+  role: HouseholdRole!
+}
+
+type MyProfileType {
+  allergies: [UserAllergyType!]!
+  allergyCategories: [UserAllergyCategoryType!]!
+  dietaryPreferences: [String!]!
+  dislikedCategoryIds: [String!]!
+  dislikedFoodIds: [String!]!
+  goal: UserGoalType
+  healthConditions: [UserHealthConditionType!]!
+  preferences: UserPreferenceType
+  preferredCuisines: [PreferredCuisineType!]!
+  profile: UserProfileDataType
+  userId: ID!
+}
+
+type NotificationBadgeType {
+  unreadCount: Int!
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+}
+
+type NotificationConnectionType {
+  nodes: [NotificationItemType!]!
+  pageInfo: NotificationPageInfoType!
+}
+
+type NotificationItemType {
+  createdAt: DateTime!
+  foodId: String
+  householdId: String!
+  id: String!
+  inventoryItemId: String
+  readAt: DateTime
+  type: NotificationType!
+}
+
+type NotificationPageInfoType {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type NotificationPreferenceType {
+  channel: NotificationChannel!
+  isEnabled: Boolean!
+  quietHoursEnd: String
+  quietHoursStart: String
+  type: NotificationType!
+  updatedAt: DateTime
+}
+
+type NotificationReceivedType {
+  householdId: String!
+  notificationId: String!
+}
+
+enum NotificationType {
+  EXPIRY_SOON
+  LOW_STOCK
+  MEMBER_CHANGED
+  PURCHASE_RECEIVED
+  RECOMMENDATION_READY
+  SAFETY_REVIEW
+}
+
+type NutritionProfile {
+  caloriesPer100g: Decimal!
+  carbsG: Decimal!
+  fatG: Decimal!
+  fiberG: Decimal!
+  proteinG: Decimal!
+  sodiumMg: Decimal!
+  sugarG: Decimal!
+}
+
+input PlanMealInputType {
+  mealDate: LocalDate!
+  mealPlanId: ID!
+  mealType: MealType!
+  recipeId: ID!
+  servings: Decimal!
+}
+
+type PlannedMealType {
+  id: ID!
+  mealDate: LocalDate!
+  mealType: MealType!
+  recipeId: ID!
+  recipeName: String!
+  servings: Decimal!
+}
+
+type PredictionConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [FoodDepletionPredictionType!]!
+}
+
+enum PredictionType {
+  CONSUMPTION
+  COST
+  FOOD_DEPLETION
+  MEAL_DEMAND
+  MEAL_PLAN_ADHERENCE
+  NUTRITION_SIGNAL
+  PREFERENCE_TREND
+  RECIPE_USAGE
+  STOCK_BALANCE
+  SUPPLY_NEED
+  WASTE
+}
+
+type PreferredCuisineType {
+  code: String!
+  id: ID!
+  name: String!
+}
+
+type ProductSafetyCheckType {
+  barcode: String!
+  brand: String
+
+  """SafetyFilterType values that failed"""
+  failedFilters: [String!]!
+  foodId: ID!
+  foodName: String!
+  productId: ID!
+  productName: String!
+
+  """
+  UNSAFE = at least one filter failed (allergy, avoid rule, diet). Show a hard warning.
+  """
+  status: ProductSafetyStatus!
+
+  """
+  SafetyFilterType values that only warn (dislikes, limits, "may contain" traces)
+  """
+  warnedFilters: [String!]!
+}
+
+enum ProductSafetyStatus {
+  SAFE
+  UNSAFE
+  WARNING
+}
+
+type PurchaseOrderConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [PurchaseOrderType!]!
+}
+
+type PurchaseOrderItemType {
+  foodId: ID!
+  foodName: String!
+  id: ID!
+  productId: ID
+  productName: String
+  quantity: Decimal!
+  receivedQuantity: Decimal!
+  totalPrice: MoneyType!
+  unit: Unit!
+  unitPrice: MoneyType!
+}
+
+input PurchaseOrderLineInputType {
+  foodId: ID!
+  productId: ID
+  quantity: Decimal!
+  unit: Unit!
+  unitPrice: Decimal!
+}
+
+enum PurchaseOrderStatus {
+  CANCELLED
+  CONFIRMED
+  DELIVERED
+  DRAFT
+  PLACED
+}
+
+type PurchaseOrderType {
+  confirmedAt: DateTime
+  createdAt: DateTime!
+  currency: CurrencyType!
+  deliveredAt: DateTime
+  id: ID!
+  items: [PurchaseOrderItemType!]!
+  orderedAt: DateTime
+  sourceName: String!
+  status: PurchaseOrderStatus!
+  totalCost: MoneyType!
+}
+
+type PurchaseReceiptType {
+  eventId: ID!
+  foodId: ID!
+  inventoryItemId: ID!
+  purchaseOrderId: ID!
+  purchaseOrderStatus: PurchaseOrderStatus!
+  quantity: Decimal!
+  replayed: Boolean!
+  unit: Unit!
+}
+
+type Query {
+  countries: [Country!]!
+  cuisines: [Cuisine!]!
+  currencies: [Currency!]!
+  dailyNutrition(from: String!, to: String!): [UserDailyNutritionType!]!
+  food(id: ID!): Food
+  foodCategories: [FoodCategory!]!
+  foods(after: String, first: Int! = 20, search: String): FoodConnection!
+  healthConditions: [HealthConditionCatalogType!]!
+  householdInvitations: [Invitation!]!
+
+  """Requires x-household-id header"""
+  householdMembers: [HouseholdMember!]!
+  image(id: ID!): Image!
+  inventory(after: String, first: Int! = 20): InventoryConnectionType!
+  inventoryItem(id: ID!, transactionAfter: String, transactionFirst: Int! = 20): InventoryItemDetailType!
+  languages: [Language!]!
+  locales: [Locale!]!
+  me: Me!
+  mealPlans(from: String!, to: String!): [MealPlanTypeObject!]!
+  myDevices: [UserDeviceType!]!
+  myHouseholds: [MyHousehold!]!
+  myProfile: MyProfileType!
+  mySafetyHistory(after: String, first: Int! = 20): SafetyHistoryConnectionType!
+  notificationBadge: NotificationBadgeType!
+  notificationPreferences: [NotificationPreferenceType!]!
+  notifications(after: String, first: Int! = 20): NotificationConnectionType!
+  predictions(after: String, first: Int! = 20, type: PredictionType!): PredictionConnectionType!
+
+  """
+  Checks a scanned barcode against the caller's own safety profile. Null when the barcode is unknown.
+  """
+  productSafetyCheck(barcode: String!): ProductSafetyCheckType
+  purchaseOrders(after: String, first: Int! = 20): PurchaseOrderConnectionType!
+  recipe(id: ID!): RecipeType!
+  recipes(after: String, first: Int! = 20): RecipeConnectionType!
+  recommendations(after: String, first: Int! = 20, type: RecommendationType!): RecommendationConnectionType!
+  search(first: Int! = 10, query: String!, types: [SearchDocumentType!]): [SearchResult!]!
+  shoppingLists: [ShoppingListType!]!
+  stockForecast(foodId: ID!): [FoodDepletionPredictionType!]!
+}
+
+input ReceivePurchaseOrderItemInputType {
+  idempotencyKey: String!
+  purchaseOrderItemId: ID!
+  quantity: Decimal!
+  unit: Unit!
+}
+
+type RecipeConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [RecipeSummaryType!]!
+}
+
+enum RecipeDifficulty {
+  EASY
+  HARD
+  MEDIUM
+}
+
+input RecipeIngredientInputType {
+  foodId: ID!
+  optional: Boolean! = false
+  quantity: Decimal!
+  unit: Unit!
+}
+
+type RecipeIngredientType {
+  foodId: ID!
+  foodName: String!
+  id: ID!
+  optional: Boolean!
+  quantity: Decimal!
+  unit: Unit!
+}
+
+input RecipeStepInputType {
+  durationMin: Int
+  instruction: String!
+}
+
+type RecipeStepType {
+  durationMin: Int
+  id: ID!
+  instruction: String!
+  stepNumber: Int!
+}
+
+type RecipeSummaryType {
+  cookTimeMin: Int
+  cuisineId: ID
+  cuisineName: String
+  description: String
+  difficulty: RecipeDifficulty!
+  householdId: ID
+  id: ID!
+  name: String!
+  prepTimeMin: Int
+  servings: Int!
+}
+
+type RecipeType {
+  cookTimeMin: Int
+  cuisineId: ID
+  cuisineName: String
+  description: String
+  difficulty: RecipeDifficulty!
+  householdId: ID
+  id: ID!
+  ingredients: [RecipeIngredientType!]!
+  name: String!
+  prepTimeMin: Int
+  servings: Int!
+  steps: [RecipeStepType!]!
+}
+
+type RecommendationConnectionType {
+  nodes: [SupplyRecommendationType!]!
+  pageInfo: RecommendationPageInfoType!
+}
+
+type RecommendationPageInfoType {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type RecommendationReasonType {
+  """Stable code the client translates, e.g. STOCK_RUNNING_LOW"""
+  code: String!
+
+  """English fallback text"""
+  message: String!
+}
+
+enum RecommendationType {
+  SUPPLY_NEED
+}
+
+input RefreshAccessTokenInput {
+  refreshToken: String!
+}
+
+input RegisterInput {
+  """ISO 3166 alpha-2, e.g. EG"""
+  countryCode: String!
+  email: String!
+
+  """ar | en. Defaults to the locale language"""
+  languageCode: String
+
+  """e.g. ar-EG"""
+  localeCode: String!
+  name: String!
+  password: String!
+
+  """IANA zone, e.g. Africa/Cairo"""
+  timezone: String!
+}
+
+type RegisterResult {
+  userId: ID!
+}
+
+input RemoveAllergyInputType {
+  categoryId: ID
+  foodId: ID
+}
+
+input RemoveMemberInput {
+  userId: String!
+}
+
+input RequestImageUploadInput {
+  """One of IMAGE_ALLOWED_MIME, e.g. image/jpeg"""
+  mimeType: String!
+
+  """Exact file size; the presigned PUT is bound to it"""
+  sizeBytes: Int!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  token: String!
+}
+
+input RevokeInvitationInput {
+  invitationId: String!
+}
+
+enum SafetyEntityType {
+  ALLERGY_CATEGORY
+  ALLERGY_FOOD
+  DIETARY_PREFERENCE
+  DISLIKE_CATEGORY
+  DISLIKE_FOOD
+  HEALTH_CONDITION
+}
+
+enum SafetyEventAction {
+  CREATED
+  DELETED
+  UPDATED
+}
+
+type SafetyHistoryConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  nodes: [SafetyHistoryEventType!]!
+}
+
+type SafetyHistoryEventType {
+  action: SafetyEventAction!
+  details: String!
+  entityId: ID!
+  entityType: SafetyEntityType!
+  id: ID!
+  occurredAt: DateTime!
+}
+
+enum SearchDocumentType {
+  FOOD
+  MEAL
+  RECIPE
+}
+
+type SearchFoodResult {
+  categoryName: String!
+  defaultUnit: String!
+  id: ID!
+  name: String!
+  safetyWarnings: [String!]!
+  score: Float!
+}
+
+type SearchMealResult {
+  eatenAt: DateTime!
+  id: ID!
+  mealType: String!
+  name: String!
+  safetyWarnings: [String!]!
+  score: Float!
+}
+
+type SearchRecipeResult {
+  description: String
+  id: ID!
+  name: String!
+  safetyWarnings: [String!]!
+  score: Float!
+}
+
+union SearchResult = SearchFoodResult | SearchMealResult | SearchRecipeResult
+
+input SetDietaryPreferencesInputType {
+  preferences: [DietaryPreference!]!
+}
+
+input SetGoalInputType {
+  calorieTarget: Int
+  goalType: GoalType!
+  proteinTargetG: Int
+  targetWeightKg: Decimal
+}
+
+input SetHealthConditionsInputType {
+  conditions: [HealthConditionInputType!]!
+}
+
+type SharesMismatchType {
+  actualServings: Decimal!
+  expectedServings: Decimal!
+}
+
+enum ShoppingItemStatus {
+  NEEDED
+  PURCHASED
+  SKIPPED
+}
+
+type ShoppingListItemType {
+  foodId: ID!
+  foodName: String!
+  id: ID!
+  productId: ID
+  productName: String
+  quantity: Decimal!
+  shoppingListId: ID!
+  status: ShoppingItemStatus!
+  unit: Unit!
+}
+
+enum ShoppingListStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+type ShoppingListType {
+  createdAt: DateTime!
+  id: ID!
+  items: [ShoppingListItemType!]!
+  name: String!
+  status: ShoppingListStatus!
+  updatedAt: DateTime!
+}
+
+enum StorageLocation {
+  COUNTER
+  FREEZER
+  FRIDGE
+  OTHER
+  PANTRY
+}
+
+type Subscription {
+  notificationReceived: NotificationReceivedType!
+}
+
+type SupplyRecommendationType {
+  expiresAt: DateTime!
+  foodId: ID!
+  foodName: String!
+  generatedAt: DateTime!
+  id: ID!
+  priority: String!
+
+  """Why this is recommended"""
+  reasons: [RecommendationReasonType!]!
+  suggestedQty: Decimal!
+  summary: String
+  unit: String!
+}
+
+input TokenInput {
+  token: String!
+}
+
+input TransferOwnershipInput {
+  newOwnerUserId: String!
+}
+
+input TransitionPurchaseOrderInputType {
+  id: ID!
+  status: PurchaseOrderStatus!
+}
+
+enum Unit {
+  CUP
+  GRAM
+  KILOGRAM
+  LITER
+  MILLILITER
+  PIECE
+  TABLESPOON
+  TEASPOON
+}
+
+input UpdateProfileInputType {
+  activityLevel: ActivityLevel
+  birthDate: String
+  gender: Gender
+  heightCm: Decimal
+  weightKg: Decimal
+}
+
+input UpdateShoppingItemInputType {
+  id: ID!
+  status: ShoppingItemStatus!
+}
+
+input UpdateShoppingListInputType {
+  id: ID!
+  name: String
+  status: ShoppingListStatus
+}
+
+type UserAllergyCategoryType {
+  categoryId: ID!
+  categoryName: String!
+  id: ID!
+  severity: AllergySeverity!
+}
+
+type UserAllergyType {
+  foodId: ID!
+  foodName: String!
+  id: ID!
+  notes: String
+  severity: AllergySeverity!
+}
+
+type UserDailyNutritionType {
+  calories: Decimal!
+  carbsG: Decimal!
+  computedAt: DateTime!
+  date: LocalDate!
+  fatG: Decimal!
+  fiberG: Decimal!
+  isFinal: Boolean!
+  mealCount: Int!
+  proteinG: Decimal!
+  sodiumMg: Decimal!
+  sugarG: Decimal!
+}
+
+enum UserDevicePlatform {
+  ANDROID
+  IOS
+  WEB
+}
+
+type UserDeviceType {
+  appVersion: String
+  id: String!
+  lastSeenAt: DateTime!
+  platform: UserDevicePlatform!
+  revokedAt: DateTime
+}
+
+type UserGoalType {
+  calorieTarget: Int
+  endedAt: DateTime
+  goalType: GoalType!
+  proteinTargetG: Int
+  startedAt: DateTime!
+  targetWeightKg: Decimal
+}
+
+type UserHealthConditionType {
+  code: String!
+  diagnosedAt: DateTime
+  healthConditionId: ID!
+  id: ID!
+  name: String!
+  notes: String
+  status: ConditionStatus!
+}
+
+type UserPreferenceType {
+  maxPrepTimeMin: Int
+  preferredDifficulty: String
+}
+
+type UserProfileDataType {
+  activityLevel: ActivityLevel
+  birthDate: DateTime
+  gender: Gender
+  heightCm: Decimal
+  weightKg: Decimal
+}

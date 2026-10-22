@@ -1,4 +1,5 @@
 import { Injectable, Logger, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
+import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { OutboxHandler, type OutboxHandlerPort, type OutboxMessage } from '@/platform/outbox/outbox-handler.decorator.js';
 import { RecommendationService } from './recommendation.service.js';
 
@@ -44,9 +45,10 @@ export class RecommendationMaintenanceJob implements OnApplicationBootstrap, OnA
   private readonly logger = new Logger(RecommendationMaintenanceJob.name);
   private timer?: NodeJS.Timeout;
   private stopping = false;
-  constructor(private readonly recommendations: RecommendationService) {}
+  constructor(private readonly recommendations: RecommendationService, private readonly config: AppConfigService) {}
 
   onApplicationBootstrap(): void {
+    if (!this.config.runsBackgroundJobs) return;
     this.timer = setInterval(() => { if (!this.stopping) void this.run(); }, 60 * 60 * 1000);
     this.timer.unref();
     void this.run();

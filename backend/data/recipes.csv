@@ -1,0 +1,4 @@
+# Global recipes (visible to every household). Match key: recipe_key, which links the three recipe files.
+# Re-importing a recipe_key replaces its ingredients and steps. cuisine: american | asian | egyptian | indian | italian | lebanese (or empty).
+# difficulty: EASY | MEDIUM | HARD
+recipe_key,name,description,cuisine,servings,prep_time_min,cook_time_min,difficulty

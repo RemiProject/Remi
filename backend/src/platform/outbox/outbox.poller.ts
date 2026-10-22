@@ -34,7 +34,7 @@ export class OutboxPoller implements OnApplicationBootstrap, OnApplicationShutdo
   ) {}
 
   onApplicationBootstrap(): void {
-    if (!this.config.env.ENABLE_OUTBOX_POLLER) return;
+    if (!this.config.env.ENABLE_OUTBOX_POLLER || !this.config.runsBackgroundJobs) return;
     this.schedule();
   }
 

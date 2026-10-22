@@ -10,6 +10,7 @@
   "scripts": {
     "build": "prisma generate && nest build && tsc-alias -p tsconfig.build.json",
     "start": "node dist/main.js",
+    "start:worker": "node dist/worker.js",
     "start:dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node scripts/dev-on-success.mjs\"",    "seed": "tsx --env-file-if-exists=.env prisma/seed/reference.seed.ts",
     "seed:catalog": "tsx --env-file-if-exists=.env prisma/seed/catalog.seed.ts",
     "db:pull": "prisma db pull",
@@ -25,6 +26,8 @@
     "phase11:query-baseline": "node --env-file-if-exists=.env scripts/phase11-query-baseline.mjs",
     "phase11:load": "node --env-file-if-exists=.env scripts/load-phase11.mjs",
     "seed:safety": "node --env-file-if-exists=.env scripts/seed-safety.mjs",
+    "data:import": "node --env-file-if-exists=.env scripts/import-catalog-data.mjs",
+    "data:check": "node --env-file-if-exists=.env scripts/import-catalog-data.mjs --dry-run",
     "embeddings:local": ".venv\\Scripts\\python.exe scripts/local_embeddings.py",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

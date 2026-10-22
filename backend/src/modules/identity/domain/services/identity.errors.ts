@@ -16,4 +16,5 @@ export class InvitationNotUsableError extends DomainError { constructor() { supe
 export class InvitationEmailMismatchError extends DomainError { constructor() { super('INVITATION_EMAIL_MISMATCH', 'This invitation was sent to a different email', 403); } }
 export class MemberNotFoundError extends DomainError { constructor() { super('MEMBER_NOT_FOUND', 'Member not found', 404); } }
 export class CannotRemoveOwnerError extends DomainError { constructor() { super('CANNOT_REMOVE_OWNER', 'The owner cannot be removed', 422); } }
+export class CannotTransferToSelfError extends DomainError { constructor() { super('CANNOT_TRANSFER_TO_SELF', 'You already own this household', 422); } }
 export class OwnerCannotLeaveError extends DomainError { constructor() { super('OWNER_CANNOT_LEAVE', 'The owner cannot leave the household', 422); } }

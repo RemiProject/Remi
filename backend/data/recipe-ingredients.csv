@@ -1,0 +1,3 @@
+# One row per ingredient. food: English name or Arabic alias. unit: GRAM | KILOGRAM | MILLILITER | LITER | PIECE | CUP | TABLESPOON | TEASPOON.
+# CUP / TABLESPOON / TEASPOON only work for foods with density_g_per_ml (or a MILLILITER default unit). optional: true | false
+recipe_key,food,quantity,unit,optional

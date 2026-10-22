@@ -21,6 +21,7 @@ export class EmbeddingWorker implements OnApplicationBootstrap, OnApplicationShu
   ) {}
 
   onApplicationBootstrap(): void {
+    if (!this.config.runsBackgroundJobs) return;
     if (!this.config.env.EMBEDDING_API_URL || !this.config.env.EMBEDDING_MODEL) {
       this.logger.warn('Search embedding worker is disabled until EMBEDDING_API_URL and EMBEDDING_MODEL are configured');
       return;

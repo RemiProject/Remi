@@ -17,6 +17,7 @@ export class SafetyProfileLoader {
         SELECT jsonb_build_object(
           'allergyFoodIds', COALESCE((SELECT jsonb_agg("foodId"::text) FROM "UserAllergy" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
           'allergyCategoryIds', COALESCE((SELECT jsonb_agg("categoryId"::text) FROM "UserAllergyCategory" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
+          'severeAllergyCategoryIds', COALESCE((SELECT jsonb_agg("categoryId"::text) FROM "UserAllergyCategory" WHERE "userId" = ${userId}::uuid AND "severity" IN ('SEVERE', 'LIFE_THREATENING')), '[]'::jsonb),
           'dislikedFoodIds', COALESCE((SELECT jsonb_agg("foodId"::text) FROM "UserDislikedFood" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
           'dislikedCategoryIds', COALESCE((SELECT jsonb_agg("categoryId"::text) FROM "UserDislikedCategory" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
           'dietaryPreferences', COALESCE((SELECT jsonb_agg("dietaryPreference"::text) FROM "UserDietaryPreference" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),

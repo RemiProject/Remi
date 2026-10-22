@@ -8,4 +8,5 @@ export class HouseholdCreatedEvent implements IEvent { constructor(public readon
 export class MemberInvitedEvent implements IEvent { constructor(public readonly householdId: string, public readonly invitationId: string, public readonly email: string) {} }
 export class MemberJoinedEvent implements IEvent { constructor(public readonly householdId: string, public readonly userId: string) {} }
 export class MemberLeftEvent implements IEvent { constructor(public readonly householdId: string, public readonly userId: string, public readonly removedBy?: string) {} }
+export class OwnershipTransferredEvent implements IEvent { constructor(public readonly householdId: string, public readonly previousOwnerId: string, public readonly newOwnerId: string) {} }
 export class InvitationRevokedEvent implements IEvent { constructor(public readonly householdId: string, public readonly invitationId: string) {} }

@@ -12,6 +12,7 @@ import { LogoutAllCommand } from '@/modules/identity/application/commands/logout
 import { LogoutCommand } from '@/modules/identity/application/commands/logout/logout.command.js';
 import { RefreshAccessTokenCommand } from '@/modules/identity/application/commands/refresh-access-token/refresh-access-token.command.js';
 import { RegisterCommand } from '@/modules/identity/application/commands/register/register.command.js';
+import { RequestEmailVerificationCommand } from '@/modules/identity/application/commands/request-email-verification/request-email-verification.command.js';
 import { RequestPasswordResetCommand } from '@/modules/identity/application/commands/request-password-reset/request-password-reset.command.js';
 import { ResetPasswordCommand } from '@/modules/identity/application/commands/reset-password/reset-password.command.js';
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
@@ -78,6 +79,14 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async verifyEmail(@Args('input') i: TokenInput) {
     await this.commandBus.execute(new VerifyEmailCommand(i.token));
+    return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean, { description: 'Re-sends the verification email to the logged-in user. No-op when already verified.' })
+  async requestEmailVerification(@Ctx() ctx: RequestContext) {
+    await this.commandBus.execute(new RequestEmailVerificationCommand(ctx.userId));
     return true;
   }
 

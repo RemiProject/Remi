@@ -1,0 +1,2 @@
+# Steps in order: step_number 1, 2, 3 ... per recipe_key.
+recipe_key,step_number,instruction,duration_min

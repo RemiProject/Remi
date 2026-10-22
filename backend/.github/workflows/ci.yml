@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  S3_BUCKET: ci-images
+  S3_AUTO_CREATE_BUCKET: "false"
+  ENABLE_OUTBOX_POLLER: "false"
+
+jobs:
+  quality:
+    name: Lint · typecheck · unit tests · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4          # version comes from package.json "packageManager"
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  database:
+    name: Migrations · seeds · integration · schema drift
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ai_kitchen_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      # Throwaway CI database: the app URL only has to differ from the test URL (the scripts refuse otherwise).
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_kitchen_app_unused
+      DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/ai_kitchen_test
+      DATABASE_URL_MIGRATOR: postgresql://postgres:postgres@localhost:5432/ai_kitchen_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate per-run test secrets
+        run: |
+          node -e '
+            const r = (n) => require("crypto").randomBytes(n).toString("base64url");
+            const keyring = JSON.stringify({ current: { kid: "ci", key: r(32) }, previous: [] });
+            console.log(`JWT_ACCESS_SECRET=${r(48)}`);
+            console.log(`JWT_REFRESH_SECRET=${r(48)}`);
+            console.log(`PROFILE_NOTES_KEYRING=${keyring}`);
+          ' >> "$GITHUB_ENV"
+
+      - name: Extensions (same as docker/postgres/init)
+        run: psql "$DATABASE_URL_TEST" -v ON_ERROR_STOP=1 -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+
+      - name: Migrate from scratch, then again (must be a no-op)
+        run: |
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm migrate
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm migrate | grep -q "migrations up to date"
+
+      - name: Seed reference, catalog and safety data
+        run: |
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm seed
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm seed:catalog
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm seed:safety
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm data:import
+
+      - run: pnpm build
+
+      - name: Integration checks on the real schema
+        run: |
+          node scripts/verify-phase5.mjs
+          node scripts/verify-phase6.mjs
+          node scripts/verify-phase7.mjs
+          node scripts/verify-phase10.mjs
+          node scripts/verify-safety-categories.mjs
+
+      - name: schema.graphql is up to date
+        run: |
+          DATABASE_URL="$DATABASE_URL_TEST" GRAPHQL_EMIT_SCHEMA=true RUN_BACKGROUND_JOBS=false PORT=3000 node dist/main.js > api.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf localhost:3000/health/live > /dev/null && break; sleep 1; done
+          curl -sf localhost:3000/health/live > /dev/null || { cat api.log; exit 1; }
+          git diff --exit-code schema.graphql || { echo "::error::schema.graphql is stale. Boot the API locally and commit the regenerated file."; exit 1; }

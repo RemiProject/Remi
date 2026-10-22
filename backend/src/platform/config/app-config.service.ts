@@ -10,6 +10,15 @@ export class AppConfigService {
     return this.env.NODE_ENV === 'production';
   }
 
+  /** Pollers, workers and periodic jobs run only where this is true (see src/worker.ts). */
+  get runsBackgroundJobs(): boolean {
+    return this.env.RUN_BACKGROUND_JOBS;
+  }
+
+  get emitsGraphqlSchema(): boolean {
+    return this.env.GRAPHQL_EMIT_SCHEMA ?? !this.isProduction;
+  }
+
   get corsOrigins(): string[] {
     return this.env.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean);
   }

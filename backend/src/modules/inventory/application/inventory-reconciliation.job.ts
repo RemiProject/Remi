@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 
 @Injectable()
@@ -6,9 +7,10 @@ export class InventoryReconciliationJob implements OnModuleInit, OnModuleDestroy
   private readonly logger = new Logger(InventoryReconciliationJob.name);
   private timer?: NodeJS.Timeout;
 
-  constructor(private readonly transactions: TransactionRunner) {}
+  constructor(private readonly transactions: TransactionRunner, private readonly config: AppConfigService) {}
 
   onModuleInit(): void {
+    if (!this.config.runsBackgroundJobs) return;
     this.timer = setInterval(() => void this.runOnce(), 24 * 60 * 60 * 1000);
     this.timer.unref?.();
     void this.runOnce();

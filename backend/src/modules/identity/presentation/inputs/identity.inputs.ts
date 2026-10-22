@@ -66,3 +66,8 @@ export class RevokeInvitationInput {
 export class RemoveMemberInput {
   @Field() @IsUUID() userId!: string;
 }
+
+@InputType()
+export class TransferOwnershipInput {
+  @Field() @IsUUID() newOwnerUserId!: string;
+}

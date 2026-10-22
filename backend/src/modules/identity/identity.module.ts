@@ -10,6 +10,8 @@ import { RefreshAccessTokenHandler } from './application/commands/refresh-access
 import { RegisterHandler } from './application/commands/register/register.handler.js';
 import { RemoveMemberHandler } from './application/commands/remove-member/remove-member.handler.js';
 import { RequestPasswordResetHandler } from './application/commands/request-password-reset/request-password-reset.handler.js';
+import { RequestEmailVerificationHandler } from './application/commands/request-email-verification/request-email-verification.handler.js';
+import { TransferOwnershipHandler } from './application/commands/transfer-ownership/transfer-ownership.handler.js';
 import { ResetPasswordHandler } from './application/commands/reset-password/reset-password.handler.js';
 import { RevokeInvitationHandler } from './application/commands/revoke-invitation/revoke-invitation.handler.js';
 import { VerifyEmailHandler } from './application/commands/verify-email/verify-email.handler.js';
@@ -61,6 +63,8 @@ const CommandHandlers = [
   RevokeInvitationHandler,
   RemoveMemberHandler,
   LeaveHouseholdHandler,
+  TransferOwnershipHandler,
+  RequestEmailVerificationHandler,
 ];
 const QueryHandlers = [
   GetMeHandler,

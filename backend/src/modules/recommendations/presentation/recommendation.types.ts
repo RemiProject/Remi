@@ -5,6 +5,12 @@ export enum RecommendationTypeEnum { SUPPLY_NEED = 'SUPPLY_NEED' }
 registerEnumType(RecommendationTypeEnum, { name: 'RecommendationType' });
 
 @ObjectType()
+export class RecommendationReasonType {
+  @Field({ description: 'Stable code the client translates, e.g. STOCK_RUNNING_LOW' }) code!: string;
+  @Field({ description: 'English fallback text' }) message!: string;
+}
+
+@ObjectType()
 export class SupplyRecommendationType {
   @Field(() => ID) id!: string;
   @Field(() => String, { nullable: true }) summary!: string | null;
@@ -15,6 +21,7 @@ export class SupplyRecommendationType {
   @Field(() => DecimalScalar) suggestedQty!: string;
   @Field() unit!: string;
   @Field() priority!: string;
+  @Field(() => [RecommendationReasonType], { description: 'Why this is recommended' }) reasons!: RecommendationReasonType[];
 }
 
 @ObjectType()

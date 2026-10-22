@@ -25,7 +25,7 @@ interface SearchIngredientRow {
   sourceType: SearchDocumentSourceType;
   sourceId: string;
   foodId: string;
-  categoryId: string;
+  categoryIds: string[];
   nutrientsPer100g: SafetyIngredient['nutrientsPer100g'];
 }
 type SafeSearchResult =
@@ -97,7 +97,7 @@ export class SearchService {
           SELECT 'MEAL', i."mealId", i."foodId" FROM "MealItem" i WHERE i."mealId" = ANY(${mealIds}::uuid[])
         )
         SELECT s."sourceType"::text AS "sourceType", s."sourceId"::text AS "sourceId",
-          f.id::text AS "foodId", f."categoryId"::text AS "categoryId",
+          f.id::text AS "foodId", food_safety_category_ids(f.id)::text[] AS "categoryIds",
           jsonb_strip_nulls(jsonb_build_object(
             'CALORIES', n."caloriesPer100g", 'PROTEIN', n."proteinG", 'CARBS', n."carbsG",
             'FAT', n."fatG", 'FIBER', n."fiberG", 'SUGAR', n."sugarG", 'SODIUM', n."sodiumMg"
@@ -108,7 +108,7 @@ export class SearchService {
       for (const ingredient of ingredientRows) {
         const key = `${ingredient.sourceType}:${ingredient.sourceId}`;
         const items = bySource.get(key) ?? [];
-        items.push({ foodId: ingredient.foodId, categoryIds: [ingredient.categoryId], nutrientsPer100g: ingredient.nutrientsPer100g ?? {} });
+        items.push({ foodId: ingredient.foodId, categoryIds: ingredient.categoryIds, nutrientsPer100g: ingredient.nutrientsPer100g ?? {} });
         bySource.set(key, items);
       }
       const safeResults: SafeSearchResult[] = [];

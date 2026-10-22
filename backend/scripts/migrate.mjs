@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 
+const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'prisma', 'migrations');
 const url = process.env.DATABASE_URL_MIGRATOR || process.env.DATABASE_URL;
 if (!url) {
@@ -21,17 +22,17 @@ try {
   const files = (await readdir(dir)).filter((f) => f.endsWith('.sql')).sort();
   for (const file of files) {
     const sql = await readFile(join(dir, file), 'utf8');
-    const checksum = createHash('sha256').update(sql).digest('hex');
+    // Checksums are over LF text so a Windows (CRLF) checkout and Linux CI agree. Older rows may hold
+    // the hash of a CRLF copy, so either line-ending variant of the same content is accepted.
+    const lf = sql.replace(/\r\n/g, '\n');
+    const checksum = sha256(lf);
     if (applied.has(file)) {
-  if (applied.get(file) !== checksum) {
-    throw new Error(
-      `Checksum mismatch for already-applied migration ${file}`
-    );
-  }
-
-  console.log(`skipping ${file} (already applied)`);
-  continue;
-}
+      if (![checksum, sha256(lf.replace(/\n/g, '\r\n'))].includes(applied.get(file))) {
+        throw new Error(`Checksum mismatch for already-applied migration ${file}`);
+      }
+      console.log(`skipping ${file} (already applied)`);
+      continue;
+    }
     console.log(`applying ${file}`);
     await client.query('BEGIN');
     try {

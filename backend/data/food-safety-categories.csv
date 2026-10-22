@@ -1,0 +1,41 @@
+# Extra safety categories per food (FoodCategoryMembership). A food's safety categories = its primary
+# category + every row here. Additive: removing a line does not delete the row (see data/README.md).
+# Baseline below covers the catalog foods made from wheat/barley/rye and obvious allergens. Review with a nutrition specialist.
+food,category_code
+wheat flour,GLUTEN
+whole wheat flour,GLUTEN
+plain flour,GLUTEN
+semolina,GLUTEN
+bulgur,GLUTEN
+couscous,GLUTEN
+freekeh,GLUTEN
+barley,GLUTEN
+farro,GLUTEN
+bran,GLUTEN
+white bread,GLUTEN
+whole wheat bread,GLUTEN
+pita bread,GLUTEN
+toast bread,GLUTEN
+rye bread,GLUTEN
+flour tortilla,GLUTEN
+breadcrumbs,GLUTEN
+panko,GLUTEN
+crackers,GLUTEN
+pasta,GLUTEN
+spaghetti,GLUTEN
+macaroni,GLUTEN
+noodles,GLUTEN
+basbousa,GLUTEN
+basbousa,DAIRY
+kunafa,GLUTEN
+kunafa,DAIRY
+baklava,GLUTEN
+baklava,DAIRY
+baklava,TREE_NUTS
+molasses cookies,GLUTEN
+milk chocolate,DAIRY
+almond milk,TREE_NUTS
+peanut butter,PEANUTS
+soybeans,SOY
+edamame,SOY
+soy milk,SOY

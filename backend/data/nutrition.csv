@@ -1,0 +1,4 @@
+# Nutrition per 100 g of the food AS STORED (raw unless the food name says cooked). Match key: food (English name or Arabic alias).
+# Take values from one trusted source per row (USDA FoodData Central, or the Egyptian food composition tables) and name it in source.
+# protein_g + carbs_g + fat_g must be <= 100.5 and calories <= 900 (the database rejects anything else).
+food,calories_per_100g,protein_g,carbs_g,fat_g,fiber_g,sugar_g,sodium_mg,source

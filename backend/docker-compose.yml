@@ -76,6 +76,8 @@ services:
       S3_ENDPOINT: http://s3:8333                 # server -> S3
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"
+      GRAPHQL_EMIT_SCHEMA: "false"                # read-only filesystem
+      RUN_BACKGROUND_JOBS: "false"                # the worker service runs them
     ports:
       - "3000:3000"
     depends_on:
@@ -88,6 +90,28 @@ services:
     security_opt: ["no-new-privileges:true"]
     mem_limit: 512m
     stop_grace_period: 20s                        # lets enableShutdownHooks() drain requests and the outbox poller
+
+  worker:                                         # outbox poller, delivery/embedding workers, periodic jobs (no HTTP)
+    profiles: ["app"]
+    build: { context: ., target: runtime }
+    command: ["node", "dist/worker.js"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kitchen}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ai_kitchen}
+      S3_ENDPOINT: http://s3:8333
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    depends_on:
+      db:      { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    healthcheck: { disable: true }                # no HTTP port; the API's /health/ready reports outbox lag
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    stop_grace_period: 30s                        # finish the in-flight outbox batch
 
 volumes:
   pgdata:

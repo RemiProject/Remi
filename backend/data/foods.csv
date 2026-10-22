@@ -1,0 +1,6 @@
+# Foods to add or update. Match key: name (English, case-insensitive). Lines starting with # are ignored.
+# default_unit: GRAM | MILLILITER | PIECE (never CUP/TABLESPOON/TEASPOON).
+# PIECE needs grams_per_piece. MILLILITER needs density_g_per_ml. Fill both when you know them: it lets users enter any unit.
+# aliases_ar / aliases_en: extra names separated by | (e.g. Egyptian street names). name_ar is the main Arabic name.
+name,name_ar,category_code,default_unit,grams_per_piece,density_g_per_ml,aliases_ar,aliases_en
+# example (remove the leading # to import): baladi bread,عيش بلدي,GRAINS,PIECE,90,,عيش|رغيف بلدي,egyptian flatbread
