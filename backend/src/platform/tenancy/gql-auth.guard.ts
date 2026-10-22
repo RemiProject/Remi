@@ -18,8 +18,11 @@ export class GqlAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = GqlExecutionContext.create(context).getContext().req;
-    const header: string | undefined = req.headers?.authorization;
+    const gqlContext = GqlExecutionContext.create(context).getContext();
+    const connectionAuthorization = gqlContext.connectionParams?.authorization ?? gqlContext.connectionParams?.Authorization;
+    const req = gqlContext.req ?? gqlContext.extra?.request ?? gqlContext.request ?? { headers: {} };
+    if (!gqlContext.req) gqlContext.req = req;
+    const header: string | undefined = req.headers?.authorization ?? connectionAuthorization;
     const raw = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
     if (!raw) throw new UnauthorizedException('Missing bearer token');
 

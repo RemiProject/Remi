@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 import type { SafetyProfileSnapshot } from '@/modules/safety/domain/safety-evaluator.js';
+import type { Tx } from '@/platform/db/tx-context.js';
 
 @Injectable()
 export class SafetyProfileLoader {
@@ -8,7 +9,10 @@ export class SafetyProfileLoader {
 
   /** Deliberately excludes encrypted free-text notes and reads a complete snapshot in one SQL statement. */
   async load(userId: string): Promise<SafetyProfileSnapshot> {
-    return this.transactions.run(async (tx) => {
+    return this.transactions.run((tx) => this.loadInTransaction(tx, userId), { userId });
+  }
+
+  async loadInTransaction(tx: Tx, userId: string): Promise<SafetyProfileSnapshot> {
       const rows = await tx.$queryRaw<Array<{ snapshot: SafetyProfileSnapshot }>>`
         SELECT jsonb_build_object(
           'allergyFoodIds', COALESCE((SELECT jsonb_agg("foodId"::text) FROM "UserAllergy" WHERE "userId" = ${userId}::uuid), '[]'::jsonb),
@@ -34,6 +38,5 @@ export class SafetyProfileLoader {
           ), '[]'::jsonb)
         ) AS snapshot`;
       return rows[0].snapshot;
-    }, { userId });
   }
 }

@@ -5,7 +5,7 @@ import { AppConfigService } from '@/platform/config/app-config.service.js';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  constructor(config: AppConfigService) {
+  constructor(private readonly config: AppConfigService) {
     super({
       adapter: new PrismaPg({
         connectionString: config.env.DATABASE_URL,
@@ -17,6 +17,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleInit(): Promise<void> {
     await this.$connect();
+
+    if (this.config.env.NODE_ENV === 'production') {
+      const [role] = await this.$queryRaw<Array<{ name: string; superuser: boolean; bypassRls: boolean }>>`
+        SELECT current_user AS name, r.rolsuper AS superuser, r.rolbypassrls AS "bypassRls"
+        FROM pg_roles r WHERE r.rolname = current_user`;
+      if (role.superuser || role.bypassRls) {
+        await this.$disconnect();
+        throw new Error(`Unsafe PostgreSQL runtime role "${role.name}": production DATABASE_URL must not use a superuser or BYPASSRLS role.`);
+      }
+    }
   }
 
   async onModuleDestroy(): Promise<void> {

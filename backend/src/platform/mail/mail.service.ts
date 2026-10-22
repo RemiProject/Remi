@@ -31,6 +31,8 @@ export class MailService {
     }
   }
 
+  get isConfigured(): boolean { return this.transporter !== undefined; }
+
   async send(input: SendMailInput): Promise<void> {
     const { subject, html } = this.renderer.render(input.template, input.lang, input.vars);
     if (!this.transporter) {

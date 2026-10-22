@@ -21,6 +21,7 @@ export const envSchema = z
     EMBEDDING_API_KEY: optionalString,
     EMBEDDING_MODEL: optionalString,
     EMBEDDING_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
+    EMBEDDING_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1500),
     DB_POOL_MAX: z.coerce.number().int().positive().default(10),
     DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().positive().default(10000),
 
@@ -58,14 +59,31 @@ export const envSchema = z
     SMTP_PASS: optionalString,
     MAIL_TEMPLATES_DIR: optionalString,
 
+    FCM_PROJECT_ID: optionalString,
+    FCM_CLIENT_EMAIL: optionalString,
+    FCM_PRIVATE_KEY: optionalString,
+    FCM_TOKEN_URI: z.string().url().default('https://oauth2.googleapis.com/token'),
+
     GRAPHQL_DEPTH_LIMIT: z.coerce.number().int().positive().default(7),
-    GRAPHQL_INTROSPECTION: bool.default(true),
+    GRAPHQL_COMPLEXITY_LIMIT: z.coerce.number().int().positive().default(2000),
+    GRAPHQL_INTROSPECTION: bool.default(false),
+    METRICS_ENABLED: bool.default(false),
+    METRICS_TOKEN: optionalString,
     THROTTLE_TTL_SEC: z.coerce.number().int().positive().default(60),
     THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),
     THROTTLE_AUTH_LIMIT: z.coerce.number().int().positive().default(10),
     THROTTLE_UPLOAD_LIMIT: z.coerce.number().int().positive().default(20),
   })
-  .refine((e) => !e.SMTP_HOST || !!e.MAIL_FROM, { message: 'MAIL_FROM is required when SMTP_HOST is set', path: ['MAIL_FROM'] });
+  .refine((e) => !e.SMTP_HOST || !!e.MAIL_FROM, { message: 'MAIL_FROM is required when SMTP_HOST is set', path: ['MAIL_FROM'] })
+  .refine((e) => [e.FCM_PROJECT_ID, e.FCM_CLIENT_EMAIL, e.FCM_PRIVATE_KEY].every((v) => !v) || [e.FCM_PROJECT_ID, e.FCM_CLIENT_EMAIL, e.FCM_PRIVATE_KEY].every(Boolean), {
+    message: 'FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY must be configured together', path: ['FCM_PROJECT_ID'],
+  })
+  .refine((e) => !e.METRICS_ENABLED || (e.METRICS_TOKEN?.length ?? 0) >= 32, {
+    message: 'METRICS_TOKEN must contain at least 32 characters when METRICS_ENABLED is true', path: ['METRICS_TOKEN'],
+  })
+  .refine((e) => e.NODE_ENV !== 'production' || (!!e.DATABASE_URL_MIGRATOR && e.DATABASE_URL_MIGRATOR !== e.DATABASE_URL), {
+    message: 'Production requires a separate DATABASE_URL_MIGRATOR; it must not match the runtime DATABASE_URL', path: ['DATABASE_URL_MIGRATOR'],
+  });
 
 export type Env = z.infer<typeof envSchema>;
 

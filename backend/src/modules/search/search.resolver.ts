@@ -6,14 +6,14 @@ import { GqlAuthGuard } from '@/platform/tenancy/gql-auth.guard.js';
 import { HouseholdGuard } from '@/platform/tenancy/household.guard.js';
 import type { RequestContext } from '@/platform/tenancy/request-context.js';
 import { SearchService } from './search.service.js';
-import { SearchDocumentSourceType, SearchResultType } from './search.types.js';
+import { SearchDocumentSourceType, SearchResultUnion } from './search.types.js';
 
 @Resolver()
 @UseGuards(GqlAuthGuard, HouseholdGuard)
 export class SearchResolver {
   constructor(private readonly searchService: SearchService) {}
 
-  @Query(() => [SearchResultType])
+  @Query(() => [SearchResultUnion])
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   search(
     @Ctx() ctx: RequestContext,
@@ -21,6 +21,6 @@ export class SearchResolver {
     @Args('types', { type: () => [SearchDocumentSourceType], nullable: true }) types: SearchDocumentSourceType[] | undefined,
     @Args('first', { type: () => Int, defaultValue: 10 }) first: number,
   ) {
-    return this.searchService.search(query, ctx.householdId!, types, first);
+    return this.searchService.search(query, ctx.householdId!, ctx.userId, types, first);
   }
 }

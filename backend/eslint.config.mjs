@@ -29,7 +29,7 @@ const layerPatterns = {
 };
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'src/generated', 'prisma/migrations', 'scripts'] },
+  { ignores: ['dist', 'node_modules', 'src/generated', 'prisma/migrations', 'scripts', '.venv', '.local-models'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

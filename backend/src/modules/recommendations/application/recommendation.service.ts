@@ -5,13 +5,14 @@ import { DomainError } from '@/shared/domain-error.js';
 import { buildInputHash } from '@/modules/predictions/domain/input-hash.js';
 import { SafetyEvaluator, SAFETY_FILTERS, type SafetyProfileSnapshot } from '@/modules/safety/domain/safety-evaluator.js';
 import type { Tx } from '@/platform/db/tx-context.js';
+import { NotificationFactory } from '@/modules/notifications/application/notification.factory.js';
 
 const MODEL = 'supply-need-v1';
 const FILTER_ENUM: Record<(typeof SAFETY_FILTERS)[number], string> = Object.fromEntries(SAFETY_FILTERS.map((filter) => [filter, filter])) as Record<(typeof SAFETY_FILTERS)[number], string>;
 
 @Injectable()
 export class RecommendationService {
-  constructor(private readonly transactions: TransactionRunner, private readonly evaluator: SafetyEvaluator) {}
+  constructor(private readonly transactions: TransactionRunner, private readonly evaluator: SafetyEvaluator, private readonly notifications: NotificationFactory) {}
 
   async generate(householdId: string): Promise<void> {
     await this.transactions.run(async (tx) => {
@@ -52,6 +53,9 @@ export class RecommendationService {
 
   async runSafety(recommendationId: string, householdId: string): Promise<void> {
     await this.transactions.run(async (tx) => {
+      const owner = await tx.$queryRaw<Array<{ userId: string }>>`SELECT recommendation_safety_owner(${recommendationId}::uuid, ${householdId}::uuid) AS "userId"`;
+      if (!owner[0]?.userId) return;
+      await tx.$executeRaw`SELECT set_config('app.user_id', ${owner[0].userId}, true)`;
       const rows = await tx.$queryRaw<Array<{ id: string; userId: string; foodId: string; foodName: string; categories: string[]; nutrients: Record<string, number> }>>`
         SELECT r.id, r."userId", d."foodId", f.name AS "foodName",
           ARRAY[f."categoryId"::text] AS categories,
@@ -77,16 +81,17 @@ export class RecommendationService {
       }
       const blocked = verdicts.some((verdict) => verdict.result === 'FAILED');
       await tx.$executeRaw`UPDATE "AIRecommendation" SET "safetyStatus" = ${blocked ? 'BLOCKED' : 'PASSED'}::"SafetyStatus", status = ${blocked ? 'DRAFT' : 'ACTIVE'}::"RecommendationStatus" WHERE id = ${recommendationId}::uuid AND "householdId" = ${householdId}::uuid`;
+      if (!blocked) await this.notifications.create(tx, { householdId, userId: row.userId, type: 'RECOMMENDATION_READY', dedupeKey: `recommendation:${recommendationId}` });
     }, { householdId });
   }
 
   async householdsForUser(userId: string): Promise<string[]> {
-    const rows = await this.transactions.db.$queryRaw<Array<{ householdId: string }>>`SELECT "householdId" FROM "HouseholdMember" WHERE "userId" = ${userId}::uuid AND "leftAt" IS NULL ORDER BY "householdId"`;
+    const rows = await this.transactions.run((tx) => tx.$queryRaw<Array<{ householdId: string }>>`SELECT "householdId" FROM "HouseholdMember" WHERE "userId" = ${userId}::uuid AND "leftAt" IS NULL ORDER BY "householdId"`, { userId });
     return rows.map((row) => row.householdId);
   }
 
   async recheckUser(householdId: string, userId: string): Promise<void> {
-    const rows = await this.transactions.db.$queryRaw<Array<{ id: string }>>`SELECT id FROM "AIRecommendation" WHERE "householdId" = ${householdId}::uuid AND "userId" = ${userId}::uuid AND status = 'DRAFT' AND "safetyStatus" = 'PENDING' ORDER BY id`;
+    const rows = await this.transactions.run((tx) => tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM "AIRecommendation" WHERE "householdId" = ${householdId}::uuid AND "userId" = ${userId}::uuid AND status = 'DRAFT' AND "safetyStatus" = 'PENDING' ORDER BY id`, { householdId, userId });
     for (const row of rows) await this.runSafety(row.id, householdId);
   }
 
@@ -121,21 +126,15 @@ export class RecommendationService {
   }
 
   async expireBatch(): Promise<number> {
-    return this.transactions.run(async (tx) => {
-      const rows = await tx.$queryRaw<Array<{ id: string }>>`WITH due AS (
-        SELECT id FROM "AIRecommendation" WHERE status IN ('DRAFT', 'ACTIVE') AND "expiresAt" <= now() ORDER BY "expiresAt", id LIMIT 500 FOR UPDATE SKIP LOCKED
-      ) UPDATE "AIRecommendation" r SET status = 'EXPIRED', "statusChangedAt" = now() FROM due WHERE r.id = due.id RETURNING r.id`;
-      return rows.length;
-    });
+    const rows = await this.transactions.db.$queryRaw<Array<{ count: number }>>`SELECT recommendation_expire_batch(500) AS count`;
+    return Number(rows[0]?.count ?? 0);
   }
 
   async foldFeedbackBatch(): Promise<number> {
     return this.transactions.run(async (tx) => {
-      const feedback = await tx.$queryRaw<Array<{ id: string; userId: string; foodId: string; status: 'ACCEPTED' | 'DISMISSED' }>>`SELECT r.id, r."userId", d."foodId", r.status
-        FROM "AIRecommendation" r JOIN "AIShoppingRecommendation" d ON d."recommendationId" = r.id
-        WHERE r.status IN ('ACCEPTED', 'DISMISSED') AND r."feedbackFoldedAt" IS NULL ORDER BY r."statusChangedAt", r.id LIMIT 500 FOR UPDATE OF r SKIP LOCKED`;
+      const feedback = await tx.$queryRaw<Array<{ id: string; userId: string; foodId: string; householdId: string; status: 'ACCEPTED' | 'DISMISSED' }>>`SELECT * FROM recommendation_feedback_claim(500)`;
       for (const row of feedback) {
-        await tx.$executeRaw`SELECT set_config('app.user_id', ${row.userId}, true)`;
+        await tx.$executeRaw`SELECT set_config('app.user_id', ${row.userId}, true), set_config('app.household_id', ${row.householdId}, true)`;
         const delta = row.status === 'ACCEPTED' ? 0.05 : -0.05;
         await tx.$executeRaw`INSERT INTO "UserFoodPreference" (id, "userId", "foodId", frequency, "preferenceScore")
           VALUES (${newId()}::uuid, ${row.userId}::uuid, ${row.foodId}::uuid, ${row.status === 'ACCEPTED' ? 1 : 0}, ${delta}::numeric)

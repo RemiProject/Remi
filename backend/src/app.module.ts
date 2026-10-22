@@ -16,15 +16,19 @@ import { ShoppingModule } from './modules/shopping/shopping.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
 import { PredictionsModule } from './modules/predictions/predictions.module.js';
 import { SearchModule } from './modules/search/search.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { AppConfigService } from './platform/config/app-config.service.js';
 import { ConfigModule } from './platform/config/config.module.js';
 import { DbModule } from './platform/db/db.module.js';
 import { depthLimit } from './platform/graphql/depth-limit.js';
+import { complexityLimit } from './platform/graphql/complexity-limit.js';
 import { formatGraphQLError } from './platform/graphql/error-mapper.js';
 import { GqlThrottlerGuard } from './platform/graphql/graphql-throttler.guard.js';
 import { DecimalScalar, LocalDateScalar } from './platform/graphql/scalars.js';
 import { MailModule } from './platform/mail/mail.module.js';
 import { HealthController } from './platform/observability/health.controller.js';
+import { MetricsService } from './platform/observability/metrics.service.js';
+import { MetricsModule } from './platform/observability/metrics.module.js';
 import { OutboxModule } from './platform/outbox/outbox.module.js';
 import { StorageModule } from './platform/storage/storage.module.js';
 import { TenancyModule } from './platform/tenancy/tenancy.module.js';
@@ -32,6 +36,7 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
 @Module({
   imports: [
     ConfigModule,
+    MetricsModule,
     LoggerModule.forRootAsync({
       inject: [AppConfigService],
       useFactory: (c: AppConfigService) => ({
@@ -54,16 +59,25 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      inject: [AppConfigService],
-      useFactory: (c: AppConfigService) => ({
+      imports: [MetricsModule],
+      inject: [AppConfigService, MetricsService],
+      useFactory: (c: AppConfigService, metrics: MetricsService) => ({
         autoSchemaFile: true,
         sortSchema: true,
         introspection: c.env.GRAPHQL_INTROSPECTION,
         playground: false,
-        plugins: c.isProduction ? [] : [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
-        validationRules: [depthLimit(c.env.GRAPHQL_DEPTH_LIMIT)],
+        plugins: [...(c.isProduction ? [] : [ApolloServerPluginLandingPageLocalDefault({ embed: true })]), metrics.apolloPlugin()],
+        validationRules: [depthLimit(c.env.GRAPHQL_DEPTH_LIMIT), complexityLimit(c.env.GRAPHQL_COMPLEXITY_LIMIT)],
         formatError: formatGraphQLError,
-        context: ({ req, res }: any) => ({ req, res }),
+        subscriptions: {
+          'graphql-ws': {
+            onConnect: ({ connectionParams, extra }: any) => {
+              const authorization = connectionParams?.authorization ?? connectionParams?.Authorization;
+              if (typeof authorization === 'string' && extra?.request?.headers) extra.request.headers.authorization = authorization;
+            },
+          },
+        },
+        context: ({ req, res, extra }: any) => ({ req: req ?? extra?.request, res }),
       }),
     }),
     ReferenceModule,
@@ -76,6 +90,7 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
     ProfileModule,
     PredictionsModule,
     SearchModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
   providers: [LocalDateScalar, DecimalScalar, { provide: APP_GUARD, useClass: GqlThrottlerGuard }],

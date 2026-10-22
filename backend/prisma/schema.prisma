@@ -75,10 +75,14 @@ model SearchDocument {
   sourceType           SearchDocumentSource
   sourceId             String                 @db.Uuid
   householdId          String?                @db.Uuid
+  userId               String?                @db.Uuid
   content              String
+  isSearchable         Boolean                @default(true)
   embeddedContentHash  String?                @db.Char(64)
   embedding            Unsupported("vector(384)")?
+  embeddingModel       String?
   embeddingStatus      SearchEmbeddingStatus  @default(PENDING)
+  embeddingAttempts    Int                    @default(0) @db.SmallInt
   embeddingClaimedAt   DateTime?              @db.Timestamptz(6)
   embeddingUpdatedAt   DateTime?              @db.Timestamptz(6)
   lastEmbeddingError   String?
@@ -87,7 +91,9 @@ model SearchDocument {
 
   @@unique([sourceType, sourceId], map: "SearchDocument_source_uq")
   @@index([updatedAt], map: "SearchDocument_embedding_pending_ix", where: raw("\"embeddingStatus\" IN ('PENDING', 'FAILED')"))
-  @@index([householdId, sourceType], map: "SearchDocument_scope_type_ix")
+  @@index([householdId, userId, sourceType], map: "SearchDocument_scope_type_ix")
+  Household Household? @relation(fields: [householdId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "SearchDocument_household_fk")
+  User User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "SearchDocument_user_fk")
 }
 
 model Currency {
@@ -227,6 +233,7 @@ model User {
   updatedAt                                                       DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
   deletedAt                                                       DateTime?                @db.Timestamptz(6)
   AIPrediction                                                    AIPrediction[]
+  SearchDocument                                                  SearchDocument[]
   FoodEvent                                                       FoodEvent[]
   memberships                                                     HouseholdMember[]
   Image                                                           Image[]
@@ -262,6 +269,7 @@ model Household {
   updatedAt            DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
   deletedAt            DateTime?              @db.Timestamptz(6)
   AIPrediction         AIPrediction[]
+  SearchDocument       SearchDocument[]
   FoodEvent            FoodEvent[]
   invitations          HouseholdInvitation[]
   members              HouseholdMember?
@@ -399,6 +407,7 @@ model InventoryItem {
 
   @@unique([id, householdId], map: "InventoryItem_id_household_uq")
   @@index([householdId, estimatedExpiryAt], map: "InventoryItem_household_expiry_live_ix", where: raw("(\"archivedAt\" IS NULL)"))
+  @@index([estimatedExpiryAt, id], map: "InventoryItem_expiry_candidate_ix", where: raw("((\"archivedAt\" IS NULL) AND (\"quantity\" > 0))"))
   @@index([householdId, foodId], map: "InventoryItem_household_food_live_ix", where: raw("(\"archivedAt\" IS NULL)"))
   @@index([updatedAt], map: "InventoryItem_freshness_due_ix", where: raw("((\"freshnessScore\" IS NOT NULL) AND (\"archivedAt\" IS NULL))"))
 }
@@ -413,945 +422,98 @@ model InventoryTransaction {
   origin          ItemOrigin               @default(HOME)
   movementType    InventoryTransactionType
   quantityDelta   Decimal                  @db.Decimal(12, 3)
-  balanceAfter    Decimal                  @db.Decimal(12, 3)
-  idempotencyKey  String
-  createdAt       DateTime                 @default(now()) @db.Timestamptz(6)
-  FoodEvent       FoodEvent                @relation(fields: [foodEventId, householdId, origin], references: [id, householdId, origin], onUpdate: NoAction, map: "InventoryTransaction_event_household_origin_fk")
-  Household       Household                @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  InventoryItem   InventoryItem            @relation(fields: [inventoryItemId, householdId], references: [id, householdId], onUpdate: NoAction, map: "InventoryTransaction_item_household_fk")
-
-  @@unique([foodEventId, inventoryItemId], map: "InventoryTransaction_event_item_uq")
-  @@unique([householdId, idempotencyKey], map: "InventoryTransaction_household_key_uq")
-  @@index([createdAt], map: "InventoryTransaction_created_brin_ix", type: Brin)
-  @@index([inventoryItemId, createdAt, id], map: "InventoryTransaction_item_history_ix")
-}
-
-model migrations {
-  name      String   @id
-  checksum  String
-  appliedAt DateTime @default(now()) @db.Timestamptz(6)
-
-  @@map("_migrations")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Recipe {
-  id               String             @id @db.Uuid
-  householdId      String?            @db.Uuid
-  cuisineId        String?            @db.Uuid
-  name             String
-  description      String?
-  servings         Int
-  prepTimeMin      Int?
-  cookTimeMin      Int?
-  difficulty       RecipeDifficulty   @default(MEDIUM)
-  archivedAt       DateTime?          @db.Timestamptz(6)
-  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt        DateTime           @default(now()) @db.Timestamptz(6)
-  PlannedMeal      PlannedMeal[]
-  Cuisine          Cuisine?           @relation(fields: [cuisineId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  Household        Household?         @relation(fields: [householdId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  RecipeIngredient RecipeIngredient[]
-  RecipeStep       RecipeStep[]
-
-  @@unique([id, householdId], map: "Recipe_id_household_uq")
-  @@index([id], map: "Recipe_global_live_ix", where: raw("((\"householdId\" IS NULL) AND (\"archivedAt\" IS NULL))"))
-  @@index([householdId, id], map: "Recipe_household_live_ix", where: raw("((\"householdId\" IS NOT NULL) AND (\"archivedAt\" IS NULL))"))
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model RecipeIngredient {
-  id       String  @id @db.Uuid
-  recipeId String  @db.Uuid
-  foodId   String  @db.Uuid
-  quantity Decimal @db.Decimal(12, 3)
-  unit     Unit
-  optional Boolean @default(false)
-  Food     Food    @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  Recipe   Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([recipeId, foodId], map: "RecipeIngredient_recipe_food_uq")
-  @@index([foodId], map: "RecipeIngredient_food_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model RecipeStep {
-  id          String @id @db.Uuid
-  recipeId    String @db.Uuid
-  stepNumber  Int
-  instruction String
-  durationMin Int?
-  Recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([recipeId, stepNumber], map: "RecipeStep_recipe_number_uq")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Meal {
-  id              String          @id @db.Uuid
-  householdId     String          @db.Uuid
-  userId          String          @db.Uuid
-  mealType        MealType
-  eatenAt         DateTime        @db.Timestamptz(6)
-  origin          ItemOrigin
-  name            String?
-  idempotencyKey  String
-  requestHash     String          @db.Char(64)
-  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
-  Household       Household       @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  HouseholdMember HouseholdMember @relation(fields: [householdId, userId], references: [householdId, userId], onUpdate: NoAction, map: "Meal_member_fk")
-  MealItem        MealItem[]
-
-  @@unique([householdId, userId, idempotencyKey], map: "Meal_household_user_key_uq")
-  @@unique([id, householdId, origin], map: "Meal_id_household_origin_uq")
-  @@unique([id, householdId], map: "Meal_id_household_uq")
-  @@index([householdId, eatenAt(sort: Desc), id(sort: Desc)], map: "Meal_household_eaten_ix")
-  @@index([userId, eatenAt(sort: Desc), id(sort: Desc)], map: "Meal_user_eaten_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model MealItem {
-  id                  String   @id @db.Uuid
-  mealId              String   @db.Uuid
-  householdId         String   @db.Uuid
-  foodId              String   @db.Uuid
-  quantity            Decimal  @db.Decimal(12, 3)
-  unit                Unit
-  quantityG           Decimal  @db.Decimal(10, 2)
-  calories            Decimal? @db.Decimal(8, 2)
-  proteinG            Decimal? @db.Decimal(8, 2)
-  carbsG              Decimal? @db.Decimal(8, 2)
-  fatG                Decimal? @db.Decimal(8, 2)
-  fiberG              Decimal? @db.Decimal(8, 2)
-  sugarG              Decimal? @db.Decimal(8, 2)
-  sodiumMg            Decimal? @db.Decimal(8, 2)
-  nutritionSnapshotAt DateTime @default(now()) @db.Timestamptz(6)
-  Food                Food     @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  Meal                Meal     @relation(fields: [mealId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "MealItem_meal_household_fk")
-
-  @@unique([mealId, foodId], map: "MealItem_meal_food_uq")
-  @@index([mealId], map: "MealItem_meal_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model MealPlan {
-  id          String        @id @db.Uuid
-  householdId String        @db.Uuid
-  name        String
-  startDate   DateTime      @db.Date
-  endDate     DateTime      @db.Date
-  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
-  Household   Household     @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  PlannedMeal PlannedMeal[]
-
-  @@unique([id, householdId], map: "MealPlan_id_household_uq")
-  @@index([householdId, startDate, endDate], map: "MealPlan_household_range_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model PlannedMeal {
-  id          String   @id @db.Uuid
-  mealPlanId  String   @db.Uuid
-  householdId String   @db.Uuid
-  recipeId    String   @db.Uuid
-  mealDate    DateTime @db.Date
-  mealType    MealType
-  servings    Decimal  @db.Decimal(5, 2)
-  MealPlan    MealPlan @relation(fields: [mealPlanId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "PlannedMeal_plan_household_fk")
-  Recipe      Recipe   @relation(fields: [recipeId], references: [id], onUpdate: NoAction)
-
-  @@unique([id, householdId], map: "PlannedMeal_id_household_uq")
-  @@unique([mealPlanId, mealDate, mealType, recipeId], map: "PlannedMeal_plan_date_type_recipe_uq")
-  @@index([householdId, mealDate, mealType], map: "PlannedMeal_household_date_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserDailyNutrition {
-  id         String   @id @db.Uuid
-  userId     String   @db.Uuid
-  date       DateTime @db.Date
-  calories   Decimal  @default(0) @db.Decimal(10, 2)
-  proteinG   Decimal  @default(0) @db.Decimal(10, 2)
-  carbsG     Decimal  @default(0) @db.Decimal(10, 2)
-  fatG       Decimal  @default(0) @db.Decimal(10, 2)
-  fiberG     Decimal  @default(0) @db.Decimal(10, 2)
-  sugarG     Decimal  @default(0) @db.Decimal(10, 2)
-  sodiumMg   Decimal  @default(0) @db.Decimal(10, 2)
-  mealCount  Int      @default(0)
-  isFinal    Boolean  @default(false)
-  computedAt DateTime @default(now()) @db.Timestamptz(6)
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, date], map: "UserDailyNutrition_user_date_uq")
-  @@index([userId, date(sort: Desc)], map: "UserDailyNutrition_date_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model PurchaseOrder {
-  id                                                                             String              @id @db.Uuid
-  householdId                                                                    String              @db.Uuid
-  createdByUserId                                                                String?             @db.Uuid
-  productSourceId                                                                String?             @db.Uuid
-  sourceName                                                                     String
-  status                                                                         PurchaseOrderStatus @default(DRAFT)
-  totalCost                                                                      Decimal             @default(0) @db.Decimal(14, 4)
-  currencyId                                                                     String              @db.Uuid
-  orderedAt                                                                      DateTime?           @db.Timestamptz(6)
-  confirmedAt                                                                    DateTime?           @db.Timestamptz(6)
-  deliveredAt                                                                    DateTime?           @db.Timestamptz(6)
-  idempotencyKey                                                                 String
-  requestHash                                                                    String              @db.Char(64)
-  createdAt                                                                      DateTime            @default(now()) @db.Timestamptz(6)
-  updatedAt                                                                      DateTime            @default(now()) @db.Timestamptz(6)
-  User                                                                           User?               @relation(fields: [createdByUserId], references: [id], onUpdate: NoAction)
-  Currency                                                                       Currency            @relation(fields: [currencyId], references: [id], onUpdate: NoAction)
-  Household                                                                      Household           @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  ProductSource                                                                  ProductSource?      @relation(fields: [productSourceId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  PurchaseOrderItem_PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder  PurchaseOrderItem[] @relation("PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder")
-  PurchaseOrderItem_PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder PurchaseOrderItem[] @relation("PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder")
-
-  @@unique([householdId, idempotencyKey], map: "PurchaseOrder_household_key_uq")
-  @@unique([id, currencyId], map: "PurchaseOrder_id_currency_uq")
-  @@unique([id, householdId], map: "PurchaseOrder_id_household_uq")
-  @@index([householdId, createdAt(sort: Desc), id(sort: Desc)], map: "PurchaseOrder_household_created_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model PurchaseOrderItem {
-  id                                                                         String        @id @db.Uuid
-  purchaseOrderId                                                            String        @db.Uuid
-  householdId                                                                String        @db.Uuid
-  foodId                                                                     String        @db.Uuid
-  productId                                                                  String?       @db.Uuid
-  quantity                                                                   Decimal       @db.Decimal(12, 3)
-  receivedQuantity                                                           Decimal       @default(0) @db.Decimal(12, 3)
-  unit                                                                       Unit
-  unitPrice                                                                  Decimal       @db.Decimal(14, 4)
-  totalPrice                                                                 Decimal?      @default(dbgenerated("round((quantity * \"unitPrice\"), 4)")) @db.Decimal(14, 4)
-  currencyId                                                                 String        @db.Uuid
-  createdAt                                                                  DateTime      @default(now()) @db.Timestamptz(6)
-  FoodEvent                                                                  FoodEvent[]   @relation("FoodEvent_PurchaseOrderItem_purchaseOrderItemId_householdIdToPurchaseOrderItem")
-  Food                                                                       Food          @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  PurchaseOrder_PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder  PurchaseOrder @relation("PurchaseOrderItem_purchaseOrderId_currencyIdToPurchaseOrder", fields: [purchaseOrderId, currencyId], references: [id, currencyId], onUpdate: NoAction, map: "PurchaseOrderItem_order_currency_fk")
-  PurchaseOrder_PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder PurchaseOrder @relation("PurchaseOrderItem_purchaseOrderId_householdIdToPurchaseOrder", fields: [purchaseOrderId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "PurchaseOrderItem_order_household_fk")
-  Product                                                                    Product?      @relation(fields: [productId, foodId], references: [id, foodId], onUpdate: NoAction, map: "PurchaseOrderItem_product_food_fk")
-
-  @@unique([id, householdId, foodId, unit], map: "PurchaseOrderItem_id_household_food_unit_uq")
-  @@unique([id, householdId], map: "PurchaseOrderItem_id_household_uq")
-  @@index([purchaseOrderId, id], map: "PurchaseOrderItem_order_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ShoppingList {
-  id               String             @id @db.Uuid
-  householdId      String             @db.Uuid
-  name             String
-  status           ShoppingListStatus @default(ACTIVE)
-  idempotencyKey   String
-  requestHash      String             @db.Char(64)
-  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt        DateTime           @default(now()) @db.Timestamptz(6)
-  Household        Household          @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  ShoppingListItem ShoppingListItem[]
-
-  @@unique([householdId, idempotencyKey], map: "ShoppingList_household_key_uq")
-  @@unique([id, householdId], map: "ShoppingList_id_household_uq")
-  @@index([householdId, status, updatedAt(sort: Desc)], map: "ShoppingList_household_status_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ShoppingListItem {
-  id             String             @id @db.Uuid
-  shoppingListId String             @db.Uuid
-  householdId    String             @db.Uuid
-  foodId         String             @db.Uuid
-  productId      String?            @db.Uuid
-  quantity       Decimal            @db.Decimal(12, 3)
-  unit           Unit
-  status         ShoppingItemStatus @default(NEEDED)
-  idempotencyKey String
-  requestHash    String             @db.Char(64)
-  createdAt      DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt      DateTime           @default(now()) @db.Timestamptz(6)
-  Food           Food               @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  ShoppingList   ShoppingList       @relation(fields: [shoppingListId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "ShoppingListItem_list_household_fk")
-  Product        Product?           @relation(fields: [productId, foodId], references: [id, foodId], onUpdate: NoAction, map: "ShoppingListItem_product_food_fk")
-
-  @@unique([householdId, idempotencyKey], map: "ShoppingListItem_household_key_uq")
-  @@unique([shoppingListId, foodId], map: "ShoppingListItem_needed_food_uq", where: raw("(status = 'NEEDED'::\"ShoppingItemStatus\")"))
-  @@index([shoppingListId, status, id], map: "ShoppingListItem_list_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model DietaryRule {
-  id                String            @id @db.Uuid
-  dietaryPreference DietaryPreference
-  ruleType          DietRuleType
-  targetType        DietRuleTarget
-  foodId            String?           @db.Uuid
-  categoryId        String?           @db.Uuid
-  isActive          Boolean           @default(true)
-  FoodCategory      FoodCategory?     @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  Food              Food?             @relation(fields: [foodId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-
-  @@unique([dietaryPreference, ruleType, targetType, foodId, categoryId], map: "DietaryRule_target_uq")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model HealthCondition {
-  id                      String                    @id @db.Uuid
-  code                    String                    @unique
-  name                    String
-  conditionGroup          HealthConditionGroup
-  isChronic               Boolean                   @default(false)
-  archivedAt              DateTime?                 @db.Timestamptz(6)
-  HealthConditionDietRule HealthConditionDietRule[]
-  UserHealthCondition     UserHealthCondition[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model HealthConditionDietRule {
-  id                String          @id @db.Uuid
-  healthConditionId String          @db.Uuid
-  ruleType          DietRuleType
-  targetType        DietRuleTarget
-  foodId            String?         @db.Uuid
-  categoryId        String?         @db.Uuid
-  nutrient          NutrientKey?
-  maxPer100g        Decimal?        @db.Decimal(8, 2)
-  maxPerDay         Decimal?        @db.Decimal(10, 2)
-  isActive          Boolean         @default(true)
-  FoodCategory      FoodCategory?   @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  Food              Food?           @relation(fields: [foodId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  HealthCondition   HealthCondition @relation(fields: [healthConditionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([healthConditionId, ruleType, targetType, foodId, categoryId, nutrient], map: "HealthConditionDietRule_target_uq")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserAllergy {
-  id        String          @id @db.Uuid
-  userId    String          @db.Uuid
-  foodId    String          @db.Uuid
-  severity  AllergySeverity
-  notes     String?
-  createdAt DateTime        @default(now()) @db.Timestamptz(6)
-  Food      Food            @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  User      User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, foodId], map: "UserAllergy_user_food_uq")
-  @@index([foodId], map: "UserAllergy_food_ix")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserAllergyCategory {
-  id           String          @id @db.Uuid
-  userId       String          @db.Uuid
-  categoryId   String          @db.Uuid
-  severity     AllergySeverity
-  createdAt    DateTime        @default(now()) @db.Timestamptz(6)
-  FoodCategory FoodCategory    @relation(fields: [categoryId], references: [id], onUpdate: NoAction)
-  User         User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, categoryId], map: "UserAllergyCategory_user_category_uq")
-  @@index([categoryId], map: "UserAllergyCategory_category_ix")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserDietaryPreference {
-  id                String            @id @db.Uuid
-  userId            String            @db.Uuid
-  dietaryPreference DietaryPreference
-  createdAt         DateTime          @default(now()) @db.Timestamptz(6)
-  User              User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, dietaryPreference], map: "UserDietaryPreference_user_diet_uq")
-  @@index([dietaryPreference], map: "UserDietaryPreference_diet_ix")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserDislikedCategory {
-  id           String       @id @db.Uuid
-  userId       String       @db.Uuid
-  categoryId   String       @db.Uuid
-  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
-  FoodCategory FoodCategory @relation(fields: [categoryId], references: [id], onUpdate: NoAction)
-  User         User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, categoryId], map: "UserDislikedCategory_user_category_uq")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserDislikedFood {
-  id        String   @id @db.Uuid
-  userId    String   @db.Uuid
-  foodId    String   @db.Uuid
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  Food      Food     @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, foodId], map: "UserDislikedFood_user_food_uq")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserFoodPreference {
-  id              String   @id @db.Uuid
-  userId          String   @db.Uuid
-  foodId          String   @db.Uuid
-  frequency       Int      @default(0)
-  preferenceScore Decimal  @default(0) @db.Decimal(4, 3)
-  updatedAt       DateTime @default(now()) @db.Timestamptz(6)
-  Food            Food     @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, foodId], map: "UserFoodPreference_user_food_uq")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserGoal {
-  id             String    @id @db.Uuid
-  userId         String    @unique(map: "UserGoal_active_uq", where: raw("(\"endedAt\" IS NULL)")) @db.Uuid
-  goalType       GoalType
-  targetWeightKg Decimal?  @db.Decimal(5, 2)
-  calorieTarget  Int?
-  proteinTargetG Int?
-  startedAt      DateTime  @default(now()) @db.Timestamptz(6)
-  endedAt        DateTime? @db.Timestamptz(6)
-  User           User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([userId, startedAt(sort: Desc)], map: "UserGoal_history_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserHealthCondition {
-  id                String          @id @db.Uuid
-  userId            String          @db.Uuid
-  healthConditionId String          @db.Uuid
-  status            ConditionStatus @default(ACTIVE)
-  diagnosedAt       DateTime?       @db.Date
-  notes             String?
-  createdAt         DateTime        @default(now()) @db.Timestamptz(6)
-  updatedAt         DateTime        @default(now()) @db.Timestamptz(6)
-  HealthCondition   HealthCondition @relation(fields: [healthConditionId], references: [id], onUpdate: NoAction)
-  User              User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, healthConditionId], map: "UserHealthCondition_user_condition_uq")
-  @@index([healthConditionId], map: "UserHealthCondition_condition_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserPreference {
-  id                  String            @id @db.Uuid
-  userId              String            @unique @db.Uuid
-  preferredDifficulty RecipeDifficulty?
-  maxPrepTimeMin      Int?
-  createdAt           DateTime          @default(now()) @db.Timestamptz(6)
-  updatedAt           DateTime          @default(now()) @db.Timestamptz(6)
-  User                User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserPreferredCuisine {
-  id        String   @id @db.Uuid
-  userId    String   @db.Uuid
-  cuisineId String   @db.Uuid
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  Cuisine   Cuisine  @relation(fields: [cuisineId], references: [id], onUpdate: NoAction)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, cuisineId], map: "UserPreferredCuisine_user_cuisine_uq")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserProfile {
-  id            String         @id @db.Uuid
-  userId        String         @unique @db.Uuid
-  heightCm      Decimal?       @db.Decimal(5, 1)
-  weightKg      Decimal?       @db.Decimal(5, 2)
-  birthDate     DateTime?      @db.Date
-  gender        Gender?
-  activityLevel ActivityLevel?
-  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime       @default(now()) @db.Timestamptz(6)
-  User          User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserSafetyProfileEvent {
-  id                                            String            @id @db.Uuid
-  userId                                        String            @db.Uuid
-  actorUserId                                   String?           @db.Uuid
-  entityType                                    SafetyEntityType
-  entityId                                      String            @db.Uuid
-  action                                        SafetyEventAction
-  snapshot                                      Json
-  occurredAt                                    DateTime          @default(now()) @db.Timestamptz(6)
-  User_UserSafetyProfileEvent_actorUserIdToUser User?             @relation("UserSafetyProfileEvent_actorUserIdToUser", fields: [actorUserId], references: [id], onUpdate: NoAction)
-  User_UserSafetyProfileEvent_userIdToUser      User              @relation("UserSafetyProfileEvent_userIdToUser", fields: [userId], references: [id], onUpdate: NoAction)
-
-  @@index([userId, occurredAt(sort: Desc), id(sort: Desc)], map: "UserSafetyProfileEvent_history_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserWeightLog {
-  id         String   @id @db.Uuid
-  userId     String   @db.Uuid
-  weightKg   Decimal  @db.Decimal(5, 2)
-  measuredAt DateTime @default(now()) @db.Timestamptz(6)
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, measuredAt], map: "UserWeightLog_user_measured_uq")
-  @@index([userId, measuredAt(sort: Desc)], map: "UserWeightLog_history_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model AIFoodDepletionPrediction {
-  predictionId   String         @id @db.Uuid
-  predictionType PredictionType @default(FOOD_DEPLETION)
-  householdId    String         @db.Uuid
-  foodId         String         @db.Uuid
-  currentQty     Decimal        @db.Decimal(12, 3)
-  unit           Unit
-  avgDailyQty    Decimal        @db.Decimal(12, 3)
-  daysLeft       Decimal        @db.Decimal(8, 2)
-  runOutAt       DateTime       @db.Timestamptz(6)
-  Food           Food           @relation(fields: [foodId], references: [id], onUpdate: NoAction)
-  AIPrediction   AIPrediction   @relation(fields: [predictionId, predictionType, householdId], references: [id, predictionType, householdId], onDelete: Cascade, onUpdate: NoAction, map: "AIFoodDepletionPrediction_prediction_fk")
-
-  @@unique([predictionId, householdId], map: "AIFoodDepletionPrediction_household_food_uq")
-  // predictionId is already the PK; this redundant superset uniqueness mirrors the SQL composite FK target for Prisma's relation validator.
-  @@unique([predictionId, predictionType, householdId])
-  @@index([householdId, foodId], map: "AIFoodDepletionPrediction_food_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model AIPrediction {
-  id                        String                     @id @db.Uuid
-  householdId               String                     @db.Uuid
-  userId                    String?                    @db.Uuid
-  predictionType            PredictionType
-  summary                   String?
-  confidence                Decimal                    @db.Decimal(4, 3)
-  modelVersion              String
-  inputHash                 String
-  generatedAt               DateTime                   @default(now()) @db.Timestamptz(6)
-  expiresAt                 DateTime                   @db.Timestamptz(6)
-  AIFoodDepletionPrediction AIFoodDepletionPrediction?
-  Household                 Household                  @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  HouseholdMember           HouseholdMember?           @relation(fields: [householdId, userId], references: [householdId, userId], onUpdate: NoAction, map: "AIPrediction_household_user_fk")
-  User                      User?                      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([id, householdId], map: "AIPrediction_id_household_uq")
-  @@unique([id, predictionType, householdId], map: "AIPrediction_id_type_household_uq")
-  @@unique([id, predictionType], map: "AIPrediction_id_type_uq")
-  @@unique([householdId, predictionType, userId, inputHash], map: "AIPrediction_input_uq")
-  @@index([expiresAt], map: "AIPrediction_expiry_ix")
-  @@index([householdId, predictionType, generatedAt(sort: Desc), id(sort: Desc)], map: "AIPrediction_household_type_generated_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model FreshnessPrediction {
-  id                    String        @id @db.Uuid
-  inventoryItemId       String        @db.Uuid
-  householdId           String        @db.Uuid
-  imageId               String        @db.Uuid
-  qualityScore          Decimal       @db.Decimal(4, 3)
-  confidence            Decimal       @db.Decimal(4, 3)
-  remainingQualityHours Int
-  predictedAt           DateTime      @default(now()) @db.Timestamptz(6)
-  Image                 Image         @relation(fields: [imageId, householdId], references: [id, householdId], onUpdate: NoAction, map: "FreshnessPrediction_image_fk")
-  InventoryItem         InventoryItem @relation(fields: [inventoryItemId, householdId], references: [id, householdId], onDelete: Cascade, onUpdate: NoAction, map: "FreshnessPrediction_item_fk")
-
-  @@unique([id, householdId], map: "FreshnessPrediction_id_household_uq")
-  @@index([inventoryItemId, predictedAt(sort: Desc), id(sort: Desc)], map: "FreshnessPrediction_item_time_ix")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Image {
-  id                  String                @id @db.Uuid
-  householdId         String                @db.Uuid
-  uploadedByUserId    String?               @db.Uuid
-  type                ImageType
-  storageKey          String                @unique
-  mimeType            String                @db.VarChar(64)
-  sizeBytes           BigInt
-  createdAt           DateTime              @default(now()) @db.Timestamptz(6)
-  FreshnessPrediction FreshnessPrediction[]
-  Household           Household             @relation(fields: [householdId], references: [id], onUpdate: NoAction)
-  User                User?                 @relation(fields: [uploadedByUserId], references: [id], onUpdate: NoAction)
-
-  @@unique([id, householdId], map: "Image_id_household_uq")
-  @@index([householdId, createdAt(sort: Desc)], map: "Image_household_created_ix")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model UserNutritionTrend {
-  id            String          @id @db.Uuid
-  userId        String          @db.Uuid
-  metric        NutritionMetric
-  period        TrendPeriod
-  avgValue      Decimal         @db.Decimal(10, 2)
-  changePercent Decimal?        @db.Decimal(6, 2)
-  calculatedAt  DateTime        @default(now()) @db.Timestamptz(6)
-  User          User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, metric, period], map: "UserNutritionTrend_user_metric_period_uq")
-}
-
-enum SystemRole {
-  USER
-  ADMIN
-}
-
-enum HouseholdRole {
-  OWNER
-  MEMBER
-}
-
-enum TokenPurpose {
-  EMAIL_VERIFY
-  PASSWORD_RESET
-  HOUSEHOLD_INVITATION
-}
-
-enum Unit {
-  GRAM
-  KILOGRAM
-  MILLILITER
-  LITER
-  CUP
-  TABLESPOON
-  TEASPOON
-  PIECE
-}
-
-enum EventSource {
-  USER
-  RECEIPT
-  PHOTO
-  VOICE
-  SYSTEM
-  AI
-  N8N
-}
-
-enum FoodEventType {
-  PURCHASED
-  SCANNED
-  ADDED
-  OPENED
-  COOKED
-  EATEN
-  LEFTOVER
-  WASTED
-  EXPIRED
-  REMOVED
-}
-
-enum InventoryTransactionType {
-  PURCHASE_RECEIPT
-  ADD
-  CONSUMPTION
-  COOKED
-  DAMAGE_WASTE
-  STOCK_AUDIT_ADJUSTMENT
-  RETURN
-  REMOVE
-  EXPIRED
-}
-
-enum ItemOrigin {
-  HOME
-  AWAY
-  UNKNOWN
-}
-
-enum StorageLocation {
-  FRIDGE
-  FREEZER
-  PANTRY
-  COUNTER
-  OTHER
-}
-
-enum RecipeDifficulty {
-  EASY
-  MEDIUM
-  HARD
-}
-
-enum MealType {
-  BREAKFAST
-  LUNCH
-  DINNER
-  SNACK
-  OTHER
-}
-
-enum PurchaseOrderStatus {
-  DRAFT
-  PLACED
-  CONFIRMED
-  DELIVERED
-  CANCELLED
-}
-
-enum ShoppingItemStatus {
-  NEEDED
-  PURCHASED
-  SKIPPED
-}
-
-enum ShoppingListStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-enum ActivityLevel {
-  SEDENTARY
-  LIGHT
-  MODERATE
-  ACTIVE
-  VERY_ACTIVE
-}
-
-enum AllergySeverity {
-  MILD
-  MODERATE
-  SEVERE
-  LIFE_THREATENING
-}
-
-enum ConditionStatus {
-  ACTIVE
-  CONTROLLED
-  REMISSION
-  RESOLVED
-}
-
-enum DietRuleTarget {
-  FOOD
-  CATEGORY
-  NUTRIENT
-}
-
-enum DietRuleType {
-  AVOID
-  LIMIT
-  PREFER
-}
-
-enum DietaryPreference {
-  VEGETARIAN
-  VEGAN
-  HALAL
-  GLUTEN_FREE
-  DAIRY_FREE
-  KETO
-  LOW_CARB
-}
-
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-  PREFER_NOT_TO_SAY
-}
-
-enum GoalType {
-  LOSE_WEIGHT
-  GAIN_MUSCLE
-  MAINTAIN
-  CUSTOM
-}
-
-enum HealthConditionGroup {
-  METABOLIC
-  CARDIOVASCULAR
-  RENAL
-  DIGESTIVE
-  AUTOIMMUNE
-  OTHER
-}
-
-enum NutrientKey {
-  CALORIES
-  PROTEIN
-  CARBS
-  FAT
-  FIBER
-  SUGAR
-  SODIUM
-}
-
-enum SafetyEntityType {
-  ALLERGY_FOOD
-  ALLERGY_CATEGORY
-  HEALTH_CONDITION
-  DIETARY_PREFERENCE
-  DISLIKE_FOOD
-  DISLIKE_CATEGORY
-}
-
-enum SafetyEventAction {
-  CREATED
-  UPDATED
-  DELETED
-}
-
-enum ImageType {
-  RECEIPT
-  FOOD
-  FRESHNESS
-  OTHER
-}
-
-enum NutritionMetric {
-  CALORIES
-  PROTEIN
-  CARBS
-  FAT
-  FIBER
-  SUGAR
-  SODIUM
-}
-
-enum PredictionType {
-  FOOD_DEPLETION
-  WASTE
-  CONSUMPTION
-  SUPPLY_NEED
-  STOCK_BALANCE
-  COST
-  NUTRITION_SIGNAL
-  MEAL_DEMAND
-  MEAL_PLAN_ADHERENCE
-  PREFERENCE_TREND
-  RECIPE_USAGE
-}
-
-enum TrendPeriod {
-  DAYS_7
-  DAYS_30
-  DAYS_90
-}
-
-enum RecommendationType {
-  SUPPLY_NEED
-}
-
-enum SearchDocumentSource {
-  FOOD
-  RECIPE
-  MEAL
-}
-
-enum SearchEmbeddingStatus {
-  PENDING
-  PROCESSING
-  READY
-  FAILED
-}
-
-enum RecommendationStatus {
-  DRAFT
-  ACTIVE
-  ACCEPTED
-  DISMISSED
-  EXPIRED
-}
-
-enum SafetyStatus {
-  PENDING
-  PASSED
-  BLOCKED
-}
-
-enum SafetyFilterType {
-  ALLERGY_FOOD
-  ALLERGY_CATEGORY
-  HEALTH_AVOID
-  HEALTH_LIMIT
-  HEALTH_PREFER
-  DISLIKE_FOOD
-  DISLIKE_CATEGORY
-  DIETARY
-}
-
-enum SafetyCheckResult {
-  PASSED
-  WARNED
-  FAILED
-}
-
-// PostgreSQL partial/NULLS NOT DISTINCT indexes and lifecycle triggers remain in the SQL migration.
-model AIRecommendation {
-  id                 String               @id @db.Uuid
-  householdId        String               @db.Uuid
-  userId             String?              @db.Uuid
-  type               RecommendationType
-  status             RecommendationStatus @default(DRAFT)
-  safetyStatus       SafetyStatus         @default(PENDING)
-  summary            String?              @db.Text
-  modelVersion       String               @db.Text
-  inputHash          String               @db.Text
-  sourcePredictionId String?              @db.Uuid
-  generatedAt        DateTime             @default(now()) @db.Timestamptz(6)
-  expiresAt          DateTime             @db.Timestamptz(6)
-  statusChangedAt    DateTime             @default(now()) @db.Timestamptz(6)
-  feedbackFoldedAt   DateTime?            @db.Timestamptz(6)
-
-  @@unique([id, householdId], map: "AIRecommendation_id_household_uq")
-  @@unique([id, type], map: "AIRecommendation_id_type_uq")
-  @@unique([id, type, householdId], map: "AIRecommendation_id_type_household_uq")
-  @@index([expiresAt], map: "AIRecommendation_expiry_ix")
-  @@map("AIRecommendation")
-}
-
-model AIShoppingRecommendation {
-  recommendationId   String             @id @db.Uuid
-  householdId        String             @db.Uuid
-  recommendationType RecommendationType  @default(SUPPLY_NEED)
-  foodId             String             @db.Uuid
-  suggestedQty       Decimal            @db.Decimal(12, 3)
-  unit               Unit
-  priority           String             @default("NORMAL") @db.Text
-
-  @@map("AIShoppingRecommendation")
-}
-
-model AIRecommendationSafetyCheck {
-  id               String            @id @db.Uuid
-  recommendationId String            @db.Uuid
-  filterType       SafetyFilterType
-  result           SafetyCheckResult
-  blockedFoodId    String?           @db.Uuid
-  createdAt        DateTime          @default(now()) @db.Timestamptz(6)
-
-  @@map("AIRecommendationSafetyCheck")
-}
+  balanceAfter    Decimal        -tß®­¢G§²ÚîÆ­yİ[Û‚ˆÛ˜\ÚİœÛÛ‚ˆØØİ\œ™Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ\Ù\—Õ\Ù\”ØY™]T›Ùš[Q]™[ØXİÜ•\Ù\’YÕ\Ù\ˆ\Ù\È™[][ÛŠ•\Ù\”ØY™]T›Ùš[Q]™[ØXİÜ•\Ù\’YÕ\Ù\ˆ‹šY[ÎˆØXİÜ•\Ù\’YK™Y™\™[˜Ù\ÎˆÚYKÛ•\]Nˆ›ĞXİ[ÛŠBˆ\Ù\—Õ\Ù\”ØY™]T›Ùš[Q]™[İ\Ù\’YÕ\Ù\ˆ\Ù\ˆ™[][ÛŠ•\Ù\”ØY™]T›Ùš[Q]™[İ\Ù\’YÕ\Ù\ˆ‹šY[Îˆİ\Ù\’YK™Y™\™[˜Ù\ÎˆÚYKÛ•\]Nˆ›ĞXİ[ÛŠB‚ˆ[™^
+İ\Ù\’YØØİ\œ™Y]
+ÛÜˆ\ØÊKY
+ÛÜˆ\ØÊWKX\ˆ•\Ù\”ØY™]T›Ùš[Q]™[Ú\İÜWÚ^ŠBŸB‚‹ËËÈ\ÈX›HÛÛZ[œÈÚXÚÈÛÛœİ˜Z[È[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙØÚXÚËXÛÛœİ˜Z[È›Üˆ[Ü™H[™›Ë‚‹ËËÈ\È[Ù[ÛÛZ[œÈ›İÈ]™[ÙXİ\š]H[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙÜ›İË[]™[\ÙXİ\š]H›Üˆ[Ü™H[™›Ë‚›[Ù[\Ù\•ÙZYÚÙÈÂˆYİš[™ÈY‹•]ZYˆ\Ù\’Yİš[™È‹•]ZYˆÙZYÚÙÈXÚ[X[‹‘XÚ[X[
+KŠBˆYX\İ\™Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ\Ù\ˆ\Ù\ˆ™[][ÛŠšY[Îˆİ\Ù\’YK™Y™\™[˜Ù\ÎˆÚYKÛ‘[]NˆØ\ØØYKÛ•\]Nˆ›ĞXİ[ÛŠB‚ˆ[š\]YJİ\Ù\’YYX\İ\™Y]KX\ˆ•\Ù\•ÙZYÚÙ×İ\Ù\—ÛYX\İ\™Yİ\HŠBˆ[™^
+İ\Ù\’YYX\İ\™Y]
+ÛÜˆ\ØÊWKX\ˆ•\Ù\•ÙZYÚÙ×Ú\İÜWÚ^ŠBŸB‚‹ËËÈ\ÈX›HÛÛZ[œÈÚXÚÈÛÛœİ˜Z[È[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙØÚXÚËXÛÛœİ˜Z[È›Üˆ[Ü™H[™›Ë‚‹ËËÈ\È[Ù[ÛÛZ[œÈ›İÈ]™[ÙXİ\š]H[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙÜ›İË[]™[\ÙXİ\š]H›Üˆ[Ü™H[™›Ë‚›[Ù[RQ›ÛÙ\][Û”™YXİ[ÛˆÂˆ™YXİ[Û’Yİš[™ÈY‹•]ZYˆ™YXİ[Û•\H™YXİ[Û•\HY˜][
+“ÓÑÑTUSÓŠBˆİ\ÙZÛYİš[™È‹•]ZYˆ›ÛÙYİš[™È‹•]ZYˆİ\œ™[]HXÚ[X[‹‘XÚ[X[
+L‹ÊBˆ[š][š]ˆ]™ÑZ[T]HXÚ[X[‹‘XÚ[X[
+L‹ÊBˆ^\ÓYXÚ[X[‹‘XÚ[X[
+ŠBˆ[“İ]]]U[YH‹•[Y\İ[\ŠŠBˆ›ÛÙ›ÛÙ™[][ÛŠšY[ÎˆÙ›ÛÙYK™Y™\™[˜Ù\ÎˆÚYKÛ•\]Nˆ›ĞXİ[ÛŠBˆRT™YXİ[ÛˆRT™YXİ[Ûˆ™[][ÛŠšY[ÎˆÜ™YXİ[Û’Y™YXİ[Û•\Kİ\ÙZÛYK™Y™\™[˜Ù\ÎˆÚY™YXİ[Û•\Kİ\ÙZÛYKÛ‘[]NˆØ\ØØYKÛ•\]Nˆ›ĞXİ[Û‹X\ˆRQ›ÛÙ\][Û”™YXİ[Û—Ü™YXİ[Û—ÙšÈŠB‚ˆ[š\]YJÜ™YXİ[Û’Yİ\ÙZÛYKX\ˆRQ›ÛÙ\][Û”™YXİ[Û—Úİ\ÙZÛÙ›ÛÙİ\HŠBˆËÈ™YXİ[Û’Y\È[™XYHHÎÈ\È™Y[™[İ\\œÙ][š\]Y[™\ÜÈZ\œ›ÜœÈHÔSÛÛ\ÜÚ]H’È\™Ù]›Üˆš\ÛXIÜÈ™[][Ûˆ˜[Y]Ü‹‚ˆ[š\]YJÜ™YXİ[Û’Y™YXİ[Û•\Kİ\ÙZÛYJBˆ[™^
+Úİ\ÙZÛY›ÛÙYKX\ˆRQ›ÛÙ\][Û”™YXİ[Û—Ù›ÛÙÚ^ŠBŸB‚‹ËËÈ\ÈX›HÛÛZ[œÈÚXÚÈÛÛœİ˜Z[È[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙØÚXÚËXÛÛœİ˜Z[È›Üˆ[Ü™H[™›Ë‚‹ËËÈ\È[Ù[ÛÛZ[œÈ›İÈ]™[ÙXİ\š]H[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙÜ›İË[]™[\ÙXİ\š]H›Üˆ[Ü™H[™›Ë‚›[Ù[RT™YXİ[ÛˆÂˆYİš[™ÈY‹•]ZYˆİ\ÙZÛYİš[™È‹•]ZYˆ\Ù\’Yİš[™ÏÈ‹•]ZYˆ™YXİ[Û•\H™YXİ[Û•\Bˆİ[[X\Hİš[™ÏÂˆÛÛ™šY[˜ÙHXÚ[X[‹‘XÚ[X[
+ÊBˆ[Ù[™\œÚ[Ûˆİš[™Âˆ[œ]\Úİš[™ÂˆÙ[™\˜]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ^\™\Ğ]]U[YH‹•[Y\İ[\ŠŠBˆRQ›ÛÙ\][Û”™YXİ[ÛˆRQ›ÛÙ\][Û”™YXİ[ÛÂˆİ\ÙZÛİ\ÙZÛ™[][ÛŠšY[ÎˆÚİ\ÙZÛYK™Y™\™[˜Ù\ÎˆÚYKÛ•\]Nˆ›ĞXİ[ÛŠBˆİ\ÙZÛY[X™\ˆİ\ÙZÛY[X™\È™[][ÛŠšY[ÎˆÚİ\ÙZÛY\Ù\’YK™Y™\™[˜Ù\ÎˆÚİ\ÙZÛY\Ù\’YKÛ•\]Nˆ›ĞXİ[Û‹X\ˆRT™YXİ[Û—Úİ\ÙZÛİ\Ù\—ÙšÈŠBˆ\Ù\ˆ\Ù\È™[][ÛŠšY[Îˆİ\Ù\’YK™Y™\™[˜Ù\ÎˆÚYKÛ‘[]NˆØ\ØØYKÛ•\]Nˆ›ĞXİ[ÛŠB‚ˆ[š\]YJÚYİ\ÙZÛYKX\ˆRT™YXİ[Û—ÚYÚİ\ÙZÛİ\HŠBˆ[š\]YJÚY™YXİ[Û•\Kİ\ÙZÛYKX\ˆRT™YXİ[Û—ÚYİ\WÚİ\ÙZÛİ\HŠBˆ[š\]YJÚY™YXİ[Û•\WKX\ˆRT™YXİ[Û—ÚYİ\Wİ\HŠBˆ[š\]YJÚİ\ÙZÛY™YXİ[Û•\K\Ù\’Y[œ]\ÚKX\ˆRT™YXİ[Û—Ú[œ]İ\HŠBˆ[™^
+Ù^\™\Ğ]KX\ˆRT™YXİ[Û—Ù^\WÚ^ŠBˆ[™^
+Úİ\ÙZÛY™YXİ[Û•\KÙ[™\˜]Y]
+ÛÜˆ\ØÊKY
+ÛÜˆ\ØÊWKX\ˆRT™YXİ[Û—Úİ\ÙZÛİ\WÙÙ[™\˜]YÚ^ŠBŸB‚‹ËËÈ\ÈX›HÛÛZ[œÈÚXÚÈÛÛœİ˜Z[È[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙØÚXÚËXÛÛœİ˜Z[È›Üˆ[Ü™H[™›Ë‚‹ËËÈ\È[Ù[ÛÛZ[œÈ›İÈ]™[ÙXİ\š]H[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙÜ›İË[]™[\ÙXİ\š]H›Üˆ[Ü™H[™›Ë‚›[Ù[œ™\Ú™\ÜÔ™YXİ[ÛˆÂˆYİš[™ÈY‹•]ZYˆ[™[ÜR][RYİš[™È‹•]ZYˆİ\ÙZÛYİš[™È‹•]ZYˆ[XYÙRYİš[™È‹•]ZYˆ]X[]TØÛÜ™HXÚ[X[‹‘XÚ[X[
+ÊBˆÛÛ™šY[˜ÙHXÚ[X[‹‘XÚ[X[
+ÊBˆ™[XZ[š[™Ô]X[]Rİ\œÈ[ˆ™YXİY]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ[XYÙH[XYÙH™[][ÛŠšY[ÎˆÚ[XYÙRYİ\ÙZÛYK™Y™\™[˜Ù\ÎˆÚYİ\ÙZÛYKÛ•\]Nˆ›ĞXİ[Û‹X\ˆ‘œ™\Ú™\ÜÔ™YXİ[Û—Ú[XYÙWÙšÈŠBˆ[™[ÜR][H[™[ÜR][H™[][ÛŠšY[ÎˆÚ[™[ÜR][RYİ\ÙZÛYK™Y™\™[˜Ù\ÎˆÚYİ\ÙZÛYKÛ‘[]NˆØ\ØØYKÛ•\]Nˆ›ĞXİ[Û‹X\ˆ‘œ™\Ú™\ÜÔ™YXİ[Û—Ú][WÙšÈŠB‚ˆ[š\]YJÚYİ\ÙZÛYKX\ˆ‘œ™\Ú™\ÜÔ™YXİ[Û—ÚYÚİ\ÙZÛİ\HŠBˆ[™^
+Ú[™[ÜR][RY™YXİY]
+ÛÜˆ\ØÊKY
+ÛÜˆ\ØÊWKX\ˆ‘œ™\Ú™\ÜÔ™YXİ[Û—Ú][Wİ[YWÚ^ŠBŸB‚‹ËËÈ\ÈX›HÛÛZ[œÈÚXÚÈÛÛœİ˜Z[È[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙØÚXÚËXÛÛœİ˜Z[È›Üˆ[Ü™H[™›Ë‚‹ËËÈ\È[Ù[ÛÛZ[œÈ›İÈ]™[ÙXİ\š]H[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙÜ›İË[]™[\ÙXİ\š]H›Üˆ[Ü™H[™›Ë‚›[Ù[[XYÙHÂˆYİš[™ÈY‹•]ZYˆİ\ÙZÛYİš[™È‹•]ZYˆ\ØYYU\Ù\’Yİš[™ÏÈ‹•]ZYˆ\H[XYÙU\BˆİÜ˜YÙRÙ^Hİš[™È[š\]YBˆZ[YU\Hİš[™È‹•˜\Ú\Š
+BˆÚ^™P]\ÈšYÒ[ˆÜ™X]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆœ™\Ú™\ÜÔ™YXİ[Ûˆœ™\Ú™\ÜÔ™YXİ[Û–×Bˆİ\ÙZÛİ\ÙZÛ™[][ÛŠšY[ÎˆÚİ\ÙZÛYK™Y™\™[˜Ù\ÎˆÚYKÛ•\]Nˆ›ĞXİ[ÛŠBˆ\Ù\ˆ\Ù\È™[][ÛŠšY[Îˆİ\ØYYU\Ù\’YK™Y™\™[˜Ù\ÎˆÚYKÛ•\]Nˆ›ĞXİ[ÛŠB‚ˆ[š\]YJÚYİ\ÙZÛYKX\ˆ’[XYÙWÚYÚİ\ÙZÛİ\HŠBˆ[™^
+Úİ\ÙZÛYÜ™X]Y]
+ÛÜˆ\ØÊWKX\ˆ’[XYÙWÚİ\ÙZÛØÜ™X]YÚ^ŠBŸB‚‹ËËÈ\È[Ù[ÛÛZ[œÈ›İÈ]™[ÙXİ\š]H[™™\]Z\™\ÈY][Û˜[Ù]\›ÜˆZYÜ˜][ÛœËˆš\Ú]Î‹ËÜš\Ë›KÙÜ›İË[]™[\ÙXİ\š]H›Üˆ[Ü™H[™›Ë‚›[Ù[\Ù\“]š][Û•™[™ÂˆYİš[™ÈY‹•]ZYˆ\Ù\’Yİš[™È‹•]ZYˆY]šXÈ]š][Û“Y]šXÂˆ\š[Ù™[™\š[Ùˆ]™Õ˜[YHXÚ[X[‹‘XÚ[X[
+LŠBˆÚ[™ÙT\˜Ù[XÚ[X[È‹‘XÚ[X[
+‹ŠBˆØ[İ[]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ\Ù\ˆ\Ù\ˆ™[][ÛŠšY[Îˆİ\Ù\’YK™Y™\™[˜Ù\ÎˆÚYKÛ‘[]NˆØ\ØØYKÛ•\]Nˆ›ĞXİ[ÛŠB‚ˆ[š\]YJİ\Ù\’YY]šXË\š[ÙKX\ˆ•\Ù\“]š][Û•™[™İ\Ù\—ÛY]šX×Ü\š[Ùİ\HŠBŸB‚™[[HŞ\İ[T›ÛHÂˆTÑT‚ˆQRS‚ŸB‚™[[Hİ\ÙZÛ›ÛHÂˆÕÓ‘T‚ˆQSP‘T‚ŸB‚™[[HÚÙ[”\œÜÙHÂˆSPRSÕ‘T’Q–BˆTÔÕÓÔ‘Ô‘TÑUˆÕTÑRÓÒS•’UUSÓ‚ŸB‚™[[H[š]ÂˆÔSBˆÒSÑÔSBˆRSSUT‚ˆUT‚ˆÕTˆP“TÔÓÓ‚ˆPTÔÓÓ‚ˆQPÑBŸB‚™[[H]™[Ûİ\˜ÙHÂˆTÑT‚ˆ‘PÑRTˆÕÂˆ“ÒPÑBˆÖTÕSBˆRBˆ‚ŸB‚™[[H›ÛÙ]™[\HÂˆTÒTÑQˆĞĞS“‘QˆQQˆÔS‘QˆÓÓÒÑQˆPUS‚ˆQ•Õ‘T‚ˆĞTÕQˆVT‘Qˆ‘SSÕ‘QŸB‚™[[H[™[ÜU˜[œØXİ[Û•\HÂˆTÒTÑWÔ‘PÑRTˆQˆÓÓ”ÕSTSÓ‚ˆÓÓÒÑQˆSPQÑWÕĞTÕBˆÕĞÒ×ĞUQUĞQ•TÕQS•ˆ‘UT“‚ˆ‘SSÕ‘BˆVT‘QŸB‚™[[H][SÜšYÚ[ˆÂˆÓQBˆUĞVBˆS’Ó“ÕÓ‚ŸB‚™[[HİÜ˜YÙSØØ][ÛˆÂˆ”’QÑBˆ”‘QV‘T‚ˆS•–BˆÓÕS•T‚ˆÕT‚ŸB‚™[[H™XÚ\QY™šXİ[HÂˆPTÖBˆQQUSBˆT‘ŸB‚™[[HYX[\HÂˆ”‘PRÑTÕˆSÒˆS“‘T‚ˆÓPÒÂˆÕT‚ŸB‚™[[H\˜Ú\ÙSÜ™\”İ]\ÈÂˆQ•ˆPÑQˆÓÓ‘’T“QQˆSU‘T‘QˆĞSÑSQŸB‚™[[HÚÜ[™Ò][Tİ]\ÈÂˆ‘QQQˆTÒTÑQˆÒÒTQŸB‚™[[HÚÜ[™Ó\İİ]\ÈÂˆPÕU‘BˆÓÓTUQˆĞSÑSQŸB‚™[[HXİ]š]S]™[ÂˆÑQS•T–BˆQÒˆSÑTUBˆPÕU‘Bˆ‘T–WĞPÕU‘BŸB‚™[[H[\™ŞTÙ]™\š]HÂˆRSˆSÑTUBˆÑU‘T‘BˆQ‘WÕ‘PUS’S‘ÂŸB‚™[[HÛÛ™][Û”İ]\ÈÂˆPÕU‘BˆÓÓ•“ÓQˆ‘SRTÔÒSÓ‚ˆ‘TÓÓ‘QŸB‚™[[HY][U\™Ù]Âˆ“ÓÑˆĞUQÓÔ–Bˆ•U’QS•ŸB‚™[[HY][U\HÂˆU“ÒQˆSRUˆ‘Q‘T‚ŸB‚™[[HY]\T™Y™\™[˜ÙHÂˆ‘QÑUT’PS‚ˆ‘QĞS‚ˆSSˆÓUS—Ñ”‘QBˆRT–WÑ”‘QBˆÑUÂˆÕ×ĞĞT‚ŸB‚™[[HÙ[™\ˆÂˆPSBˆ‘SPSBˆÕT‚ˆ‘Q‘T—Ó“ÕÕ×ÔĞVBŸB‚™[[HÛØ[\HÂˆÔÑWÕÑRQÒˆĞRS—ÓUTĞÓBˆPRS•RS‚ˆÕTÕÓBŸB‚™[[HX[ÛÛ™][Û‘Ü›İ\ÂˆQUP“ÓPÂˆĞT‘SÕTĞÕST‚ˆ‘SSˆQÑTÕU‘BˆUUÒSSUS‘BˆÕT‚ŸB‚™[[H]šY[Ù^HÂˆĞSÔ’QTÂˆ“ÕRS‚ˆĞT”ÂˆUˆ’P‘T‚ˆÕQĞT‚ˆÓÑUSBŸB‚™[[HØY™]Q[]U\HÂˆST‘ÖWÑ“ÓÑˆST‘ÖWĞĞUQÓÔ–BˆPSĞÓÓ‘USÓ‚ˆQUT–WÔ‘Q‘T‘SÑBˆTÓRÑWÑ“ÓÑˆTÓRÑWĞĞUQÓÔ–BŸB‚™[[HØY™]Q]™[Xİ[ÛˆÂˆÔ‘PUQˆTUQˆSUQŸB‚™[[H[XYÙU\HÂˆ‘PÑRTˆ“ÓÑˆ”‘TÒ‘TÔÂˆÕT‚ŸB‚™[[H]š][Û“Y]šXÈÂˆĞSÔ’QTÂˆ“ÕRS‚ˆĞT”ÂˆUˆ’P‘T‚ˆÕQĞT‚ˆÓÑUSBŸB‚™[[H™YXİ[Û•\HÂˆ“ÓÑÑTUSÓ‚ˆĞTÕBˆÓÓ”ÕSTSÓ‚ˆÕTWÓ‘QQˆÕĞÒ×ĞSSÑBˆÓÔÕˆ•U’USÓ—ÔÒQÓSˆQPSÑSPS‘ˆQPSÔS—ĞQT‘SÑBˆ‘Q‘T‘SÑWÕ‘S‘ˆ‘PÒTWÕTĞQÑBŸB‚™[[H™[™\š[ÙÂˆVT×ÍÂˆVT×ÌÌˆVT×ÎLŸB‚™[[H™XÛÛ[Y[™][Û•\HÂˆÕTWÓ‘QQŸB‚™[[HÙX\˜ÚØİ[Y[Ûİ\˜ÙHÂˆ“ÓÑˆ‘PÒTBˆQPSŸB‚™[[HÙX\˜Ú[X™Y[™Ôİ]\ÈÂˆS‘S‘Âˆ“ĞÑTÔÒS‘Âˆ‘PQBˆRSQŸB‚™[[H\Ù\‘]šXÙT]›Ü›HÂˆSÔÂˆS‘“ÒQˆÑP‚ŸB‚™[[H›İYšXØ][Û•\HÂˆVT–WÔÓÓÓ‚ˆÕ×ÔÕĞÒÂˆ‘PÓÓSQS‘USÓ—Ô‘PQBˆĞQ‘UWÔ‘U’QUÂˆTÒTÑWÔ‘PÑRU‘QˆQSP‘T—ĞÒS‘ÑQŸB‚™[[H›İYšXØ][ÛÚ[›™[ÂˆTÒˆSPRSŸB‚™[[H›İYšXØ][Û‘[]™\Tİ]\ÈÂˆS‘S‘Âˆ“ĞÑTÔÒS‘ÂˆÑS•ˆRSQŸB‚™[[H™XÛÛ[Y[™][Û”İ]\ÈÂˆQ•ˆPÕU‘BˆPĞÑTQˆTÓRTÔÑQˆVT‘QŸB‚™[[HØY™]Tİ]\ÈÂˆS‘S‘ÂˆTÔÑQˆ“ĞÒÑQŸB‚™[[HØY™]Qš[\•\HÂˆST‘ÖWÑ“ÓÑˆST‘ÖWĞĞUQÓÔ–BˆPSĞU“ÒQˆPSÓSRUˆPSÔ‘Q‘T‚ˆTÓRÑWÑ“ÓÑˆTÓRÑWĞĞUQÓÔ–BˆQUT–BŸB‚™[[HØY™]PÚXÚÔ™\İ[ÂˆTÔÑQˆĞT“‘QˆRSQŸB‚‹ËÈÜİÜ™TÔS\X[Ó•SÈ“ÕTÕSÕ[™^\È[™Y™XŞXÛHšYÙÙ\œÈ™[XZ[ˆ[ˆHÔSZYÜ˜][Û‹‚›[Ù[RT™XÛÛ[Y[™][ÛˆÂˆYİš[™ÈY‹•]ZYˆİ\ÙZÛYİš[™È‹•]ZYˆ\Ù\’Yİš[™ÏÈ‹•]ZYˆ\H™XÛÛ[Y[™][Û•\Bˆİ]\È™XÛÛ[Y[™][Û”İ]\ÈY˜][
+Q•
+BˆØY™]Tİ]\ÈØY™]Tİ]\ÈY˜][
+S‘S‘ÊBˆİ[[X\Hİš[™ÏÈ‹•^ˆ[Ù[™\œÚ[Ûˆİš[™È‹•^ˆ[œ]\Úİš[™È‹•^ˆÛİ\˜ÙT™YXİ[Û’Yİš[™ÏÈ‹•]ZYˆÙ[™\˜]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ^\™\Ğ]]U[YH‹•[Y\İ[\ŠŠBˆİ]\ĞÚ[™ÙY]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ™YY˜XÚÑ›ÛY]]U[YOÈ‹•[Y\İ[\ŠŠB‚ˆ[š\]YJÚYİ\ÙZÛYKX\ˆRT™XÛÛ[Y[™][Û—ÚYÚİ\ÙZÛİ\HŠBˆ[š\]YJÚY\WKX\ˆRT™XÛÛ[Y[™][Û—ÚYİ\Wİ\HŠBˆ[š\]YJÚY\Kİ\ÙZÛYKX\ˆRT™XÛÛ[Y[™][Û—ÚYİ\WÚİ\ÙZÛİ\HŠBˆ[™^
+Ù^\™\Ğ]KX\ˆRT™XÛÛ[Y[™][Û—Ù^\WÚ^ŠBˆX\
+RT™XÛÛ[Y[™][ÛˆŠBŸB‚›[Ù[RTÚÜ[™Ô™XÛÛ[Y[™][ÛˆÂˆ™XÛÛ[Y[™][Û’Yİš[™ÈY‹•]ZYˆİ\ÙZÛYİš[™È‹•]ZYˆ™XÛÛ[Y[™][Û•\H™XÛÛ[Y[™][Û•\HY˜][
+ÕTWÓ‘QQ
+Bˆ›ÛÙYİš[™È‹•]ZYˆİYÙÙ\İY]HXÚ[X[‹‘XÚ[X[
+L‹ÊBˆ[š][š]ˆš[Üš]Hİš[™ÈY˜][
+““Ô“PSŠH‹•^‚ˆX\
+RTÚÜ[™Ô™XÛÛ[Y[™][ÛˆŠBŸB‚›[Ù[RT™XÛÛ[Y[™][Û”ØY™]PÚXÚÈÂˆYİš[™ÈY‹•]ZYˆ™XÛÛ[Y[™][Û’Yİš[™È‹•]ZYˆš[\•\HØY™]Qš[\•\Bˆ™\İ[ØY™]PÚXÚÔ™\İ[ˆ›ØÚÙY›ÛÙYİš[™ÏÈ‹•]ZYˆÜ™X]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠB‚ˆX\
+RT™XÛÛ[Y[™][Û”ØY™]PÚXÚÈŠBŸB‚‹ËÈÜİÜ™TÔS“ÈÛXÚY\Ë\X[[™^\Ë[™[]™\HÛZ[H[˜İ[ÛœÈ]™H[ˆZYÜ˜][ÛˆŒ‚›[Ù[\Ù\‘]šXÙHÂˆYİš[™ÈYY˜][
+™Ù[™\˜]Y
+™Ù[—Ü˜[™ÛWİ]ZY
+
+HŠJH‹•]ZYˆ\Ù\’Yİš[™È‹•]ZYˆ]›Ü›H\Ù\‘]šXÙT]›Ü›Bˆ\ÚÚÙ[ˆİš[™È[š\]YBˆ\™\œÚ[Ûˆİš[™ÏÂˆ\İÙY[]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ™]›ÚÙY]]U[YOÈ‹•[Y\İ[\ŠŠBˆÜ™X]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠB‚ˆ[š\]YJÚY\Ù\’YKX\ˆ•\Ù\‘]šXÙWÚYİ\Ù\—İ\HŠBˆ[™^
+İ\Ù\’YKX\ˆ•\Ù\‘]šXÙWØXİ]™Wİ\Ù\—Ú^‹Ú\™Nˆ˜]Ê—œ™]›ÚÙY]ˆTÈ•SŠJBˆX\
+•\Ù\‘]šXÙHŠBŸB‚›[Ù[›İYšXØ][Û”™Y™\™[˜ÙHÂˆ\Ù\’Yİš[™È‹•]ZYˆ\H›İYšXØ][Û•\BˆÚ[›™[›İYšXØ][ÛÚ[›™[ˆ\Ñ[˜X›Y›ÛÛX[ˆY˜][
+YJBˆ]ZY]İ\œÔİ\]U[YOÈ‹•[YJŠBˆ]ZY]İ\œÑ[™]U[YOÈ‹•[YJŠBˆ\]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠB‚ˆY
+İ\Ù\’Y\KÚ[›™[JBˆX\
+“›İYšXØ][Û”™Y™\™[˜ÙHŠBŸB‚›[Ù[›İYšXØ][ÛˆÂˆYİš[™ÈYY˜][
+™Ù[™\˜]Y
+™Ù[—Ü˜[™ÛWİ]ZY
+
+HŠJH‹•]ZYˆİ\ÙZÛYİš[™È‹•]ZYˆ\Ù\’Yİš[™È‹•]ZYˆ\H›İYšXØ][Û•\Bˆ›ÛÙYİš[™ÏÈ‹•]ZYˆ[™[ÜR][RYİš[™ÏÈ‹•]ZYˆY\RÙ^Hİš[™ÂˆØÚY[Y›Üˆ]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆ™XY]]U[YOÈ‹•[Y\İ[\ŠŠBˆÜ™X]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠB‚ˆ[š\]YJÚY\Ù\’YKX\ˆ“›İYšXØ][Û—ÚYİ\Ù\—İ\HŠBˆ[š\]YJİ\Ù\’YY\RÙ^WKX\ˆ“›İYšXØ][Û—İ\Ù\—ÙY\Wİ\HŠBˆ[™^
+İ\Ù\’YÜ™X]Y]
+ÛÜˆ\ØÊKY
+ÛÜˆ\ØÊWKX\ˆ“›İYšXØ][Û—Ú[˜›ŞÚ^ŠBˆX\
+“›İYšXØ][ÛˆŠBŸB‚›[Ù[›İYšXØ][Û‘[]™\HÂˆYİš[™ÈYY˜][
+™Ù[™\˜]Y
+™Ù[—Ü˜[™ÛWİ]ZY
+
+HŠJH‹•]ZYˆ›İYšXØ][Û’Yİš[™È‹•]ZYˆ\Ù\’Yİš[™È‹•]ZYˆ]šXÙRYİš[™ÏÈ‹•]ZYˆÚ[›™[›İYšXØ][ÛÚ[›™[ˆİ]\È›İYšXØ][Û‘[]™\Tİ]\ÈY˜][
+S‘S‘ÊBˆ][\È[Y˜][
+
+H‹”ÛX[[ˆ™^][\]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠBˆÛZ[YY]]U[YOÈ‹•[Y\İ[\ŠŠBˆ˜Z[\™PÛÙHİš[™ÏÂˆÙ[]]U[YOÈ‹•[Y\İ[\ŠŠBˆÜ™X]Y]]U[YHY˜][
+›İÊ
+JH‹•[Y\İ[\ŠŠB‚ˆX\
+“›İYšXØ][Û‘[]™\HŠBŸB

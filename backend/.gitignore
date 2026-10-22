@@ -1,7 +1,10 @@
 node_modules
+.venv
+.local-models
 dist
 .idea
 .vscode
 .env
 src/generated
 *.tsbuildinfo
+.phase10-api.*.log
