@@ -4,7 +4,7 @@ Implements the platform and identity foundations, the catalog and unit conversio
 
 ## Project status and handoff
 
-Phases 0–10 have their core backend flows implemented. Phase 11 adds operational hardening, observability, recommendation isolation, and maintenance tooling; its remaining production-readiness work is listed in the Phase 11 section below. The backend is ready for frontend and mobile integration against the GraphQL API, while production launch still depends on completing the listed operational checks and loading verified catalog data.
+Phases 0–10 core flows are implemented. Phase 11 operational hardening is underway, with the completed checks and remaining production tasks summarized below. The GraphQL API is available for frontend and mobile integration. Production launch still requires operational review and verified catalog and nutrition data.
 
 The monorepo is organized as `backend/`, `frontend/`, and `mobile-app/`. The latter two folders are placeholders for the teams building those clients. The backend API contract and example operations are documented in `GRAPHQL_ENDPOINTS.md`.
 
@@ -150,12 +150,15 @@ Migrations `0020_notifications_devices.sql` through `0022_notification_expiry_in
 
 ## Phase 11 (hardening and scale — in progress)
 
-The API now applies a GraphQL complexity budget (`GRAPHQL_COMPLEXITY_LIMIT`) in addition to the depth limit, and introspection defaults off unless enabled explicitly. Prometheus-compatible GraphQL latency/error metrics are available at `/health/metrics` when `METRICS_ENABLED=true` and a 32-character `METRICS_TOKEN` is configured. Phase 11 artifacts under `docs/phase11` define proposed SLO targets, operations runbooks, and the RLS audit. The local API uses a non-superuser runtime login; `pnpm phase11:rls-audit` passes for scoped tables, including recommendation isolation. `pnpm phase11:backup-restore` runs a restore drill against the isolated test database. Load/soak tests, PITR, and review of identity/session/membership/outbox access remain in progress.
+The API enforces GraphQL depth and complexity limits; introspection is disabled unless explicitly enabled. Prometheus-compatible latency and error metrics are available at `/health/metrics` when `METRICS_ENABLED=true` and a 32-character `METRICS_TOKEN` are configured. Operational artifacts are under `docs/phase11`. The runtime database role is a non-superuser.
 
-For local development, install the optional Python runtime with `python -m venv .venv` and `.\.venv\Scripts\python.exe -m pip install -r requirements-embeddings.txt`, then start `npm run embeddings:local`. It serves `intfloat/multilingual-e5-small` on `127.0.0.1:8088`; set `EMBEDDING_API_URL=http://127.0.0.1:8088/v1/embeddings` and `EMBEDDING_MODEL=intfloat/multilingual-e5-small` in `.env`. Model weights are cached under `.local-models` and excluded from Git.
+Verified locally: `pnpm phase11:rls-audit`, `pnpm phase11:query-baseline`, and `pnpm phase11:backup-restore` pass against isolated test databases. Load and soak testing, point-in-time recovery validation, and final access review for identity, sessions, memberships, and outbox data remain open. Docker was unavailable during the latest local check; Mailpit and S3 were not running, so those integrations need environment-backed verification.
+
+For local semantic search development, install the optional Python runtime with `python -m venv .venv` and `.\.venv\Scripts\python.exe -m pip install -r requirements-embeddings.txt`, then run `pnpm embeddings:local`. It serves `intfloat/multilingual-e5-small` on `127.0.0.1:8088`; set `EMBEDDING_API_URL=http://127.0.0.1:8088/v1/embeddings` and `EMBEDDING_MODEL=intfloat/multilingual-e5-small` in `.env`. Model weights are cached under `.local-models` and excluded from Git.
 
 ## Notes
 * SQL in `prisma/migrations` is the source of truth; `prisma/schema.prisma` mirrors it (refresh with `pnpm db:pull`).
-* Local Phase 4 verification: migrations applied to `ai_kitchen_intelligence_v2`, Prisma schema introspected and validated, build/typecheck/lint passed, 27 unit tests passed, and the API health endpoint and GraphQL schema responded after restart. Authenticated GraphQL mutation flows were not exercised end-to-end in this pass.
-* Local Phase 5 verification: migration `0010_commerce.sql` applied to the dedicated test database, integration script passed partial/full receipt, retry and simultaneous duplicate checks, and the Phase 5 build passed. The application database was not used for integration fixtures.
+* Latest local verification: `pnpm lint`, `pnpm typecheck`, `pnpm test` (58 tests), `pnpm build`, and `pnpm db:validate` passed. Phase 5, 6, 7, 10, and safety-category integration checks passed on the dedicated test database.
+* API verification: `/health/live`, `/health/ready`, and a GraphQL catalog search responded successfully. The local catalog currently has 336 foods and 37 safety-category memberships; nutrition, product, and recipe data still need reviewed data entry.
+* Data-entry CSV validation passes in dry-run mode. See `data/README.md` and `data/` for the templates. Nutrition values must come from an approved, trusted source.
 
