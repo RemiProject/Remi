@@ -1,6 +1,14 @@
-# AI Kitchen API — Phases 0–3 (NestJS 12 · CQRS · Prisma 7 · PostgreSQL 18)
+# AI Kitchen API — Phases 0–11 (NestJS 12 · CQRS · Prisma 7 · PostgreSQL 18)
 
 Implements the platform and identity foundations, the catalog and unit conversion foundation, and the first inventory ledger path from `AI_Kitchen_ERD_Architecture_Guide.html`.
+
+## Project status and handoff
+
+Phases 0–10 have their core backend flows implemented. Phase 11 adds operational hardening, observability, recommendation isolation, and maintenance tooling; its remaining production-readiness work is listed in the Phase 11 section below. The backend is ready for frontend and mobile integration against the GraphQL API, while production launch still depends on completing the listed operational checks and loading verified catalog data.
+
+The monorepo is organized as `backend/`, `frontend/`, and `mobile-app/`. The latter two folders are placeholders for the teams building those clients. The backend API contract and example operations are documented in `GRAPHQL_ENDPOINTS.md`.
+
+Catalog seed data is starter data. Nutrition values are intentionally not populated until a trusted source is selected and reviewed. Do not treat the starter catalog as complete production data.
 
 ## Run — option 1: app on your machine, infrastructure in Docker (best for development)
 ```bash
@@ -134,7 +142,20 @@ Migrations `0012_predictions.sql` and `0013_prediction_detail_guard.sql` add nut
 ## Phase 8 (safety gated supply recommendations, first end-to-end type)
 Migrations `0014_recommendations.sql` through `0016_safety_invalidation_snapshot.sql` add the recommendation base, `SUPPLY_NEED` detail, eight-filter safety verdicts, terminal lifecycle checks, active-member guard, safety profile invalidation, and member rejoin reset. A depletion prediction can create an idempotent per-member draft; the outbox safety worker locks the shared profile, re-reads it, stores all verdicts, and is the only application path that activates a recommendation. The authenticated household GraphQL API exposes only the current user's unexpired `ACTIVE/PASSED` supply recommendations, with accept, dismiss, and debounced regenerate mutations. Feedback folds once into `UserFoodPreference`, and an hourly job expires old rows in bounded batches. See `GRAPHQL_ENDPOINTS.md`.
 
+## Phase 9 (pgvector semantic search)
+Migrations `0017_semantic_search.sql` through `0019_embedding_worker_routines.sql` create transactionally maintained documents for foods, recipes, and titled meals, track the embedding model, and provide RLS-safe worker routines. Results are scoped in SQL and backed by RLS; meals are additionally restricted to their owner. Candidates pass through the user's safety profile before display. Configure an OpenAI-compatible endpoint that returns 384 dimensions using `EMBEDDING_API_URL`, `EMBEDDING_MODEL`, and optionally `EMBEDDING_API_KEY`. E5 models receive the required `passage:` / `query:` prefixes; other models receive plain text. Vectors are normalized, provider errors retry with bounded exponential backoff, and health and nutrition fields are excluded. After documents are READY, create the partial HNSW index with `pnpm db:search:index`. The API query is `search(query, types, first)`; details are in `GRAPHQL_ENDPOINTS.md`.
+
+## Phase 10 (notifications and devices)
+Migrations `0020_notifications_devices.sql` through `0022_notification_expiry_index.sql` add owner-scoped devices, preferences, inbox records, and a retryable delivery queue. GraphQL supports inbox pagination, unread counts, read marking, device registration/revocation, preference management, and a `graphql-ws` subscription. Expiry alerts are deduped per item and expiry date; safety-passed recommendations also enter the inbox. Delivery uses PostgreSQL `SKIP LOCKED`, timezone-aware quiet hours, and bounded retries. Email is available when SMTP is configured. Push uses FCM HTTP v1 with service-account OAuth credentials (`FCM_PROJECT_ID`, `FCM_CLIENT_EMAIL`, `FCM_PRIVATE_KEY`); iOS delivery uses Firebase when APNs is configured in the Firebase project. Keep the private key in a local secret store. Missing credentials leave push queued for retry; provider-reported unregistered tokens are revoked. Run `pnpm test:integration:phase10` against a dedicated migrated `DATABASE_URL_TEST` to verify dedupe, disabled preferences, token revocation, and concurrent workers. See `GRAPHQL_ENDPOINTS.md` for operations and payloads.
+
+## Phase 11 (hardening and scale — in progress)
+
+The API now applies a GraphQL complexity budget (`GRAPHQL_COMPLEXITY_LIMIT`) in addition to the depth limit, and introspection defaults off unless enabled explicitly. Prometheus-compatible GraphQL latency/error metrics are available at `/health/metrics` when `METRICS_ENABLED=true` and a 32-character `METRICS_TOKEN` is configured. Phase 11 artifacts under `docs/phase11` define proposed SLO targets, operations runbooks, and the RLS audit. The local API uses a non-superuser runtime login; `pnpm phase11:rls-audit` passes for scoped tables, including recommendation isolation. `pnpm phase11:backup-restore` runs a restore drill against the isolated test database. Load/soak tests, PITR, and review of identity/session/membership/outbox access remain in progress.
+
+For local development, install the optional Python runtime with `python -m venv .venv` and `.\.venv\Scripts\python.exe -m pip install -r requirements-embeddings.txt`, then start `npm run embeddings:local`. It serves `intfloat/multilingual-e5-small` on `127.0.0.1:8088`; set `EMBEDDING_API_URL=http://127.0.0.1:8088/v1/embeddings` and `EMBEDDING_MODEL=intfloat/multilingual-e5-small` in `.env`. Model weights are cached under `.local-models` and excluded from Git.
+
 ## Notes
 * SQL in `prisma/migrations` is the source of truth; `prisma/schema.prisma` mirrors it (refresh with `pnpm db:pull`).
 * Local Phase 4 verification: migrations applied to `ai_kitchen_intelligence_v2`, Prisma schema introspected and validated, build/typecheck/lint passed, 27 unit tests passed, and the API health endpoint and GraphQL schema responded after restart. Authenticated GraphQL mutation flows were not exercised end-to-end in this pass.
 * Local Phase 5 verification: migration `0010_commerce.sql` applied to the dedicated test database, integration script passed partial/full receipt, retry and simultaneous duplicate checks, and the Phase 5 build passed. The application database was not used for integration fixtures.
+
