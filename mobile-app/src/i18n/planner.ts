@@ -1,0 +1,28 @@
+export const plannerMessages = {
+  en: {
+    calendar: 'Monthly calendar', previousMonth: 'Previous month', nextMonth: 'Next month',
+    dayPlan: 'Your day, your meals', emptyPeriod: 'Leave room for something good',
+    week: 'Your week', cancel: 'Cancel', selectedRecipe: 'Selected recipe', choose: 'Select recipe', meals: 'meals',
+    title: 'Meal Planner', intro: 'Plan your week with the existing sample recipes.', back: 'Back', previous: 'Previous week', next: 'Next week', today: 'Today',
+    breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snacks', add: 'Add meal', close: 'Close', date: 'Planned date', period: 'Meal period', recipe: 'Choose a recipe',
+    dateHint: 'Use YYYY-MM-DD with digits 0–9.', invalid: 'Enter a valid calendar date and select a meal period and recipe.',
+    empty: 'No meals planned for this day', emptyBody: 'Choose a recipe to start planning.', none: 'Nothing scheduled', loading: 'Loading meal plans…',
+    readError: 'Meal plans could not be read. Saved data has not been replaced.', writeError: 'Could not save this change. Your saved plan is unchanged. Retry the action.', retry: 'Retry',
+    save: 'Save meal', saving: 'Saving…', added: 'Meal added to your plan.', removed: 'Meal removed from your plan.', remove: 'Remove meal', open: 'Open recipe',
+    missing: 'Recipe unavailable', missingBody: 'This recipe is no longer in the sample catalog. You can remove this planned meal.', details: 'Planned meal', sample: 'Sample recipe · No AI recommendations',
+    photo: 'Illustrative recipe photo', minutes: 'min',
+  },
+  ar: {
+    calendar: 'التقويم الشهري', previousMonth: 'الشهر السابق', nextMonth: 'الشهر التالي',
+    dayPlan: 'يومك ووجباتك', emptyPeriod: 'اترك مساحة لوجبة تحبها',
+    week: 'أسبوعك', cancel: 'إلغاء', selectedRecipe: 'الوصفة المختارة', choose: 'اختيار الوصفة', meals: 'وجبات',
+    title: 'مخطط الوجبات', intro: 'خطط لأسبوعك باستخدام الوصفات التجريبية المتاحة.', back: 'رجوع', previous: 'الأسبوع السابق', next: 'الأسبوع التالي', today: 'اليوم',
+    breakfast: 'الإفطار', lunch: 'الغداء', dinner: 'العشاء', snack: 'الوجبات الخفيفة', add: 'إضافة وجبة', close: 'إغلاق', date: 'التاريخ المخطط', period: 'وقت الوجبة', recipe: 'اختر وصفة',
+    dateHint: 'استخدم YYYY-MM-DD بالأرقام 0–9.', invalid: 'أدخل تاريخاً صحيحاً واختر وقت الوجبة والوصفة.',
+    empty: 'لا توجد وجبات مخططة لهذا اليوم', emptyBody: 'اختر وصفة لبدء التخطيط.', none: 'لا توجد وجبة', loading: 'جارٍ تحميل خطة الوجبات…',
+    readError: 'تعذرت قراءة خطة الوجبات. لم تُستبدل البيانات المحفوظة.', writeError: 'تعذر حفظ التغيير. لم تتغير خطتك المحفوظة. أعد المحاولة.', retry: 'إعادة المحاولة',
+    save: 'حفظ الوجبة', saving: 'جارٍ الحفظ…', added: 'أُضيفت الوجبة إلى خطتك.', removed: 'حُذفت الوجبة من خطتك.', remove: 'حذف الوجبة', open: 'فتح الوصفة',
+    missing: 'الوصفة غير متاحة', missingBody: 'هذه الوصفة لم تعد في القائمة التجريبية. يمكنك حذف الوجبة المخططة.', details: 'الوجبة المخططة', sample: 'وصفة تجريبية · ليست توصية ذكاء اصطناعي',
+    photo: 'صورة توضيحية للوصفة', minutes: 'دقيقة',
+  },
+} as const;
