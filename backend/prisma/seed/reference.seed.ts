@@ -6,7 +6,7 @@ import { v7 as uuidv7 } from 'uuid';
 const url = process.env.DATABASE_URL_MIGRATOR || process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is required');
 
-const countries = [['EG', 'Egypt'], ['US', 'United States']];
+const countries = [['EG', 'Egypt'], ['SA', 'Saudi Arabia'], ['US', 'United States']];
 const languages: [string, string, boolean][] = [['ar', 'Arabic', true], ['en', 'English', false]];
 const locales = [['ar-EG', 'Arabic (Egypt)', 'ar'], ['en-US', 'English (United States)', 'en']];
 const cuisines = [['egyptian', 'Egyptian'], ['italian', 'Italian'], ['indian', 'Indian'], ['lebanese', 'Lebanese'], ['american', 'American'], ['asian', 'Asian']];

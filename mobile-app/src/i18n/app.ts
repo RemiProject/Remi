@@ -34,7 +34,7 @@ export const featureMessages: Record<'en' | 'ar', Record<string, { title: string
     shopping: { title: 'قائمة التسوق', description: 'أدر قائمة تسوق يدوية محفوظة على هذا الجهاز.' },
     notifications: { title: 'الإشعارات', description: 'الإشعارات والتذكيرات غير مفعلة.' },
     community: { title: 'المجتمع', description: 'المجتمع غير متاح حالياً. المشاركة والمنشورات والتفاعلات الاجتماعية غير مطبقة.' },
-    profile: { title: 'الملف الشخصي', description: 'الملفات الشخصية وتسجيل الدخول غير مطبقين.' },
+    profile: { title: 'الملف الشخصي', description: 'سجّل الدخول أو أنشئ حسابًا أو أدر جلستك.' },
     settings: { title: 'الإعدادات', description: 'اختر اللغة والمظهر المشتركين المحفوظين على هذا الجهاز.' },
     contact: { title: 'اتصل بنا', description: 'اتصل بنا غير متاح حالياً. لا يوجد نموذج دعم أو خدمة لإرسال الرسائل.' },
   },

@@ -402,7 +402,10 @@ input LogMealInputType {
 }
 
 input LoginInput {
-  email: String!
+  email: String @deprecated(reason: "Use identifier for email or username login.")
+
+  """Email or username"""
+  identifier: String
   password: String!
 }
 
@@ -926,20 +929,17 @@ input RefreshAccessTokenInput {
 }
 
 input RegisterInput {
-  """ISO 3166 alpha-2, e.g. EG"""
-  countryCode: String!
+  countryCode: String
   email: String!
 
   """ar | en. Defaults to the locale language"""
   languageCode: String
-
-  """e.g. ar-EG"""
-  localeCode: String!
+  localeCode: String
   name: String!
   password: String!
-
-  """IANA zone, e.g. Africa/Cairo"""
-  timezone: String!
+  phoneNumber: String!
+  timezone: String
+  username: String!
 }
 
 type RegisterResult {

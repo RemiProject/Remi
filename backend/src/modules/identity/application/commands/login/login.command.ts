@@ -3,7 +3,7 @@ import type { AuthTokens } from '@/modules/identity/domain/ports/token-signer.po
 
 export class LoginCommand extends Command<AuthTokens> {
   constructor(
-    public readonly email: string,
+    public readonly identifier: string,
     public readonly password: string,
     public readonly userAgent?: string | null,
   ) {

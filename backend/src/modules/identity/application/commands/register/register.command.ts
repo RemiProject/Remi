@@ -5,10 +5,12 @@ export class RegisterCommand extends Command<{ userId: string }> {
     public readonly email: string,
     public readonly password: string,
     public readonly name: string,
-    public readonly countryCode: string,
-    public readonly localeCode: string,
-    public readonly timezone: string,
+    public readonly countryCode?: string,
+    public readonly localeCode?: string,
+    public readonly timezone?: string,
     public readonly languageCode?: string,
+    public readonly username: string = '',
+    public readonly phoneNumber: string = '',
   ) {
     super();
   }

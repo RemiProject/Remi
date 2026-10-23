@@ -40,7 +40,7 @@ export class AuthResolver {
   @Mutation(() => RegisterResultType)
   register(@Args('input') i: RegisterInput) {
     return this.commandBus.execute(
-      new RegisterCommand(i.email, i.password, i.name, i.countryCode, i.localeCode, i.timezone, i.languageCode),
+      new RegisterCommand(i.email, i.password, i.name, i.countryCode, i.localeCode, i.timezone, i.languageCode, i.username, i.phoneNumber),
     );
   }
 
@@ -49,7 +49,7 @@ export class AuthResolver {
   login(@Args('input') i: LoginInput, @Context() ctx: { req?: { headers?: Record<string, string | string[] | undefined> } }) {
     const ua = ctx?.req?.headers?.['user-agent'];
     const userAgent = typeof ua === 'string' ? ua.slice(0, 512) : null;
-    return this.commandBus.execute(new LoginCommand(i.email, i.password, userAgent));
+    return this.commandBus.execute(new LoginCommand(i.identifier ?? i.email ?? '', i.password, userAgent));
   }
 
   @Throttle(AUTH_THROTTLE)

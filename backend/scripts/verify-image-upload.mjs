@@ -7,7 +7,7 @@ const gql = async (query, variables = {}, token, hh) => {
   const j = await r.json(); return j.errors ? { errors: j.errors.map((e) => e.extensions?.code) } : j.data;
 };
 const tag = randomBytes(4).toString('hex'), pw = 'T3st!' + randomBytes(9).toString('base64url'), email = `img.${tag}@example.test`;
-await gql(`mutation($i:RegisterInput!){register(input:$i){userId}}`, { i: { email, password: pw, name: 'Img ' + tag, countryCode: 'EG', localeCode: 'ar-EG', timezone: 'Africa/Cairo', languageCode: 'ar' } });
+await gql(`mutation($i:RegisterInput!){register(input:$i){userId}}`, { i: { email, username: 'img_' + tag, phoneNumber: '+201012345678', password: pw, name: 'Img ' + tag, countryCode: 'EG', localeCode: 'ar-EG', timezone: 'Africa/Cairo', languageCode: 'ar' } });
 const token = (await gql(`mutation($i:LoginInput!){login(input:$i){accessToken}}`, { i: { email, password: pw } })).login.accessToken;
 const hh = (await gql(`mutation($i:CreateHouseholdInput!){createHousehold(input:$i)}`, { i: { name: 'Img ' + tag, timezone: 'Africa/Cairo' } }, token)).createHousehold;
 const req = (mimeType, sizeBytes) => gql(`mutation($i:RequestImageUploadInput!){requestImageUpload(input:$i){storageKey uploadUrl expiresAt}}`, { i: { mimeType, sizeBytes } }, token, hh);

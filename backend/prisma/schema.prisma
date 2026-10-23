@@ -218,6 +218,8 @@ model ProductSource {
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model User {
+  username                                                        String?                  @unique(map: "User_username_uq")
+  phoneNumber                                                     String?
   id                                                              String                   @id @db.Uuid
   email                                                           String
   passwordHash                                                    String

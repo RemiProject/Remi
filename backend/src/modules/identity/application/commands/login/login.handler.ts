@@ -24,8 +24,12 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     @Inject(TOKEN_SIGNER) private readonly signer: TokenSignerPort,
   ) {}
 
-  async execute({ email, password, userAgent }: LoginCommand): Promise<AuthTokens> {
-    const user = await this.users.findByEmail(this.tx.db, normalizeEmail(email));
+  async execute({ identifier, password, userAgent }: LoginCommand): Promise<AuthTokens> {
+    const normalized = normalizeEmail(identifier);
+    if (!normalized || normalized.length > 254) throw new InvalidCredentialsError();
+    const user = normalized.includes('@')
+      ? await this.users.findByEmail(this.tx.db, normalized)
+      : await this.users.findByUsername(this.tx.db, normalized);
     // Same work and same error whether the email exists or not (no user enumeration, no timing oracle).
     let ok = false;
     if (user) ok = await this.hasher.verify(user.passwordHash, password);

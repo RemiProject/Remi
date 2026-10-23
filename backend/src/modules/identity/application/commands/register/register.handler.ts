@@ -17,6 +17,8 @@ import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { LinkBuilder } from '@/modules/identity/application/services/link-builder.js';
 import { OneTimeTokenService } from '@/modules/identity/application/services/one-time-token.service.js';
 import { RegisterCommand } from './register.command.js';
+import { assertStrongPassword, normalizeUsername, isValidUsername, isSupportedMobile } from '@/modules/identity/domain/services/registration-policy.js';
+import { DomainError } from '@/shared/domain-error.js';
 
 @CommandHandler(RegisterCommand)
 export class RegisterHandler implements ICommandHandler<RegisterCommand> {
@@ -34,8 +36,15 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
   ) {}
 
   async execute(cmd: RegisterCommand): Promise<{ userId: string }> {
-    if (!isValidTimezone(cmd.timezone)) throw new InvalidTimezoneError();
-    const refs = await this.queryBus.execute(new ResolveRegistrationReferencesQuery(cmd.countryCode, cmd.localeCode, cmd.languageCode));
+    assertStrongPassword(cmd.password);
+    const username = normalizeUsername(cmd.username);
+    if (!isValidUsername(username)) throw new DomainError('INVALID_USERNAME', 'Username must be 3–30 letters, numbers or underscores, starting with a letter.', 400);
+    if (!isSupportedMobile(cmd.phoneNumber)) throw new DomainError('INVALID_PHONE', 'Enter a valid Egyptian or Saudi mobile number in international format.', 400);
+    const countryCode = cmd.countryCode ?? (cmd.phoneNumber.startsWith('+20') ? 'EG' : 'SA');
+    const localeCode = cmd.localeCode ?? (cmd.languageCode === 'ar' ? 'ar-EG' : 'en-US');
+    const timezone = cmd.timezone ?? (countryCode === 'EG' ? 'Africa/Cairo' : countryCode === 'SA' ? 'Asia/Riyadh' : 'UTC');
+    if (!isValidTimezone(timezone)) throw new InvalidTimezoneError();
+    const refs = await this.queryBus.execute(new ResolveRegistrationReferencesQuery(countryCode, localeCode, cmd.languageCode));
     if (!refs) throw new ReferenceNotFoundError('country, locale or language');
 
     const email = normalizeEmail(cmd.email);
@@ -46,7 +55,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     try {
       await this.tx.run(async (tx) => {
         await this.users.create(tx, {
-          id: userId, email, passwordHash, name: cmd.name.trim(), timezone: cmd.timezone,
+          id: userId, email, username, phoneNumber: cmd.phoneNumber, passwordHash, name: cmd.name.trim(), timezone,
           countryId: refs.countryId, localeId: refs.localeId, preferredLanguageId: refs.languageId,
         });
         await this.tokenRepo.insert(tx, issued.row);
@@ -64,7 +73,12 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
         });
       }, { userId });
     } catch (err) {
-      if (isUniqueViolation(err)) throw new EmailAlreadyRegisteredError();
+      if (isUniqueViolation(err)) {
+        const conflict = err as { constraint?: string; meta?: unknown };
+        const usernameConflict = /username/i.test(`${conflict.constraint ?? ''} ${JSON.stringify(conflict.meta ?? {})}`);
+        if (usernameConflict || await this.users.findByUsername(this.tx.db, username)) throw new DomainError('USERNAME_TAKEN', 'This username is already taken.', 409);
+        throw new EmailAlreadyRegisteredError();
+      }
       throw err;
     }
 

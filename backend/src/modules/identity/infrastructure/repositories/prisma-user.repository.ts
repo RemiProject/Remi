@@ -29,6 +29,11 @@ export class PrismaUserRepository implements UserRepository {
     return r ? toRecord(r) : null;
   }
 
+  async findByUsername(db: Tx, username: string): Promise<UserRecord | null> {
+    const r = await db.user.findFirst({ where: { username, deletedAt: null }, select });
+    return r ? toRecord(r) : null;
+  }
+
   async touchLogin(tx: Tx, id: string): Promise<void> {
     await tx.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
   }

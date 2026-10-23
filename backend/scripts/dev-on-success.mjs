@@ -14,7 +14,7 @@ process.chdir(root);
 execFileSync(
   process.execPath,
   [
-    "node_modules/tsc-alias/bin/index.js",
+   "node_modules/tsc-alias/dist/bin/index.js",
     "-p",
     "tsconfig.build.json",
   ],

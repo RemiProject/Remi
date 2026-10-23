@@ -7,6 +7,7 @@ import { RemyThemeProvider, useRemyTheme } from '@/theme/provider';
 import { RemyFontProvider } from '@/theme/fonts';
 import { InventoryProvider } from '@/providers/inventory-provider';
 import { LanguageProvider } from '@/providers/language-provider';
+import { AuthProvider } from '@/providers/auth-provider';
 
 function Navigation() {
   const { colors, mode } = useRemyTheme();
@@ -25,5 +26,5 @@ function Navigation() {
 }
 
 export default function RootLayout() {
-  return <SafeAreaProvider><RemyThemeProvider><RemyFontProvider><LanguageProvider><InventoryProvider><PlannerProvider><ShoppingProvider><Navigation /></ShoppingProvider></PlannerProvider></InventoryProvider></LanguageProvider></RemyFontProvider></RemyThemeProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><RemyThemeProvider><RemyFontProvider><LanguageProvider><InventoryProvider><PlannerProvider><ShoppingProvider><AuthProvider><Navigation /></AuthProvider></ShoppingProvider></PlannerProvider></InventoryProvider></LanguageProvider></RemyFontProvider></RemyThemeProvider></SafeAreaProvider>;
 }

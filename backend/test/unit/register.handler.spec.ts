@@ -15,16 +15,37 @@ function setup(refs: any = { countryId: 'c', localeId: 'l', languageId: 'g', lan
     queryBus: { execute: vi.fn(async () => refs) },
     eventBus: { publish: vi.fn() },
     outbox: { publish: vi.fn(async () => undefined) },
-    users: { create: vi.fn(async () => undefined) },
+    users: { create: vi.fn(async () => undefined), findByUsername: vi.fn(async () => null) },
     tokenRepo: { insert: vi.fn(async () => undefined) },
     hasher: { hash: vi.fn(async () => 'HASH'), verify: vi.fn() },
   };
   const handler = new RegisterHandler(deps.tx as any, deps.queryBus as any, deps.eventBus as any, deps.outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config, deps.users as any, deps.tokenRepo as any, deps.hasher as any);
   return { handler, deps };
 }
-const cmd = (over: Partial<RegisterCommand> = {}) => Object.assign(new RegisterCommand(' Ahmed@Mail.com ', 'secret-123', 'Ahmed', 'EG', 'ar-EG', 'Africa/Cairo'), over);
+const cmd = (over: Partial<RegisterCommand> = {}) => Object.assign(new RegisterCommand(' Ahmed@Mail.com ', 'Secret-123!', 'Ahmed', 'EG', 'ar-EG', 'Africa/Cairo', undefined, 'ahmed_test', '+201012345678'), over);
 
 describe('RegisterHandler', () => {
+  it('rejects weak passwords, invalid usernames and invalid mobile numbers before writes', async () => {
+    for (const input of [{ password: 'weakpass' }, { username: 'x' }, { phoneNumber: '+123' }]) {
+      const { handler, deps } = setup();
+      await expect(handler.execute(cmd(input))).rejects.toBeDefined();
+      expect(deps.users.create).not.toHaveBeenCalled();
+    }
+  });
+
+  it('normalizes usernames and defaults hidden locale/timezone from language and phone country', async () => {
+    const { handler, deps } = setup();
+    await handler.execute(cmd({ username: 'Ahmed_Test', countryCode: undefined, localeCode: undefined, timezone: undefined, languageCode: 'en', phoneNumber: '+966501234567' }));
+    expect(deps.users.create).toHaveBeenCalledWith({}, expect.objectContaining({ username: 'ahmed_test', phoneNumber: '+966501234567', timezone: 'Asia/Riyadh' }));
+    expect(deps.queryBus.execute).toHaveBeenCalledWith(expect.objectContaining({ countryCode: 'SA', localeCode: 'en-US', languageCode: 'en' }));
+  });
+
+  it('maps a concurrent username conflict to USERNAME_TAKEN', async () => {
+    const { handler, deps } = setup();
+    deps.tx.run.mockRejectedValueOnce({ code: 'P2002' });
+    deps.users.findByUsername.mockResolvedValueOnce({ id: 'existing' } as any);
+    await expect(handler.execute(cmd())).rejects.toMatchObject({ code: 'USERNAME_TAKEN' });
+  });
   it('creates user + token + outbox in one TX, then publishes the domain event', async () => {
     const { handler, deps } = setup();
     const { userId } = await handler.execute(cmd());

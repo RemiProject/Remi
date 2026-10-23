@@ -172,6 +172,8 @@ test('Settings selector persists English-Arabic-English and updates More, featur
  mocks['@/screens/shopping-screen']={__esModule:true,default:'ShoppingScreen'};
  mocks['@/screens/planner-screen']={__esModule:true,default:'PlannerScreen'};
  mocks['@/screens/recipes-screen']={__esModule:true,default:'RecipesScreen'};
+ mocks['@/screens/profile-screen']={__esModule:true,default:'ProfileScreen'};
+ mocks['@/components/backend-connection']={BackendConnection:'BackendConnection'};
  mocks['@/i18n/cooking']=require('../src/i18n/cooking.ts');mocks['@/components/appearance-controls']={AppearanceControls:'AppearanceControls'};
  const More=load('src/screens/more-screen.tsx').default,Preview=load('src/screens/feature-preview-screen.tsx').default,Health=load('src/app/(tabs)/health.tsx').default,Tabs=load('src/app/(tabs)/_layout.tsx').default;
  function nodes(tree){if(Array.isArray(tree))return tree.flatMap(nodes);if(!tree||typeof tree!=='object')return [];return [tree,...nodes(tree.props?.children)];}

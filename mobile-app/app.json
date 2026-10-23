@@ -26,6 +26,10 @@
     "plugins": [
       "expo-router",
       [
+        "expo-secure-store",
+        { "configureAndroidBackup": true, "faceIDPermission": false }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#F8F6E6",

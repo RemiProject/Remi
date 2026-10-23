@@ -12,6 +12,7 @@ import { USER_REPOSITORY, type UserRepository } from '@/modules/identity/domain/
 import { InvalidTokenError, UserNotFoundError } from '@/modules/identity/domain/services/identity.errors.js';
 import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
 import { ResetPasswordCommand } from './reset-password.command.js';
+import { assertStrongPassword } from '@/modules/identity/domain/services/registration-policy.js';
 
 @CommandHandler(ResetPasswordCommand)
 export class ResetPasswordHandler implements ICommandHandler<ResetPasswordCommand> {
@@ -27,6 +28,7 @@ export class ResetPasswordHandler implements ICommandHandler<ResetPasswordComman
   ) {}
 
   async execute({ token, newPassword }: ResetPasswordCommand): Promise<{ changed: true }> {
+    assertStrongPassword(newPassword);
     const passwordHash = await this.hasher.hash(newPassword);
     const changedAt = new Date();
     const from = this.config.env.MAIL_FROM;

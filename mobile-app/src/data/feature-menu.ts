@@ -15,7 +15,7 @@ export const featureGroups: { title: string; items: FeatureMenuItem[] }[] = [
     { id: 'community', title: 'Community', icon: 'community', unavailable: true, description: 'Community is currently unavailable. Sharing, posts, and social interactions are not implemented.' },
   ] },
   { title: 'You & Remy', items: [
-    { id: 'profile', title: 'Profile', icon: 'profile', description: 'Account profiles and authentication are not implemented.' },
+    { id: 'profile', title: 'Profile', icon: 'profile', description: 'Log in, create an account, or manage your session.' },
     { id: 'settings', title: 'Settings', icon: 'settings', description: 'Choose shared language and appearance preferences saved on this device.' },
     { id: 'contact', title: 'Contact Us', icon: 'contact', unavailable: true, description: 'Contact Us is currently unavailable. No support form or message-delivery service is connected.' },
   ] },

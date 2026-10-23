@@ -8,7 +8,7 @@ const gql = async (query, variables = {}, token, hh) => {
 };
 const pw = 'T3st!' + randomBytes(9).toString('base64url');
 const tag = randomBytes(4).toString('hex');
-const reg = (email) => gql(`mutation($i:RegisterInput!){register(input:$i){userId}}`, { i: { email, password: pw, name: 'Test ' + tag, countryCode: 'EG', localeCode: 'ar-EG', timezone: 'Africa/Cairo', languageCode: 'ar' } });
+const reg = (email) => gql(`mutation($i:RegisterInput!){register(input:$i){userId}}`, { i: { email, username: email.split('@')[0].replace(/\./g, '_'), phoneNumber: '+201012345678', password: pw, name: 'Test ' + tag, countryCode: 'EG', localeCode: 'ar-EG', timezone: 'Africa/Cairo', languageCode: 'ar' } });
 const login = async (email) => (await gql(`mutation($i:LoginInput!){login(input:$i){accessToken}}`, { i: { email, password: pw } })).login.accessToken;
 const a = `owner.${tag}@example.test`, b = `member.${tag}@example.test`;
 const ra = await reg(a), rb = await reg(b); console.log('register', JSON.stringify(ra), JSON.stringify(rb));

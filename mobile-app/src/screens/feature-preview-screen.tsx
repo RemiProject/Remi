@@ -13,6 +13,8 @@ import { useLanguage } from '@/providers/language-provider';
 import { inventoryMessages } from '@/i18n/inventory';
 import { cookingMessages } from '@/i18n/cooking';
 import { AppearanceControls } from '@/components/appearance-controls';
+import { BackendConnection } from '@/components/backend-connection';
+import ProfileScreen from '@/screens/profile-screen';
 
 export default function FeaturePreview() {
   const { feature } = useLocalSearchParams<{ feature: string }>();
@@ -26,6 +28,7 @@ export default function FeaturePreview() {
   if (item?.id === 'shopping') return <ShoppingScreen />;
   if (item?.id === 'planner') return <PlannerScreen />;
   if (item?.id === 'recipes') return <RecipesScreen />;
+  if (item?.id === 'profile') return <ProfileScreen />;
   if (item?.id === 'cooking') return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}>
     <Button label={a.backMore} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />
     <PageHeader title={cookingMessages[language].title} subtitle={cookingMessages[language].intro} />
@@ -36,6 +39,7 @@ export default function FeaturePreview() {
       <AppText variant="title">{t.settings}</AppText>
       <Card style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}><AppText variant="heading">{t.language}</AppText><LanguageControls /></Card>
       <Card><AppearanceControls /></Card>
+      <BackendConnection />
       <AppText muted>{t.settingsNote}</AppText>
     </Screen>
   </SafeAreaView>;
