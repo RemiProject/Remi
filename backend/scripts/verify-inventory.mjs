@@ -1,5 +1,6 @@
 // Run: node backend/scripts/verify-inventory.mjs
 // After restarting the backend: node backend/scripts/verify-inventory.mjs --check
+// Household isolation (requires Mailpit): node backend/scripts/verify-inventory.mjs --isolation
 // Requires the existing API and seeded catalog. Creates test data; does not delete it.
 import { randomBytes, randomInt } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -26,7 +27,9 @@ async function gql(query, variables = {}, session = {}) {
   });
   const body = await response.json();
   if (!response.ok || body.errors?.length) {
-    throw new Error(`HTTP ${response.status}: ${JSON.stringify(body.errors ?? body)}`);
+    const error = new Error(`HTTP ${response.status}: ${JSON.stringify(body.errors ?? body)}`);
+    error.graphqlErrors = body.errors;
+    throw error;
   }
   if (!body.data) throw new Error('Response has no GraphQL data');
   return body.data;
@@ -49,7 +52,7 @@ async function step(number, label, action) {
   }
 }
 
-async function registerAndLogin(suffix) {
+async function registerAndLogin(suffix, verify = false) {
   const username = `inv_${runId}_${suffix}`;
   const password = `Inv!A9${randomBytes(16).toString('hex')}`;
   // Exact RegisterInput fields from backend/schema.graphql.
@@ -63,8 +66,44 @@ async function registerAndLogin(suffix) {
     'mutation($input:RegisterInput!){register(input:$input){userId}}', { input },
   );
   check('registered user ID present', true, Boolean(registration.register?.userId));
+  if (verify) await verifyTestEmail(input.email);
   const token = await login(input.email, password);
-  return { token, userId: registration.register.userId, email: input.email, password };
+  const session = { token, userId: registration.register.userId, email: input.email, password };
+  if (verify) {
+    const data = await gql('query{me{id email emailVerifiedAt}}', {}, session);
+    check('authenticated user ID', session.userId, data.me.id);
+    check('authenticated email', input.email, data.me.email);
+    check('email verified', true, Boolean(data.me.emailVerifiedAt));
+  }
+  return session;
+}
+
+async function verifyTestEmail(email) {
+  const mailpit = (process.env.MAILPIT_URL ?? 'http://localhost:8025').replace(/\/$/, '');
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    const search = await fetch(`${mailpit}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!search.ok) throw new Error(`Mailpit search failed: HTTP ${search.status}`);
+    const listing = await search.json();
+    for (const message of listing.messages ?? []) {
+      if (!message.To?.some((recipient) => recipient.Address?.toLowerCase() === email.toLowerCase())) continue;
+      const response = await fetch(`${mailpit}/api/v1/message/${encodeURIComponent(message.ID)}`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!response.ok) throw new Error(`Mailpit message failed: HTTP ${response.status}`);
+      const detail = await response.json();
+      const match = `${detail.Text ?? ''}\n${detail.HTML ?? ''}`.match(/verify-email\?token=([^\s"'<>]+)/);
+      if (!match) continue;
+      const token = decodeURIComponent(match[1].split('&')[0]);
+      const data = await gql('mutation($input:TokenInput!){verifyEmail(input:$input)}', { input: { token } });
+      check('verifyEmail accepted', true, data.verifyEmail);
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`No verification email arrived in Mailpit for ${email} within 30 seconds.`);
 }
 
 async function login(email, password) {
@@ -125,11 +164,122 @@ async function expectStock(session, expected) {
   return `quantity: expected=${expected} actual=${rows[0].quantity} ${rows[0].unit}`;
 }
 
+async function expectRejected(action, expectedCode) {
+  try {
+    const result = await action();
+    throw new Error(`Expected forbidden/not found (${expectedCode}); actual=${JSON.stringify(result)}`);
+  } catch (error) {
+    const errors = error.graphqlErrors;
+    if (!errors?.length) throw error;
+    const rejected = errors.every(({ extensions }) =>
+      (extensions?.code === expectedCode && extensions?.status === 404)
+      || (extensions?.code === 'FORBIDDEN' && extensions?.status === 403));
+    return check('forbidden/not found rejection', true, rejected)
+      + `; actual codes=${errors.map(({ extensions }) => extensions?.code).join(',')}`;
+  }
+}
+
+async function runIsolation() {
+  let a;
+  let b;
+  let ingredient;
+  let itemId;
+  let original;
+  let passed = 0;
+  const unchanged = async () => {
+    const current = await inventory(a);
+    check("A's inventory including versions unchanged", original, current);
+    const item = current.find((row) => row.id === itemId);
+    check("A's quantity in thousandths", '2000', milli(item?.quantity).toString());
+    return `A quantity: expected=2.000 actual=${item.quantity} ${item.unit}`;
+  };
+  const cases = [
+    ['Register, verify and log in user A; create household A', async () => {
+      a = await registerAndLogin('a', true);
+      await createHousehold(a, 'a');
+      return check('initial inventory A', [], await inventory(a));
+    }],
+    ['Register, verify and log in user B; create household B', async () => {
+      b = await registerAndLogin('b', true);
+      await createHousehold(b, 'b');
+      check('distinct users and households', true, a.userId !== b.userId && a.householdId !== b.householdId);
+      return check('initial inventory B', [], await inventory(b));
+    }],
+    ['User A adds 2 units and saves the batch ID', async () => {
+      const data = await gql('query{foods(search:"tomato",first:20){nodes{id name defaultUnit}}}', {}, a);
+      ingredient = data.foods.nodes[0];
+      check('ingredient found', true, Boolean(ingredient?.id));
+      const result = await mutate('addStock', {
+        foodId: ingredient.id, amount: '2.000', unit: ingredient.defaultUnit,
+        idempotencyKey: `${runId}:isolation:add`,
+      }, a);
+      check('result type', 'InventoryMutationSuccessType', result.__typename);
+      check('affected batches', 1, result.balances.length);
+      itemId = result.balances[0].inventoryItemId;
+      original = await inventory(a);
+      check('A batch count', 1, original.length);
+      check('A batch ID', itemId, original[0].id);
+      return `${await unchanged()}; itemId=${itemId}`;
+    }],
+    ["User B cannot list A's item", async () => {
+      const rows = await inventory(b);
+      check("A's item returned to B", false, rows.some((row) => row.id === itemId));
+      return check('inventory B', [], rows);
+    }],
+    ["User B cannot consume using A's item ID", async () => {
+      // consumeStock accepts foodId, not inventoryItemId. A batch ID must be rejected.
+      const detail = await expectRejected(() => mutate('consumeStock', {
+        foodId: itemId, amount: '0.500', unit: ingredient.defaultUnit,
+        idempotencyKey: `${runId}:isolation:consume-item`,
+      }, b), 'FOOD_NOT_FOUND');
+      return `${detail}; ${await unchanged()}`;
+    }],
+    ["User B cannot consume A's stock using the correct food ID", async () => {
+      const result = await mutate('consumeStock', {
+        foodId: ingredient.id, amount: '0.500', unit: ingredient.defaultUnit,
+        idempotencyKey: `${runId}:isolation:consume-food`,
+      }, b);
+      const detail = check('result type', 'InsufficientStockType', result.__typename);
+      check('B available stock in thousandths', '0', milli(result.available).toString());
+      check('available unit', ingredient.defaultUnit, result.unit);
+      return `${detail}; ${await unchanged()}`;
+    }],
+    ["User B cannot adjust A's item", async () => {
+      const detail = await expectRejected(() => mutate('adjustStock', {
+        inventoryItemId: itemId, delta: '-0.250', idempotencyKey: `${runId}:isolation:adjust`,
+      }, b), 'INVENTORY_ITEM_NOT_FOUND');
+      return `${detail}; ${await unchanged()}`;
+    }],
+    ['User A still has the original quantity; user B remains empty', async () => {
+      check('final inventory B', [], await inventory(b));
+      return unchanged();
+    }],
+  ];
+  console.log(`Inventory isolation | endpoint=${endpoint} run=${runId}`);
+  for (const [label, action] of cases) {
+    try {
+      console.log(`PASS ${passed + 1}. ${label} | ${await action()}`);
+      passed++;
+    } catch (error) {
+      console.error(`FAIL ${passed + 1}. ${label} | expected=all checks succeed; actual=${error.message}`);
+      console.error(`\nFAIL: ${passed}/${cases.length} checks passed; stopped at first failure; ${cases.length - passed - 1} not run.`);
+      process.exitCode = 1;
+      return;
+    }
+  }
+  console.log(`\nPASS: ${passed}/${cases.length} checks passed. Test users and households remain in the database.`);
+}
+
 let primary;
 let food;
 let addInput;
 let added;
 let batchId;
+
+if (process.argv.includes('--isolation')) {
+  await runIsolation();
+  process.exit(process.exitCode ?? 0);
+}
 
 if (process.argv.includes('--check')) {
   try {
