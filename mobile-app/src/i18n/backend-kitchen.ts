@@ -1,0 +1,28 @@
+export const backendKitchenMessages = {
+  en: {
+    title: 'Kitchen', signInTitle: 'Sign in to see your kitchen', signInBody: 'Your kitchen is saved securely with your account.', signIn: 'Sign in',
+    loading: 'Loading your kitchen…', empty: 'Your kitchen is empty', emptyBody: 'Your household’s food will appear here.',
+    error: 'Could not load your kitchen. Check your connection and try again.', retry: 'Retry',
+    device: 'On this device', deviceBody: 'Read-only local items. Not imported into your household. Nothing on this device has been changed.',
+    deviceError: 'The items on this device could not be read.', deviceLoading: 'Checking items on this device…',
+    saved: 'foods in your household', writesSoon: 'Adding, editing and deleting food is coming soon.',
+    add: 'Add food', edit: 'Edit', delete: 'Delete', readOnly: 'Read-only', storage: 'Storage',
+    search: 'Search your food', all: 'All', name: 'Name', expiry: 'Expiration date', useFirst: 'Use First',
+    none: 'No matching food', clear: 'Clear search and filters', unknown: 'No expiration date', today: 'Expires today', expired: 'Past expiration date',
+    days: 'Days until expiration:', back: 'Back', notFound: 'This food is unavailable. Return to Kitchen or retry.',
+    TABLESPOON: 'tbsp', TEASPOON: 'tsp', COUNTER: 'Counter', OTHER: 'Other',
+  },
+  ar: {
+    title: 'المطبخ', signInTitle: 'سجّل الدخول لعرض مطبخك', signInBody: 'يُحفظ مطبخك بأمان مع حسابك.', signIn: 'تسجيل الدخول',
+    loading: 'جارٍ تحميل مطبخك…', empty: 'مطبخك فارغ', emptyBody: 'سيظهر طعام منزلك هنا.',
+    error: 'تعذّر تحميل مطبخك. تحقّق من الاتصال وحاول مرة أخرى.', retry: 'أعد المحاولة',
+    device: 'على هذا الجهاز', deviceBody: 'عناصر محلية للقراءة فقط. لم تُستورد إلى منزلك، ولم تتغير أي بيانات على هذا الجهاز.',
+    deviceError: 'تعذّرت قراءة العناصر على هذا الجهاز.', deviceLoading: 'جارٍ التحقّق من عناصر هذا الجهاز…',
+    saved: 'أطعمة في منزلك', writesSoon: 'إضافة الطعام وتعديله وحذفه ستتوفر قريباً.',
+    add: 'إضافة طعام', edit: 'تعديل', delete: 'حذف', readOnly: 'للقراءة فقط', storage: 'التخزين',
+    search: 'ابحث عن طعامك', all: 'الكل', name: 'الاسم', expiry: 'تاريخ الانتهاء', useFirst: 'استخدم أولاً',
+    none: 'لا يوجد طعام مطابق', clear: 'مسح البحث والفلاتر', unknown: 'لا يوجد تاريخ انتهاء', today: 'ينتهي اليوم', expired: 'تجاوز تاريخ الانتهاء',
+    days: 'الأيام المتبقية للانتهاء:', back: 'رجوع', notFound: 'هذا الطعام غير متاح. عُد إلى المطبخ أو أعد المحاولة.',
+    TABLESPOON: 'م.ك', TEASPOON: 'م.ص', COUNTER: 'على الرخامة', OTHER: 'أخرى',
+  },
+} as const;

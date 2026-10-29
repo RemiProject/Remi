@@ -5,6 +5,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { authMessages } from '@/i18n/auth';
+import { isBackendInventoryEnabled } from '@/services/inventory-feature';
 
 export default function ProfileScreen() {
   const auth = useAuth();
@@ -28,6 +29,6 @@ export default function ProfileScreen() {
       <Button label={auth.error === 'logoutError' ? t.logout : t.retry} disabled={auth.busy}
         onPress={() => { void (auth.error === 'logoutError' ? auth.logout() : auth.restore()); }} variant="secondary" />
     </Card>}
-    <AppText muted>{t.local}</AppText>
+    <AppText muted>{isBackendInventoryEnabled() ? t.backendKitchen : t.local}</AppText>
   </Screen></SafeAreaView>;
 }

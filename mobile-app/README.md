@@ -32,12 +32,19 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Backend inventory reads (not connected to screens yet)
+## Backend Kitchen reads
 
 `EXPO_PUBLIC_BACKEND_INVENTORY` defaults to off. Only the exact value `true`
 enables `createGraphqlInventoryRepository`; otherwise it returns `undefined`
-without reading auth/storage or making requests. Existing screens continue using
-their current repository even when the flag is enabled; provider wiring is a later PR.
+without reading auth/storage or making requests. With the flag off, all existing
+screens and local storage behavior stay unchanged. With the flag on, Kitchen,
+Home food lists and food detail use the authenticated backend inventory.
+Sign in to view a household's Kitchen. A separate **On this device** count notice
+shows existing local inventory as read-only; it is never imported, edited or deleted.
+Backend Add/Edit/Delete controls and direct add/edit URLs are disabled until the
+write operations are implemented. Name search, storage filtering, name/expiry
+sorting and Use First work on backend items; category filtering is unavailable
+because inventory reads do not return a category.
 
 To enable it for development, set the variable before starting Expo:
 

@@ -123,14 +123,14 @@ function dateOrdinal(date: string) {
   // Midnight UTC used solely to compare date-only values, avoiding daylight-saving offsets.
   return Date.parse(`${date}T00:00:00.000Z`) / 86400000;
 }
-export function expirationStatus(item: InventoryItem, today = localDateKey()) {
+export function expirationStatus(item: { expirationDate?: string | null }, today = localDateKey()) {
   if (!item.expirationDate) return { kind: 'unknown' as const, label: 'No expiration date', days: null };
   const days = dateOrdinal(item.expirationDate) - dateOrdinal(today);
   if (days < 0) return { kind: 'expired' as const, label: 'Past entered expiration date', days };
   if (days === 0) return { kind: 'due' as const, label: 'Expiration date is today', days };
   return { kind: 'upcoming' as const, label: `Expires in ${days} ${days === 1 ? 'day' : 'days'}`, days };
 }
-export function useFirstItems(items: readonly InventoryItem[], today = localDateKey()) {
+export function useFirstItems<T extends { expirationDate?: string | null; name: string }>(items: readonly T[], today = localDateKey()) {
   return items.filter((item) => item.expirationDate && expirationStatus(item, today).days! <= 3)
     .sort((a, b) => a.expirationDate!.localeCompare(b.expirationDate!) || a.name.localeCompare(b.name)).slice(0, 3);
 }

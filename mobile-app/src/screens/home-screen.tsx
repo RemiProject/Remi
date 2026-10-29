@@ -14,6 +14,24 @@ import { homeMessages, homeUnitLabels } from '@/i18n/home';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { radii, spacing } from '@/theme/tokens';
+import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
+
+export interface BackendHomeData {
+  items: InventoryReadItem[];
+  status: string;
+  today: string;
+  retry: () => Promise<void>;
+  notice: ReactNode;
+  deviceNotice: ReactNode;
+  saved: string;
+  empty: string;
+  emptyBody: string;
+  writesSoon: string;
+  readOnly: string;
+  foodName: (item: InventoryReadItem) => string;
+  quantityLabel: (item: InventoryReadItem) => string;
+}
+type HomeFood = InventoryItem | InventoryReadItem;
 
 const HomeDirectionContext = createContext(false);
 function H({ style, ...props }: TextProps & { variant?: 'title' | 'heading' | 'body' | 'caption' | 'label'; muted?: boolean }) {
@@ -21,30 +39,39 @@ function H({ style, ...props }: TextProps & { variant?: 'title' | 'heading' | 'b
   return <AppText {...props} style={[{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, style]} />;
 }
 
-export default function HomeScreen() {
+export default function HomeScreen({ backend }: { backend?: BackendHomeData } = {}) {
   const { colors } = useRemyTheme();
-  const { items, status, error, retryRead } = useInventory();
-  const today = useToday();
+  const local = useInventory();
+  const localToday = useToday();
+  const { items, status, error, retryRead }: { items: readonly HomeFood[]; status: string; error: ReturnType<typeof useInventory>['error']; retryRead: () => Promise<void> } = backend
+    ? { items: backend.items, status: backend.status, error: null, retryRead: backend.retry } : local;
+  const today = backend ? backend.today : localToday;
   const { language } = useLanguage();
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState<'all' | 'foods' | 'recipes'>('all');
   const [previewId, setPreviewId] = useState<string | null>(null);
   const rtl = language === 'ar';
-  const t = homeMessages[language];
+  const t = backend ? { ...homeMessages[language], saved: backend.saved, empty: backend.empty, emptyBody: backend.emptyBody } : homeMessages[language];
   const row = { flexDirection: 'row' as const, direction: rtl ? 'rtl' as const : 'ltr' as const, alignItems: 'center' as const, gap: spacing.md };
   const number = (value: number) => value.toLocaleString(language);
   const heading = (title: string, action?: ReactNode) => <View style={[row, { flexWrap: 'wrap' }]}><H variant="heading" style={{ flex: 1 }}>{title}</H>{action}</View>;
   const matches = searchHome(status === 'ready' ? items : [], query, language, scope);
+  if (backend && status === 'ready' && scope !== 'recipes') {
+    const term = query.trim().toLocaleLowerCase(language);
+    matches.foods = backend.items.filter(item => [item.name, backend.foodName(item)].some(name => name.toLocaleLowerCase(language).includes(term)));
+  }
   const searching = query.trim() !== '' || scope !== 'all';
   const priority = useFirstItems(items, today);
-  const foodTile = (item: InventoryItem) => {
+  const foodTile = (item: HomeFood) => {
+    const name = backend ? backend.foodName(item as InventoryReadItem) : item.name;
     const expiry = expirationStatus(item, today);
     const expiryText = expiry.kind === 'unknown' ? t.unknown : expiry.kind === 'expired' ? t.expired : expiry.kind === 'due' ? t.today : `${t.soon} ${number(expiry.days!)}`;
-    return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`${item.name}. ${expiryText}`}
+    return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`${name}. ${expiryText}`}
       onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}
       style={({ pressed }) => ({ width: 190, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.sm, backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
       <View style={{ height: 58, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.selectedSurface, borderRadius: radii.md }}><Icon name="food" size={30} /></View>
-      <H variant="label">{item.name}</H><H variant="caption" muted>{number(item.quantity)} {homeUnitLabels[language][item.unitId]}</H>
+      <H variant="label">{name}</H><H variant="caption" muted>{backend ? backend.quantityLabel(item as InventoryReadItem) : <>{number(item.quantity as number)} {homeUnitLabels[language][item.unitId!]}</>}</H>
+      {backend && (item as InventoryReadItem).readOnly && <H variant="caption" muted>{backend.readOnly}</H>}
       <H variant="caption" style={{ color: expiry.kind === 'expired' ? colors.errorText : expiry.days !== null && expiry.days <= 3 ? colors.warningText : colors.textSubtle }}>{expiryText}</H>
     </Pressable>;
   };
@@ -64,7 +91,7 @@ export default function HomeScreen() {
       style={{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }} />
       <View style={[row, { flexWrap: 'wrap' }]}>{(['all', 'foods', 'recipes'] as const).map((value) => <Chip key={value} label={t[value]} selected={scope === value} onPress={() => setScope(value)} />)}</View>
     </View>
-    {status !== 'ready' && <Card><H muted>{status === 'error' ? t.readError : t.loading}</H>{status === 'error' && <Button label={t.retry} onPress={() => { void retryRead(); }} />}</Card>}
+    {backend ? <>{backend.notice}<H variant="caption" muted>{backend.writesSoon}</H></> : status !== 'ready' && <Card><H muted>{status === 'error' ? t.readError : t.loading}</H>{status === 'error' && <Button label={t.retry} onPress={() => { void retryRead(); }} />}</Card>}
     {status === 'ready' && error && <H accessibilityRole="alert" style={{ color: colors.errorText }}>{t.writeError}</H>}
     {searching ? <View style={{ gap: spacing.lg }}>{heading(t.results)}
       {!matches.foods.length && !matches.recipes.length && <H muted>{t.none}</H>}
@@ -77,7 +104,8 @@ export default function HomeScreen() {
           <View style={[row, { flexWrap: 'wrap' }]}>{storageOptions.map((storage) => <View key={storage.id} style={{ flex: 1, minWidth: 80 }}>
             <H variant="heading">{number(items.filter((item) => item.storageId === storage.id).length)}</H><H variant="caption" muted>{t[storage.id]}</H>
           </View>)}</View>
-          <Button label={items.length ? t.openKitchen : t.add} icon={items.length ? 'kitchen' : 'add'} onPress={() => router.navigate(items.length ? '/kitchen' : '/food/manual')} />
+          <Button label={backend || items.length ? t.openKitchen : t.add} icon={backend || items.length ? 'kitchen' : 'add'} onPress={() => router.navigate(backend || items.length ? '/kitchen' : '/food/manual')} />
+          {backend && <Button label={t.add} icon="add" disabled />}
         </View>
       </Card>}
       {status === 'ready' && <View style={{ gap: spacing.md }}>{heading(t.useFirst, <Button label={t.viewAll} variant="text" onPress={() => router.navigate('/kitchen')} />)}
@@ -95,6 +123,7 @@ export default function HomeScreen() {
       <View style={{ gap: spacing.md }}>{heading(t.shortcuts)}<Button label={t.plan} icon="calendar" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'planner' } })} />
         <Button label={t.shop} icon="shopping" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'shopping' } })} /></View>
     </>}
+    {backend?.deviceNotice}
     <Modal visible={previewId !== null} transparent animationType="fade" onRequestClose={() => setPreviewId(null)}>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.overlay }}><ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing.lg }}>
         <Card accessibilityViewIsModal style={{ backgroundColor: colors.modalSurface, maxWidth: 600, width: '100%', alignSelf: 'center', direction: rtl ? 'rtl' : 'ltr' }}>
