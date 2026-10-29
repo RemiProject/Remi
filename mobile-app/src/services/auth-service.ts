@@ -186,6 +186,15 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
   }
   return {
     authenticatedGraphql,
+    getIdentityRevision: () => identityRevision,
+    async getIdentityContext() {
+      await serial(load);
+      const revision = identityRevision;
+      const { me } = await authenticatedGraphql<{ me: CurrentUser }>(authOperations.me);
+      if (revision !== identityRevision) throw signedOut();
+      if (typeof me?.id !== 'string' || !me.id) throw new AuthError('INVALID_RESPONSE', 'Missing signed-in user identity.');
+      return { backendUrl, userId: me.id, revision };
+    },
     async requestPasswordReset(email: string): Promise<void> {
       await client.graphql(authOperations.requestReset, { input: { email } });
     },
