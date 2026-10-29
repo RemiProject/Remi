@@ -9,6 +9,7 @@ export interface InventoryReadItem {
   id: string;
   foodId: string;
   name: string;
+  arabicName?: string;
   quantity: Decimal;
   unitId: UnitId | null;
   storageId: StorageId | null;

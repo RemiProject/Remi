@@ -15,7 +15,7 @@ const valid = { email: user.email, identifier: user.email, password: 'Test-passw
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
 // The same lightweight component harness pattern used by the existing screen tests.
-function screenHarness({ signup = false, service = {}, language = 'en', snapshot } = {}) {
+function screenHarness({ signup = false, service = {}, language = 'en', snapshot, backendInventory = false } = {}) {
   const states = [], effects = [], routes = [];
   let cursor = 0;
   const auth = snapshot || { user: null, ready: true, busy: false, error: null,
@@ -49,6 +49,7 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
     '@/services/auth': { getAuth: () => ({ registrationReferences: async () => refs, register: async () => ({ userId: user.id }), ...service }) },
     '@/services/auth-validation': { authErrorKey }, '@/i18n/auth': { authMessages },
     '@/services/auth-form': authForm,
+    '@/services/inventory-feature': { isBackendInventoryEnabled: () => backendInventory },
     './profile-screen': { __esModule: true, default: 'ProfileScreen' },
   };
   function load(path) {
@@ -172,4 +173,16 @@ test('Egypt/Saudi calling code selection changes normalization without a country
   h.render().filter(n => n.props.accessibilityRole === 'radio')[1].props.onPress();
   h.fill({ ...valid, phoneNumber: '0501234567' }); h.press('signup'); await tick();
   assert.equal(input.phoneNumber, '+966501234567');
+});
+
+
+test('Profile copy changes only for backend inventory, in both languages', () => {
+  for (const language of ['en', 'ar']) {
+    for (const backendInventory of [false, true]) {
+      const h = screenHarness({ language, backendInventory });
+      const texts = h.render(true).filter(node => node.type === 'AppText').map(node => node.props.children);
+      assert(texts.includes(authMessages[language][backendInventory ? 'backendKitchen' : 'local']));
+      assert(!texts.includes(authMessages[language][backendInventory ? 'local' : 'backendKitchen']));
+    }
+  }
 });

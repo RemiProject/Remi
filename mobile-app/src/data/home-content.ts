@@ -1,6 +1,5 @@
 import { demoRecipes } from './kitchen-demo';
 import { homeMessages, type HomeMessageKey, type HomeLanguage } from '../i18n/home';
-import type { InventoryItem } from '../domain/inventory';
 
 // Illustrative stock imagery. These are not photos of the user's inventory.
 export const recipePhotos: Record<string, string> = {
@@ -10,7 +9,7 @@ export const recipePhotos: Record<string, string> = {
 export const kitchenPhoto = 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=720&q=80';
 export const recipeTitle = (id: string, language: HomeLanguage) => homeMessages[language][id as 'bowl' | 'breakfast'];
 export const recipeDescription = (id: string, language: HomeLanguage) => homeMessages[language][`${id}Description` as 'bowlDescription' | 'breakfastDescription'];
-export function searchHome(items: readonly InventoryItem[], query: string, language: HomeLanguage, scope: 'all' | 'foods' | 'recipes') {
+export function searchHome<T extends { name: string }>(items: readonly T[], query: string, language: HomeLanguage, scope: 'all' | 'foods' | 'recipes') {
   const term = query.trim().toLocaleLowerCase(language);
   return {
     foods: scope === 'recipes' ? [] : items.filter((item) => item.name.toLocaleLowerCase(language).includes(term)),

@@ -10,6 +10,33 @@ The monorepo is organized as `backend/`, `frontend/`, and `mobile-app/`. The lat
 
 Catalog seed data is starter data. Nutrition values are intentionally not populated until a trusted source is selected and reviewed. Do not treat the starter catalog as complete production data.
 
+## Seed an existing account's Kitchen (development only)
+
+With the local backend running and the catalog seeded, run from `backend/` on Windows:
+
+```powershell
+node scripts/seed-my-kitchen.mjs
+```
+
+Enter your existing account's email and password at the hidden prompts. The account
+must have verified its email. The script never logs or saves credentials/tokens.
+For noninteractive use, supply `KITCHEN_SEED_EMAIL` and `KITCHEN_SEED_PASSWORD`
+through your environment; avoid typing passwords into shell history.
+`API_URL` optionally overrides `http://localhost:3000/graphql`; only loopback hosts
+are allowed, and the script refuses `NODE_ENV=production`.
+
+It reuses an existing household, or creates **My Kitchen** in the device timezone
+only if there are no memberships. With several memberships, it uses its last-used
+selection if valid, otherwise the first. Only the selected household ID is saved
+in a per-account/per-backend temp file outside the repo. Browser storage cannot be
+read by this script: if Expo already uses another household, set
+`$env:KITCHEN_SEED_HOUSEHOLD_ID="<household-id>"` to target that membership.
+
+It adds five catalog foods with varied units, storage locations and expiry dates,
+including one expiring at the end of today in the household timezone. Every run
+adds more stock; it does not erase or reset any existing inventory. Run just once
+for a manual preview. It starts no server and changes no `.env` file.
+
 ## Package manager
 
 The backend uses pnpm only, with `pnpm@10.0.0` pinned in `package.json` and

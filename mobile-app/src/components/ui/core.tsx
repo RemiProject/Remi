@@ -84,11 +84,12 @@ export function EmptyState({ title, description, action, onPress }: { title: str
     {action && onPress && <Button label={action} onPress={onPress} />}
   </View>;
 }
-export function ActionRow({ title, subtitle, icon, leading, rtl, children, onPress, disabled = false, divider = false, accessibilityLabel }: PropsWithChildren<{
-  title: string; subtitle?: string; icon?: IconName; leading?: React.ReactNode; rtl?: boolean; onPress?: () => void; disabled?: boolean; divider?: boolean; accessibilityLabel?: string;
+export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleStyle, rtl, children, onPress, disabled = false, divider = false, accessibilityLabel }: PropsWithChildren<{
+  title: string; subtitle?: string; icon?: IconName; leading?: React.ReactNode; trailing?: React.ReactNode; subtitleStyle?: TextProps['style']; rtl?: boolean; onPress?: () => void; disabled?: boolean; divider?: boolean; accessibilityLabel?: string;
 }>) {
   const { colors } = useRemyTheme();
   const [focused, setFocused] = useState(false);
+  const captionStyle: TextProps['style'] = { textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' };
   return <Pressable accessibilityRole={onPress ? 'button' : undefined} accessibilityState={{ disabled }} accessibilityLabel={accessibilityLabel}
     disabled={disabled || !onPress} onPress={onPress} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
     style={({ pressed }) => ({ padding: spacing.lg, minHeight: layout.minTouchTarget, backgroundColor: pressed ? colors.pressedSurface : colors.surface,
@@ -96,8 +97,8 @@ export function ActionRow({ title, subtitle, icon, leading, rtl, children, onPre
     {divider && <View style={{ height: 1, backgroundColor: colors.divider, marginTop: -spacing.lg, marginBottom: spacing.lg }} />}
     <View style={uiStyles.row}>{leading ?? (icon && <Icon name={icon} color={colors.textSecondary} size={20} />)}
       <View style={[uiStyles.grow, { gap: spacing.xs }]}><AppText variant="label" style={{ color: disabled ? colors.textSecondary : colors.text, textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' }}>{title}</AppText>
-        {subtitle && <AppText variant="caption" muted style={{ textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' }}>{subtitle}</AppText>}{children}
-      </View>{onPress && !disabled && <View style={rtl !== undefined && rtl !== I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : undefined}><Icon name="chevron" size={16} color={colors.textSubtle} /></View>}
+        {subtitle && <AppText variant="caption" muted style={subtitleStyle ? [captionStyle, subtitleStyle] : captionStyle}>{subtitle}</AppText>}{children}
+      </View>{onPress && !disabled && (trailing ?? <View style={rtl !== undefined && rtl !== I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : undefined}><Icon name="chevron" size={16} color={colors.textSubtle} /></View>)}
     </View>
   </Pressable>;
 }
