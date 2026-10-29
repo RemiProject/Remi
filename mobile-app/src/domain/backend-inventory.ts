@@ -43,6 +43,23 @@ export interface BackendInventoryConnection {
   endCursor: string | null;
 }
 
+export interface BackendInventoryTransaction {
+  id: string;
+  eventId: string;
+  movementType: string;
+  quantityDelta: Decimal;
+  balanceAfter: Decimal;
+  createdAt: string;
+}
+
+export interface BackendInventoryItemDetail extends BackendInventoryItem {
+  transactions: {
+    nodes: BackendInventoryTransaction[];
+    hasNextPage: boolean;
+    endCursor: string | null;
+  };
+}
+
 // addStock, consumeStock and discardStock share InventoryStockInput in GraphQL.
 export interface BackendInventoryStockInput {
   foodId: string;
