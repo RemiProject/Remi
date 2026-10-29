@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-npx tsc-alias -p tsconfig.build.json
+pnpm exec tsc-alias -p tsconfig.build.json
 
 mkdir -p dist/platform/mail
 rm -rf dist/platform/mail/templates
