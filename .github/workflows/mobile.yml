@@ -1,0 +1,68 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile-app/**'
+      # Mobile contract tests read the backend schema and use its GraphQL parser.
+      - 'backend/schema.graphql'
+      - 'backend/package.json'
+      - 'backend/pnpm-lock.yaml'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'mobile-app/**'
+      - 'backend/schema.graphql'
+      - 'backend/package.json'
+      - 'backend/pnpm-lock.yaml'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    name: Mobile validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile-app
+    env:
+      CI: 'true'
+      # Existing live-backend/CORS test skips when this variable is empty.
+      REMY_TEST_API_URL: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: backend/package.json
+          dest: ~/setup-pnpm-backend
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            backend/pnpm-lock.yaml
+            mobile-app/pnpm-lock.yaml
+      - name: Install backend dependencies used by mobile contract tests
+        working-directory: backend
+        run: pnpm install --prod --frozen-lockfile --ignore-scripts
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: mobile-app/package.json
+          dest: ~/setup-pnpm-mobile
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - name: Run all mobile test scripts
+        run: node --test scripts/test-*.cjs
+      - name: Export Expo web
+        run: pnpm exec expo export --platform web
