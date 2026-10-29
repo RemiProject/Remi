@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { createRequire } = require('node:module');
 const ts = require('typescript');
 const babel = require('@babel/core');
 
@@ -26,15 +27,16 @@ function loadNativeSource(filename, dependency) {
     filename, presets: [require.resolve('@react-native/babel-preset')], babelrc: false, configFile: false,
   }).code;
   const module = { exports: {} };
-  new Function('require', 'module', 'exports', '__DEV__', output)(dependency, module, module.exports, true);
+  const nativeRequire = createRequire(fs.realpathSync(filename));
+  new Function('require', 'module', 'exports', '__DEV__', output)((id) => dependency(id, nativeRequire), module, module.exports, true);
   return module.exports;
 }
-const processTransform = loadNativeSource('node_modules/react-native/Libraries/StyleSheet/processTransform.js', (id) =>
-  id.includes('stringifySafe') ? { default: JSON.stringify } : require(id)).default;
-const payload = loadNativeSource('node_modules/react-native/Libraries/ReactNative/ReactFabricPublicInstance/ReactNativeAttributePayload.js', (id) => {
+const processTransform = loadNativeSource('node_modules/react-native/Libraries/StyleSheet/processTransform.js', (id, nativeRequire) =>
+  id.includes('stringifySafe') ? { default: JSON.stringify } : nativeRequire(id)).default;
+const payload = loadNativeSource('node_modules/react-native/Libraries/ReactNative/ReactFabricPublicInstance/ReactNativeAttributePayload.js', (id, nativeRequire) => {
   if (id.includes('flattenStyle')) return flatten;
   if (id.includes('deepDiffer')) return (a, b) => JSON.stringify(a) !== JSON.stringify(b);
-  return require(id);
+  return nativeRequire(id);
 });
 const attributes = { style: { transform: { process: processTransform } } };
 
