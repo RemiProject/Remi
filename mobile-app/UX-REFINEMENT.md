@@ -1,5 +1,7 @@
 # Remy 0.4.0 — UX redesign and Dark Mode refinement
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 ## Problems identified from source inspection
 
 - Home gave similar emphasis to the blue kitchen panel, tall inventory cards, recipe
@@ -102,13 +104,13 @@ consistent with prior phases; the on-screen phase label now says 0.4.0.
 
 | Command/check | Result |
 | --- | --- |
-| `npm.cmd run typecheck` | Passed |
-| `npm.cmd run lint` | Passed |
+| `pnpm.cmd run typecheck` | Passed |
+| `pnpm.cmd run lint` | Passed |
 | `node --test scripts/test-inventory.cjs` | 10/10 passed using approved Node worker execution |
-| `npx.cmd expo-doctor` | 21/21 passed |
-| `npx.cmd expo export --platform web` | Passed |
-| `npx.cmd expo export --platform android --platform ios` | Passed using approved Hermes execution |
-| `npx.cmd expo export --platform web --platform android --platform ios` | Final combined export passed on all three platforms |
+| `pnpm.cmd dlx expo-doctor` | 21/21 passed |
+| `pnpm.cmd exec expo export --platform web` | Passed |
+| `pnpm.cmd exec expo export --platform android --platform ios` | Passed using approved Hermes execution |
+| `pnpm.cmd exec expo export --platform web --platform android --platform ios` | Final combined export passed on all three platforms |
 | `git diff --check` | Passed, with existing line-ending notices |
 | Inline Node contrast/palette assertions | 16 text pairings per theme passed 4.5:1; minimum light 4.84:1, dark 5.50:1. Input borders passed 3:1 (light 3.57, dark 3.49). Six brand colors unchanged. |
 | Color-literal search across active screens/primitives | No hex/rgba literals found |
@@ -127,7 +129,7 @@ verify compilation, not visual comfort, keyboard overlap, focus behavior or phon
 
 ## Manual review checklist
 
-Launch with `npm.cmd run web`. Repeat native checks on available compatible devices.
+Launch with `pnpm.cmd run web`. Repeat native checks on available compatible devices.
 Use disposable test inventory and preserve saved data before any fault testing.
 
 1. Inspect Home empty/loading/read-error/populated states. First-food action should lead

@@ -1,5 +1,7 @@
 # Receipt scanner
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 ## Diagnostic follow-up (14 October 2026)
 
 Installed versions verified from node_modules: Expo 57.0.28, React Native 0.86.3, image-picker 57.0.20, file-system 57.0.7, text-extractor 2.0.0. `expo-modules-autolinking resolve --platform android --json` discovers `expo.modules.textextractor.ExpoTextExtractorModule`. No missing OCR config plugin was found: the package registers an Expo native module through expo-module.config.json and needs compilation/autolinking, not an app.json plugin entry. Broad peer ranges accept this SDK; that is not proof that Gradle/Kotlin compilation succeeds.
@@ -16,19 +18,19 @@ From the project directory, after Android Studio SDK/platform-tools and the appr
 
 ```powershell
 adb devices
-npx.cmd expo run:android --device
+pnpm.cmd exec expo run:android --device
 ```
 
-The second command generates the native project when absent, compiles the OCR module, installs a debug application and starts Metro. The current npm android script only starts Expo; it does not compile native dependencies. If prompted for an Android application ID, use the project's agreed stable ID (or the existing native app's ID); no ID was invented in configuration here. Build errors must be collected before declaring SDK compatibility or selecting a replacement OCR dependency. This project's expo-dev-client is not installed; do not use a development-client/EAS development profile as though it already exists. The local debug-build path does not require installing it.
+The second command generates the native project when absent, compiles the OCR module, installs a debug application and starts Metro. The current pnpm android script only starts Expo; it does not compile native dependencies. If prompted for an Android application ID, use the project's agreed stable ID (or the existing native app's ID); no ID was invented in configuration here. Build errors must be collected before declaring SDK compatibility or selecting a replacement OCR dependency. This project's expo-dev-client is not installed; do not use a development-client/EAS development profile as though it already exists. The local debug-build path does not require installing it.
 
 For an authorized USB device and an already installed debug app, in separate terminals:
 
 ```powershell
 adb reverse tcp:8081 tcp:8081
-npx.cmd expo start --localhost --port 8081
+pnpm.cmd exec expo start --localhost --port 8081
 ```
 
-First stop the existing Metro process in its own terminal if replacing it; do not run a second server on a silently chosen port. Reload the installed Remy debug app. For LAN instead, use `npx.cmd expo start --lan --port 8081`; both devices must reach the computer's LAN address/port. Check the full warning URL against that address and test `http://<computer-LAN-IP>:8081/status` from the phone. VPN, firewall and Wi-Fi isolation remain hypotheses until tested; no firewall changes were made. Restoring Metro connectivity does not enable OCR in Expo Go.
+First stop the existing Metro process in its own terminal if replacing it; do not run a second server on a silently chosen port. Reload the installed Remy debug app. For LAN instead, use `pnpm.cmd exec expo start --lan --port 8081`; both devices must reach the computer's LAN address/port. Check the full warning URL against that address and test `http://<computer-LAN-IP>:8081/status` from the phone. VPN, firewall and Wi-Fi isolation remain hypotheses until tested; no firewall changes were made. Restoring Metro connectivity does not enable OCR in Expo Go.
 
 ### Receipt review limits and device checklist
 
@@ -44,7 +46,7 @@ Installed `expo-text-extractor` 2.0.0 through Expo CLI. Its peer ranges accept E
 
 Native compilation with this SDK is **not yet verified**. Expo Go does not contain this module. Web has no OCR engine. Both show an explicit unavailable message and permit manual entry. Optional module lookup prevents an Expo Go startup crash.
 
-Build an Android native application with `npx.cmd expo run:android` on a configured Android SDK machine; this generates native projects and compiles/autolinks the module. iOS requires a Mac/Xcode with `npx expo run:ios`. Rebuild after dependency changes; a JS export alone cannot install the engine. No API keys/config plugin are required by this library. No development client dependency or native projects were generated in this task.
+Build an Android native application with `pnpm.cmd exec expo run:android` on a configured Android SDK machine; this generates native projects and compiles/autolinks the module. iOS requires a Mac/Xcode with `pnpm exec expo run:ios`. Rebuild after dependency changes; a JS export alone cannot install the engine. No API keys/config plugin are required by this library. No development client dependency or native projects were generated in this task.
 
 Arabic UI is translated, but **Arabic OCR is not supported by the selected Android engine and is unverified on iOS**. Automatic receipt line-item parsing is deliberately absent: OCR does not establish reliable products or quantities. Verify accuracy, rotation, formats and model availability with real receipts before release.
 
