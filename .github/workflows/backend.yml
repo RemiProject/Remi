@@ -1,0 +1,129 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18-trixie
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ai_kitchen_test
+          TZ: UTC
+        ports: ['5432:5432']
+        options: >-
+          --shm-size=256m
+          --health-cmd "pg_isready -U postgres -d ai_kitchen_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      NODE_ENV: test
+      S3_BUCKET: ci-images
+      S3_AUTO_CREATE_BUCKET: 'false'
+      ENABLE_OUTBOX_POLLER: 'false'
+      RUN_BACKGROUND_JOBS: 'false'
+      GRAPHQL_EMIT_SCHEMA: 'false'
+      # Integration scripts require different app/test URLs to protect the app DB.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_kitchen_app_unused
+      DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/ai_kitchen_test
+      DATABASE_URL_MIGRATOR: postgresql://postgres:postgres@localhost:5432/ai_kitchen_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: backend/package.json
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          # Matches backend/Dockerfile and satisfies engines.node >=22.12.
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+
+      - name: Generate throwaway test credentials
+        run: |
+          node --input-type=module <<'NODE'
+          import { randomBytes } from 'node:crypto';
+          import { appendFileSync } from 'node:fs';
+          const random = (n) => randomBytes(n).toString('base64url');
+          const values = {
+            JWT_ACCESS_SECRET: random(48),
+            JWT_REFRESH_SECRET: random(48),
+            PROFILE_NOTES_KEYRING: JSON.stringify({ current: { kid: 'ci', key: random(32) }, previous: [] }),
+          };
+          for (const [name, value] of Object.entries(values)) {
+            console.log(`::add-mask::${value}`);
+            appendFileSync(process.env.GITHUB_ENV, `${name}=${value}\n`);
+          }
+          NODE
+
+      - name: Configure PostgreSQL extensions to match Compose
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec "$POSTGRES_CONTAINER" psql -U postgres -d ai_kitchen_test -v ON_ERROR_STOP=1 -c "ALTER SYSTEM SET shared_preload_libraries = 'pg_stat_statements';"
+          docker restart "$POSTGRES_CONTAINER"
+          for i in $(seq 1 60); do
+            if psql "$DATABASE_URL_TEST" -Atc "SHOW shared_preload_libraries" | grep -qx pg_stat_statements; then break; fi
+            sleep 1
+          done
+          psql "$DATABASE_URL_TEST" -Atc "SHOW shared_preload_libraries" | grep -qx pg_stat_statements
+          psql "$DATABASE_URL_TEST" -v ON_ERROR_STOP=1 -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+
+      - name: Migrate from scratch, then again (must be a no-op)
+        run: |
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm migrate
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm migrate | grep -q "migrations up to date"
+
+      - name: Seed reference, catalog and safety data
+        run: |
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm seed
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm seed:catalog
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm seed:safety
+          DATABASE_URL="$DATABASE_URL_TEST" pnpm data:import
+
+      - name: Integration checks on the real schema
+        run: |
+          node scripts/verify-phase5.mjs
+          node scripts/verify-phase6.mjs
+          node scripts/verify-phase7.mjs
+          node scripts/verify-phase10.mjs
+          node scripts/verify-safety-categories.mjs
+
+      - name: Check schema.graphql is up to date
+        run: |
+          DATABASE_URL="$DATABASE_URL_TEST" GRAPHQL_EMIT_SCHEMA=true PORT=3000 node dist/main.js > api.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do curl -sf localhost:3000/health/live > /dev/null && break; sleep 1; done
+          curl -sf localhost:3000/health/live > /dev/null || { cat api.log; exit 1; }
+          git diff --exit-code -- schema.graphql || { echo "::error::schema.graphql is stale. Boot the API locally and commit the regenerated file."; exit 1; }
