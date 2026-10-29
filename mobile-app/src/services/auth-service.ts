@@ -51,6 +51,7 @@ function unauthenticated(error: unknown) {
 }
 
 /** One instance per backend. All session operations serialize, including disk writes.
+ * Authenticated GraphQL calls run concurrently; only session transitions serialize.
  * Never auto-retry refresh: its single-use token may have been consumed before a timeout.
  */
 export function createAuthService(client: Client, storage: AuthStorage, backendUrl: string, now = Date.now) {
@@ -58,12 +59,15 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
   let loaded = false;
   let queue: Promise<unknown> = Promise.resolve();
   let pendingRefresh: Promise<void> | undefined;
+  // Changes at account/session boundaries, but not during token rotation.
+  let identityRevision = 0;
   function serial<T>(work: () => Promise<T>): Promise<T> {
     const result = queue.then(work);
     queue = result.catch(() => undefined);
     return result;
   }
-  async function clear() {
+  async function clear({ rotation = false }: { rotation?: boolean } = {}) {
+    if (!rotation) identityRevision++;
     session = null;
     loaded = true;
     try { await storage.clear(); }
@@ -77,7 +81,10 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
     if (raw !== null) {
       let record;
       try { record = JSON.parse(raw); } catch { /* invalid record is removed below */ }
-      if (record?.version === 1 && record.backendUrl === backendUrl && isSession(record.session)) session = record.session;
+      if (record?.version === 1 && record.backendUrl === backendUrl && isSession(record.session)) {
+        identityRevision++;
+        session = record.session;
+      }
       else await clear();
     }
     loaded = true;
@@ -86,7 +93,7 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
     if (!session) throw new AuthError('NO_SESSION', 'Sign in is required.');
     return session;
   }
-  async function save(tokens: AuthTokens, requestedAt: number) {
+  async function save(tokens: AuthTokens, requestedAt: number, { rotation = false }: { rotation?: boolean } = {}) {
     if (!tokens || typeof tokens.accessToken !== 'string' || !tokens.accessToken
       || typeof tokens.refreshToken !== 'string' || !tokens.refreshToken
       || !Number.isFinite(tokens.expiresInSeconds) || tokens.expiresInSeconds <= 0) {
@@ -101,25 +108,84 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
       await clear();
       throw new AuthError('STORAGE', 'Could not save secure session storage.');
     }
+    if (!rotation) identityRevision++;
     session = next;
     loaded = true;
   }
   async function rotate() {
     const previous = requireSession();
+    const previousRevision = identityRevision;
     // Remove the single-use token before dispatch, including from disk. A crash or
     // ambiguous network failure must never restore/reuse an already rotated token.
-    await clear();
-    const requestedAt = now();
-    const result = await client.graphql<{ refreshAccessToken: AuthTokens }>(authOperations.refresh,
-      { input: { refreshToken: previous.refreshToken } });
-    await save(result.refreshAccessToken, requestedAt);
+    try {
+      await clear({ rotation: true });
+      const requestedAt = now();
+      const result = await client.graphql<{ refreshAccessToken: AuthTokens }>(authOperations.refresh,
+        { input: { refreshToken: previous.refreshToken } });
+      await save(result.refreshAccessToken, requestedAt, { rotation: true });
+    } catch (error) {
+      // Rotation's temporary clear preserves identity only if replacement succeeds.
+      // Invalid tokens/save failures may already have incremented through clear().
+      if (identityRevision === previousRevision) identityRevision++;
+      throw error;
+    }
   }
-  async function validSession() {
+  async function validSession(refresh = rotate) {
     await load();
-    if (requireSession().expiresAt <= now() + 30000) await rotate();
+    if (requireSession().expiresAt <= now() + 30000) await refresh();
     return requireSession();
   }
+  function signedOut() {
+    return new AuthError('NO_SESSION', 'Your session has expired. Please sign in again.');
+  }
+  async function refreshForRequest() {
+    try { await rotate(); }
+    catch { throw signedOut(); } // rotate already discards the single-use refresh token.
+  }
+  async function authenticatedGraphql<T>(query: string, variables: Record<string, unknown> = {}, householdId?: string): Promise<T> {
+    const initial = await serial(async () => {
+      await load();
+      const previous = requireSession();
+      const current = await validSession(refreshForRequest);
+      return { current, refreshed: current !== previous, revision: identityRevision };
+    });
+    const send = async (current: Session): Promise<T> => {
+      const data = await client.graphql<T>(query, variables, {
+        accessToken: current.accessToken, ...(householdId ? { householdId } : {}),
+      });
+      return serial(async () => {
+        if (initial.revision !== identityRevision || !session) throw signedOut();
+        return data;
+      });
+    };
+    try { return await send(initial.current); }
+    catch (error) {
+      if (!unauthenticated(error)) throw error;
+    }
+    const retrySession = await serial(async () => {
+      if (initial.revision !== identityRevision) throw signedOut();
+      const current = requireSession();
+      // Another request (or explicit refresh) already rotated this rejected token.
+      // This also handles late 401 responses arriving after that refresh finished.
+      if (current !== initial.current) return current;
+      if (initial.refreshed) {
+        await clear();
+        throw signedOut();
+      }
+      await refreshForRequest();
+      return requireSession();
+    });
+    try { return await send(retrySession); }
+    catch (error) {
+      if (!unauthenticated(error)) throw error;
+      await serial(async () => {
+        if (initial.revision === identityRevision && session === retrySession) await clear();
+      });
+      throw signedOut();
+    }
+  }
   return {
+    authenticatedGraphql,
     async requestPasswordReset(email: string): Promise<void> {
       await client.graphql(authOperations.requestReset, { input: { email } });
     },
