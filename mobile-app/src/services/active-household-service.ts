@@ -18,6 +18,8 @@ interface Resolution { household: Household; identity: Identity }
 interface Coordinator {
   selections: Map<ActiveHouseholdStorage, SelectionStorage>;
   pending?: Promise<Resolution>;
+  activeContext?: string;
+  revision: number;
 }
 
 export const createHouseholdMutation = 'mutation CreateHousehold($input: CreateHouseholdInput!) { createHousehold(input: $input) }';
@@ -42,10 +44,15 @@ function enqueue<T>(selection: SelectionStorage, work: () => Promise<T>): Promis
 function coordinatorFor(auth: Auth) {
   let coordinator = coordinators.get(auth);
   if (!coordinator) {
-    coordinator = { selections: new Map() };
+    coordinator = { selections: new Map(), revision: 0 };
     coordinators.set(auth, coordinator);
   }
   return coordinator;
+}
+
+/** Tracks observed selection changes, including switching away and back. */
+export function getActiveHouseholdRevision(auth: Auth): number {
+  return coordinators.get(auth)?.revision ?? 0;
 }
 
 function assertIdentity(auth: Auth, identity: Identity) {
@@ -105,6 +112,11 @@ export async function resolveActiveHousehold(auth: Auth, storage: ActiveHousehol
       await storage.setItem(key, household.id);
       assertIdentity(auth, identity);
     });
+    const activeContext = JSON.stringify([identity.revision, household.id, household.timezone]);
+    if (coordinator.activeContext !== activeContext) {
+      coordinator.activeContext = activeContext;
+      coordinator.revision++;
+    }
     return household;
   } catch (error) {
     if (error instanceof ActiveHouseholdError) throw error;

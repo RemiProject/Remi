@@ -32,6 +32,32 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Backend inventory reads (not connected to screens yet)
+
+`EXPO_PUBLIC_BACKEND_INVENTORY` defaults to off. Only the exact value `true`
+enables `createGraphqlInventoryRepository`; otherwise it returns `undefined`
+without reading auth/storage or making requests. Existing screens continue using
+their current repository even when the flag is enabled; provider wiring is a later PR.
+
+To enable it for development, set the variable before starting Expo:
+
+```powershell
+$env:EXPO_PUBLIC_BACKEND_INVENTORY="true"
+pnpm.cmd exec expo start
+```
+
+On macOS/Linux: `EXPO_PUBLIC_BACKEND_INVENTORY=true pnpm exec expo start`.
+Full-reload the app after changing the flag. See [Expo environment variables](https://docs.expo.dev/guides/environment-variables/).
+
+Reads use authenticated requests for the active household, fetch all inventory
+pages, exclude zero balances from lists, and surface failures without local
+inventory fallback. Quantities remain exact decimal strings. Unsupported unit or
+storage values remain available as backend labels and make an item read-only.
+Expiry dates are calendar days in the household timezone, expiring at the end of
+that local day. Missing expiry stays null; unavailable notes/photos are omitted.
+`get(id)` includes the transaction page (and its cursors) returned by
+`inventoryItem`; it does not claim to load the complete transaction history.
+
 ## Get a fresh project
 
 When you're ready, run:
