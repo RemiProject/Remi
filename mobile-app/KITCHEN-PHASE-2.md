@@ -1,5 +1,7 @@
 # Phase 2 — Kitchen Inventory UI/UX
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 ## Focused filter/Settings refinement
 
 Kitchen no longer displays language controls. More → Settings uses its existing
@@ -25,7 +27,7 @@ Changed: `src/screens/kitchen-screen.tsx`, `src/screens/feature-preview-screen.t
 Inventory architecture/schema/storage, language provider/key, Home implementation,
 routes, palette, dependencies and Button transform fix were not modified.
 
-Verification: `npm.cmd run typecheck`, `npm.cmd run lint -- --no-cache`, and
+Verification: `pnpm.cmd run typecheck`, `pnpm.cmd run lint --no-cache`, and
 `node --test scripts/test-home.cjs scripts/test-button-transform.cjs scripts/test-inventory.cjs scripts/test-kitchen.cjs`
 passed (23/23 tests). `git diff --check` passed with existing line-ending notices.
 New tests use a controlled component/hook harness and cover draft Apply/Close/Clear,
@@ -116,12 +118,12 @@ KITCHEN-PHASE-2.md
 
 | Command | Result |
 | --- | --- |
-| `npm.cmd run typecheck` | Passed |
-| `npm.cmd run lint -- --no-cache` | Passed |
+| `pnpm.cmd run typecheck` | Passed |
+| `pnpm.cmd run lint --no-cache` | Passed |
 | `node --test scripts/test-home.cjs scripts/test-button-transform.cjs scripts/test-inventory.cjs scripts/test-kitchen.cjs` | 21/21 passed, including all three requested existing suites |
-| `npx.cmd expo-doctor` | 21/21 passed |
-| `npx.cmd expo export --platform web` | Passed |
-| `npx.cmd expo export --platform android --platform ios` | Passed with approved Hermes execution |
+| `pnpm.cmd dlx expo-doctor` | 21/21 passed |
+| `pnpm.cmd exec expo export --platform web` | Passed |
+| `pnpm.cmd exec expo export --platform android --platform ios` | Passed with approved Hermes execution |
 | `git diff --check` | Passed; existing line-ending notices |
 
 Focused Kitchen tests cover non-mutating combined filters, name/expiration sorting,
@@ -138,7 +140,7 @@ were performed. Bundle success does not establish phone layout or RTL correctnes
 Metro emitted existing NO_COLOR/FORCE_COLOR notices. Existing audit warnings, missing
 brand font assets and native navigation caveats remain outside this focused phase.
 
-Manual review with `npm.cmd run web` and available native devices:
+Manual review with `pnpm.cmd run web` and available native devices:
 
 1. Choose Arabic in Home, switch to Kitchen, restart and verify the same persisted choice.
    Repeat English. Force preference storage failures in disposable test storage and retry.

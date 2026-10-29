@@ -1,5 +1,7 @@
 # Theme persistence fix
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 ## Root cause
 
 RemyThemeProvider initialized `useState('system')` on every mount and never read or wrote storage. More explicitly described appearance as session-only; Settings had no appearance selector. The native color-scheme hook already tracks system changes and did not need modification.
@@ -32,10 +34,10 @@ Storage errors are caught. Failed writes retain the chosen appearance for the ac
 
 ## Executed verification
 
-- `npm.cmd run typecheck`: exit 0, no TypeScript errors.
-- `npm.cmd run lint -- --no-cache`: exit 0, no lint errors/warnings.
+- `pnpm.cmd run typecheck`: exit 0, no TypeScript errors.
+- `pnpm.cmd run lint --no-cache`: exit 0, no lint errors/warnings.
 - `node --test scripts/test-theme.cjs scripts/test-home.cjs scripts/test-kitchen.cjs scripts/test-button-transform.cjs scripts/test-inventory.cjs scripts/test-planner.cjs scripts/test-shopping.cjs scripts/test-receipt.cjs scripts/test-cooking.cjs scripts/test-audit-regressions.cjs`: 73 tests passed, 0 failed/skipped/cancelled. Includes 11 new theme tests.
-- `npx.cmd expo export --platform web --platform android --platform ios --output-dir dist/theme`: exit 0; all three platforms exported. Bundler emitted benign NO_COLOR/FORCE_COLOR warnings. A subsequent copy-only change clarified Settings descriptions; typecheck/lint and the complete test suite were rerun afterward.
+- `pnpm.cmd exec expo export --platform web --platform android --platform ios --output-dir dist/theme`: exit 0; all three platforms exported. Bundler emitted benign NO_COLOR/FORCE_COLOR warnings. A subsequent copy-only change clarified Settings descriptions; typecheck/lint and the complete test suite were rerun afterward.
 
 Tests cover light/dark/system save and restart restoration, missing/invalid values, read/write failures, retry, repeated changes, late hydration, and system scheme changes. Injected storage and mocked hooks exercise the real provider code without touching user data. They do not prove physical AsyncStorage durability, actual OS appearance events, startup rendering, accessibility or device RTL rendering. No native build/device test or interactive visual review was performed.
 

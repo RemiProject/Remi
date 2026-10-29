@@ -1,5 +1,7 @@
 # Remy AI Kitchen Assistant — Comprehensive QA Audit Report
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 **Audit Date:** 2026-10-14  
 **Audit Scope:** End-to-End Mobile App Frontend, Routing, State, Localization, Theme, Persistence, Accessibility, and Native Integrations  
 **Lead QA Engineers:** Senior React Native Engineer, QA Automation Engineer, Mobile App Tester  
@@ -22,7 +24,7 @@ Three confirmed frontend bugs were identified, isolated, resolved with zero arch
 | :--- | :--- | :--- |
 | **Operating System** | Windows 11 Pro (win32 x64) | PowerShell / Windows Command Processor |
 | **Node.js** | v20.18.3 | LTS Runtime |
-| **npm** | 10.8.2 | CLI Package Manager |
+| **pnpm (current workflow)** | 10.34.8 | pnpm-only; historical audit environment otherwise retained |
 | **Expo SDK** | 57.0.20 | Managed Workflow with CNG |
 | **React** | 19.1.0 | Core UI Library |
 | **React Native** | 0.86.3 | New Architecture (Fabric + Hermes) |
@@ -34,17 +36,17 @@ Three confirmed frontend bugs were identified, isolated, resolved with zero arch
 
 ---
 
-## 3. Commands Executed & Exact Results
+## 3. Validation Results (Current pnpm Command Equivalents)
 
 | Command Line | Purpose | Result | Output Summary |
 | :--- | :--- | :--- | :--- |
-| `npm.cmd run typecheck` (`tsc --noEmit`) | TypeScript Strict Type Checking | **PASS** | 0 errors found |
-| `npm.cmd run lint` (`expo lint`) | ESLint Verification | **PASS** | 0 warnings, 0 errors |
+| `pnpm.cmd run typecheck` (`tsc --noEmit`) | TypeScript Strict Type Checking | **PASS** | 0 errors found |
+| `pnpm.cmd run lint` (`expo lint`) | ESLint Verification | **PASS** | 0 warnings, 0 errors |
 | `node --test scripts/test-*.cjs` | Automated Unit & Integration Suite | **PASS** | **62 / 62 passed**, 0 failed, 0 skipped (1871ms) |
-| `npx.cmd expo-doctor` | Dependency & Config Diagnostic | **PASS (20/21)** | 20 passed; 1 advisory on 5 minor SDK patch version differences preserved per project constraints |
-| `npx.cmd expo export --platform web` | Universal Web Production Export | **PASS** | 20 static routes generated in `dist` |
-| `npx.cmd expo export --platform android` | Android Hermes Bytecode Export | **PASS** | Bundle: `entry-de288bef0870935d8e75e95fe0f05814.hbc` |
-| `npx.cmd expo export --platform ios` | iOS Hermes Bytecode Export | **PASS** | Bundle: `entry-6cda53637e6da3733075b281f62c82fe.hbc` |
+| `pnpm.cmd dlx expo-doctor` | Dependency & Config Diagnostic | **PASS (20/21)** | 20 passed; 1 advisory on 5 minor SDK patch version differences preserved per project constraints |
+| `pnpm.cmd exec expo export --platform web` | Universal Web Production Export | **PASS** | 20 static routes generated in `dist` |
+| `pnpm.cmd exec expo export --platform android` | Android Hermes Bytecode Export | **PASS** | Bundle: `entry-de288bef0870935d8e75e95fe0f05814.hbc` |
+| `pnpm.cmd exec expo export --platform ios` | iOS Hermes Bytecode Export | **PASS** | Bundle: `entry-6cda53637e6da3733075b281f62c82fe.hbc` |
 
 ---
 
@@ -148,7 +150,7 @@ The test suite consists of 10 test scripts executing in parallel under the Node.
 ## 7. Environment Blockers & Limitations
 
 1. **PowerShell Script Execution Policy:**
-   - On Windows environments with `Restricted` PowerShell policies, standard `npx` and `npm` scripts fail unless invoked via `.cmd` (e.g., `npm.cmd`, `npx.cmd`) or wrapped in `cmd /c`.
+   - On Windows, PowerShell script policy blocks the `pnpm.ps1` shim. Use `pnpm.cmd` for every package-manager command; no execution-policy change is needed.
 2. **Native Mobile Device / Simulator Absence:**
    - Headless desktop environment lacks connected iOS or Android physical devices or running emulators, preventing live hardware touch testing and OS permission prompt interception.
 3. **Expo Go Native Module Incompatibility:**

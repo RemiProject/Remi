@@ -1,5 +1,7 @@
 # Home image-rich redesign
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 The existing `/` route (`src/app/(tabs)/index.tsx`) still re-exports the same Home
 screen. Five-tab navigation, the central Add chooser, inventory domain/provider,
 repositories, saved data, appearance preference and all existing assets are unchanged.
@@ -61,21 +63,21 @@ HOME-REDESIGN.md
 
 ## Verification
 
-- `npm.cmd run typecheck`: passed.
-- `npm.cmd run lint`: passed after fixing an initial nested-component declaration and
+- `pnpm.cmd run typecheck`: passed.
+- `pnpm.cmd run lint`: passed after fixing an initial nested-component declaration and
   duplicate-import warning.
 - `node --test scripts/test-home.cjs scripts/test-button-transform.cjs scripts/test-inventory.cjs`:
   16 tests passed. Covers search/scopes/Arabic recipe matching, catalog parity, image
   loading/error fallback/source reset, existing transform press/release regression,
   inventory validation and persistence operations.
-- `npx.cmd expo export --platform web`: passed.
-- `npx.cmd expo export --platform android --platform ios`: passed with approved Hermes execution.
+- `pnpm.cmd exec expo export --platform web`: passed.
+- `pnpm.cmd exec expo export --platform android --platform ios`: passed with approved Hermes execution.
 - `git diff --check`: passed, with existing line-ending notices.
 - No connected browser/app surfaces were exposed by the UI tool. No interactive visual,
   external photo availability, network loading, theme screenshot or native RTL review
   is claimed. Programmatic image tests use controlled component dependencies.
 
-Manual acceptance: run `npm.cmd run web`; inspect 320/375/430 px widths and enlarged
+Manual acceptance: run `pnpm.cmd run web`; inspect 320/375/430 px widths and enlarged
 text in Light/Dark/System. Add an actual food with a due date; check counts/Use First,
 food detail and View all navigation. Search food names and recipe ingredients in both
 languages/scopes. Open/close each sample recipe preview and the notification/shortcut

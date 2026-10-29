@@ -1,5 +1,7 @@
 # Remy 0.1.0
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 Minimal Expo Router frontend foundation. No backend, AI, OCR, authentication,
 inventory, or health features are implemented.
 
@@ -16,10 +18,10 @@ inventory, or health features are implemented.
 ## Development
 
 ```powershell
-npm.cmd start
-npm.cmd run typecheck
-npm.cmd run lint
-npx.cmd expo-doctor
+pnpm.cmd start
+pnpm.cmd run typecheck
+pnpm.cmd run lint
+pnpm.cmd dlx expo-doctor
 ```
 
 Appearance defaults to System. More provides Light/Dark/System controls for the
@@ -37,16 +39,16 @@ generation should be performed as part of this foundation phase.
 
 ## Setup and validation command record
 
-| Exact command | Result |
+| Current pnpm command | Historical result |
 | --- | --- |
-| `npx.cmd create-expo-app@latest . --template default` | Sandbox download failed with ENOTCACHED; approved network retry generated SDK 57 and installed the template. |
-| `npm.cmd run typecheck` | Initial template CSS declaration errors fixed with `src/types/css.d.ts`; final check passed. |
-| `npm.cmd run lint` | Sandbox network failure; approved retry installed ESLint tooling. First process failed resolving newly installed ESLint; rerun found the template hydration-hook lint error. Hook corrected; final check passed. |
-| `npx.cmd expo-doctor` | Sandbox download failed; approved retry passed 21/21 checks. |
-| `npm.cmd audit --json` | Sandbox response reported zero findings; registry-enabled retry confirmed 29 findings (11 moderate, 18 high), exit 1. No audit fixes applied. |
-| `npm.cmd config get omit` | Empty value; no dependency omission configured. |
-| `npx.cmd expo export --platform web` | Passed; five application destinations statically rendered. |
-| `npx.cmd expo export --platform android --platform ios` | Initial sandbox run failed spawning Hermes (EPERM); approved retry passed both native bundles. |
+| `pnpm.cmd dlx create-expo-app@latest . --template default` | Sandbox download failed with ENOTCACHED; approved network retry generated SDK 57 and installed the template. |
+| `pnpm.cmd run typecheck` | Initial template CSS declaration errors fixed with `src/types/css.d.ts`; final check passed. |
+| `pnpm.cmd run lint` | Sandbox network failure; approved retry installed ESLint tooling. First process failed resolving newly installed ESLint; rerun found the template hydration-hook lint error. Hook corrected; final check passed. |
+| `pnpm.cmd dlx expo-doctor` | Sandbox download failed; approved retry passed 21/21 checks. |
+| `pnpm.cmd audit --json` | Sandbox response reported zero findings; registry-enabled retry confirmed 29 findings (11 moderate, 18 high), exit 1. No audit fixes applied. |
+| Legacy dependency-omission configuration inspection (historical only) | Empty value; no dependency omission configured. |
+| `pnpm.cmd exec expo export --platform web` | Passed; five application destinations statically rendered. |
+| `pnpm.cmd exec expo export --platform android --platform ios` | Initial sandbox run failed spawning Hermes (EPERM); approved retry passed both native bundles. |
 | `git diff --check` | Passed; Git emitted line-ending conversion notices. |
 
 Lint added only development dependencies: `eslint` (resolved 9.39.5) and

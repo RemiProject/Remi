@@ -11,7 +11,7 @@
 ### 1. Standard Testing (Expo Go / Metro)
 ```powershell
 # Start Metro bundler with cache cleared
-npx.cmd expo start -c
+pnpm.cmd exec expo start -c
 ```
 *Note: Camera intake, inventory, shopping list, meal planner, recipes, cooking mode, themes, and localization can be fully exercised in Expo Go. Receipt OCR requires a native development build.*
 
@@ -21,7 +21,7 @@ npx.cmd expo start -c
 adb devices
 
 # Build and install debug APK with autolinked native modules (expo-text-extractor)
-npx.cmd expo run:android --device
+pnpm.cmd exec expo run:android --device
 ```
 
 ---

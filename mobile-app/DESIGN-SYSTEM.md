@@ -1,5 +1,7 @@
 # Remy 0.2.0 — Design System and Core UI
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 The subsequent manual-entry/persistence phase is documented in [ADD-FOOD-WORKFLOW.md](./ADD-FOOD-WORKFLOW.md).
 The statements below describe the historical 0.2.0 scope.
 
@@ -55,11 +57,11 @@ mirroring for future RTL; translations and complete Arabic/RTL behavior are defe
 
 ## Validation
 
-- `npm.cmd run typecheck`: passed after correcting the preserved template's obsolete href.
-- `npm.cmd run lint`: passed.
-- `npx.cmd expo-doctor`: sandbox registry fetch failed (ENOTCACHED); approved retry passed 21/21.
-- `npx.cmd expo export --platform web`: passed.
-- `npx.cmd expo export --platform android --platform ios`: passed with approved Hermes execution.
+- `pnpm.cmd run typecheck`: passed after correcting the preserved template's obsolete href.
+- `pnpm.cmd run lint`: passed.
+- `pnpm.cmd dlx expo-doctor`: sandbox registry fetch failed (ENOTCACHED); approved retry passed 21/21.
+- `pnpm.cmd exec expo export --platform web`: passed.
+- `pnpm.cmd exec expo export --platform android --platform ios`: passed with approved Hermes execution.
 - Six Node assertions against the actual `filterFoods` implementation passed: all items,
   normalized case/whitespace search, combined filters, incompatible filters, missing name,
   and empty inventory.

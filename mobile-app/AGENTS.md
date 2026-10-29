@@ -10,15 +10,16 @@ Expo ships breaking changes every SDK release. APIs you remember are likely rena
 
 ## Commands
 
-Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
+This app uses pnpm 10.34.8 only, pinned in package.json. Keep pnpm-lock.yaml as the sole dependency lockfile. On Windows, use `pnpm.cmd` because PowerShell script policy blocks the `pnpm.ps1` shim. On macOS/Linux, use `pnpm` instead.
 
-```bash
-npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
-npx expo lint               # lint
-npx tsc --noEmit            # typecheck
-npx expo-doctor             # diagnose dependency and config issues
-npx expo install --fix      # fix incompatible package versions
+```powershell
+pnpm.cmd install --frozen-lockfile           # install the locked dependency graph
+pnpm.cmd exec expo install <package> --pnpm  # ALWAYS use for SDK-compatible packages
+pnpm.cmd exec expo start                     # start the dev server
+pnpm.cmd run lint                            # lint
+pnpm.cmd run typecheck                       # typecheck
+pnpm.cmd dlx expo-doctor                     # diagnose dependency and config issues
+pnpm.cmd exec expo install --fix --pnpm      # fix incompatible package versions
 ```
 
 Run lint and typecheck before declaring any task done.
@@ -31,11 +32,11 @@ Run lint and typecheck before declaring any task done.
 
 ## Building with EAS
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
+Use EAS to build, sign, and submit the app in the cloud and to ship over-the-air updates — no local Xcode or Android Studio required. Run EAS CLI as `pnpm.cmd dlx eas-cli@latest <command>` (for example, `pnpm.cmd dlx eas-cli@latest build`); substitute that for bare `eas` in docs examples. Use `pnpm` instead of `pnpm.cmd` on macOS/Linux.
 Docs: https://docs.expo.dev/eas/index.md
 
 ## Rules
 
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
+- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a native build: `pnpm.cmd exec expo run:android` on Windows, `pnpm exec expo run:ios` on macOS, or `pnpm.cmd dlx eas-cli@latest build --profile development` for a configured EAS development profile.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md

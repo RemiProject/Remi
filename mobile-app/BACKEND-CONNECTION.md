@@ -1,5 +1,7 @@
 # Backend connection
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 The existing NestJS API listens on port 3000. PostgreSQL's host port 5433 is used
 only by the backend; the mobile app never connects directly to the database.
 
@@ -53,7 +55,7 @@ backend. Production uses only the configured allowlist.
 
 ## Verification
 
-From `mobile-app`, run `npm.cmd run typecheck`, `npm.cmd run lint`, and
+From `mobile-app`, run `pnpm.cmd run typecheck`, `pnpm.cmd run lint`, and
 `node scripts/test-backend.cjs`. To include live HTTP checks in PowerShell:
 
 ```powershell

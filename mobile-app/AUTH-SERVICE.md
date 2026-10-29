@@ -1,5 +1,7 @@
 # Authentication service and UI
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 More → Profile opens the account entry point. `/login` and `/signup` use a shared,
 responsive authentication design in English and Arabic. `AuthProvider` restores the
 session on launch and on app resume through `me`, using `AuthStore` for shared
@@ -108,8 +110,8 @@ a separately designed server-backed cookie flow, which the current API does not 
 ## Checks
 
 From `mobile-app`: `node scripts/test-auth.cjs`, `node scripts/test-auth-ui.cjs`,
-`node scripts/test-auth-design.cjs`, `npm.cmd run typecheck`, and
-`npm.cmd run lint`. Tests inject storage and HTTP responses into the real shared
+`node scripts/test-auth-design.cjs`, `pnpm.cmd run typecheck`, and
+`pnpm.cmd run lint`. Tests inject storage and HTTP responses into the real shared
 GraphQL client; they do not create accounts, touch device storage, or use real tokens.
 They cover contracts, login success/failure, restart restore, expiry, rotation,
 concurrency, retry limits, logout, backend URL isolation, and storage errors.

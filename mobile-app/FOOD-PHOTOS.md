@@ -1,5 +1,7 @@
 # Optional food photos
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 Manual Add/Edit supports camera capture, gallery selection, preview, replacement and
 removal. These actions do not recognize food or fill in metadata. The Add chooser
 also supports camera/gallery acquisition with review, retake/replacement and explicit
@@ -45,17 +47,17 @@ Inventory changes only when food details are validated and saved in the manual f
 ## Dependencies/configuration
 
 SDK-compatible `expo-image-picker` and direct `expo-file-system` were installed with
-`npx.cmd expo install expo-image-picker expo-file-system`. Camera/photo usage strings
+`pnpm.cmd exec expo install expo-image-picker expo-file-system`. Camera/photo usage strings
 are configured; microphone permission is disabled. Runtime feedback follows the shared
 English/Arabic preference. System permission-dialog wording follows native configuration
 and OS behavior; standalone binaries need rebuilding to apply config changes.
 
 ## Verification
 
-- `npm.cmd run typecheck`: passed.
-- `npm.cmd run lint -- --no-cache`: passed.
+- `pnpm.cmd run typecheck`: passed.
+- `pnpm.cmd run lint --no-cache`: passed.
 - `node --test scripts/test-home.cjs scripts/test-kitchen.cjs scripts/test-button-transform.cjs scripts/test-inventory.cjs`: 35 passed.
-- `npx.cmd expo export --platform web`: passed.
+- `pnpm.cmd exec expo export --platform web`: passed.
 
 Tests use injected storage and mocked native/IndexedDB/picker APIs, never user inventory.
 They cover Version 1 compatibility/no hydration writes, Version 2 validation/write

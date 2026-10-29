@@ -1,5 +1,7 @@
 # Remy 0.3.0 — Add Food Workflow
 
+Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
+
 ## Implementation
 
 Manual creation, editing, confirmed deletion and local persistence now work through
@@ -52,7 +54,7 @@ Modified:
 
 ```text
 package.json                         # Only AsyncStorage added
-package-lock.json                    # npm's resulting lockfile retained
+pnpm-lock.yaml                       # current lockfile; replaces the original installer lock
 src/app/_layout.tsx
 src/components/ui/core.tsx
 src/components/food-card.tsx
@@ -89,17 +91,17 @@ phase designation. No unrelated direct dependencies were changed.
 
 ## Commands and verification
 
-| Exact command | Result |
+| Current pnpm command | Historical result |
 | --- | --- |
-| `npx.cmd expo install @react-native-async-storage/async-storage` | Sandbox network fetch failed; approved retry installed SDK-compatible **2.2.0**, adding three packages including transitives. |
-| `npm.cmd run typecheck` | Initial stale generated-route error fixed by regenerating route types; passed. |
-| `npm.cmd run lint` | Initial two UTF-8 BOM warnings removed; passed. |
-| `npx.cmd expo-doctor` | 21/21 passed. |
-| `npx.cmd expo export --platform web` | Passed. |
-| `npx.cmd expo export --platform android --platform ios` | Passed with approved Hermes process execution. |
+| `pnpm.cmd exec expo install @react-native-async-storage/async-storage` | Sandbox network fetch failed; approved retry installed SDK-compatible **2.2.0**, adding three packages including transitives. |
+| `pnpm.cmd run typecheck` | Initial stale generated-route error fixed by regenerating route types; passed. |
+| `pnpm.cmd run lint` | Initial two UTF-8 BOM warnings removed; passed. |
+| `pnpm.cmd dlx expo-doctor` | 21/21 passed. |
+| `pnpm.cmd exec expo export --platform web` | Passed. |
+| `pnpm.cmd exec expo export --platform android --platform ios` | Passed with approved Hermes process execution. |
 | `node --test scripts/test-inventory.cjs` | Sandbox worker spawn failed; approved retry passed **10/10** built-in Node tests. No testing dependencies added. |
 | `git diff --check` | Passed; Git emitted existing line-ending conversion notices. |
-| `npx.cmd expo start --port 8082` | Used to refresh generated route types; Metro started. Optional DevTools emitted sandbox spawn EPERM. Temporary server stopped afterward. |
+| `pnpm.cmd exec expo start --port 8082` | Used to refresh generated route types; Metro started. Optional DevTools emitted sandbox spawn EPERM. Temporary server stopped afterward. |
 
 Tests exercise the actual domain, repository and store through an in-memory adapter:
 validation/date relationships, empty first launch/hydration protection, concurrent writes,
