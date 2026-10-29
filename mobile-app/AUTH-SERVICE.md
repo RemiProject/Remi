@@ -60,7 +60,7 @@ OAuth clients, redirect URLs, and native app identifiers, not just frontend keys
 `backend/prisma/migrations/0028_auth_username_phone.sql` adds nullable username and
 phone columns, format checks, a unique username index, and the Saudi country
 reference. It does not delete, recreate or rename existing accounts. Run the
-existing `npm.cmd run migrate` and `npm.cmd run db:generate` deployment steps before
+existing `pnpm.cmd run migrate` and `pnpm.cmd run db:generate` deployment steps before
 starting the updated API. They have been run against the local development DB.
 Do not edit an applied migration. The API schema now requires username and phone
 on new registrations, so deploy compatible clients with the API. Login retains
