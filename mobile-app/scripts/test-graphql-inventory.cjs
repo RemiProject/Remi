@@ -16,7 +16,7 @@ const { inventoryExpiryDay, mapInventoryReadItem } = require('../src/domain/back
 const { createGraphqlInventoryRepository, inventoryReadOperations, InventoryReadError } = require('../src/repositories/graphql-inventory-repository.ts');
 
 const originalFlag = process.env.EXPO_PUBLIC_BACKEND_INVENTORY;
-test.beforeEach(() => { process.env.EXPO_PUBLIC_BACKEND_INVENTORY = 'true'; });
+test.beforeEach(() => { delete process.env.EXPO_PUBLIC_BACKEND_INVENTORY; });
 test.after(() => {
   if (originalFlag === undefined) delete process.env.EXPO_PUBLIC_BACKEND_INVENTORY;
   else process.env.EXPO_PUBLIC_BACKEND_INVENTORY = originalFlag;
@@ -67,14 +67,20 @@ async function harness({ pages = [page()], detail = { ...batch('batch'), transac
   };
 }
 
-test('flag defaults off; disabled factory performs no auth or storage work and local repository is unchanged', async () => {
-  for (const value of [undefined, '', 'false', '1', 'TRUE']) {
+test('backend inventory defaults on; only the exact false value disables it', async () => {
+  for (const value of [undefined, '', 'true', '1', 'TRUE', 'FALSE', 'False', ' false ']) {
     if (value === undefined) delete process.env.EXPO_PUBLIC_BACKEND_INVENTORY;
     else process.env.EXPO_PUBLIC_BACKEND_INVENTORY = value;
-    assert.equal(isBackendInventoryEnabled(), false);
-    const forbidden = new Proxy({}, { get() { throw new Error('Disabled reader touched dependencies'); } });
-    assert.equal(createGraphqlInventoryRepository(forbidden, forbidden), undefined);
+    assert.equal(isBackendInventoryEnabled(), true);
+    assert(createGraphqlInventoryRepository({}, {})); // Construction remains lazy.
   }
+});
+
+test('explicit false performs no repository auth/storage/network work and preserves the local repository', async () => {
+  process.env.EXPO_PUBLIC_BACKEND_INVENTORY = 'false';
+  assert.equal(isBackendInventoryEnabled(), false);
+  const forbidden = new Proxy({}, { get() { throw new Error('Disabled reader touched dependencies'); } });
+  assert.equal(createGraphqlInventoryRepository(forbidden, forbidden), undefined);
   const { StoredInventoryRepository } = require('../src/repositories/inventory-repository.ts');
   assert.deepEqual(await new StoredInventoryRepository({ getItem: async () => null }).read(), []);
   const provider = fs.readFileSync('src/providers/inventory-provider.tsx', 'utf8');

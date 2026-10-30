@@ -63,9 +63,12 @@ export function useBackendKitchen() {
   if (!store) throw new Error('Backend kitchen is not enabled.');
   const auth = useAuth();
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
+  const restoreFailed = auth.ready && !auth.busy && !auth.user
+    && (auth.error === 'connectionError' || auth.error === 'storageError');
   return {
     ...visibleBackendKitchen(snapshot, auth.user?.id ?? null, auth.busy || !auth.ready),
-    retry: store.reload, loadDetail: store.loadDetail,
+    ...(restoreFailed ? { status: 'error' as const } : {}),
+    retry: restoreFailed ? auth.restore : store.reload, loadDetail: store.loadDetail,
     showAdded: store.showAdded, dismissAdded: store.dismissAdded,
     refreshStock: store.refreshStock, showUpdated: store.showUpdated,
   };

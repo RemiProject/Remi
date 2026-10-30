@@ -12,6 +12,9 @@ test('development URL selection and explicit production configuration', () => {
   assert.equal(resolveBackendUrl({ ...base, hostUri: '192.168.1.4:8081' }), 'http://192.168.1.4:3000');
   assert.equal(resolveBackendUrl(base), 'http://10.0.2.2:3000');
   assert.equal(resolveBackendUrl({ ...base, platform: 'web', webHostname: 'localhost' }), 'http://localhost:3000');
+  assert.equal(resolveBackendUrl({ ...base, platform: 'web', webHostname: '192.168.1.4' }), 'http://192.168.1.4:3000');
+  assert.equal(resolveBackendUrl({ ...base, platform: 'ios', hostUri: '192.168.1.4:8081' }), 'http://192.168.1.4:3000');
+  assert.equal(resolveBackendUrl({ ...base, hostUri: 'localhost:8081' }), 'http://localhost:3000');
   assert.equal(resolveBackendUrl({ ...base, explicitUrl: 'https://api.example.com/' }), 'https://api.example.com');
   assert.throws(() => resolveBackendUrl({ ...base, development: false }), /EXPO_PUBLIC_API_URL/);
   assert.throws(() => resolveBackendUrl({ ...base, hostUri: 'abc.exp.direct:80' }), /tunnels/);
