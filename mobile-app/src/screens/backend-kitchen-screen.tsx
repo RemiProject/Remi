@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
-import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { ActivityIndicator, View, type ScrollView } from 'react-native';
 import { AppText, ActionRow, Button, Card, Chip, EmptyState, PageHeader, Screen, SearchField, SectionHeader, uiStyles } from '@/components/ui/core';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
 import { useInventory } from '@/providers/inventory-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { backendKitchenMessages } from '@/i18n/backend-kitchen';
+import { backendAddFoodMessages } from '@/i18n/backend-add-food';
 import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
 import { backendExpiryDays, backendFoodName, backendKitchenView, backendQuantityLabel, backendRowSubtitle, backendStorageLabel, backendUnitLabel, displayInventoryQuantity } from '@/utils/backend-kitchen-view';
 import { useRemyTheme } from '@/theme/provider';
@@ -68,16 +69,25 @@ function BackendFoodRow({ item }: { item: InventoryReadItem }) {
 }
 
 export function BackendKitchenScreen() {
-  const { items, status, today } = useBackendKitchen();
+  const { items, status, today, owner, additionNotice, dismissAdded } = useBackendKitchen();
   const { language, t, rtl } = useLabels();
+  const { colors } = useRemyTheme();
+  const scrollRef = useRef<ScrollView>(null);
   const [query, setQuery] = useState('');
   const [storage, setStorage] = useState('all');
   const [sort, setSort] = useState<'name' | 'expiry'>('name');
   const [priority, setPriority] = useState(false);
+  useFocusEffect(useCallback(() => {
+    if (additionNotice == null || !owner) return;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    const timer = setTimeout(() => dismissAdded(additionNotice), 3500);
+    return () => clearTimeout(timer);
+  }, [additionNotice, dismissAdded, owner]));
   const visible = backendKitchenView(items, query, storage, sort, priority, today, language);
   const storages = [...new Map(items.map(item => [item.storageId ?? item.backendStorageLocation, backendStorageLabel(item, language)])).entries()];
-  return <Screen rtl={rtl}><PageHeader title={t.title} subtitle={status === 'ready' ? `${items.length.toLocaleString(language)} ${t.saved}` : undefined}
-    action={<Button label={t.add} icon="add" disabled />} />
+  return <Screen rtl={rtl} scrollRef={scrollRef}><PageHeader title={t.title} subtitle={status === 'ready' ? `${items.length.toLocaleString(language)} ${t.saved}` : undefined}
+    action={<Button label={t.add} icon="add" disabled={status !== 'ready'} onPress={() => router.push('/food/manual')} />} />
+    {additionNotice != null && owner && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{backendAddFoodMessages[language].added}</AppText></Card>}
     <AppText variant="caption" muted>{t.writesSoon}</AppText>
     <BackendKitchenState />
     {status === 'ready' && <>

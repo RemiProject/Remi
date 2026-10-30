@@ -148,8 +148,9 @@ test('catalog alias operation validates against the backend schema', () => {
 function uiHarness() {
   let state = { ...emptyBackendKitchen, owner: 'a', status: 'ready', items: [item], today: '2026-06-02' };
   let language = 'en', retryCount = 0;
-  const navigated = [], details = [], slots = [], effects = [];
+  const navigated = [], details = [], slots = [], effects = [], focusEffects = [], scrolls = [];
   let cursor = 0;
+  const dismissAdded = notice => { if (state.additionNotice === notice) state = { ...state, additionNotice: null }; };
   const local = { items: [{ id: 'local-one', name: 'Private local food' }, { id: 'local-two' }], status: 'ready', retryRead: () => {} };
   const code = ts.transpileModule(fs.readFileSync('src/screens/backend-kitchen-screen.tsx', 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 },
@@ -158,16 +159,19 @@ function uiHarness() {
   new Function('require', 'exports', code)(id => {
     if (id === 'react') return {
       useEffect: effect => effects.push(effect),
+      useCallback: callback => callback,
+      useRef: initial => { const index = cursor++; return slots[index] ??= { current: initial ?? { scrollTo: value => scrolls.push(value) } }; },
       useState: initial => { const index = cursor++; if (!(index in slots)) slots[index] = initial; return [slots[index], value => { slots[index] = value; }]; },
     };
-    if (id === 'expo-router') return { router: { push: route => navigated.push(route), navigate: route => navigated.push(route), replace: route => navigated.push(route), canGoBack: () => false }, useLocalSearchParams: () => ({ id: item.id }) };
+    if (id === 'expo-router') return { router: { push: route => navigated.push(route), navigate: route => navigated.push(route), replace: route => navigated.push(route), canGoBack: () => false }, useLocalSearchParams: () => ({ id: item.id }), useFocusEffect: effect => focusEffects.push(effect) };
     if (id === 'react-native') return { ActivityIndicator: 'ActivityIndicator', View: 'View' };
     if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText', 'ActionRow', 'Button', 'Card', 'Chip', 'EmptyState', 'PageHeader', 'Screen', 'SearchField', 'SectionHeader'].map(name => [name, name])), uiStyles: {} };
-    if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ ...state, retry: () => { retryCount++; }, loadDetail: id => details.push(id) }) };
+    if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ ...state, dismissAdded, retry: () => { retryCount++; }, loadDetail: id => details.push(id) }) };
     if (id === '@/providers/inventory-provider') return { useInventory: () => local };
     if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
-    if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: { textSubtle: '#666' } }) };
+    if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: { textSubtle: '#666', successSurface: '#dfd', successText: '#050' } }) };
     if (id === '@/i18n/backend-kitchen') return { backendKitchenMessages };
+    if (id === '@/i18n/backend-add-food') return require('../src/i18n/backend-add-food.ts');
     if (id === '@/i18n/home') return { homeUnitLabels, homeMessages };
     if (id === '@/i18n/inventory') return { inventoryMessages };
     if (id === '@/data/home-content') return { recipeTitle: () => '', searchHome: () => ({ recipes: [] }) };
@@ -188,7 +192,7 @@ function uiHarness() {
     return [...(node.type === type ? [node] : []), ...nodes(node.props.children, type), ...nodes(node.props.action, type)];
   }
   return {
-    exported, local, navigated, details, effects, nodes,
+    exported, local, navigated, details, effects, nodes, scrolls, focus: () => focusEffects.at(-1)(),
     render: (which = 'BackendKitchenScreen', props = {}) => { cursor = 0; return expand(exported[which](props)); },
     set: update => { state = { ...state, ...update }; }, language: value => { language = value; }, retries: () => retryCount,
   };
@@ -201,8 +205,48 @@ test('Kitchen shows backend items, sensible quantities and an untouched device-o
     assert.equal(JSON.stringify(h.local), before);
     assert.equal(JSON.stringify(tree).includes('Private local food'), false);
     const add = h.nodes(tree, 'Button').find(node => node.props.label === 'Add food');
-    assert.equal(add.props.disabled, true);
-    assert.equal(add.props.onPress, undefined);
+    assert.equal(add.props.disabled, false);
+    add.props.onPress();
+    assert.deepEqual(h.navigated, ['/food/manual']);
+});
+
+test('Added banner works without route params in both languages and expires only after Kitchen is focused', t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { backendAddFoodMessages } = require('../src/i18n/backend-add-food.ts');
+  for (const language of ['en', 'ar']) {
+    const h = uiHarness(); h.language(language); h.set({ additionNotice: 1 });
+    const banner = () => h.nodes(h.render(), 'AppText').find(node => node.props.children === backendAddFoodMessages[language].added);
+    // The custom tabs may drop redirect params, and Kitchen may remain mounted behind the form.
+    assert(banner()); t.mock.timers.tick(5000); assert(banner());
+    const blur = h.focus();
+    assert.deepEqual(h.scrolls, [{ y: 0, animated: false }]);
+    assert.equal(banner().props.accessibilityLiveRegion, 'polite');
+    assert(h.nodes(h.render(), 'Card').some(node => node.props.style?.backgroundColor === '#dfd'));
+    t.mock.timers.tick(3499); assert(banner());
+    t.mock.timers.tick(1); assert.equal(banner(), undefined);
+    blur();
+    h.set({ additionNotice: 2 }); h.render(); const leave = h.focus();
+    t.mock.timers.tick(1000); leave();
+    t.mock.timers.tick(5000); assert(banner());
+    const refocus = h.focus(); t.mock.timers.tick(3500); assert.equal(banner(), undefined); refocus();
+  }
+});
+
+test('pending Added notice survives list refresh, dismisses once, and clears on account change', async () => {
+  const store = new BackendKitchenStore(() => ({ list: async () => ({ items: [item], today: '2026-06-01' }) }));
+  store.showAdded(); assert.equal(store.getSnapshot().additionNotice, null);
+  store.setUser('a'); await tick(); store.showAdded();
+  const notice = store.getSnapshot().additionNotice;
+  await store.reload(); assert.equal(store.getSnapshot().additionNotice, notice);
+  store.showAdded(); store.dismissAdded(notice);
+  assert.notEqual(store.getSnapshot().additionNotice, null);
+  store.dismissAdded(store.getSnapshot().additionNotice);
+  assert.equal(store.getSnapshot().additionNotice, null);
+  store.showAdded();
+  assert.equal(visibleBackendKitchen(store.getSnapshot(), null, false).additionNotice, null);
+  assert.equal(visibleBackendKitchen(store.getSnapshot(), 'b', false).additionNotice, null);
+  store.setUser('b'); assert.equal(store.getSnapshot().additionNotice, null);
+  store.showAdded(); store.setUser(null); assert.equal(store.getSnapshot().additionNotice, null);
 });
 
 test('backend Home reuses the original screen, supplies display-only names, and keeps read-only notices', () => {
@@ -283,9 +327,11 @@ test('backend Home keeps the original hero, storage counts, Use First tiles and 
   preview.props.onPress();
   assert.equal(h.nodes(h.render(), 'Modal').length, 1);
   const add = h.nodes(tree, 'Button').find(node => node.props.label === homeMessages.en.add);
-  assert.equal(add.props.disabled, true); assert.equal(add.props.onPress, undefined);
+  assert.notEqual(add.props.disabled, true);
+  add.props.onPress();
+  assert.deepEqual(h.routes, ['/food/manual']);
   h.nodes(tree, 'Button').find(node => node.props.label === homeMessages.en.openKitchen).props.onPress();
-  assert.deepEqual(h.routes, ['/kitchen']);
+  assert.deepEqual(h.routes, ['/food/manual', '/kitchen']);
 });
 
 test('signed-out/loading/empty/error/retry states are clear in English and Arabic', () => {
@@ -320,7 +366,7 @@ test('unsupported labels remain visible; food details load from get and disable 
   assert.deepEqual(h.nodes(arabic, 'AppText').slice(0, 4).map(node => node.props.children), ['1.25', 'م.ك', '·', 'على الرخامة']);
   assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'على الرخامة'));
   h.language('en');
-  h.render('BackendFoodDetailScreen'); h.effects[0](); assert.deepEqual(h.details, [item.id]);
+  h.render('BackendFoodDetailScreen'); h.effects.at(-1)(); assert.deepEqual(h.details, [item.id]);
   h.set({ detail: { id: item.id, status: 'ready', item } });
   const buttons = h.nodes(h.render('BackendFoodDetailScreen'), 'Button');
   for (const label of ['Edit', 'Delete']) {
@@ -370,9 +416,9 @@ test('flag off routes preserve original components; flag on also guards direct a
     ['(tabs)/index.tsx', '@/screens/home-screen', 'BackendHomeScreen'],
     ['(tabs)/kitchen.tsx', '@/screens/kitchen-screen', 'BackendKitchenScreen'],
     ['food/[id].tsx', '@/screens/food-detail-screen', 'BackendFoodDetailScreen'],
-    ['(tabs)/add.tsx', '@/screens/food-entry-chooser', 'BackendWritesUnavailableScreen'],
-    ['food-entry.tsx', '@/screens/food-entry-chooser', 'BackendWritesUnavailableScreen'],
-    ['food/manual.tsx', '@/screens/food-form-screen', 'BackendWritesUnavailableScreen'],
+    ['(tabs)/add.tsx', '@/screens/food-entry-chooser', 'BackendAddFoodScreen'],
+    ['food-entry.tsx', '@/screens/food-entry-chooser', 'BackendAddFoodScreen'],
+    ['food/manual.tsx', '@/screens/food-form-screen', 'BackendAddFoodScreen'],
     ['food/edit/[id].tsx', '@/screens/food-form-screen', 'BackendWritesUnavailableScreen'],
   ]) {
     let enabled = false;
@@ -381,6 +427,7 @@ test('flag off routes preserve original components; flag on also guards direct a
     new Function('require', 'exports', code)(id => {
       if (id === '@/services/inventory-feature') return { isBackendInventoryEnabled: () => enabled };
       if (id === '@/screens/backend-kitchen-screen') return Object.fromEntries(['BackendKitchenScreen', 'BackendHomeScreen', 'BackendFoodDetailScreen', 'BackendWritesUnavailableScreen'].map(name => [name, name]));
+      if (id === '@/screens/backend-add-food-screen') return { __esModule: true, default: 'BackendAddFoodScreen' };
       if (id === local) return { __esModule: true, default: 'LocalScreen' };
       if (id === 'expo-router') return { useLocalSearchParams: () => ({ id: 'local-id' }) };
       if (id === '@/domain/inventory') return { isPhotoRef: () => false };

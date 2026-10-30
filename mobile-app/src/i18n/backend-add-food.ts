@@ -1,0 +1,28 @@
+export const backendAddFoodMessages = {
+  en: {
+    search: 'Search the food catalog', selected: 'Selected food', noMatch: 'Not found, try another name',
+    searching: 'Searching…', searchError: 'Could not search the catalog. Check your connection and retry.', more: 'More results',
+    choose: 'Select a food from the catalog results.', quantity: 'Enter a positive quantity with at most 3 decimal places.',
+    required: 'Choose an option.', date: 'Enter a real date as YYYY-MM-DD, or leave blank.', dateOrder: 'Expiration must be on or after the purchase date.',
+    numericHint: 'Up to 3 decimal places. Arabic digits and a comma or dot are accepted.',
+    datesHint: 'Optional. Use YYYY-MM-DD. Expiration is the end of that day in your household’s timezone.',
+    purchaseHint: 'Optional. YYYY-MM-DD.',
+    saveError: 'Could not confirm the addition. Your form is kept. Retry Save without changes to safely repeat the same request.',
+    verify: 'Verify your email before adding food.', signedOut: 'Your session ended. Sign in again to add food.',
+    forbidden: 'You do not have permission to add food to this household.',
+    added: 'Added', saved: 'Saved to your household’s kitchen.', comingSoon: 'Coming soon',
+  },
+  ar: {
+    search: 'ابحث في دليل الطعام', selected: 'الطعام المحدد', noMatch: 'لم نجده، جرّب اسماً آخر',
+    searching: 'جارٍ البحث…', searchError: 'تعذّر البحث في دليل الطعام. تحقّق من الاتصال وأعد المحاولة.', more: 'نتائج أخرى',
+    choose: 'اختر طعاماً من نتائج الدليل.', quantity: 'أدخل كمية موجبة بحد أقصى 3 منازل عشرية.',
+    required: 'اختر أحد الخيارات.', date: 'أدخل تاريخاً صحيحاً بصيغة YYYY-MM-DD أو اتركه فارغاً.', dateOrder: 'يجب ألا يسبق تاريخ الانتهاء تاريخ الشراء.',
+    numericHint: 'حتى 3 منازل عشرية. تُقبل الأرقام العربية والفاصلة أو النقطة.',
+    datesHint: 'اختياري. استخدم YYYY-MM-DD. تنتهي الصلاحية في نهاية ذلك اليوم بتوقيت منزلك.',
+    purchaseHint: 'اختياري. YYYY-MM-DD.',
+    saveError: 'تعذّر تأكيد الإضافة. احتفظنا ببياناتك. أعد الحفظ دون تعديل لتكرار الطلب نفسه بأمان.',
+    verify: 'أكّد بريدك الإلكتروني قبل إضافة الطعام.', signedOut: 'انتهت جلستك. سجّل الدخول مجدداً لإضافة الطعام.',
+    forbidden: 'ليس لديك إذن لإضافة الطعام إلى هذا المنزل.',
+    added: 'تمت الإضافة', saved: 'يُحفظ في مطبخ منزلك.', comingSoon: 'قريباً',
+  },
+} as const;

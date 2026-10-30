@@ -8,12 +8,13 @@ export interface BackendKitchenSnapshot {
   items: InventoryReadItem[];
   today: string;
   detail: { id: string; status: Status; item?: InventoryReadDetail } | null;
+  additionNotice: number | null;
 }
 interface Reads {
   list(): Promise<{ items: InventoryReadItem[]; today: string }>;
   get(id: string): Promise<InventoryReadDetail>;
 }
-export const emptyBackendKitchen: BackendKitchenSnapshot = { owner: null, status: 'signed-out', items: [], today: '', detail: null };
+export const emptyBackendKitchen: BackendKitchenSnapshot = { owner: null, status: 'signed-out', items: [], today: '', detail: null, additionNotice: null };
 
 /** No mutation methods or local inventory access. Generations also protect UI state. */
 export class BackendKitchenStore {
@@ -22,6 +23,7 @@ export class BackendKitchenStore {
   private generation = 0;
   private listRequest = 0;
   private detailRequest = 0;
+  private noticeSequence = 0;
   constructor(private readonly reads: () => Reads) {}
   getSnapshot = () => this.snapshot;
   getServerSnapshot = () => emptyBackendKitchen;
@@ -38,6 +40,12 @@ export class BackendKitchenStore {
   };
   updateToday = (today: string) => {
     if (this.snapshot.owner && today !== this.snapshot.today) this.publish({ today });
+  };
+  showAdded = () => {
+    if (this.snapshot.owner) this.publish({ additionNotice: ++this.noticeSequence });
+  };
+  dismissAdded = (notice: number) => {
+    if (this.snapshot.additionNotice === notice) this.publish({ additionNotice: null });
   };
   reload = async () => {
     if (!this.snapshot.owner) return;
