@@ -34,7 +34,7 @@ export interface BackendHomeData {
 type HomeFood = InventoryItem | InventoryReadItem;
 
 const HomeDirectionContext = createContext(false);
-function H({ style, ...props }: TextProps & { variant?: 'title' | 'heading' | 'body' | 'caption' | 'label'; muted?: boolean }) {
+function H({ style, ...props }: TextProps & { variant?: 'title' | 'heading' | 'body' | 'caption' | 'label'; muted?: boolean; dir?: 'rtl' | 'ltr' }) {
   const rtl = useContext(HomeDirectionContext);
   return <AppText {...props} style={[{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, style]} />;
 }
@@ -70,7 +70,7 @@ export default function HomeScreen({ backend }: { backend?: BackendHomeData } = 
       onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}
       style={({ pressed }) => ({ width: 190, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.sm, backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
       <View style={{ height: 58, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.selectedSurface, borderRadius: radii.md }}><Icon name="food" size={30} /></View>
-      <H variant="label">{name}</H><H variant="caption" muted>{backend ? backend.quantityLabel(item as InventoryReadItem) : <>{number(item.quantity as number)} {homeUnitLabels[language][item.unitId!]}</>}</H>
+      <H variant="label">{name}</H><H variant="caption" muted dir={backend && rtl ? 'rtl' : undefined}>{backend ? backend.quantityLabel(item as InventoryReadItem) : <>{number(item.quantity as number)} {homeUnitLabels[language][item.unitId!]}</>}</H>
       {backend && (item as InventoryReadItem).readOnly && <H variant="caption" muted>{backend.readOnly}</H>}
       <H variant="caption" style={{ color: expiry.kind === 'expired' ? colors.errorText : expiry.days !== null && expiry.days <= 3 ? colors.warningText : colors.textSubtle }}>{expiryText}</H>
     </Pressable>;

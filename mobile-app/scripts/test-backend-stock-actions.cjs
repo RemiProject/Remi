@@ -336,5 +336,5 @@ for (const language of ['en', 'ar']) {
 }
 test('English/Arabic stock labels have matching keys and the agreed action wording', () => {
   assert.deepEqual(Object.keys(stockActionMessages.en), Object.keys(stockActionMessages.ar));
-  assert.deepEqual(['used', 'discard', 'fix', 'mistake'].map(key => stockActionMessages.ar[key]), ['استخدمت', 'رميت', 'صحّح العدد', 'اتضاف غلط']);
+  assert.deepEqual(['used', 'discard', 'fix', 'mistake'].map(key => stockActionMessages.ar[key]), ['استخدمت', 'تخلّصت منه', 'صحّح العدد', 'أُضيف بالخطأ']);
 });

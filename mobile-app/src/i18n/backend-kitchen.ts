@@ -23,6 +23,6 @@ export const backendKitchenMessages = {
     search: 'ابحث عن طعامك', all: 'الكل', name: 'الاسم', expiry: 'تاريخ الانتهاء', useFirst: 'استخدم أولاً',
     none: 'لا يوجد طعام مطابق', clear: 'مسح البحث والفلاتر', unknown: 'لا يوجد تاريخ انتهاء', today: 'ينتهي اليوم', expired: 'تجاوز تاريخ الانتهاء',
     days: 'الأيام المتبقية للانتهاء:', back: 'رجوع', notFound: 'هذا الطعام غير متاح. عُد إلى المطبخ أو أعد المحاولة.',
-    TABLESPOON: 'م.ك', TEASPOON: 'م.ص', COUNTER: 'على الرخامة', OTHER: 'أخرى',
+    TABLESPOON: 'م.ك', TEASPOON: 'م.ص', COUNTER: 'على سطح العمل', OTHER: 'أخرى',
   },
 } as const;

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type PropsWithChildren, type Ref } from 'react';
-import { I18nManager, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextProps, type ViewProps, type TextInputProps } from 'react-native';
+import { I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextProps, type ViewProps, type TextInputProps } from 'react-native';
 import { useRemyTheme } from '@/theme/provider';
 import { useRemyFonts } from '@/theme/fonts';
 import { layout, radii, spacing, typography } from '@/theme/tokens';
@@ -8,17 +8,17 @@ import { Icon, type IconName } from './icon';
 type TextVariant = 'title' | 'heading' | 'body' | 'caption' | 'label' | 'brand';
 const ScreenDirection = createContext<boolean | undefined>(undefined);
 export const ScreenDirectionProvider = ScreenDirection.Provider;
-export function AppText({ variant = 'body', muted = false, style, ...props }: TextProps & { variant?: TextVariant; muted?: boolean }) {
+export function AppText({ variant = 'body', muted = false, style, dir, ...props }: TextProps & { variant?: TextVariant; muted?: boolean; dir?: 'rtl' | 'ltr' }) {
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const rtl = useContext(ScreenDirection);
   const family = variant === 'brand' ? fonts.brand : variant === 'title' || variant === 'heading' || variant === 'label' ? fonts.heading : fonts.body;
-  return <Text {...props} style={[textStyles[variant], { fontFamily: family, color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, style]} />;
+  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, style]} />;
 }
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+export function PageHeader({ title, subtitle, subtitleDirection, action }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode }) {
   return <View style={{ gap: spacing.xs }}><View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
     <AppText variant="title" accessibilityRole="header" style={uiStyles.grow}>{title}</AppText>{action}
-  </View>{subtitle && <AppText muted>{subtitle}</AppText>}</View>;
+  </View>{subtitle && <AppText muted dir={subtitleDirection}>{subtitle}</AppText>}</View>;
 }
 export function Screen({ children, rtl, scrollRef, contentGap = spacing.xl }: PropsWithChildren<{ rtl?: boolean; scrollRef?: Ref<ScrollView>; contentGap?: number }>) {
   const { colors } = useRemyTheme();
@@ -84,11 +84,13 @@ export function EmptyState({ title, description, action, onPress }: { title: str
     {action && onPress && <Button label={action} onPress={onPress} />}
   </View>;
 }
-export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleStyle, rtl, children, onPress, disabled = false, divider = false, accessibilityLabel }: PropsWithChildren<{
-  title: string; subtitle?: string; icon?: IconName; leading?: React.ReactNode; trailing?: React.ReactNode; subtitleStyle?: TextProps['style']; rtl?: boolean; onPress?: () => void; disabled?: boolean; divider?: boolean; accessibilityLabel?: string;
+export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleStyle, subtitleDirection, rtl, children, onPress, disabled = false, divider = false, accessibilityLabel }: PropsWithChildren<{
+  title: string; subtitle?: string; icon?: IconName; leading?: React.ReactNode; trailing?: React.ReactNode; subtitleStyle?: TextProps['style']; subtitleDirection?: 'rtl' | 'ltr'; rtl?: boolean; onPress?: () => void; disabled?: boolean; divider?: boolean; accessibilityLabel?: string;
 }>) {
   const { colors } = useRemyTheme();
   const [focused, setFocused] = useState(false);
+  const screenRtl = useContext(ScreenDirection);
+  const rowRtl = rtl ?? screenRtl ?? I18nManager.isRTL ?? false;
   const captionStyle: TextProps['style'] = { textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' };
   return <Pressable accessibilityRole={onPress ? 'button' : undefined} accessibilityState={{ disabled }} accessibilityLabel={accessibilityLabel}
     disabled={disabled || !onPress} onPress={onPress} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
@@ -97,8 +99,8 @@ export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleSt
     {divider && <View style={{ height: 1, backgroundColor: colors.divider, marginTop: -spacing.lg, marginBottom: spacing.lg }} />}
     <View style={uiStyles.row}>{leading ?? (icon && <Icon name={icon} color={colors.textSecondary} size={20} />)}
       <View style={[uiStyles.grow, { gap: spacing.xs }]}><AppText variant="label" style={{ color: disabled ? colors.textSecondary : colors.text, textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' }}>{title}</AppText>
-        {subtitle && <AppText variant="caption" muted style={subtitleStyle ? [captionStyle, subtitleStyle] : captionStyle}>{subtitle}</AppText>}{children}
-      </View>{onPress && !disabled && (trailing ?? <View style={rtl !== undefined && rtl !== I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : undefined}><Icon name="chevron" size={16} color={colors.textSubtle} /></View>)}
+        {subtitle && <AppText variant="caption" muted dir={subtitleDirection} style={subtitleStyle ? [captionStyle, subtitleStyle] : captionStyle}>{subtitle}</AppText>}{children}
+      </View>{onPress && !disabled && (trailing ?? <Icon name="chevron" size={16} color={colors.textSubtle} rtl={rowRtl} />)}
     </View>
   </Pressable>;
 }

@@ -16,11 +16,11 @@ export const stockActionMessages = {
     confirm: 'Set this batch to zero', editSoon: 'Editing name, dates and storage is coming soon.',
   },
   ar: {
-    used: 'استخدمت', discard: 'رميت', fix: 'صحّح العدد', mistake: 'اتضاف غلط',
+    used: 'استخدمت', discard: 'تخلّصت منه', fix: 'صحّح العدد', mistake: 'أُضيف بالخطأ',
     fefo: 'يُخصم من الأقرب انتهاءً أولاً', amount: 'الكمية', total: 'العدد الصحيح', unit: 'الوحدة',
     save: 'حفظ', saving: 'جارٍ التحديث…', cancel: 'إلغاء', retry: 'أعد تحميل المطبخ', updated: 'تم التحديث',
     quantity: 'أدخل كمية موجبة بحد أقصى 3 منازل عشرية.', balance: 'أدخل صفراً أو عدداً موجباً بحد أقصى 3 منازل عشرية.',
-    insufficient: (amount: string) => `عندك ${amount} بس`,
+    insufficient: (amount: string) => `لديك ${amount} فقط`,
     error: 'تعذّر تأكيد التحديث. احتفظنا بالكمية. أعد المحاولة دون تعديل لتكرار الطلب نفسه بأمان.',
     refreshError: 'تم التحديث لكن تعذّر تحميل المطبخ. أعد التحميل؛ لن تتكرر العملية.',
     unitMismatch: 'لا يمكن تحويل هذه الوحدات لهذا الطعام لعدم توفر بيانات التحويل. جرّب وحدة أخرى أو صحّح العدد.',

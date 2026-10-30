@@ -106,7 +106,7 @@ test('unsupported labels are translated in rows, details and storage filters wit
     assert.equal(backendView.backendUnitLabel(raw, 'ar'), ar);
     assert.equal(raw.readOnly, true);
   }
-  for (const [storage, en, ar] of [['COUNTER', 'Counter', 'على الرخامة'], ['OTHER', 'Other', 'أخرى']]) {
+  for (const [storage, en, ar] of [['COUNTER', 'Counter', 'على سطح العمل'], ['OTHER', 'Other', 'أخرى']]) {
     const raw = { ...item, storageId: null, backendStorageLocation: storage };
     assert.equal(backendView.backendStorageLabel(raw, 'en'), en);
     assert.equal(backendView.backendStorageLabel(raw, 'ar'), ar);
@@ -371,17 +371,13 @@ test('unsupported labels remain visible; food details load from get, expose stoc
   const row = h.nodes(h.render(), 'ActionRow')[0];
   assert.equal(row.props.subtitle, '1.25 tbsp · Counter');
   assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'Counter'));
-  assert.equal(row.props.trailing.props.children, '›');
+  assert.equal(row.props.trailing, undefined); // Shared ActionRow owns chevrons.
   h.language('ar');
   const arabic = h.nodes(h.render(), 'ActionRow')[0];
-  assert.equal(arabic.props.subtitle, undefined);
-  assert.equal(arabic.props.trailing.type, 'View');
-  assert.equal(arabic.props.trailing.props.style.direction, 'ltr');
-  assert.equal(arabic.props.trailing.props.style.borderLeftWidth, 2);
-  assert.equal(arabic.props.trailing.props.style.borderBottomWidth, 2);
-  assert.deepEqual(arabic.props.trailing.props.style.transform, [{ rotate: '45deg' }]);
-  assert.deepEqual(h.nodes(arabic, 'AppText').slice(0, 4).map(node => node.props.children), ['1.25', 'م.ك', '·', 'على الرخامة']);
-  assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'على الرخامة'));
+  assert.equal(arabic.props.subtitle, '\u20661.25\u2069 م.ك · على سطح العمل');
+  assert.equal(arabic.props.subtitleDirection, 'rtl');
+  assert.equal(arabic.props.trailing, undefined);
+  assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'على سطح العمل'));
   h.language('en');
   h.render('BackendFoodDetailScreen'); h.effects.at(-1)(); assert.deepEqual(h.details, [item.id]);
   h.set({ detail: { id: item.id, status: 'ready', item } });
@@ -395,39 +391,30 @@ test('unsupported labels remain visible; food details load from get, expose stoc
   }
 });
 
-test('Arabic Kitchen and detail isolate quantity and unit as ordered layout segments; English stays unchanged', () => {
+test('Arabic Kitchen/detail use one natural RTL subtitle, isolating only numbers; English stays unchanged', () => {
   for (const [overrides, quantity, unit, storage, english] of [
     [{ quantity: '2.000', unitId: 'pieces', backendUnit: 'PIECE' }, '2', 'قطع', 'الثلاجة', '2 pieces · Refrigerator'],
     [{ quantity: '0.750', storageId: 'pantry', backendStorageLocation: 'PANTRY' }, '0.75', 'كغ', 'خزانة الطعام', '0.75 kg · Pantry'],
-    [{ quantity: '2.000', unitId: null, storageId: null, backendUnit: 'TABLESPOON', backendStorageLocation: 'COUNTER', readOnly: true }, '2', 'م.ك', 'على الرخامة', '2 tbsp · Counter'],
+    [{ quantity: '2.000', unitId: null, storageId: null, backendUnit: 'TABLESPOON', backendStorageLocation: 'COUNTER', readOnly: true }, '2', 'م.ك', 'على سطح العمل', '2 tbsp · Counter'],
   ]) {
     const h = uiHarness(), raw = { ...item, ...overrides };
     h.set({ items: [raw], detail: { id: item.id, status: 'ready', item: raw } });
     const englishRow = h.nodes(h.render(), 'ActionRow')[0];
     assert.equal(englishRow.props.subtitle, english);
-    assert.equal(englishRow.props.trailing.props.children, '›');
+    assert.equal(englishRow.props.trailing, undefined);
     const englishHeader = h.nodes(h.render('BackendFoodDetailScreen'), 'PageHeader')[0];
     assert.equal(englishHeader.props.subtitle, english.split(' · ')[0]);
 
     h.language('ar');
     const arabicRow = h.nodes(h.render(), 'ActionRow')[0];
-    assert.equal(arabicRow.props.subtitle, undefined);
-    const runs = h.nodes(arabicRow, 'AppText').slice(0, 4);
-    assert.deepEqual(runs.map(node => node.props.children), [quantity, unit, '·', storage]);
-    assert.equal(runs[0].props.style.writingDirection, 'ltr');
-    assert.equal(runs[1].props.style.writingDirection, 'rtl');
-    for (const view of h.nodes(arabicRow, 'View')) {
-      assert.equal(view.props.style.direction, 'ltr');
-      assert.equal(view.props.style.flexDirection, 'row');
-    }
-    assert.equal(h.nodes(arabicRow, 'View')[0].props.style.justifyContent, 'flex-end');
-    assert.deepEqual(h.nodes(h.nodes(arabicRow, 'View')[1], 'AppText').map(node => node.props.children), [quantity, unit]);
-    assert(!runs.some(node => /[\u2066-\u2069]/.test(node.props.children)));
+    assert.equal(arabicRow.props.subtitle, `\u2066${quantity}\u2069 ${unit} · ${storage}`);
+    assert.equal(arabicRow.props.subtitleDirection, 'rtl');
+    assert.equal(arabicRow.props.subtitleStyle.writingDirection, 'rtl');
+    assert.equal(h.nodes(arabicRow, 'View').length, 0);
 
     const arabicDetail = h.render('BackendFoodDetailScreen');
-    assert.equal(h.nodes(arabicDetail, 'PageHeader')[0].props.subtitle, undefined);
-    assert.deepEqual(h.nodes(arabicDetail, 'AppText').slice(0, 2).map(node => node.props.children), [quantity, unit]);
-    assert(h.nodes(arabicDetail, 'AppText').slice(0, 2).every(node => node.props.variant === 'body'));
+    assert.equal(h.nodes(arabicDetail, 'PageHeader')[0].props.subtitle, `\u2066${quantity}\u2069 ${unit}`);
+    assert.equal(h.nodes(arabicDetail, 'PageHeader')[0].props.subtitleDirection, 'rtl');
   }
 });
 
