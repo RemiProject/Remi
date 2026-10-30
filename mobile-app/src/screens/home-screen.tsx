@@ -105,7 +105,7 @@ export default function HomeScreen({ backend }: { backend?: BackendHomeData } = 
             <H variant="heading">{number(items.filter((item) => item.storageId === storage.id).length)}</H><H variant="caption" muted>{t[storage.id]}</H>
           </View>)}</View>
           <Button label={backend || items.length ? t.openKitchen : t.add} icon={backend || items.length ? 'kitchen' : 'add'} onPress={() => router.navigate(backend || items.length ? '/kitchen' : '/food/manual')} />
-          {backend && <Button label={t.add} icon="add" disabled />}
+          {backend && <Button label={t.add} icon="add" onPress={() => router.push('/food/manual')} />}
         </View>
       </Card>}
       {status === 'ready' && <View style={{ gap: spacing.md }}>{heading(t.useFirst, <Button label={t.viewAll} variant="text" onPress={() => router.navigate('/kitchen')} />)}

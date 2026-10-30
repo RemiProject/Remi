@@ -41,10 +41,24 @@ screens and local storage behavior stay unchanged. With the flag on, Kitchen,
 Home food lists and food detail use the authenticated backend inventory.
 Sign in to view a household's Kitchen. A separate **On this device** count notice
 shows existing local inventory as read-only; it is never imported, edited or deleted.
-Backend Add/Edit/Delete controls and direct add/edit URLs are disabled until the
+Backend Edit/Delete controls and direct edit URLs are disabled until the
 write operations are implemented. Name search, storage filtering, name/expiry
 sorting and Use First work on backend items; category filtering is unavailable
 because inventory reads do not return a category.
+
+Add food from the Add tab or the Home/Kitchen **Add food** button. Search the
+catalog (including Arabic aliases), select a result, then enter a positive quantity
+with up to three decimal places. Arabic digits and decimal commas are accepted.
+Packs, notes and photos are not offered. Camera, gallery and receipt methods remain
+disabled. Purchase date is a `YYYY-MM-DD` LocalDate; optional expiry is sent as
+23:59:59 in the active household's timezone. Dates use the existing YYYY-MM-DD
+form style. The app never creates catalog entries or writes these items locally.
+
+After a timeout or network error, retry Save on the same form without edits to
+reuse the exact request and idempotency key. Any field change starts a new operation.
+The pending retry is held in memory while the form remains mounted; reloading the
+page or leaving the form discards it. A confirmed success refreshes Kitchen and
+shows **Added**. Existing local items are untouched.
 
 To enable it for development, set the variable before starting Expo:
 

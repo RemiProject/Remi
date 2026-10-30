@@ -66,5 +66,6 @@ export function useBackendKitchen() {
   return {
     ...visibleBackendKitchen(snapshot, auth.user?.id ?? null, auth.busy || !auth.ready),
     retry: store.reload, loadDetail: store.loadDetail,
+    showAdded: store.showAdded, dismissAdded: store.dismissAdded,
   };
 }
