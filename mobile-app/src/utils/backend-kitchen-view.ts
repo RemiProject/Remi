@@ -17,14 +17,15 @@ export function backendStorageLabel(item: InventoryReadItem, language: 'en' | 'a
   return labels[item.backendStorageLocation] ?? item.backendStorageLocation;
 }
 export function backendQuantityLabel(item: InventoryReadItem, language: 'en' | 'ar'): string {
-  const text = `${displayInventoryQuantity(item.quantity)} ${backendUnitLabel(item, language)}`;
-  // Isolate this run from surrounding Arabic so the quantity stays before its unit.
-  return language === 'ar' ? `\u2066${text}\u2069` : text;
+  return `${inventoryNumberLabel(displayInventoryQuantity(item.quantity), language)} ${backendUnitLabel(item, language)}`;
+}
+/** Isolate only the number; the surrounding Arabic sentence keeps its RTL base. */
+export function inventoryNumberLabel(value: string, language: 'en' | 'ar'): string {
+  return language === 'ar' ? `\u2066${value}\u2069` : value;
 }
 export function backendRowSubtitle(item: InventoryReadItem, language: 'en' | 'ar'): string {
   const storage = backendStorageLabel(item, language);
-  return language === 'ar' ? `\u2066${backendQuantityLabel(item, language)} · \u2067${storage}\u2069\u2069`
-    : `${backendQuantityLabel(item, language)} · ${storage}`;
+  return `${backendQuantityLabel(item, language)} · ${storage}`;
 }
 
 export function displayInventoryQuantity(value: string): string {

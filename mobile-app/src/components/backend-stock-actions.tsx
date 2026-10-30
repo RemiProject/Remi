@@ -16,7 +16,7 @@ import { useLanguage } from '@/providers/language-provider';
 import { getAuth } from '@/services/auth';
 import { isSignedOutError } from '@/services/auth-validation';
 import { BackendStockActionsStore } from '@/services/backend-stock-actions';
-import { backendUnitLabel, displayInventoryQuantity } from '@/utils/backend-kitchen-view';
+import { backendUnitLabel, displayInventoryQuantity, inventoryNumberLabel } from '@/utils/backend-kitchen-view';
 import { useRemyTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
 
@@ -58,7 +58,7 @@ export function BackendStockActions({ item }: { item: InventoryReadItem }) {
             </View></FieldGroup>}
           </>}
           {(state.action === 'used' || state.action === 'discard') && <AppText variant="caption" muted>{t.fefo}</AppText>}
-          {available && <AppText accessibilityRole="alert" style={{ color: colors.errorText }}>{t.insufficient(`\u2066${displayInventoryQuantity(available.available)} ${unitLabel}\u2069`)}</AppText>}
+          {available && <AppText accessibilityRole="alert" dir={language === 'ar' ? 'rtl' : undefined} style={{ color: colors.errorText }}>{t.insufficient(language === 'ar' ? `${inventoryNumberLabel(displayInventoryQuantity(available.available), language)} ${unitLabel}` : `\u2066${displayInventoryQuantity(available.available)} ${unitLabel}\u2069`)}</AppText>}
           {state.error !== null && <AppText accessibilityRole="alert" style={{ color: colors.errorText }}>{message}</AppText>}
           {state.unchanged && <AppText accessibilityLiveRegion="polite">{t.unchanged}</AppText>}
           <Button label={busy ? t.saving : state.refreshPending ? t.retry : state.action === 'mistake' ? t.confirm : t.save} variant={state.action === 'mistake' && !state.refreshPending ? 'destructive' : 'primary'} disabled={busy || item.readOnly} onPress={() => { void store.submit(state.action === 'mistake'); }} />

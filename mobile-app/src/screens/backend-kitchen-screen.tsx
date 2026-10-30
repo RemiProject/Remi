@@ -10,9 +10,8 @@ import { backendAddFoodMessages } from '@/i18n/backend-add-food';
 import { stockActionMessages } from '@/i18n/backend-stock-actions';
 import { BackendStockActions } from '@/components/backend-stock-actions';
 import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
-import { backendExpiryDays, backendFoodName, backendKitchenView, backendQuantityLabel, backendRowSubtitle, backendStorageLabel, backendUnitLabel, displayInventoryQuantity } from '@/utils/backend-kitchen-view';
+import { backendExpiryDays, backendFoodName, backendKitchenView, backendQuantityLabel, backendRowSubtitle, backendStorageLabel, inventoryNumberLabel } from '@/utils/backend-kitchen-view';
 import { useRemyTheme } from '@/theme/provider';
-import { spacing } from '@/theme/tokens';
 import HomeScreen from './home-screen';
 
 function useLabels() {
@@ -23,7 +22,7 @@ function Expiry({ item }: { item: InventoryReadItem }) {
   const { today } = useBackendKitchen();
   const { language, t } = useLabels();
   const days = backendExpiryDays(item, today);
-  return <AppText variant="caption" muted>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : `${t.days} ${days.toLocaleString(language)}`}</AppText>;
+  return <AppText variant="caption" muted dir={language === 'ar' ? 'rtl' : undefined}>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : `${t.days} ${inventoryNumberLabel(days.toLocaleString(language), language)}`}</AppText>;
 }
 export function BackendKitchenState({ detail = false, retry }: { detail?: boolean; retry?: () => void }) {
   const state = useBackendKitchen();
@@ -42,31 +41,12 @@ function DeviceInventoryNotice() {
     {status === 'error' ? <><AppText accessibilityRole="alert">{t.deviceError}</AppText><Button label={t.retry} onPress={retryRead} /></> : status !== 'ready' && <AppText muted>{t.deviceLoading}</AppText>}
   </Card>;
 }
-function ArabicChevron() {
-  const { colors } = useRemyTheme();
-  // A drawn left chevron cannot be mirrored by the Unicode bidi algorithm.
-  return <View accessible={false} style={{ direction: 'ltr', width: 8, height: 8, margin: 4,
-    borderColor: colors.textSubtle, borderLeftWidth: 2, borderBottomWidth: 2, transform: [{ rotate: '45deg' }] }} />;
-}
-function ArabicStockLine({ item, includeStorage = true, variant = 'caption' }: { item: InventoryReadItem; includeStorage?: boolean; variant?: 'body' | 'caption' }) {
-  // Layout isolation keeps the order independent of the surrounding RTL text.
-  // Keep quantity + unit in one non-wrapping group, with separate text runs.
-  return <View style={{ direction: 'ltr', flexDirection: 'row', alignSelf: 'stretch', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-    <View style={{ direction: 'ltr', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-      <AppText variant={variant} muted style={{ writingDirection: 'ltr' }}>{displayInventoryQuantity(item.quantity)}</AppText>
-      <AppText variant={variant} muted style={{ writingDirection: 'rtl' }}>{backendUnitLabel(item, 'ar')}</AppText>
-    </View>
-    {includeStorage && <><AppText variant={variant} muted style={{ writingDirection: 'ltr' }}>·</AppText>
-      <AppText variant={variant} muted style={{ writingDirection: 'rtl' }}>{backendStorageLabel(item, 'ar')}</AppText></>}
-  </View>;
-}
 function BackendFoodRow({ item }: { item: InventoryReadItem }) {
   const { language, t, rtl } = useLabels();
   return <ActionRow title={backendFoodName(item, language)} rtl={rtl} icon="food"
-    trailing={rtl ? <ArabicChevron /> : <AppText style={{ writingDirection: 'ltr' }}>›</AppText>}
-    subtitle={rtl ? undefined : backendRowSubtitle(item, language)} subtitleStyle={{ writingDirection: 'ltr' }}
+    subtitle={backendRowSubtitle(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} subtitleStyle={{ writingDirection: rtl ? 'rtl' : 'ltr' }}
     onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}>
-    {rtl && <ArabicStockLine item={item} />}<Expiry item={item} />{item.readOnly && <AppText variant="caption" muted>{t.readOnly}</AppText>}
+    <Expiry item={item} />{item.readOnly && <AppText variant="caption" muted>{t.readOnly}</AppText>}
   </ActionRow>;
 }
 
@@ -87,7 +67,7 @@ export function BackendKitchenScreen() {
   }, [additionNotice, dismissAdded, owner]));
   const visible = backendKitchenView(items, query, storage, sort, priority, today, language);
   const storages = [...new Map(items.map(item => [item.storageId ?? item.backendStorageLocation, backendStorageLabel(item, language)])).entries()];
-  return <Screen rtl={rtl} scrollRef={scrollRef}><PageHeader title={t.title} subtitle={status === 'ready' ? `${items.length.toLocaleString(language)} ${t.saved}` : undefined}
+  return <Screen rtl={rtl} scrollRef={scrollRef}><PageHeader title={t.title} subtitle={status === 'ready' ? `${inventoryNumberLabel(items.length.toLocaleString(language), language)} ${t.saved}` : undefined} subtitleDirection={rtl ? 'rtl' : undefined}
     action={<Button label={t.add} icon="add" disabled={status !== 'ready'} onPress={() => router.push('/food/manual')} />} />
     {additionNotice != null && owner && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{additionNoticeKind === 'updated' ? stockActionMessages[language].updated : backendAddFoodMessages[language].added}</AppText></Card>}
     <AppText variant="caption" muted>{t.writesSoon}</AppText>
@@ -135,9 +115,7 @@ export function BackendFoodDetailScreen() {
   return <Screen rtl={rtl} scrollRef={scrollRef}><Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/kitchen')} />
     {owner && additionNotice != null && additionNoticeKind === 'updated' && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{stockActionMessages[language].updated}</AppText></Card>}
     <BackendKitchenState detail retry={() => { void loadDetail(id); }} />
-    {item && <>{rtl ? <View style={{ gap: spacing.xs }}><PageHeader title={backendFoodName(item, language)} />
-      <ArabicStockLine item={item} includeStorage={false} variant="body" /></View>
-      : <PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} />}
+    {item && <><PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} />
       <Card><AppText>{t.storage}: {backendStorageLabel(item, language)}</AppText><AppText>{t.expiry}: {item.expirationDate ?? t.unknown}</AppText><Expiry item={item} />
         {item.readOnly && <AppText muted>{t.readOnly}</AppText>}</Card>
       <BackendStockActions key={`${owner}:${id}`} item={item} />
