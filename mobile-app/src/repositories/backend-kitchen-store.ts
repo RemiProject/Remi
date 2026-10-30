@@ -9,12 +9,13 @@ export interface BackendKitchenSnapshot {
   today: string;
   detail: { id: string; status: Status; item?: InventoryReadDetail } | null;
   additionNotice: number | null;
+  additionNoticeKind: 'added' | 'updated';
 }
 interface Reads {
   list(): Promise<{ items: InventoryReadItem[]; today: string }>;
   get(id: string): Promise<InventoryReadDetail>;
 }
-export const emptyBackendKitchen: BackendKitchenSnapshot = { owner: null, status: 'signed-out', items: [], today: '', detail: null, additionNotice: null };
+export const emptyBackendKitchen: BackendKitchenSnapshot = { owner: null, status: 'signed-out', items: [], today: '', detail: null, additionNotice: null, additionNoticeKind: 'added' };
 
 /** No mutation methods or local inventory access. Generations also protect UI state. */
 export class BackendKitchenStore {
@@ -42,10 +43,30 @@ export class BackendKitchenStore {
     if (this.snapshot.owner && today !== this.snapshot.today) this.publish({ today });
   };
   showAdded = () => {
-    if (this.snapshot.owner) this.publish({ additionNotice: ++this.noticeSequence });
+    if (this.snapshot.owner) this.publish({ additionNotice: ++this.noticeSequence, additionNoticeKind: 'added' });
+  };
+  showUpdated = () => {
+    if (this.snapshot.owner) this.publish({ additionNotice: ++this.noticeSequence, additionNoticeKind: 'updated' });
   };
   dismissAdded = (notice: number) => {
     if (this.snapshot.additionNotice === notice) this.publish({ additionNotice: null });
+  };
+  refreshStock = async (id: string): Promise<InventoryReadDetail> => {
+    if (!this.snapshot.owner) throw new Error('Sign in to refresh your kitchen.');
+    const generation = this.generation, listRequest = ++this.listRequest, detailRequest = ++this.detailRequest;
+    try {
+      const reads = this.reads();
+      const [{ items, today }, item] = await Promise.all([reads.list(), reads.get(id)]);
+      if (generation !== this.generation || listRequest !== this.listRequest || detailRequest !== this.detailRequest) throw new Error('Inventory changed while refreshing. Please retry.');
+      this.publish({ items, today, status: 'ready', detail: { id, status: 'ready', item } });
+      return item;
+    } catch (error) {
+      if (generation === this.generation && listRequest === this.listRequest && detailRequest === this.detailRequest) {
+        const clearDetail = (error as { code?: string })?.code === 'STALE_CONTEXT';
+        this.publish(isSignedOutError(error) ? { status: 'signed-out', items: [], detail: null } : { status: 'error', items: [], ...(clearDetail ? { detail: null } : {}) });
+      }
+      throw error;
+    }
   };
   reload = async () => {
     if (!this.snapshot.owner) return;
@@ -56,7 +77,8 @@ export class BackendKitchenStore {
       if (generation === this.generation && request === this.listRequest) this.publish({ status: 'ready', items, today });
     } catch (error) {
       if (generation === this.generation && request === this.listRequest) {
-        this.publish({ status: isSignedOutError(error) ? 'signed-out' : 'error', items: [], detail: null });
+        const clearDetail = isSignedOutError(error) || (error as { code?: string })?.code === 'STALE_CONTEXT';
+        this.publish({ status: isSignedOutError(error) ? 'signed-out' : 'error', items: [], ...(clearDetail ? { detail: null } : {}) });
       }
     }
   };

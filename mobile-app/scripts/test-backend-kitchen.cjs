@@ -172,6 +172,8 @@ function uiHarness() {
     if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: { textSubtle: '#666', successSurface: '#dfd', successText: '#050' } }) };
     if (id === '@/i18n/backend-kitchen') return { backendKitchenMessages };
     if (id === '@/i18n/backend-add-food') return require('../src/i18n/backend-add-food.ts');
+    if (id === '@/i18n/backend-stock-actions') return require('../src/i18n/backend-stock-actions.ts');
+    if (id === '@/components/backend-stock-actions') return { BackendStockActions: 'BackendStockActions' };
     if (id === '@/i18n/home') return { homeUnitLabels, homeMessages };
     if (id === '@/i18n/inventory') return { inventoryMessages };
     if (id === '@/data/home-content') return { recipeTitle: () => '', searchHome: () => ({ recipes: [] }) };
@@ -247,6 +249,21 @@ test('pending Added notice survives list refresh, dismisses once, and clears on 
   assert.equal(visibleBackendKitchen(store.getSnapshot(), 'b', false).additionNotice, null);
   store.setUser('b'); assert.equal(store.getSnapshot().additionNotice, null);
   store.showAdded(); store.setUser(null); assert.equal(store.getSnapshot().additionNotice, null);
+});
+
+test('Updated confirmation is translated on Kitchen and detail, and expires after focus', t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { stockActionMessages } = require('../src/i18n/backend-stock-actions.ts');
+  for (const language of ['en', 'ar']) {
+    for (const screen of ['BackendKitchenScreen', 'BackendFoodDetailScreen']) {
+      const h = uiHarness(); h.language(language);
+      h.set({ additionNotice: 1, additionNoticeKind: 'updated', detail: { id: item.id, status: 'ready', item } });
+      const message = () => h.nodes(h.render(screen), 'AppText').find(node => node.props.children === stockActionMessages[language].updated);
+      assert(message()); assert.equal(message().props.accessibilityLiveRegion, 'polite');
+      const blur = h.focus(); t.mock.timers.tick(3499); assert(message());
+      t.mock.timers.tick(1); assert.equal(message(), undefined); blur();
+    }
+  }
 });
 
 test('backend Home reuses the original screen, supplies display-only names, and keeps read-only notices', () => {
@@ -348,7 +365,7 @@ test('signed-out/loading/empty/error/retry states are clear in English and Arabi
   assert.deepEqual(Object.keys(backendKitchenMessages.en), Object.keys(backendKitchenMessages.ar));
 });
 
-test('unsupported labels remain visible; food details load from get and disable edit/delete', () => {
+test('unsupported labels remain visible; food details load from get, expose stock actions and disable metadata edit', () => {
   const h = uiHarness();
   h.set({ items: [{ ...item, readOnly: true, unitId: null, storageId: null, backendUnit: 'TABLESPOON', backendStorageLocation: 'COUNTER' }] });
   const row = h.nodes(h.render(), 'ActionRow')[0];
@@ -369,7 +386,10 @@ test('unsupported labels remain visible; food details load from get and disable 
   h.render('BackendFoodDetailScreen'); h.effects.at(-1)(); assert.deepEqual(h.details, [item.id]);
   h.set({ detail: { id: item.id, status: 'ready', item } });
   const buttons = h.nodes(h.render('BackendFoodDetailScreen'), 'Button');
-  for (const label of ['Edit', 'Delete']) {
+  const detailTree = h.render('BackendFoodDetailScreen');
+  assert.equal(h.nodes(detailTree, 'BackendStockActions')[0].props.item.id, item.id);
+  assert.equal(buttons.some(button => button.props.label === 'Delete'), false);
+  for (const label of ['Edit']) {
     const button = buttons.find(node => node.props.label === label);
     assert.equal(button.props.disabled, true); assert.equal(button.props.onPress, undefined);
   }

@@ -7,6 +7,8 @@ import { useInventory } from '@/providers/inventory-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { backendKitchenMessages } from '@/i18n/backend-kitchen';
 import { backendAddFoodMessages } from '@/i18n/backend-add-food';
+import { stockActionMessages } from '@/i18n/backend-stock-actions';
+import { BackendStockActions } from '@/components/backend-stock-actions';
 import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
 import { backendExpiryDays, backendFoodName, backendKitchenView, backendQuantityLabel, backendRowSubtitle, backendStorageLabel, backendUnitLabel, displayInventoryQuantity } from '@/utils/backend-kitchen-view';
 import { useRemyTheme } from '@/theme/provider';
@@ -69,7 +71,7 @@ function BackendFoodRow({ item }: { item: InventoryReadItem }) {
 }
 
 export function BackendKitchenScreen() {
-  const { items, status, today, owner, additionNotice, dismissAdded } = useBackendKitchen();
+  const { items, status, today, owner, additionNotice, additionNoticeKind, dismissAdded } = useBackendKitchen();
   const { language, t, rtl } = useLabels();
   const { colors } = useRemyTheme();
   const scrollRef = useRef<ScrollView>(null);
@@ -87,7 +89,7 @@ export function BackendKitchenScreen() {
   const storages = [...new Map(items.map(item => [item.storageId ?? item.backendStorageLocation, backendStorageLabel(item, language)])).entries()];
   return <Screen rtl={rtl} scrollRef={scrollRef}><PageHeader title={t.title} subtitle={status === 'ready' ? `${items.length.toLocaleString(language)} ${t.saved}` : undefined}
     action={<Button label={t.add} icon="add" disabled={status !== 'ready'} onPress={() => router.push('/food/manual')} />} />
-    {additionNotice != null && owner && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{backendAddFoodMessages[language].added}</AppText></Card>}
+    {additionNotice != null && owner && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{additionNoticeKind === 'updated' ? stockActionMessages[language].updated : backendAddFoodMessages[language].added}</AppText></Card>}
     <AppText variant="caption" muted>{t.writesSoon}</AppText>
     <BackendKitchenState />
     {status === 'ready' && <>
@@ -118,18 +120,28 @@ export function BackendHomeScreen() {
 
 export function BackendFoodDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { detail, owner, status, loadDetail } = useBackendKitchen();
+  const { detail, owner, loadDetail, additionNotice, additionNoticeKind, dismissAdded } = useBackendKitchen();
   const { language, t, rtl } = useLabels();
-  useEffect(() => { if (owner && status !== 'signed-out') void loadDetail(id); }, [owner, id, loadDetail, status]);
+  const { colors } = useRemyTheme();
+  const scrollRef = useRef<ScrollView>(null);
+  useEffect(() => { if (owner) void loadDetail(id); }, [owner, id, loadDetail]);
+  useFocusEffect(useCallback(() => {
+    if (!owner || additionNotice == null || additionNoticeKind !== 'updated') return;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    const timer = setTimeout(() => dismissAdded(additionNotice), 3500);
+    return () => clearTimeout(timer);
+  }, [owner, additionNotice, additionNoticeKind, dismissAdded]));
   const item = detail?.id === id && detail.status === 'ready' ? detail.item : undefined;
-  return <Screen rtl={rtl}><Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/kitchen')} />
+  return <Screen rtl={rtl} scrollRef={scrollRef}><Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/kitchen')} />
+    {owner && additionNotice != null && additionNoticeKind === 'updated' && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{stockActionMessages[language].updated}</AppText></Card>}
     <BackendKitchenState detail retry={() => { void loadDetail(id); }} />
     {item && <>{rtl ? <View style={{ gap: spacing.xs }}><PageHeader title={backendFoodName(item, language)} />
       <ArabicStockLine item={item} includeStorage={false} variant="body" /></View>
       : <PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} />}
       <Card><AppText>{t.storage}: {backendStorageLabel(item, language)}</AppText><AppText>{t.expiry}: {item.expirationDate ?? t.unknown}</AppText><Expiry item={item} />
         {item.readOnly && <AppText muted>{t.readOnly}</AppText>}</Card>
-      <AppText variant="caption" muted>{t.writesSoon}</AppText><Button label={t.edit} disabled /><Button label={t.delete} variant="dangerText" disabled />
+      <BackendStockActions key={`${owner}:${id}`} item={item} />
+      <AppText variant="caption" muted>{stockActionMessages[language].editSoon}</AppText><Button label={t.edit} disabled />
     </>}
   </Screen>;
 }
