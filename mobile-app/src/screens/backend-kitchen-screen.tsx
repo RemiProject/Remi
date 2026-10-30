@@ -27,7 +27,7 @@ function Expiry({ item }: { item: InventoryReadItem }) {
 export function BackendKitchenState({ detail = false, retry }: { detail?: boolean; retry?: () => void }) {
   const state = useBackendKitchen();
   const { t } = useLabels();
-  const status = state.status === 'signed-out' ? 'signed-out' : detail ? state.detail?.status ?? 'loading' : state.status;
+  const status = state.status === 'signed-out' ? 'signed-out' : detail ? state.detail?.status ?? (state.status === 'error' ? 'error' : 'loading') : state.status;
   if (status === 'signed-out') return <EmptyState title={t.signInTitle} description={t.signInBody} action={t.signIn} onPress={() => router.push('/login')} />;
   if (status === 'loading') return <View style={uiStyles.row}><ActivityIndicator /><AppText accessibilityLiveRegion="polite">{t.loading}</AppText></View>;
   if (status === 'error') return <Card><AppText accessibilityRole="alert">{detail ? t.notFound : t.error}</AppText><Button label={t.retry} onPress={retry ?? state.retry} /></Card>;

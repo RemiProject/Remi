@@ -15,7 +15,7 @@ const valid = { email: user.email, identifier: user.email, password: 'Test-passw
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
 // The same lightweight component harness pattern used by the existing screen tests.
-function screenHarness({ signup = false, service = {}, language = 'en', snapshot, backendInventory = false } = {}) {
+function screenHarness({ signup = false, service = {}, language = 'en', snapshot, backendInventory = true } = {}) {
   const states = [], effects = [], routes = [];
   let cursor = 0;
   const auth = snapshot || { user: null, ready: true, busy: false, error: null,
