@@ -41,8 +41,7 @@ screens and local storage behavior stay unchanged. With the flag on, Kitchen,
 Home food lists and food detail use the authenticated backend inventory.
 Sign in to view a household's Kitchen. A separate **On this device** count notice
 shows existing local inventory as read-only; it is never imported, edited or deleted.
-Backend Edit/Delete controls and direct edit URLs are disabled until the
-write operations are implemented. Name search, storage filtering, name/expiry
+Backend Edit controls and direct edit URLs remain disabled. Name search, storage filtering, name/expiry
 sorting and Use First work on backend items; category filtering is unavailable
 because inventory reads do not return a category.
 
@@ -59,6 +58,20 @@ reuse the exact request and idempotency key. Any field change starts a new opera
 The pending retry is held in memory while the form remains mounted; reloading the
 page or leaving the form discards it. A confirmed success refreshes Kitchen and
 shows **Added**. Existing local items are untouched.
+
+On backend food detail, **Used** and **Thrown away** take an amount from the food's
+soonest-expiring batches (FEFO), which may be different from the displayed batch.
+The FEFO hint is always shown because this remains food-wide even with one current
+batch. Units default to the displayed batch's unit; the backend converts compatible
+units and reports an error when required density or piece-weight data is missing.
+**Fix count** refetches this batch and adjusts by correct total minus current;
+zero is a valid total and an unchanged total sends no mutation. **Added by mistake**
+confirms before setting only this batch to zero. Unsupported batches remain read-only.
+Successful actions refresh both the list and detail, show **Updated**, and return
+to Kitchen when this batch reaches zero. A network retry keeps the same key and
+payload (including an already-computed adjustment delta); editing the input starts
+a new operation. If only the refresh fails after confirmed success, Retry refresh
+never repeats the mutation. These retries are in memory while the dialog remains mounted.
 
 To enable it for development, set the variable before starting Expo:
 
