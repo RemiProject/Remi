@@ -1,5 +1,5 @@
 import { useState, type PropsWithChildren, type Ref } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, type TextInputProps } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/core';
 import { useRemyTheme } from '@/theme/provider';
@@ -35,7 +35,7 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
   </SafeAreaView>;
 }
 
-export function AuthInput({ label, error, password = false, inputRef, ...props }: TextInputProps & { label: string; error?: string; password?: boolean; inputRef?: Ref<TextInput> }) {
+export function AuthInput({ label, error, password = false, inputRef, ...props }: TextInputProps & { label: string; error?: string; password?: boolean; inputRef?: Ref<TextInputInstance> }) {
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const { language } = useLanguage();

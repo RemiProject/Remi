@@ -1,4 +1,678 @@
-# Nutrition per 100 g of the food AS STORED (raw unless the food name says cooked). Match key: food (English name or Arabic alias).
-# Take values from one trusted source per row (USDA FoodData Central, or the Egyptian food composition tables) and name it in source.
-# protein_g + carbs_g + fat_g must be <= 100.5 and calories <= 900 (the database rejects anything else).
+﻿# Remi AI development dataset. Nutrition per 100 g as stored; source = USDA FoodData Central FDC ID.
 food,calories_per_100g,protein_g,carbs_g,fat_g,fiber_g,sugar_g,sodium_mg,source
+tomato,18,0.88,3.89,0.2,1.2,2.63,5,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170457"
+potato,77,2.05,17.49,0.09,2.1,0.82,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170026"
+onion,40,1.1,9.34,0.1,1.7,4.24,4,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170000"
+garlic,149,6.36,33.06,0.5,2.1,1,17,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169230"
+cucumber,15,0.65,3.63,0.11,0.5,1.67,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168409"
+carrot,41,0.93,9.58,0.24,2.8,4.74,69,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170393"
+bell pepper,20,0.86,4.64,0.17,1.7,2.4,3,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170427"
+chili pepper,40,2,9.46,0.2,1.5,5.1,7,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170497"
+eggplant,25,0.98,5.88,0.18,3,3.53,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169228"
+zucchini,17,1.21,3.11,0.32,1,2.5,8,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169291"
+okra,33,1.93,7.45,0.19,3.2,1.48,7,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169260"
+green beans,31,1.83,6.97,0.22,2.7,3.26,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169961"
+lettuce,17,1.23,3.29,0.3,2.1,1.19,8,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169247"
+spinach,23,2.86,3.63,0.39,2.2,0.42,79,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168462"
+arugula,25,2.58,3.65,0.66,1.6,2.05,27,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169387"
+cabbage,25,1.28,5.8,0.1,2.5,3.2,18,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169975"
+cauliflower,25,1.92,4.97,0.28,2,1.91,30,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169986"
+broccoli,34,2.82,6.64,0.37,2.6,1.7,33,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170379"
+celery,14,0.69,2.97,0.17,1.6,1.34,80,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169988"
+beetroot,43,1.61,9.56,0.17,2.8,6.76,78,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169145"
+radish,16,0.68,3.4,0.1,1.6,1.86,39,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169276"
+turnip,28,0.9,6.43,0.1,1.8,3.8,67,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170465"
+sweet potato,86,1.57,20.12,0.05,3,4.18,55,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168482"
+pumpkin,26,1,6.5,0.1,0.5,2.76,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168448"
+mushroom,22,3.09,3.26,0.34,1,1.98,5,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169251"
+artichoke,47,3.27,10.51,0.15,5.4,0.99,94,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169205"
+leek,61,1.5,14.15,0.3,1.8,3.9,20,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169246"
+spring onion,32,1.83,7.34,0.19,2.6,2.33,16,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170005"
+corn,86,3.27,18.7,1.35,2,6.26,15,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169998"
+ginger,80,1.82,17.77,0.75,2,1.7,13,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169231"
+avocado,160,2,8.53,14.66,6.7,0.66,7,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171705"
+olive,145,1.03,3.84,15.32,3.3,0.54,1556,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169096"
+taro,112,1.5,26.46,0.2,4.1,0.4,11,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169308"
+parsley,36,2.97,6.33,0.79,3.3,0.85,56,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170416"
+fresh coriander,23,2.13,3.67,0.52,2.8,0.87,46,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169997"
+grape leaves,93,5.6,17.31,2.12,11,6.3,9,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168575"
+tomato paste,82,4.32,18.91,0.47,4.1,12.18,59,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170459"
+lemon,29,1.1,9.32,0.3,2.8,2.5,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 167746"
+lime,30,0.7,10.54,0.2,2.8,1.69,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168155"
+orange,47,0.94,11.75,0.12,2.4,9.35,0,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169097"
+mandarin,53,0.81,13.34,0.31,1.8,10.58,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169105"
+apple,52,0.26,13.81,0.17,2.4,10.39,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171688"
+banana,89,1.09,22.84,0.33,2.6,12.23,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173944"
+grapes,69,0.72,18.1,0.16,0.9,15.48,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174683"
+raisins,299,3.3,79.32,0.25,4.5,65.18,26,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168165"
+strawberry,32,0.67,7.68,0.3,2,4.89,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 167762"
+guava,68,2.55,14.32,0.95,5.4,8.92,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173044"
+mango,60,0.82,14.98,0.38,1.6,13.66,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169910"
+watermelon,30,0.61,7.55,0.15,0.4,6.2,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 167765"
+cantaloupe,34,0.84,8.16,0.19,0.9,7.86,16,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169092"
+fig,74,0.75,19.18,0.3,2.9,16.26,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173021"
+dried dates,282,2.45,75.03,0.39,8,63.35,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171726"
+pomegranate,83,1.67,18.7,1.17,4,13.67,3,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169134"
+peach,39,0.91,9.54,0.25,1.5,8.39,0,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169928"
+apricot,48,1.4,11.12,0.39,2,9.24,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171697"
+plum,46,0.7,11.42,0.28,1.4,9.92,0,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169949"
+pear,57,0.36,15.23,0.14,3.1,9.75,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169118"
+coconut,354,3.33,15.23,33.49,9,6.23,20,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170169"
+mulberry,43,1.44,9.8,0.39,1.7,8.1,10,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169913"
+beef,167,20.95,0,9.3,0,0,61,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174757"
+ground beef,254,17.17,0,20,0,0,66,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174036"
+veal,144,19.35,0,6.77,0,0,82,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173815; sugar/fiber 0 derived from carbohydrate 0"
+lamb,267,16.88,0,21.59,0,0,58,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172479; sugar/fiber 0 derived from carbohydrate 0"
+rabbit,136,20.05,0,5.55,0,0,41,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172521; sugar/fiber 0 derived from carbohydrate 0"
+beef liver,135,20.36,3.89,3.63,0,0,69,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169451"
+beef kidney,99,17.4,0.29,3.09,0,0,182,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169449"
+beef tripe,85,12.07,0,3.69,0,0,97,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170599"
+chicken,215,18.6,0,15.06,0,0,70,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171447"
+chicken breast,120,22.5,0,2.62,0,0,45,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171077"
+chicken thigh,121,19.66,0,4.12,0,0,95,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173627"
+chicken drumstick,161,18.08,0.11,9.2,0,0,106,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172373"
+chicken wing,191,17.52,0,12.85,0,0,84,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172390"
+chicken liver,119,16.92,0.73,4.83,0,0,71,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171060"
+chicken gizzard,94,17.66,0,2.06,0,0,69,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171456"
+duck,404,11.49,0,39.34,0,0,63,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172408"
+quail,192,19.63,0,12.05,0,0,53,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172418; sugar/fiber 0 derived from carbohydrate 0"
+pigeon,294,18.47,0,23.8,0,0,54,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174475; sugar/fiber 0 derived from carbohydrate 0"
+tilapia,96,20.08,0,1.7,0,0,52,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175176"
+mullet,117,19.35,0,3.79,0,0,65,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175123"
+sea bass,97,18.43,0,2,0,0,68,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175142"
+mackerel,205,18.6,0,13.89,0,0,90,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175119"
+herring,158,17.96,0,9.04,0,0,90,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175116"
+smoked herring,217,24.58,0,12.37,0,0,918,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173668"
+salmon,208,20.42,0,13.42,0,0,59,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175167"
+tuna,109,24.4,0,0.49,0,0,45,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175159"
+canned tuna,198,29.13,0,8.21,0,0,416,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173708"
+canned sardines,208,24.62,0,11.45,0,0,307,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175139"
+shrimp,85,20.1,0,0.51,0,0,119,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175179; sugar/fiber 0 derived from carbohydrate 0"
+squid,92,15.58,3.08,1.38,0,0,44,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174223"
+carp,127,17.83,0,5.6,0,0,49,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171952"
+brown rice,367,7.54,76.25,3.2,3.6,0.66,5,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169703"
+bulgur,342,12.29,75.87,1.33,12.5,0.41,17,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170688"
+wheat flour,364,10.33,76.31,0.98,2.7,0.27,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168894"
+whole wheat flour,340,13.21,71.97,2.5,10.7,0.41,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168893"
+oats,379,13.15,67.7,6.52,10.1,0.99,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173904"
+barley,352,9.91,77.72,1.16,15.6,0.8,9,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170284"
+white bread,266,8.85,49.42,3.33,2.7,5.67,490,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174924"
+pita bread,275,9.1,55.7,1.2,2.2,1.3,536,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174915"
+whole wheat bread,252,12.45,42.71,3.5,6,4.34,455,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172688"
+pasta,371,13.04,74.67,1.51,3.2,2.67,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169736"
+macaroni,371,13.04,74.67,1.51,3.2,2.67,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169736"
+spaghetti,371,13.04,74.67,1.51,3.2,2.67,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169736"
+cooked pasta,158,5.8,30.86,0.93,1.8,0.56,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169737"
+breadcrumbs,395,13.35,71.98,5.3,4.5,6.2,732,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174928"
+corn starch,381,0.26,91.27,0.05,0.9,0,9,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169698"
+bran,216,15.55,64.51,4.25,42.8,0.41,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169722"
+chickpeas,378,20.47,62.95,6.04,12.2,10.7,24,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173756"
+cooked chickpeas,164,8.86,27.42,2.59,7.6,4.8,7,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173757"
+brown lentils,352,24.63,63.35,1.06,10.7,2.03,6,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172420"
+cooked lentils,116,9.02,20.13,0.38,7.9,1.8,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172421"
+fava beans,341,26.12,58.29,1.53,25,5.7,13,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175205"
+white beans,333,23.36,60.27,0.85,15.2,2.11,16,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175202"
+black eyed peas,336,23.52,60.03,1.26,10.6,6.9,16,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173758"
+green peas,81,5.42,14.45,0.4,5.7,5.67,5,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170419"
+soybeans,446,36.49,30.16,19.94,9.3,7.33,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174270"
+hummus,237,7.78,15,17.82,5.5,0.62,426,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174289"
+whole milk,61,3.15,4.8,3.25,0,5.05,43,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171265"
+low fat milk,42,3.37,4.99,0.97,0,5.2,44,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170872"
+skim milk,34,3.37,4.96,0.08,0,5.09,42,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171269"
+buttermilk,40,3.31,4.79,1.07,0,5.36,148,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170874"
+yogurt,61,3.47,4.66,3.25,0,4.66,46,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171284"
+greek yogurt,97,9,3.98,5,0,4,35,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171304"
+heavy cream,340,2.84,2.84,36.08,0,2.92,27,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170859"
+butter,717,0.85,0.06,81.11,0,0.06,11,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173430"
+ghee,876,0.28,0,99.48,0,0,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173412"
+cheddar cheese,403,22.87,3.37,33.31,0,0.48,653,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173414"
+mozzarella cheese,299,22.17,2.4,22.14,0,0,486,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170845"
+feta cheese,265,14.21,3.88,21.49,0,0,1139,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173420"
+cottage cheese,98,11.12,3.38,4.3,0,2.67,315,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172179"
+condensed milk,321,7.91,54.4,8.7,0,54.4,127,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171275"
+milk powder,496,26.32,38.42,26.71,0,38.42,371,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170876"
+chicken egg,143,12.56,0.72,9.51,0,0.37,142,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171287"
+egg white,52,10.9,0.73,0.17,0,0.71,166,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172183"
+egg yolk,322,15.86,3.59,26.54,0,0.56,48,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172184"
+duck egg,185,12.81,1.45,13.77,0,0.93,146,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172189"
+quail egg,158,13.05,0.41,11.09,0,0.4,141,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172191"
+olive oil,884,0,0,100,0,0,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171413"
+sunflower oil,884,0,0,100,0,0,0,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171025"
+corn oil,900,0,0,100,0,0,0,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171029"
+cottonseed oil,884,0,0,100,0,0,0,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171024"
+white sugar,387,0,99.98,0,0,99.8,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169655"
+honey,304,0.3,82.4,0,0.2,82.12,4,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169640"
+molasses,290,0,74.73,0.1,0,74.72,37,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 168820"
+cocoa powder,228,19.6,57.9,13.7,37,1.75,21,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169593"
+tahini,595,17,21.19,53.76,9.3,0.49,115,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170189"
+jam,278,0.37,68.86,0.07,1.1,48.5,32,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169641"
+peanut butter,598,22.21,22.31,51.36,5,10.49,426,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 174266"
+water,0,0,0,0,0,0,4,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173647"
+orange juice,45,0.7,10.4,0.2,0.2,8.4,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 169098"
+lemon juice,22,0.35,6.9,0.24,0.3,2.52,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 167747"
+almonds,579,21.15,21.55,49.93,12.5,4.35,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170567"
+walnuts,654,15.23,13.71,65.21,6.7,2.61,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170187"
+pistachios,560,20.16,27.17,45.32,10.6,7.66,1,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170184"
+peanuts,567,25.8,16.13,49.24,8.5,4.72,18,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172430"
+sesame seeds,573,17.73,23.45,49.67,11.8,0.3,11,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170150"
+pumpkin seeds,559,30.23,10.71,49.05,6,1.4,7,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170556"
+salt,0,0,0,0,0,0,38758,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 173468"
+cumin,375,17.81,44.24,22.27,10.5,2.25,168,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170923"
+black pepper,251,10.39,63.95,3.26,25.3,0.64,20,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170931"
+cinnamon,247,3.99,80.59,1.24,53.1,2.17,10,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171320"
+turmeric,312,9.68,67.14,3.25,22.7,3.21,27,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172231"
+cloves,274,5.97,65.53,13,33.9,2.38,277,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171321"
+paprika,282,14.14,53.99,12.89,34.9,10.34,68,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 171329"
+cayenne pepper,318,12.01,56.63,17.27,27.2,10.34,30,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 170932"
+vinegar,18,0,0.04,0,0,0.04,2,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 172237"
+baking soda,0,0,0,0,0,0,27360,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175040"
+dry yeast,325,40.44,41.22,7.61,26.9,0,51,"USDA FoodData Central, SR Legacy (April 2018 release), FDC ID 175043"
+fennel,31,1.24,7.3,0.2,3.1,3.93,52,SRC-USDA-SR-2018 FDC 169385
+chard,19,1.8,3.74,0.2,1.6,1.1,213,SRC-USDA-SR-2018 FDC 169991
+watercress,11,2.3,1.29,0.1,0.5,0.2,41,SRC-USDA-SR-2018 FDC 170068
+cherry,63,1.06,16.01,0.2,2.1,12.82,0,SRC-USDA-SR-2018 FDC 171719
+pineapple,50,0.54,13.12,0.12,1.4,9.85,1,SRC-USDA-SR-2018 FDC 169124
+kiwi,61,1.14,14.66,0.52,3,8.99,3,SRC-USDA-SR-2018 FDC 168153
+persimmon,70,0.58,18.59,0.19,3.6,12.53,1,SRC-USDA-SR-2018 FDC 169941
+papaya,43,0.47,10.82,0.26,1.7,7.82,8,SRC-USDA-SR-2018 FDC 169926
+grapefruit,42,0.77,10.66,0.14,1.6,6.89,0,SRC-USDA-SR-2018 FDC 174673
+goat meat,109,20.6,0,2.31,0,0,82,SRC-USDA-SR-2018 FDC 175303
+goose,371,15.86,0,33.62,0,0,73,SRC-USDA-SR-2018 FDC 174470
+turkey,144,21.64,0.14,5.64,0,0.07,112,SRC-USDA-SR-2018 FDC 171081
+cod,82,17.81,0,0.67,0,0,54,SRC-USDA-SR-2018 FDC 171955
+catfish,95,16.38,0,2.82,0,0,43,SRC-USDA-SR-2018 FDC 174186
+grouper,92,19.38,0,1.02,0,0,53,SRC-USDA-SR-2018 FDC 171962
+trout,141,19.94,0,6.18,0,0,51,SRC-USDA-SR-2018 FDC 173717
+anchovy,131,20.35,0,4.84,0,0,104,SRC-USDA-SR-2018 FDC 174182
+mussel,86,11.9,3.69,2.24,0,0,286,SRC-USDA-SR-2018 FDC 174216
+octopus,82,14.91,2.2,1.04,0,0,230,SRC-USDA-SR-2018 FDC 174218
+cornmeal,362,8.12,76.89,3.59,7.3,0.64,35,SRC-USDA-SR-2018 FDC 169697
+rice flour,366,5.95,80.13,1.42,2.4,0.12,0,SRC-USDA-SR-2018 FDC 169714
+kidney beans,337,22.53,61.29,1.06,15.2,2.1,12,SRC-USDA-SR-2018 FDC 173744
+pinto beans,347,21.42,62.55,1.23,15.5,2.11,12,SRC-USDA-SR-2018 FDC 175199
+sour cream,198,2.44,4.63,19.35,0,3.41,31,SRC-USDA-SR-2018 FDC 171257
+cream cheese,350,6.15,5.52,34.44,0,3.76,314,SRC-USDA-SR-2018 FDC 173418
+parmesan cheese,392,35.75,3.22,25,0,0.11,1175,SRC-USDA-SR-2018 FDC 170848
+canola oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 172336
+sesame oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171016
+coconut oil,892,0,0,99.06,0,0,0,SRC-USDA-SR-2018 FDC 171412
+soybean oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171012
+brown sugar,380,0.12,98.09,0,0,97.02,28,SRC-USDA-SR-2018 FDC 168833
+dark chocolate,598,7.79,45.9,42.63,10.9,23.99,20,SRC-USDA-SR-2018 FDC 170273
+milk chocolate,535,7.65,59.4,29.66,3.4,51.5,79,SRC-USDA-SR-2018 FDC 167587
+maple syrup,260,0.04,67.04,0.06,0,60.46,12,SRC-USDA-SR-2018 FDC 169661
+apple juice,46,0.1,11.3,0.13,0.2,9.62,4,SRC-USDA-SR-2018 FDC 173933
+coconut water,19,0.72,3.71,0.2,1.1,2.61,105,SRC-USDA-SR-2018 FDC 170174
+soy milk,54,3.27,6.28,1.75,0.6,3.99,51,SRC-USDA-SR-2018 FDC 172446
+almond milk,15,0.4,1.31,0.96,0.2,0.81,72,SRC-USDA-SR-2018 FDC 174832
+cashews,553,18.22,30.19,43.85,3.3,5.91,12,SRC-USDA-SR-2018 FDC 170162
+hazelnuts,628,14.95,16.7,60.75,9.7,4.34,0,SRC-USDA-SR-2018 FDC 170581
+pine nuts,673,13.69,13.08,68.37,3.7,3.59,2,SRC-USDA-SR-2018 FDC 170591
+kale,35,2.92,4.42,1.49,4.1,0.99,53,SRC-USDA-SR-2018 FDC 168421
+butternut squash,45,1,11.69,0.1,2,2.2,4,SRC-USDA-SR-2018 FDC 169295
+asparagus,20,2.2,3.88,0.12,2.1,1.88,2,SRC-USDA-SR-2018 FDC 168389
+yam,118,1.53,27.88,0.17,4.1,0.5,9,SRC-USDA-SR-2018 FDC 170071
+bean sprouts,30,3.04,5.94,0.18,1.8,4.13,6,SRC-USDA-SR-2018 FDC 169957
+caper,23,2.36,4.89,0.86,3.2,0.41,2348,SRC-USDA-SR-2018 FDC 172238
+blueberry,57,0.74,14.49,0.33,2.4,9.96,1,SRC-USDA-SR-2018 FDC 171711
+raspberry,52,1.2,11.94,0.65,6.5,4.42,1,SRC-USDA-SR-2018 FDC 167755
+blackberry,43,1.39,9.61,0.49,5.3,4.88,1,SRC-USDA-SR-2018 FDC 173946
+cranberry,46,0.46,11.97,0.13,3.6,4.27,2,SRC-USDA-SR-2018 FDC 171722
+nectarine,44,1.06,10.55,0.32,1.7,7.89,0,SRC-USDA-SR-2018 FDC 169914
+honeydew melon,36,0.54,9.09,0.14,0.8,8.12,18,SRC-USDA-SR-2018 FDC 169911
+passion fruit,97,2.2,23.38,0.7,10.4,11.2,28,SRC-USDA-SR-2018 FDC 169108
+lychee,66,0.83,16.53,0.44,1.3,15.23,1,SRC-USDA-SR-2018 FDC 169086
+jackfruit,95,1.72,23.25,0.64,1.5,19.08,2,SRC-USDA-SR-2018 FDC 174687
+star fruit,31,1.04,6.73,0.33,2.8,3.98,2,SRC-USDA-SR-2018 FDC 171715
+soursop,66,1,16.84,0.3,3.3,13.54,14,SRC-USDA-SR-2018 FDC 167761
+breadfruit,103,1.07,27.12,0.23,4.9,11,2,SRC-USDA-SR-2018 FDC 171714
+beef heart,112,17.72,0.14,3.94,0,0,98,SRC-USDA-SR-2018 FDC 168625
+beef brisket,165,20.32,0,9.29,0,0,80,SRC-USDA-SR-2018 FDC 168714
+beef chuck,249,19.14,0,18.57,0,0,63,SRC-USDA-SR-2018 FDC 168668
+beef sirloin,201,20.3,0,12.71,0,0,52,SRC-USDA-SR-2018 FDC 168726
+beef tenderloin,247,19.61,0,18.16,0,0,50,SRC-USDA-SR-2018 FDC 169542
+lamb chops,372,14.52,0,34.39,0,0,56,SRC-USDA-SR-2018 FDC 174321
+lamb shoulder,264,16.58,0,21.45,0,0,61,SRC-USDA-SR-2018 FDC 172496
+lamb shank,201,18.91,0,13.38,0,0,72,SRC-USDA-SR-2018 FDC 172547
+lamb mince,282,16.56,0,23.41,0,0,59,SRC-USDA-SR-2018 FDC 174370
+veal liver,140,19.93,2.91,4.85,0,0,77,SRC-USDA-SR-2018 FDC 172534
+corned beef,250,27.1,0,14.93,0,0,897,SRC-USDA-SR-2018 FDC 170602
+beef frankfurter,315,11.69,2.97,28.1,0,1.17,865,SRC-USDA-SR-2018 FDC 173862
+turkey breast,114,23.66,0.14,1.48,0,0.05,113,SRC-USDA-SR-2018 FDC 171098
+duck breast,135,18.28,0.94,5.95,0,0,74,SRC-USDA-SR-2018 FDC 172410
+chicken mince,143,17.44,0.04,8.1,0,0,60,SRC-USDA-SR-2018 FDC 171116
+turkey mince,148,19.66,0,7.66,0,0,58,SRC-USDA-SR-2018 FDC 171505
+roasted chicken breast,165,31.02,0,3.57,0,0,74,SRC-USDA-SR-2018 FDC 171477
+haddock,74,16.32,0,0.45,0,0,213,SRC-USDA-SR-2018 FDC 171964
+lobster,77,16.52,0,0.75,0,0,423,SRC-USDA-SR-2018 FDC 174208
+oyster,51,5.71,2.72,1.71,0,0.62,85,SRC-USDA-SR-2018 FDC 171978
+clam,86,14.67,3.57,0.96,0,0,601,SRC-USDA-SR-2018 FDC 174214
+swordfish,144,19.66,0,6.65,0,0,81,SRC-USDA-SR-2018 FDC 173703
+smoked salmon,117,18.28,0,4.32,0,0,672,SRC-USDA-SR-2018 FDC 173687
+fish roe,143,22.32,1.5,6.42,0,0,91,SRC-USDA-SR-2018 FDC 175132
+canned tuna in water,86,19.44,0,0.96,0,0,247,SRC-USDA-SR-2018 FDC 173709
+noodles,384,14.16,71.27,4.44,3.3,1.88,21,SRC-USDA-SR-2018 FDC 169731
+rice noodles,364,5.95,80.18,0.56,1.6,0.12,182,SRC-USDA-SR-2018 FDC 169742
+corn tortilla,218,5.7,44.64,2.85,6.3,0.88,45,SRC-USDA-SR-2018 FDC 175036
+flour tortilla,306,8.2,49.38,7.99,3.5,3.71,736,SRC-USDA-SR-2018 FDC 175037
+crackers,418,9.46,74.05,8.64,2.8,1.29,941,SRC-USDA-SR-2018 FDC 172746
+rye bread,259,8.5,48.3,3.3,5.8,3.85,603,SRC-USDA-SR-2018 FDC 172684
+sorghum,329,10.62,72.09,3.46,6.7,2.53,2,SRC-USDA-SR-2018 FDC 169716
+oat bran,246,17.3,66.22,7.03,15.4,1.45,4,SRC-USDA-SR-2018 FDC 168872
+whole wheat grain,327,12.61,71.18,1.54,12.2,0.41,2,SRC-USDA-SR-2018 FDC 168890
+dried corn kernels,365,9.42,74.26,4.74,7.3,0.64,35,SRC-USDA-SR-2018 FDC 170288
+popcorn,387,12.94,77.78,4.54,14.5,0.87,8,SRC-USDA-SR-2018 FDC 167959
+croissant,406,8.2,45.8,21,2.6,11.26,384,SRC-USDA-SR-2018 FDC 174987
+hamburger bun,279,9.77,50.12,3.91,1.8,7.28,494,SRC-USDA-SR-2018 FDC 172796
+puff pastry,551,7.3,45.1,38.1,1.5,0.74,249,SRC-USDA-SR-2018 FDC 172790
+phyllo dough,299,7.1,52.6,6,1.9,0.18,483,SRC-USDA-SR-2018 FDC 172791
+cooked brown rice,123,2.74,25.58,0.97,1.6,0.24,4,SRC-USDA-SR-2018 FDC 169704
+cooked bulgur,83,3.08,18.58,0.24,4.5,0.1,5,SRC-USDA-SR-2018 FDC 170287
+cooked couscous,112,3.79,23.22,0.16,1.4,0.1,5,SRC-USDA-SR-2018 FDC 169700
+cooked quinoa,120,4.4,21.3,1.92,2.8,0.87,7,SRC-USDA-SR-2018 FDC 168917
+black beans,341,21.6,62.36,1.42,15.5,2.12,5,SRC-USDA-SR-2018 FDC 173734
+mung beans,347,23.86,62.62,1.15,16.3,6.6,15,SRC-USDA-SR-2018 FDC 174256
+lima beans,338,21.46,63.38,0.69,19,8.5,18,SRC-USDA-SR-2018 FDC 174252
+navy beans,337,22.33,60.75,1.5,15.3,3.88,5,SRC-USDA-SR-2018 FDC 173745
+chickpea flour,387,22.39,57.82,6.69,10.8,10.85,64,SRC-USDA-SR-2018 FDC 174288
+baked beans,94,4.75,21.14,0.37,4.1,7.96,343,SRC-USDA-SR-2018 FDC 175182
+edamame,109,11.22,7.61,4.73,4.8,2.48,6,SRC-USDA-SR-2018 FDC 168410
+cooked fava beans,110,7.6,19.65,0.4,5.4,1.82,5,SRC-USDA-SR-2018 FDC 173753
+cooked white beans,139,9.73,25.09,0.35,6.3,0.34,6,SRC-USDA-SR-2018 FDC 175203
+cooked kidney beans,127,8.67,22.8,0.5,7.4,0.32,2,SRC-USDA-SR-2018 FDC 175194
+cooked black eyed peas,116,7.73,20.76,0.53,6.5,3.3,4,SRC-USDA-SR-2018 FDC 173759
+cooked split peas,118,8.34,21.1,0.39,8.3,2.9,2,SRC-USDA-SR-2018 FDC 172429
+ricotta cheese,150,7.54,7.27,10.18,0,0.27,110,SRC-USDA-SR-2018 FDC 170851
+ice cream,207,3.5,23.6,11,0.7,21.22,80,SRC-USDA-SR-2018 FDC 167575
+whey powder,353,12.93,74.46,1.07,0,74.46,1079,SRC-USDA-SR-2018 FDC 171283
+edam cheese,357,24.99,1.43,28.57,0,0,973,SRC-USDA-SR-2018 FDC 173419
+gouda cheese,356,24.94,2.22,27.44,0,2.22,819,SRC-USDA-SR-2018 FDC 171241
+swiss cheese,393,26.96,1.44,30.99,0,0,187,SRC-USDA-SR-2018 FDC 171251
+low fat yogurt,63,5.25,7.04,1.55,0,7.04,70,SRC-USDA-SR-2018 FDC 170886
+skim yogurt,56,5.73,7.68,0.18,0,7.68,77,SRC-USDA-SR-2018 FDC 170887
+evaporated milk,134,6.81,10.04,7.56,0,10.04,106,SRC-USDA-SR-2018 FDC 171276
+goat milk,69,3.56,4.45,4.14,0,4.45,50,SRC-USDA-SR-2018 FDC 171278
+chocolate milk,76,2.99,12.13,1.9,0.7,9.55,66,SRC-USDA-SR-2018 FDC 170880
+low moisture mozzarella,318,21.6,2.47,24.64,0,1.01,710,SRC-USDA-SR-2018 FDC 170846
+hard boiled egg,155,12.58,1.12,10.61,0,1.12,124,SRC-USDA-SR-2018 FDC 173424
+fried egg,196,13.61,0.83,14.84,0,0.4,207,SRC-USDA-SR-2018 FDC 173423
+dried egg powder,592,48.05,1.13,43.9,0,0.56,476,SRC-USDA-SR-2018 FDC 172188
+peanut oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171410
+flaxseed oil,884,0.11,0,99.98,0,0,0,SRC-USDA-SR-2018 FDC 167702
+avocado oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 173573
+grapeseed oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171028
+palm oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171015
+margarine,717,0.16,0.7,80.71,0,0,751,SRC-USDA-SR-2018 FDC 172346
+vegetable shortening,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171011
+marmalade,246,0.3,66.3,0,0.7,60,56,SRC-USDA-SR-2018 FDC 168819
+powdered sugar,389,0,99.77,0,0,97.81,2,SRC-USDA-SR-2018 FDC 169656
+corn syrup,283,0,76.79,0.2,0,76.77,62,SRC-USDA-SR-2018 FDC 168837
+vanilla extract,288,0.06,12.65,0.06,0,12.65,9,SRC-USDA-SR-2018 FDC 173471
+gelatin powder,335,85.6,0,0.1,0,0,196,SRC-USDA-SR-2018 FDC 169599
+chocolate hazelnut spread,539,5.41,62.36,29.73,5.4,54.05,41,SRC-USDA-SR-2018 FDC 168000
+rice pudding,108,3.23,18.39,2.15,0.3,11.59,97,SRC-USDA-SR-2018 FDC 168782
+butter cookies,467,6.1,68.9,18.8,0.8,20.24,282,SRC-USDA-SR-2018 FDC 174950
+sparkling water,0,0,0,0,0,0,21,SRC-USDA-SR-2018 FDC 174842
+brewed black tea,1,0,0.3,0,0,0,3,SRC-USDA-SR-2018 FDC 173227
+brewed green tea,1,0.22,0,0,0,0,1,SRC-USDA-SR-2018 FDC 171917
+brewed coffee,1,0.12,0,0.02,0,0,2,SRC-USDA-SR-2018 FDC 171890
+espresso,9,0.12,1.67,0.18,0,0,14,SRC-USDA-SR-2018 FDC 171891
+instant coffee,353,12.2,75.4,0.5,0,0,37,SRC-USDA-SR-2018 FDC 171893
+mango juice,51,0.11,13.12,0.06,0.3,12.45,5,SRC-USDA-SR-2018 FDC 167785
+guava juice,63,0.09,16.25,0.06,1,12.95,6,SRC-USDA-SR-2018 FDC 167784
+apricot juice,56,0.17,13.63,0.45,0.1,12.79,8,SRC-USDA-SR-2018 FDC 171704
+pomegranate juice,54,0.15,13.13,0.29,0.1,12.65,9,SRC-USDA-SR-2018 FDC 167787
+tomato juice,17,0.85,3.53,0.29,0.4,2.58,253,SRC-USDA-SR-2018 FDC 170458
+tamarind drink,57,0.09,14.73,0.12,0.5,12.7,7,SRC-USDA-SR-2018 FDC 167786
+cola,42,0,10.36,0.25,0,9.94,3,SRC-USDA-SR-2018 FDC 174852
+lemonade,40,0.07,10.42,0.04,0,9.98,4,SRC-USDA-SR-2018 FDC 173217
+red bell pepper,26,0.99,6.03,0.3,2.1,4.2,4,SRC-USDA-SR-2018 FDC 170108
+red cabbage,31,1.43,7.37,0.16,2.1,3.83,27,SRC-USDA-SR-2018 FDC 169977
+chinese cabbage,16,1.2,3.23,0.2,1.2,1.41,9,SRC-USDA-SR-2018 FDC 169979
+kohlrabi,27,1.7,6.2,0.1,3.6,2.6,20,SRC-USDA-SR-2018 FDC 168424
+jerusalem artichoke,73,2,17.44,0.01,1.6,9.6,4,SRC-USDA-SR-2018 FDC 169236
+fresh basil,23,3.15,2.65,0.64,1.6,0.3,4,SRC-USDA-SR-2018 FDC 172232
+mustard greens,27,2.86,4.67,0.42,3.2,1.32,20,SRC-USDA-SR-2018 FDC 169256
+endive,17,1.25,3.35,0.2,3.1,0.25,22,SRC-USDA-SR-2018 FDC 168412
+jalapeno pepper,29,0.91,6.5,0.37,2.8,4.12,3,SRC-USDA-SR-2018 FDC 168576
+pickled cucumber,12,0.5,2.41,0.3,1,1.07,809,SRC-USDA-SR-2018 FDC 168558
+sauerkraut,19,0.91,4.28,0.14,2.9,1.78,661,SRC-USDA-SR-2018 FDC 169279
+canned tomatoes,16,0.79,3.47,0.25,1.9,2.55,115,SRC-USDA-SR-2018 FDC 170051
+tomato sauce,24,1.2,5.31,0.3,1.5,3.56,474,SRC-USDA-SR-2018 FDC 170054
+sun dried tomatoes,258,14.11,55.76,2.97,12.3,37.59,107,SRC-USDA-SR-2018 FDC 168567
+frozen peas,77,5.22,13.62,0.4,4.5,5,108,SRC-USDA-SR-2018 FDC 170016
+frozen okra,30,1.69,6.63,0.25,2.2,2.97,3,SRC-USDA-SR-2018 FDC 169262
+frozen spinach,29,3.63,4.21,0.57,2.9,0.65,74,SRC-USDA-SR-2018 FDC 169287
+boiled potatoes,86,1.71,20.01,0.1,1.8,0.89,5,SRC-USDA-SR-2018 FDC 170440
+frozen french fries,147,2.24,24.81,4.66,1.9,0.2,23,SRC-USDA-SR-2018 FDC 170523
+baked sweet potato,90,2.01,20.71,0.15,3.3,6.48,36,SRC-USDA-SR-2018 FDC 168483
+cooked molokhia,37,3.68,7.29,0.2,2,1,11,SRC-USDA-SR-2018 FDC 168420
+cooked spinach,23,2.97,3.75,0.26,2.4,0.43,70,SRC-USDA-SR-2018 FDC 168463
+cooked okra,22,1.87,4.51,0.21,2.5,2.4,6,SRC-USDA-SR-2018 FDC 169261
+cooked taro,142,0.52,34.6,0.11,5.1,0.49,15,SRC-USDA-SR-2018 FDC 168486
+cooked artichoke,53,2.89,11.95,0.34,5.7,0.99,60,SRC-USDA-SR-2018 FDC 168386
+cooked green beans,35,1.89,7.88,0.28,3.2,3.63,1,SRC-USDA-SR-2018 FDC 169141
+cooked cauliflower,23,1.84,4.11,0.45,2.3,2.08,15,SRC-USDA-SR-2018 FDC 170397
+cooked carrots,35,0.76,8.22,0.18,3,3.45,58,SRC-USDA-SR-2018 FDC 170394
+cooked zucchini,15,1.14,2.69,0.36,1,1.71,3,SRC-USDA-SR-2018 FDC 169292
+cooked eggplant,35,0.83,8.73,0.23,2.5,3.2,1,SRC-USDA-SR-2018 FDC 169229
+cooked beetroot,44,1.68,9.96,0.18,2,7.96,77,SRC-USDA-SR-2018 FDC 169146
+cooked pumpkin,20,0.72,4.9,0.07,1.1,2.08,1,SRC-USDA-SR-2018 FDC 168449
+black olives,116,0.84,6.04,10.9,1.6,0,735,SRC-USDA-SR-2018 FDC 169094
+medjool dates,277,1.81,74.97,0.15,6.7,66.47,1,SRC-USDA-SR-2018 FDC 168191
+dried figs,249,3.3,63.87,0.93,9.8,47.92,10,SRC-USDA-SR-2018 FDC 174665
+dried apricots,241,3.39,62.64,0.51,7.3,53.44,10,SRC-USDA-SR-2018 FDC 173941
+prunes,240,2.18,63.88,0.38,7.1,38.13,2,SRC-USDA-SR-2018 FDC 168162
+tamarind,239,2.8,62.5,0.6,5.1,38.8,28,SRC-USDA-SR-2018 FDC 167763
+desiccated coconut,660,6.88,23.65,64.53,16.3,7.35,37,SRC-USDA-SR-2018 FDC 170170
+apple sauce,42,0.17,11.27,0.1,1.1,9.39,2,SRC-USDA-SR-2018 FDC 171695
+canned peaches,74,0.45,19.94,0.1,1.3,18.64,6,SRC-USDA-SR-2018 FDC 169112
+canned pineapple,78,0.35,20.2,0.11,0.8,16.9,1,SRC-USDA-SR-2018 FDC 169944
+chestnuts,245,3.17,52.96,2.2,5.1,10.6,2,SRC-USDA-SR-2018 FDC 170190
+macadamia nuts,718,7.91,13.82,75.77,8.6,4.57,5,SRC-USDA-SR-2018 FDC 170178
+pecans,691,9.17,13.86,71.97,9.6,3.97,0,SRC-USDA-SR-2018 FDC 170182
+roasted almonds,598,20.96,21.01,52.54,10.9,4.86,3,SRC-USDA-SR-2018 FDC 170158
+roasted peanuts,587,24.35,21.26,49.66,8.4,4.9,410,SRC-USDA-SR-2018 FDC 174262
+boiled sweet corn,96,3.41,20.98,1.5,2.4,4.54,1,SRC-USDA-SR-2018 FDC 169999
+iceberg lettuce,14,0.9,2.97,0.14,1.2,1.97,10,SRC-USDA-SR-2018 FDC 169248
+baked potato,93,2.5,21.15,0.13,2.2,1.18,10,SRC-USDA-SR-2018 FDC 170093
+grilled tilapia,128,26.15,0,2.65,0,0,56,SRC-USDA-SR-2018 FDC 175177
+grilled sea bass,124,23.63,0,2.56,0,0,87,SRC-USDA-SR-2018 FDC 173694
+sunflower seeds,584,20.78,20,51.46,8.6,2.62,9,SRC-USDA-SR-2018 FDC 170562
+flaxseed,534,18.29,28.88,42.16,27.3,1.55,30,SRC-USDA-SR-2018 FDC 169414
+nutmeg,525,5.84,49.29,36.31,20.8,2.99,16,SRC-USDA-SR-2018 FDC 171326
+dried thyme,276,9.11,63.94,7.43,37,1.71,55,SRC-USDA-SR-2018 FDC 170938
+ground ginger,335,8.98,71.62,4.24,14.1,3.39,27,SRC-USDA-SR-2018 FDC 170926
+garlic powder,331,16.55,72.73,0.73,9,2.43,60,SRC-USDA-SR-2018 FDC 171325
+dried oregano,265,9,68.92,4.28,42.5,4.09,25,SRC-USDA-SR-2018 FDC 171328
+ketchup,101,1.04,27.4,0.1,0.3,21.27,907,SRC-USDA-SR-2018 FDC 168556
+mayonnaise,680,0.96,0.57,74.85,0,0.57,635,SRC-USDA-SR-2018 FDC 171009
+mustard,60,3.74,5.83,3.34,4,0.92,1104,SRC-USDA-SR-2018 FDC 172234
+soy sauce,53,8.14,4.93,0.57,0.8,0.4,5493,SRC-USDA-SR-2018 FDC 174277
+baking powder,53,0,27.7,0,0.2,0,10600,SRC-USDA-SR-2018 FDC 172803
+roasted pumpkin seeds,574,29.84,14.71,49.05,6.5,1.29,256,SRC-USDA-SR-2018 FDC 169415
+roasted sunflower seeds,582,19.33,24.07,49.8,9,2.73,655,SRC-USDA-SR-2018 FDC 169418
+caraway seed,333,19.77,49.9,14.59,38,0.64,17,SRC-USDA-SR-2018 FDC 170918
+mustard seed,508,26.08,28.09,36.24,12.2,6.79,13,SRC-USDA-SR-2018 FDC 170929
+dried basil,233,22.98,47.75,4.07,37.7,1.71,76,SRC-USDA-SR-2018 FDC 171317
+dried marjoram,271,12.66,60.56,7.04,40.3,4.09,77,SRC-USDA-SR-2018 FDC 170928
+celery seed,392,18.07,41.35,25.27,11.8,0.67,160,SRC-USDA-SR-2018 FDC 170920
+curry powder,325,14.29,55.83,14.01,53.2,2.76,52,SRC-USDA-SR-2018 FDC 170924
+chili powder blend,282,13.46,49.7,14.28,34.8,7.19,2867,SRC-USDA-SR-2018 FDC 171319
+onion powder,341,10.41,79.12,1.04,15.2,6.63,73,SRC-USDA-SR-2018 FDC 171327
+dried parsley,292,26.63,50.64,5.48,26.7,7.27,452,SRC-USDA-SR-2018 FDC 170930
+cider vinegar,21,0,0.93,0,0,0.4,5,SRC-USDA-SR-2018 FDC 173469
+hot sauce,11,0.51,1.75,0.37,0.3,1.26,2643,SRC-USDA-SR-2018 FDC 174527
+worcestershire sauce,77,0,19.17,0,0,10.03,1300,SRC-USDA-SR-2018 FDC 171610
+barbecue sauce,172,0.82,40.77,0.63,0.9,33.24,1027,SRC-USDA-SR-2018 FDC 174523
+chicken stock cube,198,14.6,23.5,4.7,0,0,24000,SRC-USDA-SR-2018 FDC 171563
+beef stock cube,213,15.97,17.4,8.89,0,16.71,26000,SRC-USDA-SR-2018 FDC 171560
+roasted chicken thigh,179,24.76,0,8.15,0,0,106,SRC-USDA-SR-2018 FDC 172388
+roasted chicken drumstick,191,23.35,0,10.15,0,0,123,SRC-USDA-SR-2018 FDC 173612
+roasted chicken wing,254,23.79,0,16.87,0,0,98,SRC-USDA-SR-2018 FDC 173630
+roasted chicken,239,27.3,0,13.6,0,0,82,SRC-USDA-SR-2018 FDC 171450
+fried chicken,269,28.56,3.15,14.92,0.1,0,84,SRC-USDA-SR-2018 FDC 171449
+boiled chicken,219,24.68,0,12.56,0,0,67,SRC-USDA-SR-2018 FDC 171051
+cooked chicken liver,167,24.46,0.87,6.51,0,0,76,SRC-USDA-SR-2018 FDC 171061
+roasted duck,337,18.99,0,28.35,0,0,59,SRC-USDA-SR-2018 FDC 172409
+roasted turkey breast,147,30.13,0,2.08,0,0,99,SRC-USDA-SR-2018 FDC 171496
+roasted quail,227,25.1,0,14.1,0,0,52,SRC-USDA-SR-2018 FDC 169902
+cooked ground beef,272,27,0,17.36,0,0,91,SRC-USDA-SR-2018 FDC 171799
+lean ground beef,176,20,0,10,0,0,66,SRC-USDA-SR-2018 FDC 174030
+extra lean ground beef,137,21.41,0,5,0,0,66,SRC-USDA-SR-2018 FDC 171790
+grilled beef steak,243,26.96,0,14.23,0,0,56,SRC-USDA-SR-2018 FDC 168727
+braised beef,302,30.12,0,19.22,0,0,50,SRC-USDA-SR-2018 FDC 168667
+roasted lamb,294,24.52,0,20.94,0,0,72,SRC-USDA-SR-2018 FDC 172480
+grilled lamb chops,361,22.13,0,29.59,0,0,76,SRC-USDA-SR-2018 FDC 174322
+lamb leg,230,17.91,0,17.07,0,0,56,SRC-USDA-SR-2018 FDC 174311
+fried beef liver,175,26.52,5.16,4.68,0,0,77,SRC-USDA-SR-2018 FDC 168627
+cooked veal,231,30.1,0,11.39,0,0,87,SRC-USDA-SR-2018 FDC 173816
+roasted rabbit,197,29.06,0,8.05,0,0,47,SRC-USDA-SR-2018 FDC 172522
+beef luncheon,299,10.91,4.29,26.13,0,2.05,1013,SRC-USDA-SR-2018 FDC 172012
+beef salami,261,12.6,1.9,22.2,0,1.5,1140,SRC-USDA-SR-2018 FDC 172935
+beef pastrami,147,21.8,0.36,5.82,0,0.1,1078,SRC-USDA-SR-2018 FDC 170204
+beef jerky,410,33.2,11,25.6,1.8,9,1785,SRC-USDA-SR-2018 FDC 167536
+smoked beef,153,31.1,2.76,1.94,0,2.7,2790,SRC-USDA-SR-2018 FDC 170604
+baked salmon,206,22.1,0,12.35,0,0,61,SRC-USDA-SR-2018 FDC 175168
+grilled mackerel,262,23.85,0,17.81,0,0,83,SRC-USDA-SR-2018 FDC 175120
+grilled mullet,150,24.81,0,4.86,0,0,71,SRC-USDA-SR-2018 FDC 175124
+baked cod,105,22.83,0,0.86,0,0,78,SRC-USDA-SR-2018 FDC 171956
+steamed crab,83,17.88,0,0.74,0,0,395,SRC-USDA-SR-2018 FDC 174205
+sole,70,12.41,0,1.93,0,0,296,SRC-USDA-SR-2018 FDC 174196
+canned sardines in tomato,185,20.86,0.54,10.45,0.1,0.43,414,SRC-USDA-SR-2018 FDC 175140
+canned anchovies,210,28.89,0,9.71,0,0,3668,SRC-USDA-SR-2018 FDC 174183
+canned salmon,139,19.78,0,6.05,0,0,75,SRC-USDA-SR-2018 FDC 174225
+fish fingers,277,11.01,21.66,16.23,1.5,1.65,402,SRC-USDA-SR-2018 FDC 174195
+scallops,69,12.06,3.18,0.49,0,0,392,SRC-USDA-SR-2018 FDC 174220
+scrambled eggs,149,9.99,1.61,10.98,0,1.39,145,SRC-USDA-SR-2018 FDC 172187
+poached egg,143,12.51,0.71,9.47,0,0.37,297,SRC-USDA-SR-2018 FDC 172186
+omelette,154,10.57,0.64,11.66,0,0.31,155,SRC-USDA-SR-2018 FDC 172185
+egg substitute,48,10,2,0,0,2,199,SRC-USDA-SR-2018 FDC 173462
+cooked barley,123,2.26,28.22,0.44,3.8,0.28,3,SRC-USDA-SR-2018 FDC 170285
+cooked millet,119,3.51,23.67,1,1.3,0.13,2,SRC-USDA-SR-2018 FDC 168871
+cooked buckwheat,92,3.38,19.94,0.62,2.7,0.9,4,SRC-USDA-SR-2018 FDC 170686
+oatmeal cooked with water,71,2.54,12,1.52,1.7,0.27,71,SRC-USDA-SR-2018 FDC 171675
+whole wheat pita,262,9.8,55.89,1.71,6.1,2.87,421,SRC-USDA-SR-2018 FDC 174916
+french bread,272,10.75,51.88,2.42,2.2,4.62,602,SRC-USDA-SR-2018 FDC 172675
+multigrain bread,265,13.36,43.34,4.23,7.4,6.39,381,SRC-USDA-SR-2018 FDC 168013
+dinner rolls,310,10.86,52.04,6.47,2,5.55,467,SRC-USDA-SR-2018 FDC 172793
+bagel,264,10.56,52.38,1.32,1.6,8.43,422,SRC-USDA-SR-2018 FDC 174899
+raisin bread,274,7.9,52.3,4.4,4.3,5.68,347,SRC-USDA-SR-2018 FDC 172680
+granola,489,13.67,53.88,24.31,8.9,19.8,26,SRC-USDA-SR-2018 FDC 171646
+tapioca pearls,358,0.19,88.69,0.02,0.9,3.35,1,SRC-USDA-SR-2018 FDC 169717
+potato starch,357,6.9,83.1,0.34,5.9,3.52,55,SRC-USDA-SR-2018 FDC 168446
+cooked egg noodles,138,4.54,25.16,2.07,1.2,0.4,5,SRC-USDA-SR-2018 FDC 169732
+cooked rice noodles,108,1.79,24.01,0.2,1,0.03,19,SRC-USDA-SR-2018 FDC 168914
+instant noodles,440,10.17,60.26,17.59,2.9,1.98,1855,SRC-USDA-SR-2018 FDC 171177
+pancake mix,368,9.77,73.65,3.1,2.9,16.03,1082,SRC-USDA-SR-2018 FDC 172772
+cooked pinto beans,143,9.01,26.22,0.65,9,0.34,1,SRC-USDA-SR-2018 FDC 175200
+cooked black beans,132,8.86,23.71,0.54,8.7,0.32,1,SRC-USDA-SR-2018 FDC 173735
+cooked navy beans,140,8.23,26.05,0.62,10.5,0.37,0,SRC-USDA-SR-2018 FDC 173746
+cooked lima beans,115,7.8,20.88,0.38,7,2.9,2,SRC-USDA-SR-2018 FDC 174253
+cooked mung beans,105,7.02,19.15,0.38,7.6,2,2,SRC-USDA-SR-2018 FDC 174257
+cooked soybeans,172,18.21,8.36,8.97,6,3,1,SRC-USDA-SR-2018 FDC 174271
+homemade hummus,177,4.86,20.12,8.59,4,0.27,242,SRC-USDA-SR-2018 FDC 172454
+canned kidney beans,81,5.22,14.83,0.36,4.3,1.85,256,SRC-USDA-SR-2018 FDC 175195
+canned green peas,68,4.47,11.36,0.8,4.9,2.99,273,SRC-USDA-SR-2018 FDC 170013
+peanuts roasted in oil,599,28.03,15.26,52.5,9.4,4.18,320,SRC-USDA-SR-2018 FDC 174261
+miso,198,12.79,25.37,6.01,5.4,6.2,3728,SRC-USDA-SR-2018 FDC 172442
+brussels sprouts,43,3.38,8.95,0.3,3.8,2.2,25,SRC-USDA-SR-2018 FDC 170383
+parsnip,75,1.2,17.99,0.3,4.9,4.8,10,SRC-USDA-SR-2018 FDC 170417
+rutabaga,37,1.08,8.62,0.16,2.3,4.46,12,SRC-USDA-SR-2018 FDC 168454
+collard greens,32,3.02,5.42,0.61,4,0.46,17,SRC-USDA-SR-2018 FDC 170406
+green leaf lettuce,15,1.36,2.87,0.15,1.3,0.78,28,SRC-USDA-SR-2018 FDC 169249
+radicchio,23,1.43,4.48,0.25,0.9,0.6,22,SRC-USDA-SR-2018 FDC 168564
+shallot,72,2.5,16.8,0.1,3.2,7.87,12,SRC-USDA-SR-2018 FDC 170499
+green tomato,23,1.2,5.1,0.2,1.1,4,13,SRC-USDA-SR-2018 FDC 170456
+cooked tomatoes,18,0.95,4.01,0.11,0.7,2.49,11,SRC-USDA-SR-2018 FDC 170050
+boiled onions,44,1.36,10.15,0.19,1.4,4.73,3,SRC-USDA-SR-2018 FDC 170001
+dried onion flakes,349,8.95,83.28,0.46,9.2,37.41,21,SRC-USDA-SR-2018 FDC 170002
+shiitake mushroom,34,2.24,6.79,0.49,2.5,2.38,9,SRC-USDA-SR-2018 FDC 169242
+oyster mushroom,33,3.31,6.09,0.41,2.3,1.11,18,SRC-USDA-SR-2018 FDC 168580
+portabella mushroom,22,2.11,3.87,0.35,1.3,2.5,9,SRC-USDA-SR-2018 FDC 169255
+cooked mushrooms,28,2.17,5.29,0.47,2.2,2.34,2,SRC-USDA-SR-2018 FDC 169252
+mashed potatoes,113,1.86,16.81,4.22,1.5,1.43,317,SRC-USDA-SR-2018 FDC 168555
+potato chips,532,6.39,53.83,33.98,3.1,0.33,527,SRC-USDA-SR-2018 FDC 169677
+tortilla chips,472,7.1,67.78,20.68,5.4,0.78,328,SRC-USDA-SR-2018 FDC 167558
+snow peas,42,2.8,7.55,0.2,2.6,4,4,SRC-USDA-SR-2018 FDC 170010
+yellow wax beans,31,1.82,7.13,0.12,3.4,3.27,6,SRC-USDA-SR-2018 FDC 169320
+alfalfa sprouts,23,3.99,2.1,0.69,1.9,0.2,6,SRC-USDA-SR-2018 FDC 168384
+bamboo shoots,27,2.6,5.2,0.3,2.2,3,4,SRC-USDA-SR-2018 FDC 169210
+canned mixed vegetables,49,2.59,9.26,0.25,3,2.41,214,SRC-USDA-SR-2018 FDC 170065
+cooked bell pepper,28,0.92,6.7,0.2,1.2,3.19,2,SRC-USDA-SR-2018 FDC 170428
+cooked broccoli,35,2.38,7.18,0.41,3.3,1.39,41,SRC-USDA-SR-2018 FDC 169967
+cooked cabbage,23,1.27,5.51,0.06,1.9,2.79,8,SRC-USDA-SR-2018 FDC 169976
+cooked sweet corn,81,2.55,19.3,0.67,2.4,3.07,1,SRC-USDA-SR-2018 FDC 168399
+cooked leek,31,0.81,7.62,0.2,1,2.11,10,SRC-USDA-SR-2018 FDC 168426
+cooked turnip,22,0.71,5.06,0.08,2,2.99,16,SRC-USDA-SR-2018 FDC 170058
+cooked sweet potato,76,1.37,17.72,0.14,2.5,5.74,27,SRC-USDA-SR-2018 FDC 168484
+cooked chard,20,1.88,4.13,0.08,2.1,1.1,179,SRC-USDA-SR-2018 FDC 170401
+nori seaweed,35,5.81,5.11,0.28,0.3,0.49,48,SRC-USDA-SR-2018 FDC 168458
+kelp,43,1.68,9.57,0.56,1.3,0.6,233,SRC-USDA-SR-2018 FDC 168457
+pickled jalapenos,27,0.92,4.74,0.94,2.6,2.14,1671,SRC-USDA-SR-2018 FDC 170080
+canned pimento,23,1.1,5.1,0.3,1.9,2.71,14,SRC-USDA-SR-2018 FDC 168559
+dried apple,243,0.93,65.89,0.32,8.7,57.19,87,SRC-USDA-SR-2018 FDC 171691
+golden raisins,301,3.28,80.02,0.2,3.3,65.7,24,SRC-USDA-SR-2018 FDC 168164
+dried cranberries,308,0.17,82.8,1.09,5.3,72.56,5,SRC-USDA-SR-2018 FDC 171723
+dried mango,319,2.45,78.58,1.18,2.4,66.27,162,SRC-USDA-SR-2018 FDC 169091
+plantain,122,1.3,31.89,0.35,1.7,17.51,4,SRC-USDA-SR-2018 FDC 169130
+clementine,47,0.85,12.02,0.15,1.7,9.18,1,SRC-USDA-SR-2018 FDC 168195
+currant,56,1.4,13.8,0.2,4.3,7.37,1,SRC-USDA-SR-2018 FDC 173964
+cherimoya,75,1.57,17.71,0.68,3,12.87,7,SRC-USDA-SR-2018 FDC 173953
+coconut cream,357,1.17,53.21,16.31,0.2,51.5,36,SRC-USDA-SR-2018 FDC 170171
+lime juice,25,0.42,8.42,0.07,0.4,1.69,2,SRC-USDA-SR-2018 FDC 168156
+grapefruit juice,39,0.5,9.2,0.1,0.1,9.1,1,SRC-USDA-SR-2018 FDC 173039
+pineapple juice,53,0.36,12.87,0.12,0.2,9.98,2,SRC-USDA-SR-2018 FDC 169947
+cranberry juice,54,0,13.52,0.1,0,11.87,2,SRC-USDA-SR-2018 FDC 171903
+carrot juice,40,0.95,9.28,0.15,0.8,3.91,66,SRC-USDA-SR-2018 FDC 170491
+grape juice,60,0.37,14.77,0.13,0.2,14.2,5,SRC-USDA-SR-2018 FDC 173042
+lemon peel,47,1.5,16,0.3,10.6,4.17,6,SRC-USDA-SR-2018 FDC 167749
+blue cheese,353,21.4,2.34,28.74,0,0.5,1146,SRC-USDA-SR-2018 FDC 172175
+brie cheese,334,20.75,0.45,27.68,0,0.45,629,SRC-USDA-SR-2018 FDC 172177
+camembert cheese,300,19.8,0.46,24.26,0,0.46,842,SRC-USDA-SR-2018 FDC 172178
+provolone cheese,351,25.58,2.14,26.62,0,0.56,727,SRC-USDA-SR-2018 FDC 170850
+romano cheese,387,31.8,3.63,26.94,0,0.73,1433,SRC-USDA-SR-2018 FDC 171249
+processed cheese,366,18.13,4.78,30.71,0,2.26,1671,SRC-USDA-SR-2018 FDC 170853
+cheese spread,290,16.41,8.73,21.23,0,7.32,1625,SRC-USDA-SR-2018 FDC 171254
+low fat cottage cheese,72,12.39,2.72,1.02,0,2.72,406,SRC-USDA-SR-2018 FDC 173417
+part skim ricotta,138,11.39,5.14,7.91,0,0.31,99,SRC-USDA-SR-2018 FDC 171248
+low fat cream cheese,208,7.85,6.73,16.67,0,3.3,317,SRC-USDA-SR-2018 FDC 169079
+reduced fat milk,50,3.3,4.8,1.98,0,5.06,47,SRC-USDA-SR-2018 FDC 171267
+half and half,131,3.13,4.3,11.5,0,4.13,61,SRC-USDA-SR-2018 FDC 171255
+light cream,195,2.96,3.66,19.1,0,3.67,72,SRC-USDA-SR-2018 FDC 170857
+whipped cream,257,3.2,12.49,22.22,0,8,8,SRC-USDA-SR-2018 FDC 170860
+salted butter,717,0.85,0.06,81.11,0,0.06,643,SRC-USDA-SR-2018 FDC 173410
+nonfat milk powder,362,36.16,51.98,0.77,0,51.98,535,SRC-USDA-SR-2018 FDC 170877
+vanilla yogurt,85,4.93,13.8,1.25,0,13.8,66,SRC-USDA-SR-2018 FDC 170888
+fruit yogurt,102,4.37,19.05,1.08,0,19.05,58,SRC-USDA-SR-2018 FDC 171285
+chocolate ice cream,216,3.8,28.2,11,1.2,25.36,76,SRC-USDA-SR-2018 FDC 168809
+frozen yogurt,159,4,24.2,5.6,0,24,87,SRC-USDA-SR-2018 FDC 168815
+dulce de leche,315,6.84,55.35,7.35,0,49.74,129,SRC-USDA-SR-2018 FDC 173461
+liquid whey,27,0.85,5.14,0.36,0,5.14,54,SRC-USDA-SR-2018 FDC 171282
+mixed nuts,594,17.3,25.35,51.45,9,4.8,345,SRC-USDA-SR-2018 FDC 168599
+roasted cashews,574,15.31,32.69,46.35,3,5.01,640,SRC-USDA-SR-2018 FDC 169421
+roasted pistachios,569,21.05,27.55,45.82,10.3,7.74,428,SRC-USDA-SR-2018 FDC 169426
+brazil nuts,659,14.32,11.74,67.1,7.5,2.33,3,SRC-USDA-SR-2018 FDC 170569
+almond butter,614,20.96,18.82,55.5,10.3,4.43,7,SRC-USDA-SR-2018 FDC 168588
+ground almonds,590,21.4,18.67,52.52,9.9,4.63,19,SRC-USDA-SR-2018 FDC 170568
+roasted hazelnuts,646,15.03,17.6,62.4,9.4,4.89,0,SRC-USDA-SR-2018 FDC 170583
+sponge cake,290,5.4,61,2.7,0.5,36.66,623,SRC-USDA-SR-2018 FDC 172706
+chocolate cake,389,3.48,52.84,20.05,2.2,39.96,348,SRC-USDA-SR-2018 FDC 174934
+doughnut,434,5.31,47.06,24.93,1.7,18.15,477,SRC-USDA-SR-2018 FDC 174990
+chocolate chip cookies,492,5.1,65.36,24.72,2,32.9,311,SRC-USDA-SR-2018 FDC 172716
+oatmeal cookies,450,6.2,68.7,18.1,2.8,24.66,520,SRC-USDA-SR-2018 FDC 172725
+vanilla wafers,441,5,73.6,15.2,1.9,37.5,388,SRC-USDA-SR-2018 FDC 174973
+sandwich cookies,464,5.21,71,19.14,2.9,40.67,388,SRC-USDA-SR-2018 FDC 172718
+apple pie,237,1.9,34,11,1.6,15.65,201,SRC-USDA-SR-2018 FDC 175011
+chocolate pudding,142,2.09,23.01,4.6,0,17.17,152,SRC-USDA-SR-2018 FDC 168778
+jelly dessert,60,1.22,14.19,0,0,13.49,75,SRC-USDA-SR-2018 FDC 169596
+hard candy,394,0,98,0.2,0,62.9,38,SRC-USDA-SR-2018 FDC 167990
+caramels,382,4.6,77,8.1,0,65.5,245,SRC-USDA-SR-2018 FDC 167974
+marshmallows,318,1.8,81.3,0.2,0.1,57.56,80,SRC-USDA-SR-2018 FDC 167995
+sesame candy,516,11.6,50.3,33.3,7.7,31.17,167,SRC-USDA-SR-2018 FDC 169588
+peanut brittle,486,7.57,71.24,18.98,2.5,51.33,445,SRC-USDA-SR-2018 FDC 169586
+chocolate syrup,350,4.6,62.9,8.9,2.8,34.82,346,SRC-USDA-SR-2018 FDC 168835
+agave syrup,310,0.09,76.37,0.45,0.2,68.03,4,SRC-USDA-SR-2018 FDC 170277
+white chocolate,539,5.87,59.24,32.09,0.2,59,90,SRC-USDA-SR-2018 FDC 167571
+pretzels,384,10.04,80.39,2.93,3.4,2.21,1240,SRC-USDA-SR-2018 FDC 167555
+rice cakes,387,8.2,81.5,2.8,4.2,0.88,26,SRC-USDA-SR-2018 FDC 170250
+microwave popcorn,583,7.29,45.06,43.55,8.1,0.46,909,SRC-USDA-SR-2018 FDC 167549
+lemon-lime soda,41,0.09,10.42,0,0,10.38,10,SRC-USDA-SR-2018 FDC 173205
+chamomile tea,1,0,0.2,0,0,0,1,SRC-USDA-SR-2018 FDC 174156
+herbal tea,1,0,0.2,0,0,0,1,SRC-USDA-SR-2018 FDC 173232
+cocoa drink mix,398,6.67,83.73,4,3.7,65.55,504,SRC-USDA-SR-2018 FDC 174122
+iced tea,45,0,10.8,0.22,0,9.49,3,SRC-USDA-SR-2018 FDC 171888
+tonic water,34,0,8.8,0,0,8.8,12,SRC-USDA-SR-2018 FDC 171869
+ginger ale,34,0,8.76,0,0,8.9,7,SRC-USDA-SR-2018 FDC 174846
+soy milk chocolate,63,2.26,9.95,1.53,0.4,7.86,53,SRC-USDA-SR-2018 FDC 174293
+fresh chives,30,3.27,4.35,0.73,2.5,1.85,3,SRC-USDA-SR-2018 FDC 169994
+canned chickpeas,139,7.05,22.53,2.77,6.4,4.01,246,SRC-USDA-SR-2018 FDC 173800
+great northern beans,339,21.86,62.37,1.14,20.2,2.26,14,SRC-USDA-SR-2018 FDC 175190
+refried beans,90,4.98,13.55,2.01,3.7,0.54,370,SRC-USDA-SR-2018 FDC 172438
+soft tofu,61,7.17,1.18,3.69,0.2,0.7,8,SRC-USDA-SR-2018 FDC 172449
+soy flour,434,37.81,31.92,20.65,9.6,7.5,13,SRC-USDA-SR-2018 FDC 174273
+beef brain,143,10.86,1.05,10.3,0,0,126,SRC-USDA-SR-2018 FDC 168622
+lamb brain,122,10.4,0,8.58,0,0,112,SRC-USDA-SR-2018 FDC 172525
+beef sweetbreads,236,12.18,0,20.35,0,0,96,SRC-USDA-SR-2018 FDC 170194
+beef flank steak,165,21.22,0,8.29,0,0,54,SRC-USDA-SR-2018 FDC 169433
+beef rib eye,274,17.51,0,22.07,0,0,56,SRC-USDA-SR-2018 FDC 168612
+chicken leg quarter,214,16.37,0.17,15.95,0,0,84,SRC-USDA-SR-2018 FDC 172378
+chicken neck,297,14.07,0,26.24,0,0,64,SRC-USDA-SR-2018 FDC 172382
+chicken breast with skin,172,20.85,0,9.25,0,0,63,SRC-USDA-SR-2018 FDC 171474
+nile crayfish,72,14.85,0,0.97,0,0,62,SRC-USDA-SR-2018 FDC 175169
+eel,184,18.44,0,11.66,0,0,51,SRC-USDA-SR-2018 FDC 174193
+sockeye salmon,131,22.25,0,4.69,0,0,78,SRC-USDA-SR-2018 FDC 173691
+caviar,264,24.6,4,17.9,0,0,1500,SRC-USDA-SR-2018 FDC 174188
+white tuna canned,128,23.62,0,2.97,0,0,377,SRC-USDA-SR-2018 FDC 175158
+beet greens,22,2.2,4.33,0.13,3.7,0.5,226,SRC-USDA-SR-2018 FDC 170375
+dandelion greens,45,2.7,9.2,0.7,3.5,0.71,76,SRC-USDA-SR-2018 FDC 169226
+savoy cabbage,27,2,6.1,0.1,3.1,2.27,28,SRC-USDA-SR-2018 FDC 170388
+white sweet corn,86,3.22,19.02,1.18,2.7,3.22,15,SRC-USDA-SR-2018 FDC 168538
+red potato,70,1.89,15.9,0.14,1.7,1.29,18,SRC-USDA-SR-2018 FDC 170029
+russet potato,79,2.14,18.07,0.08,1.3,0.62,5,SRC-USDA-SR-2018 FDC 170027
+peeled cucumber,10,0.59,2.16,0.16,0.7,1.38,2,SRC-USDA-SR-2018 FDC 169225
+sweet onion,32,0.8,7.55,0.08,0.9,5.02,8,SRC-USDA-SR-2018 FDC 170008
+butterhead lettuce,13,1.35,2.23,0.22,1.1,0.94,5,SRC-USDA-SR-2018 FDC 168429
+navel orange,49,0.91,12.54,0.15,2.2,8.5,1,SRC-USDA-SR-2018 FDC 169917
+sour cherries,50,1,12.18,0.3,1.6,8.49,3,SRC-USDA-SR-2018 FDC 173954
+fruit cocktail,73,0.39,18.91,0.07,1,17.91,6,SRC-USDA-SR-2018 FDC 173028
+canned mandarins,61,0.45,16.19,0.1,0.7,15.49,6,SRC-USDA-SR-2018 FDC 169924
+frozen strawberries,35,0.43,9.13,0.11,2.1,4.56,2,SRC-USDA-SR-2018 FDC 168173
+frozen blueberries,51,0.42,12.17,0.64,2.7,8.45,1,SRC-USDA-SR-2018 FDC 173950
+casaba melon,28,1.11,6.58,0.1,0.9,5.69,9,SRC-USDA-SR-2018 FDC 169093
+american grapes,67,0.63,17.15,0.35,0.9,16.25,2,SRC-USDA-SR-2018 FDC 174682
+bread flour,361,11.98,72.53,1.66,2.4,0.31,2,SRC-USDA-SR-2018 FDC 168896
+cake flour,362,8.2,78.03,0.86,1.7,0.31,2,SRC-USDA-SR-2018 FDC 169723
+self-rising flour,354,9.89,74.22,0.97,2.7,0.22,1193,SRC-USDA-SR-2018 FDC 168895
+long grain rice,365,7.13,79.95,0.66,1.3,0.12,5,SRC-USDA-SR-2018 FDC 168877
+cooked long grain rice,130,2.69,28.17,0.28,0.4,0.05,1,SRC-USDA-SR-2018 FDC 168878
+wild rice,357,14.73,74.9,1.08,6.2,2.5,7,SRC-USDA-SR-2018 FDC 169726
+spelt,338,14.57,70.19,2.43,10.7,6.82,8,SRC-USDA-SR-2018 FDC 169745
+amaranth,371,13.56,65.25,7.02,6.7,1.69,4,SRC-USDA-SR-2018 FDC 170682
+whole wheat pasta,352,13.87,73.37,2.93,9.2,2.74,6,SRC-USDA-SR-2018 FDC 169738
+cooked whole wheat pasta,149,5.99,30.07,1.71,3.9,0.75,4,SRC-USDA-SR-2018 FDC 168910
+oatmeal bread,269,8.4,48.5,4.4,4,8.14,447,SRC-USDA-SR-2018 FDC 172678
+english muffin,227,8.87,44.17,1.69,3.5,3.53,425,SRC-USDA-SR-2018 FDC 174994
+blueberry muffin,375,4.49,53,16.07,1.1,31.47,336,SRC-USDA-SR-2018 FDC 172765
+brownies,405,4.8,63.9,16.3,2.1,36.61,286,SRC-USDA-SR-2018 FDC 172713
+cheesecake,321,5.5,25.5,22.5,0.4,21.8,438,SRC-USDA-SR-2018 FDC 172711
+chocolate frosting,397,1.1,63.2,17.6,0.9,57.7,183,SRC-USDA-SR-2018 FDC 168795
+fruit jelly,266,0.15,69.95,0.02,1,51.22,30,SRC-USDA-SR-2018 FDC 169642
+goat cheese,264,18.52,0,21.08,0,0,459,SRC-USDA-SR-2018 FDC 173435
+part skim mozzarella,254,24.26,2.77,15.92,0,1.13,619,SRC-USDA-SR-2018 FDC 170847
+gruyere cheese,413,29.81,0.36,32.34,0,0.36,714,SRC-USDA-SR-2018 FDC 171242
+monterey jack cheese,373,24.48,0.68,30.28,0,0.5,600,SRC-USDA-SR-2018 FDC 170844
+evaporated skim milk,78,7.55,11.35,0.2,0,11.35,115,SRC-USDA-SR-2018 FDC 170878
+light whipping cream,292,2.17,2.96,30.91,0,2.96,34,SRC-USDA-SR-2018 FDC 170858
+safflower oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171026
+walnut oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171030
+rice bran oil,884,0,0,100,0,0,0,SRC-USDA-SR-2018 FDC 171013
+chicken fat,900,0,0,99.8,0,0,0,SRC-USDA-SR-2018 FDC 173564
+rice milk,47,0.28,9.17,0.97,0.3,5.28,39,SRC-USDA-SR-2018 FDC 171942
+orange drink powder,386,0,98.94,0,0.4,92.31,17,SRC-USDA-SR-2018 FDC 173235
+lemonade powder,376,0,97.57,1.05,0.4,94.7,51,SRC-USDA-SR-2018 FDC 174858
+decaf instant coffee,351,11.6,76,0.2,0,0,23,SRC-USDA-SR-2018 FDC 174133
+instant tea,315,20.21,58.66,0,8.5,5.53,72,SRC-USDA-SR-2018 FDC 173230
+poppy seeds,525,17.99,28.13,41.56,19.5,2.99,26,SRC-USDA-SR-2018 FDC 171330
+red wine vinegar,19,0.04,0.27,0,0,0,8,SRC-USDA-SR-2018 FDC 172240
+pickle relish,130,0.37,35.06,0.47,1.1,29.13,811,SRC-USDA-SR-2018 FDC 168561
+horseradish,48,1.18,11.29,0.69,3.3,7.99,420,SRC-USDA-SR-2018 FDC 173472
+ranch dressing,430,1.32,5.9,44.54,0,4.69,901,SRC-USDA-SR-2018 FDC 173592
+italian dressing,240,0.41,12.12,21.12,0,10.77,993,SRC-USDA-SR-2018 FDC 171019
+thousand island dressing,379,1.09,14.64,35.06,0.8,15.18,962,SRC-USDA-SR-2018 FDC 171402
+caesar dressing,542,2.17,3.3,57.85,0.5,2.81,1209,SRC-USDA-SR-2018 FDC 169055
+teriyaki sauce,89,5.93,15.56,0.02,0.1,14.1,3833,SRC-USDA-SR-2018 FDC 171167
+fish sauce,35,5.06,3.64,0.01,0,3.64,7851,SRC-USDA-SR-2018 FDC 174531
+oyster sauce,51,1.35,10.92,0.25,0.3,0,2733,SRC-USDA-SR-2018 FDC 174529
+hoisin sauce,220,3.31,44.08,3.39,2.8,27.26,1615,SRC-USDA-SR-2018 FDC 172886
+sweet and sour sauce,154,0.27,38.22,0.02,0.1,18.75,539,SRC-USDA-SR-2018 FDC 174066
+pesto sauce,418,9.83,10.09,37.6,1.8,6.33,603,SRC-USDA-SR-2018 FDC 171579
+salsa,29,1.52,6.64,0.17,1.9,4.01,711,SRC-USDA-SR-2018 FDC 174524
+gravy,53,3.75,4.81,2.36,0.4,0.21,633,SRC-USDA-SR-2018 FDC 171564
+dried sage,315,10.63,60.73,12.75,40.3,1.71,11,SRC-USDA-SR-2018 FDC 170935
+poultry seasoning,307,9.59,65.59,7.53,11.3,1.8,27,SRC-USDA-SR-2018 FDC 171331
+pumpkin pie spice,342,5.76,69.28,12.6,14.8,7.76,52,SRC-USDA-SR-2018 FDC 171332
+yeast extract,185,23.88,20.42,0.9,6.5,1.6,3380,SRC-USDA-SR-2018 FDC 167717
+fresh yeast,105,8.4,18.1,1.9,8.1,0,30,SRC-USDA-SR-2018 FDC 175042
+cream of tartar,258,0,61.5,0,0.2,0,52,SRC-USDA-SR-2018 FDC 175041
+light mayonnaise,238,0.37,9.23,22.22,0,3.56,827,SRC-USDA-SR-2018 FDC 173594

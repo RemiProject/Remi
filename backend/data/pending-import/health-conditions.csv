@@ -1,0 +1,10 @@
+﻿# Proposed. No importer exists; load only through a clinically reviewed seed script.
+code,name,condition_group,is_chronic
+G6PD_DEFICIENCY,G6PD Deficiency (Favism),OTHER,true
+LACTOSE_INTOLERANCE,Lactose Intolerance,DIGESTIVE,true
+GOUT,Gout,METABOLIC,true
+PHENYLKETONURIA,Phenylketonuria (PKU),METABOLIC,true
+HEART_FAILURE,Heart Failure,CARDIOVASCULAR,true
+TYPE_1_DIABETES,Type 1 Diabetes,METABOLIC,true
+IRRITABLE_BOWEL_SYNDROME,Irritable Bowel Syndrome,DIGESTIVE,true
+DYSLIPIDEMIA,Dyslipidemia (High Cholesterol),CARDIOVASCULAR,true

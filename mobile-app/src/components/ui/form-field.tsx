@@ -1,5 +1,5 @@
 import { useState, type PropsWithChildren, type Ref } from 'react';
-import { TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { AppText } from './core';
 import { useRemyFonts } from '@/theme/fonts';
 import { useRemyTheme } from '@/theme/provider';
@@ -13,7 +13,7 @@ export function FieldGroup({ label, hint, error, children }: PropsWithChildren<{
     {error ? <AppText accessibilityRole="alert" accessibilityLiveRegion="polite" variant="caption" style={{ color: colors.errorText }}>{error}</AppText> : hint && <AppText variant="caption" muted>{hint}</AppText>}
   </View>;
 }
-export function FormField({ label, hint, error, onFocus, onBlur, inputDirection, inputRef, ...props }: TextInputProps & { label: string; hint?: string; error?: string; inputDirection?: 'ltr' | 'rtl'; inputRef?: Ref<TextInput> }) {
+export function FormField({ label, hint, error, onFocus, onBlur, inputDirection, inputRef, ...props }: TextInputProps & { label: string; hint?: string; error?: string; inputDirection?: 'ltr' | 'rtl'; inputRef?: Ref<TextInputInstance> }) {
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const { language } = useLanguage();

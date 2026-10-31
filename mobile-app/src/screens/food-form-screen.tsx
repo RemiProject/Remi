@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { router, Stack, useNavigation } from 'expo-router';
-import { AccessibilityInfo, BackHandler, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, type LayoutChangeEvent } from 'react-native';
+import { router, Stack, usePreventRemove } from 'expo-router';
+import { AccessibilityInfo, BackHandler, Keyboard, KeyboardAvoidingView, Platform, Pressable, type ScrollViewInstance, type TextInputInstance, View, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Button, Chip, EmptyState, PageHeader, Screen, uiStyles } from '@/components/ui/core';
 import { FoodPhotoField } from '@/components/food-photo-field';
@@ -36,7 +36,6 @@ function FoodForm({ item, initialPhotoRef, initialName }: { item?: InventoryItem
   const t = foodEntryMessages[language];
   const rtl = language === 'ar';
   const { colors } = useRemyTheme();
-  const navigation = useNavigation();
   const [draft, setDraft] = useState<FoodDraft>(() => item ? itemToDraft(item) : { ...emptyDraft, name: initialName ?? '' });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
@@ -48,8 +47,8 @@ function FoodForm({ item, initialPhotoRef, initialName }: { item?: InventoryItem
   const [detailsOpen, setDetailsOpen] = useState(() => Boolean(item?.purchaseDate || item?.expirationDate || item?.notes));
   const [unitsOpen, setUnitsOpen] = useState(false);
   const [recovery, setRecovery] = useState<{ field: keyof FoodDraft } | null>(null);
-  const scrollRef = useRef<ScrollView>(null);
-  const inputs = useRef<Partial<Record<keyof FoodDraft, TextInput | null>>>({});
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const inputs = useRef<Partial<Record<keyof FoodDraft, TextInputInstance | null>>>({});
   const positions = useRef<Partial<Record<keyof FoodDraft | 'optional', number>>>({});
   const recordPosition = (field: keyof FoodDraft | 'optional', event: LayoutChangeEvent) => {
     positions.current[field] = event.nativeEvent.layout.y;
@@ -65,11 +64,11 @@ function FoodForm({ item, initialPhotoRef, initialName }: { item?: InventoryItem
     });
     return () => cancelAnimationFrame(frame);
   }, [recovery]);
+  const disableRemovePrevention = usePreventRemove(saving || photoBusy, () => {});
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (event) => { if (savingRef.current || photoBusyRef.current) event.preventDefault(); });
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => savingRef.current || photoBusyRef.current);
-    return () => { unsubscribe(); subscription.remove(); };
-  }, [navigation]);
+    return () => { subscription.remove(); };
+  }, []);
   const change = (field: keyof FoodDraft, value: string) => {
     setDraft((previous) => ({ ...previous, [field]: value }));
     setErrors((previous) => ({ ...previous, [field]: undefined }));
@@ -98,6 +97,7 @@ function FoodForm({ item, initialPhotoRef, initialName }: { item?: InventoryItem
       const saved = item ? await updateItem(item.id, input) : await createItem(input);
       savingRef.current = false;
       setSaving(false);
+      disableRemovePrevention();
       if (item && router.canGoBack()) router.back();
       else router.replace({ pathname: '/food/[id]', params: { id: saved.id } });
     } catch (error) {

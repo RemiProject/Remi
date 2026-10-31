@@ -1,0 +1,54 @@
+﻿# Proposed format: no FoodSubstitution importer exists. Batch 2 + Batch 9. Source: NMSU Extension Guide E-131. Ratio = substitute per 1 of original.
+original_food,substitute_food,ratio,notes
+butter,margarine,1,Cooking and baking. Margarine may contain milk solids; not a guaranteed dairy-free swap. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+vegetable shortening,butter,1.125,Baking. Adds dairy and water; reduce salt as the source advises. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+vegetable shortening,margarine,1.125,Baking. Reduce salt as the source advises. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+vegetable shortening,sunflower oil,1,Only where the recipe calls for MELTED shortening (source limitation). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+vegetable shortening,corn oil,1,Only where the recipe calls for MELTED shortening (source limitation). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+ketchup,tomato sauce,1,Cooking. Less sweet and less acidic. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+corn syrup,honey,1,Flavour changes; honey is not suitable for infants under 12 months. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+corn syrup,white sugar,1,Add 1/4 cup of the recipe liquid per cup (source). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+honey,white sugar,1.25,Add 1/4 cup of the recipe liquid per cup (source). Not nutritionally equivalent. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+corn starch,wheat flour,2,Thickening only. Adds GLUTEN: unsafe for coeliac / gluten-free users. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+wheat flour,corn starch,0.5,Thickening only (not for baking). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+wheat flour,whole wheat flour,1.5,Thickening only. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+wheat flour,rice flour,1,Baking: specialty flours give lower volume and a heavier product (source). Not automatically gluten-free safe (cross-contact). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+wheat flour,oats,1,Baking: changes texture (source note on specialty flours). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+wheat flour,breadcrumbs,1.5,Baking; changes texture. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+white rice,brown rice,1,Brown rice needs longer cooking and more water. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+macaroni,spaghetti,1,Shape differs. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+macaroni,noodles,2,Egg noodles add EGGS. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+lemon juice,vinegar,0.5,Acidity only; flavour differs. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+buttermilk,yogurt,1,Baking and cooking. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+mayonnaise,sour cream,1,"Salads and dressings only. Removes EGGS, keeps DAIRY. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131."
+mayonnaise,cottage cheese,1,Salads and dressings only; puree first. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+mustard seed,mustard,3,"Adds liquid, vinegar and salt. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131."
+chicken egg,egg yolk,2,Custards and fillings only. Ratio basis: count (substitute per 1 of original). Source: NMSU E-131.
+desiccated coconut,coconut,1.5,Fresh coconut is moister. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+dried parsley,parsley,3,Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+dried mint,fresh mint,4,Source row is peppermint; catalog mint is spearmint (same culinary use). Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+fresh basil,dried basil,0.333,Generic herb rule from the source. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+fresh rosemary,dried rosemary,0.333,Generic herb rule from the source. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+fresh thyme,dried thyme,0.333,Generic herb rule from the source. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+dill,dried dill,0.333,Generic herb rule from the source. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+sour cream,yogurt,1,Lower fat; may thin when heated. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+brown sugar,white sugar,1,Less moist and no molasses flavour. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+white sugar,corn syrup,1,Decrease recipe liquid by 1/4 cup per cup. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+white sugar,molasses,1.333,Decrease recipe liquid by 1/3 cup per cup; strong flavour. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+white sugar,powdered sugar,1,Contains starch; texture changes in baking. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+white sugar,brown sugar,1,"Moister, caramel flavour. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131."
+white sugar,honey,1,Decrease recipe liquid by 1/4 cup; not for infants under 12 months. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+tomato juice,tomato sauce,0.5,Add an equal volume of water. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+yogurt,buttermilk,1,Thinner. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+yogurt,cottage cheese,1,Blend until smooth first. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+yogurt,sour cream,1,Higher fat. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+half and half,evaporated milk,1,Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+light cream,evaporated milk,1,Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+coconut cream,heavy cream,1,Adds DAIRY; flavour differs. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+coconut milk,whole milk,1,Adds DAIRY; much lower fat and no coconut flavour. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+coconut milk,reduced fat milk,1,Adds DAIRY; much lower fat. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+cake flour,wheat flour,0.875,Slightly less tender crumb. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+wheat flour,cake flour,1.125,Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+white rice,wild rice,1,Much longer cooking time. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+ground ginger,ginger,24,Grated fresh ginger. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.
+fresh mint,dried mint,0.25,Inverse of the published fresh-for-dried row. Ratio basis: volume (substitute per 1 of original). Source: NMSU E-131.

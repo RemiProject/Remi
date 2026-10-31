@@ -1,0 +1,17 @@
+﻿# Proposed, inactive. PENDING_DIETITIAN_REVIEW.
+dietary_preference,rule_type,target_type,food,category_code,is_active
+VEGETARIAN,AVOID,FOOD,gelatin powder,,false
+VEGETARIAN,AVOID,FOOD,chicken stock cube,,false
+VEGETARIAN,AVOID,FOOD,beef stock cube,,false
+VEGAN,AVOID,FOOD,gelatin powder,,false
+VEGAN,AVOID,FOOD,honey,,false
+VEGAN,AVOID,FOOD,chicken stock cube,,false
+VEGAN,AVOID,FOOD,beef stock cube,,false
+HALAL,LIMIT,FOOD,gelatin powder,,false
+HALAL,LIMIT,FOOD,vanilla extract,,false
+KETO,AVOID,CATEGORY,,SWEETS,false
+KETO,AVOID,CATEGORY,,GRAINS,false
+KETO,LIMIT,CATEGORY,,FRUITS,false
+KETO,LIMIT,CATEGORY,,LEGUMES,false
+LOW_CARB,LIMIT,CATEGORY,,SWEETS,false
+LOW_CARB,LIMIT,CATEGORY,,GRAINS,false

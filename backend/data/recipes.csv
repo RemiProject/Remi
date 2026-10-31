@@ -1,4 +1,402 @@
-# Global recipes (visible to every household). Match key: recipe_key, which links the three recipe files.
-# Re-importing a recipe_key replaces its ingredients and steps. cuisine: american | asian | egyptian | indian | italian | lebanese (or empty).
-# difficulty: EASY | MEDIUM | HARD
+﻿# Remi AI development dataset. Global recipes.
 recipe_key,name,description,cuisine,servings,prep_time_min,cook_time_min,difficulty
+eg_mesh_salad,Mish with Tomato,Sharp aged Upper-Egyptian cheese loosened with tomato and chili; eaten with bread in small amounts.,egyptian,4,5,0,EASY
+eg_asal_tehina,Black Honey with Tahini,Sugarcane molasses swirled with tahini: a traditional Egyptian breakfast dip.,egyptian,4,3,0,EASY
+eg_couscous_sweet,Sweet Couscous,"Steamed couscous with butter, sugar, raisins and nuts.",egyptian,4,5,15,EASY
+eg_ashura,Ashura,"Creamy wheat pudding with milk, nuts and dried fruit, made for the 10th of Muharram.",egyptian,8,10,30,EASY
+eg_kunafa,Kunafa with Cream,"Shredded kunafa pastry with ghee, filled with milk cream and soaked in syrup.",egyptian,10,25,40,MEDIUM
+eg_om_ali,Om Ali,"Baked pudding of pastry, nuts and raisins in sweet milk and cream.",egyptian,8,15,25,EASY
+eg_ghorayeba,Ghorayeba,"Melt-in-the-mouth butter cookies of ghee, powdered sugar and flour.",egyptian,30,20,15,MEDIUM
+eg_khoshaf,Khoshaf (Dried Fruit Compote),Dried fruits soaked in sweetened water: a Ramadan staple.,egyptian,6,10,0,EASY
+eg_creme_caramel,Crème Caramel,Baked egg custard with a caramel top.,egyptian,6,15,50,MEDIUM
+eg_balah_el_sham,Balah el-Sham,Fried choux-pastry fingers soaked in syrup.,egyptian,8,20,30,MEDIUM
+eg_halawet_semid,Semolina Halva,Semolina toasted in butter and cooked with sweet milk.,egyptian,6,5,20,EASY
+eg_feteer_asal,Feteer with Honey and Cream,Warm feteer meshaltet served with honey and cream.,egyptian,4,5,0,EASY
+eg_karkade,Hibiscus Drink (Karkade),Dried hibiscus steeped and sweetened; served cold in summer or hot in winter.,egyptian,6,5,20,EASY
+eg_sobia,Sobia,"Creamy rice, coconut and milk drink of Ramadan.",egyptian,6,15,0,EASY
+eg_lemon_mint,Lemon Mint Juice,"Blended lemon, mint and sugar with ice.",egyptian,4,10,0,EASY
+eg_shai_bel_naana,Egyptian Tea with Mint,Strong black tea with fresh mint and sugar.,egyptian,4,2,5,EASY
+eg_mango_milk,Mango with Milk,Ripe Egyptian mango blended with cold milk.,egyptian,3,5,0,EASY
+eg_guava_milk,Guava with Milk,Guava blended with milk and strained.,egyptian,3,5,0,EASY
+eg_ful_medames,Ful Medames,"Stewed fava beans mashed with cumin, olive oil and lemon: the classic Egyptian breakfast.",egyptian,4,5,15,EASY
+eg_ful_zeit_har,Ful with Linseed Oil,Ful medames dressed the Alexandrian-street way with pungent linseed (zeit har) oil and cumin.,egyptian,4,5,15,EASY
+eg_ful_eskandarani,Alexandrian Ful,"Fava beans cooked with sautéed tomato, pepper, onion and garlic, Alexandria style.",egyptian,4,10,20,EASY
+eg_ful_tahina,Ful with Tahini,"Mashed fava beans enriched with tahini, lemon and garlic.",egyptian,4,5,12,EASY
+eg_taameya,Taameya (Egyptian Falafel),"Fava-bean fritters packed with fresh herbs, fried until crisp outside and green inside.",egyptian,6,30,20,MEDIUM
+eg_beid_basterma,Eggs with Basterma,Eggs fried in butter with thin slices of spiced cured beef.,egyptian,2,5,8,EASY
+eg_beid_tamatem,Eggs with Tomato,"Soft scrambled eggs cooked into a quick tomato, onion and pepper sauce.",egyptian,3,5,12,EASY
+eg_gebna_tamatem,White Cheese with Tomato,"Mashed white Domiati cheese with tomato, chili and olive oil, eaten with bread.",egyptian,4,10,0,EASY
+eg_shakshouka,Egyptian Shakshuka,Eggs poached in a spiced tomato and pepper sauce.,egyptian,4,10,20,EASY
+eg_batates_mehamara,Egyptian Fried Potatoes,"Potato slices fried crisp and sprinkled with salt and cumin, a sandwich and side staple.",egyptian,4,15,20,EASY
+eg_eggah,Eggah (Herb Omelette),"Thick Egyptian omelette with onion, parsley and dill, cut into wedges.",egyptian,4,10,15,EASY
+eg_salata_baladi,Egyptian Green Salad,"Finely diced tomato, cucumber, onion, pepper and herbs dressed with lemon and cumin.",egyptian,4,15,0,EASY
+eg_tehina_sauce,Tahini Sauce,"Tahini whisked with lemon, garlic, vinegar and cumin into a pourable sauce.",egyptian,6,8,0,EASY
+eg_baba_ghanoug,Baba Ghanoug,"Smoky roasted eggplant mashed with tahini, garlic and lemon.",egyptian,6,10,30,EASY
+eg_salatet_zabadi,Yogurt and Cucumber Salad,"Cool yogurt with grated cucumber, garlic and dried mint.",egyptian,4,10,0,EASY
+eg_bitingan_mekhalel,Fried Eggplant with Garlic Vinegar,"Fried eggplant slices soaked in a garlic, chili and vinegar dressing.",egyptian,4,15,20,EASY
+eg_beet_salad,Beetroot Salad,"Boiled beetroot with onion, vinegar and cumin.",egyptian,4,10,45,EASY
+eg_potato_salad,Egyptian Potato Salad,"Boiled potatoes with onion, parsley, lemon and oil.",egyptian,4,10,20,EASY
+eg_renga_salad,Smoked Herring Salad,"Flaked smoked herring with tomato, onion, pepper and lemon, a Sham El-Nessim favourite.",egyptian,4,20,0,EASY
+eg_lupini_salad,Seasoned Lupini Beans,"Ready-to-eat lupini beans with lemon, cumin and chili.",egyptian,4,5,0,EASY
+eg_hummus_tehina,Hummus with Tahini,"Chickpeas blended with tahini, lemon and garlic.",egyptian,6,10,0,EASY
+eg_garlic_vinegar_dakka,Garlic Vinegar Sauce (Dakka),"Sharp garlic, vinegar and cumin sauce served with koshari and fatta.",egyptian,6,5,3,EASY
+eg_koshari_tomato_sauce,Koshari Tomato Sauce (Salsa),Spicy tomato sauce with garlic and vinegar for koshari.,egyptian,6,5,20,EASY
+eg_taleya,Ta'leya (Fried Garlic and Coriander),Garlic and ground coriander fried in ghee: the finishing sizzle for molokhia and many stews.,egyptian,4,5,4,EASY
+eg_bechamel,Béchamel Sauce,"White sauce for macaroni bechamel, moussaka and gratins.",egyptian,6,5,12,EASY
+eg_torshi_lift,Pink Pickled Turnips,"Turnips pickled in brine and vinegar, coloured pink with beetroot.",egyptian,8,20,0,EASY
+eg_fried_cauliflower,Fried Cauliflower,Parboiled cauliflower florets dipped in spiced egg batter and fried.,egyptian,4,15,25,EASY
+eg_shorbet_ads,Lentil Soup,"Smooth red-lentil soup with onion, carrot, tomato and cumin, finished with lemon.",egyptian,6,10,40,EASY
+eg_shorbet_shareya,Vermicelli Soup,Toasted vermicelli simmered in chicken broth with tomato.,egyptian,4,5,25,EASY
+eg_chicken_soup,Chicken Broth with Vegetables,"Whole-chicken broth with onion, carrot, celery and warm spices; the chicken is served separately.",egyptian,6,15,70,EASY
+eg_molokhia_chicken,Molokhia with Chicken,Finely minced jute leaves in chicken broth finished with a garlic and coriander ta'leya.,egyptian,6,20,30,MEDIUM
+eg_molokhia_rabbit,Molokhia with Rabbit,"Molokhia cooked in rabbit broth, a traditional Egyptian combination.",egyptian,6,25,80,MEDIUM
+eg_molokhia_shrimp,Alexandrian Molokhia with Shrimp,"Molokhia cooked in fish-and-shrimp stock with a tomato-free garlic ta'leya, Alexandria style.",egyptian,5,20,20,MEDIUM
+eg_dried_molokhia,Dried Molokhia Soup,"Molokhia made from dried leaves, a pantry staple in Upper Egypt.",egyptian,4,5,20,EASY
+eg_bisara,Bissara,"Split fava beans simmered with molokhia, herbs and garlic, topped with crisp fried onions.",egyptian,6,20,60,EASY
+eg_shorbet_khodar,Vegetable Soup,"Light tomato-based soup with carrots, zucchini, potato and peas.",egyptian,6,15,35,EASY
+eg_freekeh_soup,Freekeh Soup,Smoky green wheat simmered in chicken broth.,egyptian,6,10,45,EASY
+eg_shorbet_tomatem,Tomato Soup,Fresh tomato soup with a little rice to thicken.,egyptian,4,10,25,EASY
+eg_chicken_vermicelli_soup,Chicken and Vermicelli Vegetable Soup,"Chicken pieces, vegetables and toasted vermicelli in one pot.",egyptian,6,15,30,EASY
+eg_kersha_soup,Tripe Soup,Long-simmered beef tripe in a garlicky lemon broth.,egyptian,6,30,180,HARD
+eg_roz_shareya,Egyptian Rice with Vermicelli,Everyday Egyptian rice cooked with butter-toasted vermicelli.,egyptian,6,5,25,EASY
+eg_roz_abyad,Plain Egyptian White Rice,Short-grain rice cooked with a little ghee.,egyptian,6,5,22,EASY
+eg_koshari,Koshari,"Egypt's national dish: rice, lentils and macaroni with chickpeas, spicy tomato sauce, garlic vinegar and crispy onions.",egyptian,6,30,75,MEDIUM
+eg_mudardara,Mudardara (Rice with Lentils),Brown lentils and rice cooked together and topped with caramelised onions.,egyptian,6,10,45,EASY
+eg_roz_bel_khalta,Rice with Nuts and Liver (Roz bel Khalta),"Festive rice with chicken livers, minced beef, raisins and toasted nuts.",egyptian,8,20,35,MEDIUM
+eg_roz_moammar,Baked Rice with Cream (Roz Moammar),"Rice baked slowly in a clay pot with milk, cream and butter until a golden crust forms.",egyptian,6,10,75,MEDIUM
+eg_roz_bel_shabat,Rice with Dill,"Rice cooked with plenty of fresh dill and onion, served with fish.",egyptian,6,10,25,EASY
+eg_roz_ahmar,Red Rice with Tomato,"Rice cooked in tomato and onion, often served with fish or chicken.",egyptian,6,10,30,EASY
+eg_roz_sayadeya,Sayadeya Rice,"Rice coloured brown with deeply caramelised onions and cooked in fish stock, served with fried fish.",egyptian,6,15,40,MEDIUM
+eg_freekeh_chicken,Freekeh with Chicken,Freekeh cooked in chicken broth and baked with the chicken on top.,egyptian,6,15,60,MEDIUM
+eg_fattah,Fattah with Meat,"Layers of toasted bread soaked in broth, rice and garlic-vinegar tomato sauce topped with boiled beef: the Eid dish.",egyptian,6,20,120,MEDIUM
+eg_roz_bel_bisella,Rice with Peas,Egyptian rice cooked with green peas and butter.,egyptian,6,5,25,EASY
+eg_bulgur_pilaf,Bulgur with Tomato,Coarse bulgur cooked in tomato and onion.,egyptian,4,5,25,EASY
+eg_roz_bel_laban,Rice Pudding (Roz bel Laban),"Creamy rice simmered in milk, lightly thickened with corn starch and scented with vanilla.",egyptian,6,5,40,EASY
+eg_belila,Belila (Wheat with Milk),Boiled whole wheat in hot sweet milk with nuts and coconut; a winter breakfast.,egyptian,4,5,10,EASY
+eg_mahshi_kousa,Stuffed Zucchini (Mahshi Kousa),Cored zucchini filled with herbed tomato rice and simmered in broth.,egyptian,6,60,50,MEDIUM
+eg_mahshi_bitingan,Stuffed Eggplant (Mahshi Bitingan),Small cored eggplants stuffed with spiced tomato rice.,egyptian,6,60,50,MEDIUM
+eg_mahshi_felfel,Stuffed Peppers (Mahshi Felfel),Bell peppers filled with herbed tomato rice and cooked in tomato broth.,egyptian,6,45,50,MEDIUM
+eg_mahshi_waraa_enab,Stuffed Vine Leaves (Mahshi Wara' Enab),"Tightly rolled vine leaves filled with herby rice, cooked in broth with lemon.",egyptian,8,90,60,HARD
+eg_mahshi_koromb,Stuffed Cabbage Rolls (Mahshi Koromb),Cabbage leaves rolled around spiced dill rice and simmered.,egyptian,8,75,60,HARD
+eg_mahshi_tomatem,Stuffed Tomatoes,Large tomatoes hollowed and filled with herb rice using their own pulp.,egyptian,6,30,40,MEDIUM
+eg_mahshi_mix,Mixed Mahshi Pot,"A mixed pot of stuffed zucchini, eggplant, peppers and vine leaves sharing one tomato-rice filling.",egyptian,8,90,60,HARD
+eg_mahshi_basal,Stuffed Onions,Onion layers rolled around tomato rice and simmered.,egyptian,6,60,50,HARD
+eg_mahshi_kousa_lahma,Zucchini Stuffed with Meat and Rice,Zucchini filled with minced beef and rice in a tomato sauce.,egyptian,6,50,50,MEDIUM
+eg_bamia_lahma,Okra Stew with Meat,Tender beef and small okra in a tomato sauce finished with garlic and coriander.,egyptian,6,20,90,MEDIUM
+eg_fasolia_khadra,Green Beans with Meat,Green beans and beef cubes stewed in tomato sauce.,egyptian,6,20,80,EASY
+eg_bisella_gazar,Peas and Carrots with Meat,Green peas and carrots in tomato sauce with beef.,egyptian,6,15,80,EASY
+eg_batatis_lahma,Potato Stew with Meat,"Potatoes and beef in a spiced tomato sauce, oven-finished.",egyptian,6,20,80,EASY
+eg_torly,Torly (Mixed Vegetable Bake),Mixed vegetables baked with beef in tomato sauce.,egyptian,6,25,70,EASY
+eg_sabanekh_lahma,Spinach Stew with Meat,"Chopped spinach cooked with beef, onion, garlic and coriander.",egyptian,6,15,70,EASY
+eg_kolkas_salk,Taro with Chard,Taro cubes in a green chard and coriander broth: a winter (Epiphany) classic.,egyptian,6,30,60,MEDIUM
+eg_kharshouf,Artichoke Stew,Artichoke hearts with peas and beef in a light lemon sauce.,egyptian,6,30,60,MEDIUM
+eg_fasolia_beida,White Bean Stew,"Dried white beans stewed in tomato sauce, with or without meat.",egyptian,6,10,90,EASY
+eg_lobia,Black-eyed Pea Stew,Black-eyed peas simmered in tomato sauce with onion and garlic.,egyptian,6,10,80,EASY
+eg_moussaka,Egyptian Moussaka,"Fried eggplant baked in a spicy tomato, pepper and garlic sauce.",egyptian,6,20,60,EASY
+eg_kousa_bechamel,Zucchini with Béchamel,Sautéed zucchini and minced beef baked under béchamel.,egyptian,6,20,50,MEDIUM
+eg_bamia_zeit,Okra in Oil (Vegetarian),Meatless okra in garlic tomato sauce.,egyptian,4,15,35,EASY
+eg_chicken_salsa,Chicken in Tomato Sauce,"Chicken pieces simmered in a spiced tomato sauce, served with rice.",egyptian,6,15,60,EASY
+eg_kofta_dawood_basha,Kofta Dawood Basha (Meatballs in Tomato Sauce),Spiced beef meatballs browned then simmered in tomato sauce.,egyptian,6,25,40,MEDIUM
+eg_lesan_salsa,Beef Tongue in Tomato Sauce,"Boiled beef tongue, peeled and sliced, in tomato sauce.",egyptian,6,20,150,MEDIUM
+eg_kebda_eskandarani,Alexandrian Liver,"Strips of beef liver flash-fried with garlic, green chili, cumin and lemon.",egyptian,4,15,10,EASY
+eg_kebda_qawanes,Chicken Livers and Gizzards,Boiled gizzards and quick-fried chicken livers with garlic and pepper.,egyptian,4,15,40,EASY
+eg_sinyet_batatis_frakh,Chicken and Potato Tray,Chicken pieces roasted over potatoes and onions in tomato sauce.,egyptian,6,20,75,EASY
+eg_sinyet_samak,Baked Fish Tray,Fish fillets baked on potatoes and peppers in a cumin-tomato sauce.,egyptian,5,20,50,EASY
+eg_tagen_samak,Fish Tagen,"Fish baked in a clay pot with onions, peppers, tomato and cumin.",egyptian,4,20,45,MEDIUM
+eg_tagen_gambari,Shrimp Tagen,"Shrimp baked with tomato, pepper and garlic in a clay pot.",egyptian,4,20,30,MEDIUM
+eg_tagen_lahma_basal,Beef and Onion Tagen,Slow-baked beef with a large quantity of onion and tomato.,egyptian,6,20,120,MEDIUM
+eg_macarona_bechamel,Macaroni Béchamel,Layered baked pasta with spiced minced beef and a thick béchamel crust.,egyptian,8,30,60,MEDIUM
+eg_ads_bigebba,Brown Lentil Stew (Ads Bigebba),"Whole brown lentils cooked with onion, garlic, tomato and cumin.",egyptian,6,10,50,EASY
+eg_hummus_sham,Hot Chickpea Drink (Hummus el-Sham),"Hot spiced chickpea broth with tomato, lemon and chili, a winter street drink.",egyptian,4,5,15,EASY
+eg_ful_nabet,Sprouted Fava Bean Soup (Ful Nabet),"Fava beans soaked until sprouting, boiled with lemon and cumin; a traditional remedy soup.",egyptian,6,10,60,EASY
+eg_bamia_salsa_lamb,Okra with Lamb,Okra stewed with lamb shank in tomato sauce.,egyptian,6,20,100,MEDIUM
+eg_bitingan_rumi,Eggplant with Rumi Cheese Bake,Fried eggplant layered with tomato sauce and grated rumi cheese.,egyptian,6,20,40,EASY
+eg_mashed_potato_beef,Potato and Mince Pie (Sinyet Batatis bel Lahma el-Mafrouma),"Mashed potato layers filled with spiced minced beef, baked golden.",egyptian,6,25,50,MEDIUM
+eg_kofta_mashwia,Grilled Kofta,"Minced beef and lamb with onion, parsley and spices, grilled on skewers.",egyptian,6,25,15,MEDIUM
+eg_kebab,Egyptian Kebab,Lamb cubes marinated in onion and grilled over charcoal.,egyptian,6,20,20,MEDIUM
+eg_hawawshi,Hawawshi,"Baladi bread stuffed with spiced minced beef, onion and pepper, baked crisp.",egyptian,6,20,25,EASY
+eg_escalope_pane,Chicken Pané,Thin chicken breast cutlets breaded and fried.,egyptian,4,20,15,EASY
+eg_frakh_mashwi,Egyptian Grilled Chicken,"Whole chicken marinated in yogurt, lemon and spices, roasted until crisp.",egyptian,4,15,60,EASY
+eg_hamam_mahshi,Stuffed Pigeon,"Pigeons stuffed with spiced freekeh, simmered in broth and then fried or roasted until crisp.",egyptian,4,40,60,HARD
+eg_rabbit_salsa,Rabbit in Tomato Sauce,Rabbit pieces boiled with spices then simmered in tomato sauce.,egyptian,6,20,80,MEDIUM
+eg_duck_roasted,Roasted Duck with Orange,"Duck boiled with spices, then roasted until crisp and glazed with orange juice.",egyptian,6,20,120,HARD
+eg_lamb_shank_fatta,Lamb Shank with Rice,Slow-cooked lamb shanks served on vermicelli rice.,egyptian,4,15,150,MEDIUM
+eg_rosto,Egyptian Roast Beef (Rosto),"Beef roast browned and braised in onion and spices, then sliced and served in its sauce.",egyptian,8,20,150,MEDIUM
+eg_rayash_mashwia,Grilled Lamb Chops,Lamb chops marinated in onion and rosemary and grilled.,egyptian,4,10,15,EASY
+eg_kersha_tomato,Tripe in Tomato Sauce,Cleaned tripe boiled until tender and finished in a garlic tomato sauce.,egyptian,6,30,180,HARD
+eg_samak_mashwi,Grilled Fish (Samak Mashwi),"Whole fish coated in bran with a cumin-garlic marinade and grilled, Egyptian fish-shop style.",egyptian,4,15,25,EASY
+eg_bolti_maqli,Fried Tilapia,"Whole tilapia seasoned with cumin and garlic, floured and deep-fried.",egyptian,4,15,20,EASY
+eg_calamari_maqli,Fried Calamari,Squid rings floured and quickly fried.,egyptian,4,15,10,EASY
+eg_gambari_mashwi,Grilled Shrimp,"Large shrimp in garlic, lemon and cumin, grilled.",egyptian,4,15,8,EASY
+eg_shorbet_samak,Fish Soup,"Fish and shrimp soup with tomato, onion and cumin, Alexandria style.",egyptian,6,20,40,MEDIUM
+eg_crab_kaboria,Spicy Crab (Kaboria),"Blue crabs boiled then tossed in a spicy garlic and cumin sauce, Alexandria style.",egyptian,4,15,20,MEDIUM
+eg_eish_baladi,Homemade Baladi Bread,Whole-wheat flatbread puffed in a very hot oven and dusted with bran.,egyptian,10,30,20,HARD
+eg_feteer_meshaltet,Feteer Meshaltet,Flaky layered pastry made by stretching dough paper-thin and folding it with ghee.,egyptian,8,60,35,HARD
+eg_goulash_lahma,Meat Goulash (Phyllo Pie),"Phyllo sheets layered with spiced minced beef and ghee, baked and soaked in milk.",egyptian,8,30,40,MEDIUM
+eg_goulash_gebna,Cheese Goulash,"Phyllo pie filled with white cheese, mozzarella and egg.",egyptian,8,25,40,MEDIUM
+eg_sambousek,Cheese Sambousek,"Small half-moon pastries filled with white cheese, fried or baked.",egyptian,6,40,20,MEDIUM
+eg_hawawshi_eskandarani,Alexandrian Hawawshi (Dough),Spiced beef baked inside a homemade dough envelope.,egyptian,6,40,30,MEDIUM
+eg_qaraqeesh,Qaraqeesh (Savory Sesame Rusks),"Crunchy ring rusks with sesame and black seed, baked twice.",egyptian,10,30,35,MEDIUM
+eg_roqaq_lahma,Roqaq with Meat,"Thin dry roqaq sheets layered with spiced beef and broth, baked until crisp on top (phyllo used here).",egyptian,8,30,40,MEDIUM
+eg_basbousa,Basbousa,"Semolina cake soaked in syrup, cut into diamonds.",egyptian,12,15,35,EASY
+eg_mahalabeya,Mahalabeya,Milk pudding thickened with corn starch and scented with rose water.,egyptian,6,5,15,EASY
+eg_sahlab,Sahlab,"Hot thick milk drink with sahlab powder, topped with coconut, nuts and cinnamon.",egyptian,4,2,8,EASY
+eg_zalabya,Zalabya (Lokma),Fried yeasted dough balls soaked in syrup or honey.,egyptian,8,15,30,MEDIUM
+eg_kahk,Eid Kahk,"Ghee-rich Eid cookies dusted with powdered sugar, optionally filled with agameya or nuts.",egyptian,40,60,25,HARD
+eg_basbousa_coconut,Coconut Basbousa with Cream,Basbousa with a layer of milk cream in the middle.,egyptian,12,20,40,MEDIUM
+eg_atayef,Qatayef,"Ramadan pancakes filled with nuts, folded, fried and dipped in syrup.",egyptian,8,30,25,MEDIUM
+eg_mehalabeya_roz,Rice and Coconut Milk Pudding (Mehalabeya bel Roz),Milk pudding thickened with ground rice instead of starch.,egyptian,6,5,20,EASY
+eg_tamr_hindi,Tamarind Drink,Tamarind pulp soaked and strained into a sweet-sour Ramadan drink.,egyptian,6,10,0,EASY
+eg_helba,Fenugreek Drink (Helba),"Fenugreek seeds boiled and sweetened, a soothing winter drink.",egyptian,2,2,10,EASY
+eg_yansoon,Aniseed Tea (Yansoon),"Anise seeds simmered in water, a calming herbal drink.",egyptian,2,1,8,EASY
+eg_irfa,Cinnamon Drink (Irfa),Cinnamon simmered in water and milk.,egyptian,2,1,8,EASY
+it_tiramisu,Tiramisu,Coffee-soaked biscuits layered with a sweet cream-cheese and egg cream (made here with cream cheese).,italian,8,30,0,MEDIUM
+it_panna_cotta,Panna Cotta,Set vanilla cream served with berries.,italian,6,10,5,EASY
+it_spaghetti_bolognese,Spaghetti Bolognese,"Spaghetti with a slow-simmered beef, tomato and vegetable ragù.",italian,4,10,45,EASY
+it_penne_arrabbiata,Penne Arrabbiata,Penne in a garlicky tomato sauce with chili.,italian,4,5,20,EASY
+it_pasta_pomodoro,Pasta al Pomodoro,Pasta with a simple fresh tomato and basil sauce.,italian,4,5,25,EASY
+it_fettuccine_alfredo_chicken,Chicken Fettuccine Alfredo,"Pasta and seared chicken in a butter, cream and parmesan sauce.",italian,4,10,20,EASY
+it_lasagna,Beef Lasagna,"Layers of pasta, beef ragù, béchamel and mozzarella.",italian,8,30,60,MEDIUM
+it_margherita_pizza,Pizza Margherita,"Thin pizza with tomato sauce, mozzarella and basil.",italian,2,20,12,MEDIUM
+it_risotto_mushroom,Mushroom Risotto,"Creamy rice stirred with mushrooms, butter and parmesan.",italian,4,10,30,MEDIUM
+it_minestrone,Minestrone,"Hearty vegetable, bean and pasta soup.",italian,6,15,40,EASY
+it_caprese,Caprese Salad,Sliced tomato and mozzarella with basil and olive oil.,italian,4,10,0,EASY
+it_bruschetta,Tomato Bruschetta,Toasted bread rubbed with garlic and topped with chopped tomato and basil.,italian,4,10,5,EASY
+it_chicken_parmigiana,Chicken Parmigiana,Breaded chicken baked with tomato sauce and melted cheese.,italian,4,20,30,MEDIUM
+it_gnocchi_tomato,Potato Gnocchi with Tomato Sauce,Homemade potato dumplings in a quick tomato sauce.,italian,4,40,25,HARD
+it_pesto_pasta,Pasta with Basil Pesto,"Pasta tossed with a blended basil, pine nut, garlic and parmesan sauce.",italian,4,10,12,EASY
+it_frittata,Vegetable Frittata,"Thick baked omelette with potato, onion and spinach.",italian,4,10,20,EASY
+it_aglio_olio,Spaghetti Aglio e Olio,"Spaghetti tossed with garlic, chili and olive oil.",italian,4,5,15,EASY
+it_shrimp_linguine,Shrimp Pasta with Garlic and Tomato,"Pasta with shrimp sautéed in garlic, tomato and parsley.",italian,4,15,20,EASY
+it_eggplant_parmigiana,Eggplant Parmigiana,"Fried eggplant layered with tomato sauce, mozzarella and parmesan.",italian,6,25,45,MEDIUM
+it_focaccia,Rosemary Focaccia,Olive-oil flatbread with rosemary and salt.,italian,8,20,25,MEDIUM
+it_mac_cheese_baked,Baked Pasta with Four Cheeses,"Pasta baked in a creamy sauce of mozzarella, parmesan, cheddar and cream cheese.",italian,6,10,30,EASY
+it_osso_buco_style_veal,Braised Veal with Tomato and Vegetables,"Veal braised slowly with onion, carrot, celery and tomato.",italian,4,20,120,MEDIUM
+it_tuna_pasta_salad,Italian Pasta Salad with Tuna,"Cold pasta with tuna, olives, tomato and lemon dressing.",italian,4,15,12,EASY
+it_italian_meatballs,Italian Meatballs in Tomato Sauce,Beef and parmesan meatballs simmered in tomato sauce.,italian,4,20,35,EASY
+gr_greek_salad,Greek Salad,"Tomato, cucumber, onion, pepper, olives and feta with oregano and olive oil.",greek,4,15,0,EASY
+gr_tzatziki,Tzatziki,"Thick yogurt with grated cucumber, garlic, olive oil and dill.",greek,6,10,0,EASY
+gr_moussaka,Greek Moussaka,"Baked layers of eggplant, potato, spiced lamb sauce and béchamel.",greek,8,40,60,HARD
+gr_spanakopita,Spanakopita,"Phyllo pie filled with spinach, feta and herbs.",greek,8,30,45,MEDIUM
+gr_souvlaki_chicken,Chicken Souvlaki,Lemon-oregano chicken skewers served with pita and tzatziki.,greek,4,15,15,EASY
+gr_gigantes,Baked Giant Beans in Tomato,Large white beans baked in tomato sauce with dill and olive oil.,greek,6,10,60,EASY
+gr_lemon_potatoes,Greek Lemon Potatoes,"Potato wedges roasted in lemon, garlic, oregano and olive oil.",greek,4,10,60,EASY
+me_shakshuka_feta,Mediterranean Shakshuka with Feta,Eggs baked in a pepper-tomato sauce finished with feta and herbs.,mediterranean,4,10,20,EASY
+me_grilled_vegetables,Grilled Mediterranean Vegetables,"Zucchini, eggplant and peppers grilled and dressed with olive oil and herbs.",mediterranean,4,15,20,EASY
+me_lentil_salad,Mediterranean Lentil Salad,"Brown lentils with tomato, cucumber, herbs and lemon dressing.",mediterranean,4,15,25,EASY
+me_baked_fish_herbs,Baked Fish with Herbs and Lemon,"Whole sea bass baked with lemon, garlic, herbs and olive oil.",mediterranean,4,10,25,EASY
+fr_quiche_lorraine_style,Quiche with Smoked Beef and Cheese,"Buttery pastry case filled with egg custard, cheese and smoked beef (pork-free).",french,6,25,40,MEDIUM
+fr_french_onion_soup,French Onion Soup,"Slowly caramelised onions in beef broth, topped with cheese toast.",french,4,15,60,MEDIUM
+fr_ratatouille,Ratatouille,"Provençal stew of eggplant, zucchini, peppers and tomato.",french,6,20,50,EASY
+fr_crepes,Sweet Crêpes,"Thin pancakes served with sugar, lemon, jam or chocolate spread.",french,4,10,20,EASY
+fr_chicken_mushroom_cream,Chicken with Mushroom Cream Sauce,Pan-seared chicken in a creamy mushroom sauce.,french,4,10,30,EASY
+es_spanish_omelette,Spanish Omelette (Tortilla de Patatas),Thick potato and onion omelette.,spanish,6,15,35,MEDIUM
+es_gazpacho,Gazpacho,"Chilled blended tomato, cucumber and pepper soup.",spanish,4,15,0,EASY
+es_chicken_paella,Chicken and Seafood Paella,"Saffron rice cooked with chicken, shrimp, peas and peppers.",spanish,6,20,45,HARD
+es_garlic_shrimp,Garlic Shrimp (Gambas al Ajillo),Shrimp sizzled in olive oil with garlic and chili.,spanish,4,10,8,EASY
+lb_tabbouleh,Tabbouleh,"Parsley-heavy salad with fine bulgur, tomato, mint, lemon and olive oil.",lebanese,4,25,0,EASY
+lb_mutabbal,Mutabbal,"Smoky eggplant mashed with tahini, yogurt, garlic and lemon.",lebanese,6,10,30,EASY
+lb_shish_tawook,Shish Tawook,"Garlic, lemon and yogurt-marinated chicken skewers.",lebanese,4,15,15,EASY
+lb_kibbeh_saniyeh,Baked Kibbeh (Kibbeh bil Saniyeh),"Bulgur and beef shell baked in a tray around a spiced mince, onion and pine-nut filling.",lebanese,8,40,40,HARD
+lb_kafta_saniyeh,Kafta Tray with Potatoes,Flat kafta baked with sliced potatoes and tomatoes in tomato sauce.,lebanese,6,20,50,EASY
+lb_manakish_thyme,Thyme and Sesame Manakish,"Flatbreads topped with dried thyme, toasted sesame and olive oil.",lebanese,6,20,12,MEDIUM
+lb_lahm_bi_ajeen,Lahm bi Ajeen,"Thin flatbreads topped with spiced minced lamb, tomato and onion.",lebanese,6,30,12,MEDIUM
+lb_fatayer_sabanekh,Spinach Fatayer,Triangular pastries filled with lemony spinach and onion.,lebanese,8,40,20,MEDIUM
+lb_labneh_plate,Labneh with Olive Oil,"Thick strained yogurt with olive oil, mint and olives.",lebanese,4,5,0,EASY
+lb_chicken_shawarma_plate,Chicken Shawarma Plate with Toum,"Spiced chicken thighs served with garlic toum, pickles and bread.",lebanese,4,20,25,EASY
+lb_toum,Toum (Garlic Sauce),Fluffy emulsified garlic sauce.,lebanese,10,15,0,MEDIUM
+lb_batata_harra,Batata Harra,"Fried potato cubes tossed with garlic, chili and coriander.",lebanese,4,15,25,EASY
+lb_riz_a_djej,Chicken and Rice (Riz a Djej),"Spiced rice with minced beef, topped with shredded chicken and toasted nuts.",lebanese,6,20,60,MEDIUM
+lb_loubieh_bi_zeit,Green Beans in Olive Oil (Loubieh bi Zeit),"Green beans slow-cooked with tomato, onion and garlic; served at room temperature.",lebanese,4,15,40,EASY
+lb_fattet_hummus,Chickpea Fatteh,"Toasted bread layered with warm chickpeas, garlic yogurt-tahini sauce and pine nuts.",lebanese,4,15,10,EASY
+lb_adas_bi_hamod,Lentils with Chard and Lemon (Adas bi Hamod),"Brown lentils with chard, potato, garlic and plenty of lemon.",lebanese,6,15,40,EASY
+lb_muhammara,Muhammara,Roasted red pepper and walnut dip with pomegranate molasses.,lebanese,6,15,20,EASY
+lb_sfouf,Sfouf (Turmeric Semolina Cake),Golden semolina cake flavoured with turmeric and anise.,lebanese,12,15,35,EASY
+lb_sawdat_djej,Chicken Livers with Pomegranate Molasses,"Quick-fried chicken livers with garlic, lemon and pomegranate molasses.",lebanese,4,10,10,EASY
+lb_kousa_bi_laban,Stuffed Zucchini in Yogurt (Kousa bi Laban),"Zucchini filled with rice and meat, simmered in a garlicky yogurt sauce.",lebanese,6,50,45,HARD
+tr_menemen,Menemen,Turkish scrambled eggs with tomato and green pepper.,turkish,3,10,15,EASY
+tr_mercimek,Turkish Red Lentil Soup (Mercimek),"Red lentil soup with onion, carrot, paprika butter and dried mint.",turkish,6,10,35,EASY
+tr_imam_bayildi,Imam Bayildi,"Eggplants braised whole with an olive-oil onion, tomato and garlic filling.",turkish,4,25,50,MEDIUM
+tr_karniyarik,Karniyarik,Fried eggplants split and filled with spiced minced beef and tomato.,turkish,4,25,40,MEDIUM
+tr_adana_kebab,Adana Kebab,"Hand-minced lamb with red pepper and chili, grilled on flat skewers.",turkish,4,25,12,MEDIUM
+tr_lahmacun,Lahmacun,"Very thin crisp flatbreads with a spiced lamb, tomato and pepper topping.",turkish,8,30,10,MEDIUM
+tr_sigara_borek,Sigara Borek,"Phyllo cigars filled with white cheese and parsley, fried golden.",turkish,6,25,15,EASY
+tr_bulgur_pilavi,Bulgur Pilaf with Pepper and Tomato,Coarse bulgur cooked with pepper paste-style tomato and green pepper.,turkish,4,5,25,EASY
+tr_kisir,Kisir (Bulgur Salad),"Fine bulgur salad with tomato paste, herbs, pomegranate molasses and lemon.",turkish,6,20,0,EASY
+tr_cilbir,Cilbir (Turkish Eggs),Poached eggs on garlic yogurt with chili butter.,turkish,2,10,8,EASY
+tr_hunkar_begendi,Hunkar Begendi,Lamb stew served on a smoky eggplant and cheese béchamel purée.,turkish,6,20,90,MEDIUM
+tr_baklava,Walnut Baklava,Layers of buttered phyllo and walnuts soaked in lemon syrup.,turkish,20,40,45,HARD
+ma_chicken_tagine_olives,Chicken Tagine with Olives and Lemon,"Chicken braised with onion, ginger, saffron, olives and lemon.",moroccan,4,15,60,MEDIUM
+ma_harira,Harira,"Tomato, lentil and chickpea soup with lamb and herbs, thickened with flour.",moroccan,8,20,70,MEDIUM
+ma_kefta_tagine,Kefta Tagine with Eggs,Spiced meatballs simmered in tomato sauce with eggs cracked on top.,moroccan,4,20,35,EASY
+ma_zaalouk,Zaalouk,"Cooked eggplant and tomato salad with garlic, cumin and paprika.",moroccan,6,10,30,EASY
+ma_couscous_vegetables,Couscous with Seven Vegetables,Steamed couscous with lamb and vegetables in a spiced broth.,moroccan,6,25,60,MEDIUM
+gf_chicken_kabsa,Chicken Kabsa,"Spiced Gulf rice cooked with chicken, tomato and dried lime-style lemon.",gulf,6,20,60,MEDIUM
+gf_harees,Harees,Whole wheat and chicken slow-cooked and beaten to a smooth porridge.,gulf,6,10,180,EASY
+gf_luqaimat,Luqaimat,Crisp fried dough balls drizzled with date syrup and sesame.,gulf,8,15,25,MEDIUM
+gf_saloona,Saloona (Gulf Vegetable and Chicken Stew),"Tomato-based stew of chicken, potato, zucchini and carrots with Gulf spices.",gulf,6,20,50,EASY
+in_chicken_curry,Home-style Chicken Curry,"Chicken simmered in an onion, tomato, ginger and garlic masala.",indian,6,20,45,MEDIUM
+in_butter_chicken,Butter Chicken,Yogurt-marinated chicken in a creamy tomato and butter sauce.,indian,4,20,35,MEDIUM
+in_dal_tadka,Dal Tadka,"Red lentils simmered with turmeric and finished with a sizzling cumin, garlic and chili tempering.",indian,4,10,35,EASY
+in_chana_masala,Chana Masala,Chickpeas in a tangy spiced tomato and onion gravy.,indian,4,10,30,EASY
+in_aloo_palak,Aloo Palak (Spinach and Potato),Potatoes cooked in a garlicky spiced spinach purée.,indian,4,15,25,EASY
+in_aloo_gobi,Aloo Gobi,Dry curry of potato and cauliflower with turmeric and cumin.,indian,4,15,25,EASY
+in_chicken_biryani,Chicken Biryani,"Layered spiced chicken and rice cooked with fried onions, yogurt and saffron.",indian,6,30,60,HARD
+in_jeera_rice,Jeera Rice,Rice cooked with cumin seeds and ghee.,indian,4,5,20,EASY
+in_cucumber_raita,Cucumber Raita,"Yogurt with cucumber, roasted cumin and mint.",indian,4,10,0,EASY
+in_keema_matar,Keema Matar,Spiced minced lamb cooked with green peas.,indian,4,10,35,EASY
+in_rajma,Rajma (Kidney Bean Curry),Red kidney beans in a thick tomato-onion gravy.,indian,4,10,30,EASY
+in_egg_curry,Egg Curry,Boiled eggs in a spiced onion-tomato gravy.,indian,4,10,25,EASY
+in_tandoori_chicken,Oven Tandoori Chicken,Chicken legs marinated in spiced yogurt and roasted hot.,indian,4,15,40,EASY
+in_samosa,Vegetable Samosa,Crisp pastry cones filled with spiced potato and peas.,indian,8,45,25,HARD
+in_onion_bhaji,Onion Bhaji,"Sliced onions in a spiced chickpea-flour batter, fried crisp.",indian,4,15,15,EASY
+in_mango_lassi,Mango Lassi,"Mango blended with yogurt, milk and cardamom.",indian,2,5,0,EASY
+in_kheer,Kheer,"Slow-cooked rice and milk pudding with cardamom, raisins and nuts.",indian,6,5,50,EASY
+in_chapati,Chapati,Unleavened whole-wheat flatbread cooked on a dry pan.,indian,8,20,20,MEDIUM
+in_rogan_josh,Lamb Rogan Josh,"Lamb braised in a Kashmiri-style yogurt, paprika and spice gravy.",indian,6,20,90,MEDIUM
+in_baingan_bharta,Baingan Bharta,"Charred eggplant mashed and cooked with onion, tomato and spices.",indian,4,10,35,EASY
+as_egg_fried_rice,Egg Fried Rice,"Day-old rice stir-fried with egg, peas, carrot and soy sauce (Chinese).",asian,4,10,12,EASY
+as_chicken_vegetable_stirfry,Chicken and Vegetable Stir-fry,"Chicken strips stir-fried with broccoli, peppers and carrot in a garlic-soy sauce (Chinese).",asian,4,15,12,EASY
+as_sweet_sour_chicken,Sweet and Sour Chicken,"Crisp chicken pieces with pepper, onion and pineapple in a sweet-sour sauce (Chinese).",asian,4,20,20,MEDIUM
+as_kung_pao_chicken,Kung Pao Chicken,"Spicy diced chicken with peanuts, chili and a tangy soy glaze (Chinese).",asian,4,15,10,MEDIUM
+as_beef_broccoli,Beef and Broccoli,Thin beef slices and broccoli in a garlic-ginger soy sauce (Chinese).,asian,4,15,12,EASY
+as_chow_mein,Chicken Chow Mein,"Egg noodles stir-fried with chicken, cabbage and bean sprouts (Chinese).",asian,4,15,15,EASY
+as_hot_sour_soup,Hot and Sour Soup,"Tofu, mushroom and egg soup sharpened with vinegar and white pepper (Chinese).",asian,4,15,15,EASY
+as_steamed_fish_ginger,Steamed Fish with Ginger and Soy,"Whole fish steamed and dressed with ginger, spring onion and hot oil (Chinese).",asian,4,10,15,EASY
+as_chicken_teriyaki,Chicken Teriyaki,"Pan-seared chicken thighs glazed with soy, honey and ginger (Japanese).",asian,4,10,20,EASY
+as_salmon_teriyaki,Salmon Teriyaki,Salmon fillets glazed in a soy and honey teriyaki sauce (Japanese).,asian,4,10,12,EASY
+as_sunomono,Japanese Cucumber Salad (Sunomono),Thin cucumber slices in sweet rice-vinegar-style dressing with sesame.,asian,4,10,0,EASY
+as_pad_thai,Shrimp Pad Thai,"Rice noodles stir-fried with shrimp, egg, bean sprouts, tamarind and peanuts (Thai).",asian,4,20,12,MEDIUM
+as_thai_basil_chicken,Thai Basil Chicken (Pad Kra Pao),"Minced chicken stir-fried with chili, garlic, soy and basil, served with rice and fried egg (Thai).",asian,4,10,10,EASY
+as_bibimbap,Bibimbap,"Rice bowl topped with seasoned vegetables, beef and a fried egg (Korean).",asian,4,30,20,MEDIUM
+as_bulgogi,Beef Bulgogi,"Thin beef in a sweet soy, pear-style apple, garlic and sesame marinade, quickly seared (Korean).",asian,4,15,10,EASY
+as_chicken_satay,Chicken Satay with Peanut Sauce,Turmeric-marinated chicken skewers with a peanut butter dipping sauce (Southeast Asian).,asian,4,20,12,EASY
+as_sesame_noodles,Cold Sesame Noodles,Noodles tossed in a tahini-soy-garlic sauce with cucumber (Chinese).,asian,4,10,8,EASY
+as_tofu_stirfry,Tofu and Vegetable Stir-fry,Crisp tofu cubes with mixed vegetables in soy-ginger sauce.,asian,4,15,12,EASY
+as_mapo_tofu,Mapo Tofu,Silky tofu in a spicy beef and chili sauce (Chinese).,asian,4,10,15,MEDIUM
+as_chicken_corn_soup,Chicken and Sweet Corn Soup,"Chicken broth with sweet corn, shredded chicken and egg ribbons (Chinese).",asian,4,10,20,EASY
+us_beef_burger,Classic Beef Burger,"Grilled beef patties with cheese, lettuce, tomato and pickles in buns.",american,4,15,10,EASY
+us_mac_and_cheese,Mac and Cheese,Macaroni in a creamy cheddar sauce.,american,4,5,25,EASY
+us_pancakes,Fluffy Pancakes,Thick buttermilk-style pancakes with maple syrup.,american,4,10,20,EASY
+us_chocolate_chip_cookies,Chocolate Chip Cookies,Chewy butter cookies with chopped dark chocolate.,american,24,15,12,EASY
+us_brownies,Chocolate Brownies,Fudgy chocolate squares.,american,16,15,25,EASY
+us_buffalo_wings,Buffalo Wings,Oven-crisp chicken wings tossed in hot sauce and butter.,american,4,10,45,EASY
+us_bbq_chicken,Barbecue Chicken,Chicken pieces baked and glazed with barbecue sauce.,american,4,10,45,EASY
+us_coleslaw,Coleslaw,Shredded cabbage and carrot in a creamy tangy dressing.,american,6,15,0,EASY
+us_clam_chowder,New England Clam Chowder,"Creamy soup with clams, potatoes and onion.",american,6,20,35,MEDIUM
+us_mashed_potatoes,Creamy Mashed Potatoes,Potatoes mashed with butter and warm milk.,american,4,10,20,EASY
+us_cornbread,Cornbread,Lightly sweet baked cornmeal bread.,american,9,10,25,EASY
+us_apple_pie,Apple Pie,Double-crust pie with cinnamon-spiced apples.,american,8,40,50,HARD
+us_banana_bread,Banana Bread,Moist loaf cake made with ripe bananas.,american,10,15,55,EASY
+mx_guacamole,Guacamole,"Mashed avocado with lime, onion, tomato, chili and coriander.",mexican,4,10,0,EASY
+mx_pico_de_gallo,Pico de Gallo,"Fresh tomato salsa with onion, chili, lime and coriander.",mexican,4,10,0,EASY
+mx_chicken_fajitas,Chicken Fajitas,Spiced chicken strips with peppers and onion in warm tortillas.,mexican,4,15,15,EASY
+mx_beef_tacos,Beef Tacos,"Seasoned ground beef in corn tortillas with lettuce, tomato and cheese.",mexican,4,15,15,EASY
+mx_bean_burrito,Bean and Rice Burrito,"Flour tortillas wrapped around black beans, rice, cheese and salsa.",mexican,4,15,10,EASY
+mx_chicken_quesadilla,Chicken Quesadilla,"Tortillas filled with chicken and melted cheese, toasted crisp.",mexican,4,10,12,EASY
+mx_chili_con_carne,Chili con Carne,"Beef and kidney bean stew with chili, cumin and tomato.",mexican,6,15,60,EASY
+mx_mexican_rice,Mexican Red Rice,"Rice toasted then cooked in tomato, onion and garlic broth.",mexican,4,5,25,EASY
+mx_black_bean_soup,Black Bean Soup,Smooth black bean soup with cumin and lime.,mexican,6,15,90,EASY
+mx_huevos_rancheros,Huevos Rancheros,Fried eggs on corn tortillas with a spicy tomato sauce.,mexican,2,10,15,EASY
+mx_chicken_enchiladas,Chicken Enchiladas,"Corn tortillas rolled around chicken and cheese, baked in red sauce.",mexican,4,20,25,MEDIUM
+mx_elote,Mexican Street Corn (Elote),"Boiled corn spread with mayonnaise, cheese, chili and lime.",mexican,4,5,10,EASY
+eg_asir_farawla,Strawberry Juice,Fresh strawberries blended with water and sugar.,egyptian,3,5,0,EASY
+eg_roz_bel_laban_mango,Rice with Milk and Mango,Roz bel laban layered with fresh mango cubes.,egyptian,6,5,40,EASY
+eg_konafa_manga,Mango Kunafa,"Crisp kunafa layered with cream and fresh mango, soaked in light syrup.",egyptian,8,25,35,MEDIUM
+eg_petit_four,Egyptian Petit Four with Jam,Piped butter biscuits sandwiched with jam.,egyptian,30,30,15,MEDIUM
+eg_fouliya,Fouliya (Peanut Brittle),Roasted peanuts in crunchy caramel.,egyptian,12,5,15,MEDIUM
+eg_mehalabeya_chocolate,Chocolate Mahalabeya,Milk pudding flavoured with cocoa.,egyptian,6,5,15,EASY
+as_miso_soup,Miso Soup,"Light broth with miso, tofu, seaweed and spring onion (Japanese).",asian,4,5,10,EASY
+us_grilled_cheese,Grilled Cheese Sandwich,Buttered bread toasted around melted cheddar.,american,2,5,8,EASY
+it_affogato,Affogato,Vanilla ice cream drowned in hot espresso.,italian,2,3,0,EASY
+eg_bid_maslouk_salata,Boiled Egg Salad,"Chopped boiled eggs with tomato, onion and cumin.",egyptian,3,10,10,EASY
+eg_tomato_onion_salad,Tomato and Onion Salad,"Sliced tomatoes and onion with vinegar, oil and dried mint.",egyptian,4,8,0,EASY
+eg_fried_eggplant,Fried Eggplant Slices,Simple fried eggplant rounds for sandwiches with tahini or salad.,egyptian,4,15,20,EASY
+eg_kromb_sauteed,Sautéed Cabbage with Tomato,"Shredded cabbage cooked with tomato, garlic and cumin.",egyptian,4,15,30,EASY
+eg_fasolia_zeit,Green Beans in Olive Oil,"Vegetarian green beans with tomato, onion and olive oil.",egyptian,4,15,35,EASY
+eg_macarona_salsa_lahma,Baked Macaroni with Meat Sauce,Pasta tossed in a beef and tomato sauce and baked briefly.,egyptian,6,10,40,EASY
+eg_pasta_salsa,Pasta in Tomato Sauce,Everyday Egyptian spaghetti in garlic tomato sauce.,egyptian,4,5,25,EASY
+eg_spinach_eggs,Spinach with Eggs,Sautéed spinach and onion with eggs cracked on top.,egyptian,4,10,15,EASY
+eg_pumpkin_stew,Pumpkin Stew,Pumpkin cubes cooked in a light tomato and onion sauce.,egyptian,4,15,30,EASY
+eg_chicken_peas_carrots,Chicken with Peas and Carrots,Chicken thighs braised with peas and carrots in tomato sauce.,egyptian,6,15,60,EASY
+eg_shawerma_frakh,Egyptian Chicken Shawarma,Spiced chicken strips pan-seared and served in bread with tahini and pickles.,egyptian,4,20,20,EASY
+eg_kofta_frakh,Chicken Kofta,"Minced chicken with onion, parsley and spices, grilled or pan-fried.",egyptian,4,20,15,EASY
+eg_tuna_salad,Egyptian Tuna Salad,"Canned tuna with onion, pepper, tomato and lemon.",egyptian,3,10,0,EASY
+eg_sardine_tomato,Sardines with Tomato and Cumin,Canned sardines warmed in a quick tomato and cumin sauce.,egyptian,3,10,10,EASY
+eg_mokh_pane,Fried Breaded Brain (Mokh Pané),"Poached calf brain slices, breaded and fried until crisp.",egyptian,4,20,20,MEDIUM
+eg_halawiyat,Sweetbreads with Garlic and Lemon (Halawiyat),"Blanched sweetbreads sautéed with garlic, chili and lemon.",egyptian,4,10,15,MEDIUM
+eg_ful_akhdar_beid,Fresh Green Fava with Eggs,"Spring green fava beans cooked with onion and dill, finished with eggs.",egyptian,4,15,20,EASY
+eg_bamia_gambari,Okra with Shrimp (Alexandria),"Okra and shrimp in a garlicky tomato sauce, a seaside variation.",egyptian,4,20,35,MEDIUM
+eg_samak_tahina,Fish Baked with Tahini (Sinai style),Fish fillets baked under a lemony tahini and onion sauce.,egyptian,4,15,30,EASY
+eg_batates_bechamel,Potato Béchamel with Minced Beef,Layers of potato slices and spiced beef baked under béchamel.,egyptian,6,25,50,MEDIUM
+eg_beid_luncheon,Eggs with Luncheon,A quick Egyptian breakfast of eggs fried with diced beef luncheon.,egyptian,2,5,8,EASY
+eg_fattet_frakh,Chicken Fattah,"Fattah layered with toasted bread, rice, garlic-vinegar tomato sauce and roasted chicken.",egyptian,6,20,60,MEDIUM
+eg_gambari_pane,Breaded Shrimp,"Large shrimp marinated in garlic and cumin, breaded and fried.",egyptian,4,20,12,EASY
+eg_samak_fillet_pane,Breaded Fish Fillet,"Thin fish fillets with a cumin-garlic marinade, breaded and fried.",egyptian,4,15,12,EASY
+eg_shish_frakh,Egyptian Chicken Shish,"Chicken cubes in yogurt, garlic and spice marinade, grilled with peppers and onion.",egyptian,4,15,15,EASY
+eg_kabab_halla,Kabab Halla (Beef and Onion Stew),Beef chunks slowly stewed with a large amount of onion until the sauce is thick and sweet.,egyptian,6,20,120,EASY
+eg_batates_fel_forn,Oven-roasted Potatoes,"Potato wedges roasted with oil, garlic, paprika and cumin.",egyptian,4,10,40,EASY
+eg_feteer_lahma,Feteer with Minced Meat,Flaky ghee pastry filled with spiced minced beef and peppers.,egyptian,6,45,30,HARD
+eg_hawawshi_frakh,Chicken Hawawshi,"Baladi bread filled with spiced minced chicken and peppers, baked crisp.",egyptian,6,20,25,EASY
+eg_shorbet_bisella,Split Pea Soup,Yellow split peas simmered with onion and carrot and blended smooth.,egyptian,6,10,50,EASY
+eg_batata_asal,Baked Sweet Potato with Honey and Cinnamon,Oven-baked sweet potatoes drizzled with honey and cinnamon.,egyptian,4,5,45,EASY
+eg_hommos_mehammas,Crispy Roasted Chickpeas,"Cooked chickpeas roasted until crunchy with salt and cumin, a classic snack.",egyptian,4,5,35,EASY
+eg_asabe_zeinab,Asabe' Zeinab (Fried Dough Fingers in Syrup),Semolina dough fingers fried and soaked in syrup.,egyptian,10,30,25,MEDIUM
+eg_simsimiya,Simsimiya (Sesame Brittle),"Toasted sesame bound with caramelised sugar and honey, a mawlid sweet.",egyptian,12,5,15,MEDIUM
+as_thai_coconut_chicken_curry,Thai-style Coconut Chicken Curry,"Chicken simmered in coconut milk with curry powder, fish sauce, chili and basil (Thai-style, no curry paste).",asian,4,15,25,EASY
+as_coconut_shrimp_soup,Coconut Shrimp Soup,"Shrimp and mushrooms in a lime, chili and coconut broth (Thai-style).",asian,4,15,15,EASY
+in_coconut_fish_curry,Coconut Fish Curry,"Firm fish in a coconut, tomato and curry-leaf-style spiced gravy (South Indian style).",indian,4,15,25,EASY
+in_chicken_korma,Chicken Korma,"Mild chicken curry in a yogurt, cashew and coconut sauce.",indian,4,15,35,MEDIUM
+as_salmon_rice_bowl,Salmon Rice Bowl,"Seared salmon on sticky rice with cucumber, avocado, sesame and soy (Japanese-style).",asian,2,15,15,EASY
+as_hoisin_chicken,Hoisin Chicken Stir-fry,Chicken strips glazed in hoisin with spring onion and peppers (Chinese).,asian,4,15,12,EASY
+as_oyster_beef_mushroom,Beef and Mushrooms in Oyster Sauce,Thinly sliced beef stir-fried with mushrooms in oyster sauce (Chinese).,asian,4,15,12,EASY
+as_chicken_lo_mein,Chicken Lo Mein,Soft egg noodles tossed with chicken and vegetables in a soy-oyster sauce (Chinese).,asian,4,15,15,EASY
+as_chicken_adobo,Chicken Adobo,"Chicken braised in vinegar, soy sauce, garlic, bay leaf and pepper (Filipino).",asian,4,10,45,EASY
+us_turkey_club,Turkey Club Sandwich,"Toasted bread layered with turkey, lettuce, tomato and mayonnaise.",american,2,15,5,EASY
+us_caesar_salad,Chicken Caesar Salad,"Romaine with grilled chicken, croutons, parmesan and Caesar dressing.",american,4,12,0,EASY
+us_cobb_salad,Cobb Salad,"Salad of chicken, boiled egg, avocado, tomato and blue cheese.",american,4,20,12,EASY
+us_meatloaf,Meatloaf,Baked beef loaf with a ketchup glaze.,american,6,15,60,EASY
+us_sloppy_joes,Sloppy Joes,Saucy beef and tomato filling in toasted buns.,american,4,10,20,EASY
+us_chicken_noodle_soup,Chicken Noodle Soup,"Chicken broth with vegetables, shredded chicken and egg noodles.",american,6,15,40,EASY
+us_potato_salad,American Potato Salad,"Creamy potato salad with egg, celery, mustard and mayonnaise.",american,6,15,20,EASY
+us_deviled_eggs,Deviled Eggs,Boiled egg halves filled with a creamy mustard yolk mixture.,american,6,15,12,EASY
+us_french_toast,French Toast,Bread soaked in a cinnamon egg custard and fried in butter.,american,4,5,15,EASY
+us_blueberry_muffins,Blueberry Muffins,Tender muffins studded with blueberries.,american,12,15,22,EASY
+it_carbonara_smoked_beef,Spaghetti Carbonara with Smoked Beef,"Spaghetti tossed with egg, parmesan, black pepper and crisp smoked beef (pork-free).",italian,4,10,15,MEDIUM
+it_risotto_milanese,Saffron Risotto (Risotto alla Milanese),"Creamy rice with saffron, butter and parmesan.",italian,4,10,25,MEDIUM
+it_tomato_basil_soup,Tomato Basil Soup,Roasted tomato and garlic soup with basil and a little cream.,italian,4,10,30,EASY
+it_chicken_piccata,Chicken Piccata,"Pan-fried chicken cutlets in a lemon, butter and caper sauce.",italian,4,10,20,EASY
+it_chicken_cacciatore,Chicken Cacciatore,"Chicken braised with tomatoes, peppers, mushrooms and herbs.",italian,4,15,45,EASY
+it_pasta_e_fagioli,Pasta e Fagioli,Hearty bean and pasta soup with tomato and rosemary.,italian,6,10,35,EASY
+mx_chicken_tortilla_soup,Chicken Tortilla Soup,"Spiced tomato-chicken broth with beans and corn, topped with tortilla chips and avocado.",mexican,6,15,30,EASY
+mx_nachos,Loaded Nachos,"Tortilla chips baked with cheese, beans and jalapeños, served with salsa.",mexican,4,10,10,EASY
+mx_burrito_bowl,Chicken Burrito Bowl,"Rice bowl with spiced chicken, black beans, corn, salsa and avocado.",mexican,4,15,25,EASY
+mx_horchata,Horchata,Chilled rice and cinnamon drink.,mexican,6,10,0,EASY
+es_churros,Churros,Fried choux-style dough sticks rolled in cinnamon sugar.,spanish,6,15,20,MEDIUM
+es_patatas_bravas,Patatas Bravas,Crisp potato cubes with a spicy tomato sauce.,spanish,4,10,35,EASY
+gr_avgolemono,Avgolemono (Egg-Lemon Chicken Soup),Chicken and rice soup thickened with egg and lemon.,greek,6,10,35,MEDIUM
+gr_yogurt_honey_walnuts,Greek Yogurt with Honey and Walnuts,Thick yogurt topped with honey and toasted walnuts.,greek,2,3,0,EASY
+tr_mercimek_koftesi,Red Lentil Kofte (Mercimek Köftesi),"Vegan patties of red lentils and fine bulgur with spices and herbs, eaten in lettuce.",turkish,6,30,20,EASY
+tr_ayran,Ayran,Chilled salted yogurt drink.,turkish,2,3,0,EASY
+ma_chicken_bastilla,Chicken Bastilla,"Sweet-savoury pie of spiced chicken, eggs and almonds in phyllo, dusted with sugar and cinnamon.",moroccan,8,40,60,HARD
+ma_carrot_salad,Moroccan Carrot Salad,"Tender carrots dressed with cumin, garlic, lemon and parsley.",moroccan,4,10,10,EASY
+ma_mint_tea,Moroccan Mint Tea,Green tea brewed with fresh mint and sugar.,moroccan,4,3,7,EASY
+in_vegetable_pulao,Vegetable Pulao,"Rice cooked with peas, carrots and whole spices.",indian,4,10,25,EASY
+in_aloo_paratha,Aloo Paratha,Whole-wheat flatbreads stuffed with spiced potato and cooked with ghee.,indian,6,30,25,MEDIUM
+in_masala_chai,Masala Chai,"Black tea simmered with milk, ginger and cardamom.",indian,4,2,10,EASY
+in_lemon_rice,Lemon Rice,"Cooked rice tossed with turmeric, peanuts, mustard seed and lemon.",indian,4,10,10,EASY
+in_gulab_jamun,Gulab Jamun,Milk-powder dumplings fried and soaked in cardamom-rose syrup.,indian,20,25,25,MEDIUM
+in_pav_bhaji,Pav Bhaji,"Spiced mashed vegetable curry cooked with butter, served with toasted buns.",indian,4,20,30,EASY
+as_egg_drop_soup,Egg Drop Soup,Silky broth with ribbons of egg (Chinese).,asian,4,5,10,EASY
+as_garlic_green_beans,Garlic Green Beans Stir-fry,Blistered green beans with garlic and soy (Chinese).,asian,4,10,8,EASY
+as_chicken_katsu,Chicken Katsu,Breaded fried chicken cutlets with a quick sweet-savoury sauce (Japanese).,asian,4,15,15,EASY
+as_korean_fried_chicken,Korean Fried Chicken,Twice-fried crisp chicken wings tossed in a spicy-sweet glaze (Korean).,asian,4,20,30,MEDIUM
+as_mango_sticky_rice,Mango Sticky Rice,Sweet coconut sticky rice with fresh mango (Thai).,asian,4,10,25,MEDIUM
+uk_shepherds_pie,Shepherd's Pie,Minced lamb in gravy topped with mashed potato and baked (British).,international,6,20,50,EASY
+uk_fish_and_chips,Fish and Chips,Batter-fried cod with thick-cut chips (British).,international,4,20,30,MEDIUM
+uk_scones,Scones,Light baked scones served with jam and cream (British).,international,8,15,15,EASY
+fr_croque_monsieur,Croque Monsieur with Smoked Turkey,Grilled sandwich of smoked turkey and cheese topped with béchamel.,french,2,10,15,EASY
+fr_chocolate_mousse,Chocolate Mousse,Airy dark chocolate mousse (cooked-yolk method).,french,6,20,0,MEDIUM
+fr_creme_brulee,Crème Brûlée,Baked vanilla custard with a caramelised sugar crust.,french,6,15,40,MEDIUM
+fr_nicoise_salad,Salade Niçoise,"Tuna, potatoes, green beans, eggs, tomatoes and olives with a mustard vinaigrette.",french,4,20,15,EASY
+us_buttermilk_biscuits,Buttermilk Biscuits,Flaky Southern biscuits made with cold butter and buttermilk.,american,8,15,15,EASY

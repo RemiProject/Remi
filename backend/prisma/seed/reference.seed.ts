@@ -9,12 +9,17 @@ if (!url) throw new Error('DATABASE_URL is required');
 const countries = [['EG', 'Egypt'], ['SA', 'Saudi Arabia'], ['US', 'United States']];
 const languages: [string, string, boolean][] = [['ar', 'Arabic', true], ['en', 'English', false]];
 const locales = [['ar-EG', 'Arabic (Egypt)', 'ar'], ['en-US', 'English (United States)', 'en']];
-const cuisines = [['egyptian', 'Egyptian'], ['italian', 'Italian'], ['indian', 'Indian'], ['lebanese', 'Lebanese'], ['american', 'American'], ['asian', 'Asian']];
+const cuisines = [
+  ['egyptian', 'Egyptian'], ['italian', 'Italian'], ['indian', 'Indian'], ['lebanese', 'Lebanese'], ['american', 'American'], ['asian', 'Asian'],
+  ['greek', 'Greek'], ['mediterranean', 'Mediterranean'], ['french', 'French'], ['spanish', 'Spanish'], ['turkish', 'Turkish'],
+  ['moroccan', 'Moroccan'], ['gulf', 'Gulf (Khaleeji)'], ['mexican', 'Mexican'], ['international', 'International'],
+];
 // Safety categories (GLUTEN, DAIRY, TREE_NUTS, ...) and display categories live in the same table.
 const foodCategories = [
   ['VEGETABLES', 'Vegetables'], ['FRUITS', 'Fruits'], ['MEAT', 'Meat'], ['POULTRY', 'Poultry'], ['FISH', 'Fish & Seafood'],
   ['GRAINS', 'Grains'], ['LEGUMES', 'Legumes'], ['SWEETS', 'Sweets'], ['BEVERAGES', 'Beverages'], ['OILS', 'Oils & Fats'],
   ['DAIRY', 'Dairy'], ['GLUTEN', 'Gluten'], ['EGGS', 'Eggs'], ['TREE_NUTS', 'Tree Nuts'], ['PEANUTS', 'Peanuts'], ['SOY', 'Soy'],
+  ['SPICES', 'Spices, Herbs & Seasonings'], ['CONDIMENTS', 'Condiments, Sauces & Baking Aids'], ['SEEDS', 'Seeds'], ['SESAME', 'Sesame'],
 ];
 
 const client = new pg.Client({ connectionString: url });

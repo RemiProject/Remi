@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Pressable, View, type TextInput } from 'react-native';
+import { Pressable, View, type TextInputInstance } from 'react-native';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/core';
 import { AuthAction, AuthInput, AuthLink, AuthNotice, AuthShell, AuthSocial } from '@/components/auth-ui';
@@ -25,7 +25,7 @@ export default function AuthScreen({ signup = false }: { signup?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [registered, setRegistered] = useState(false);
   const submitting = useRef(false);
-  const inputs = useRef<Partial<Record<keyof AuthDraft, TextInput | null>>>({});
+  const inputs = useRef<Partial<Record<keyof AuthDraft, TextInputInstance | null>>>({});
   const country = phoneCountries.find(entry => entry.code === countryCode)!;
   function change(field: keyof AuthDraft, value: string) {
     setDraft(previous => ({ ...previous, [field]: value }));

@@ -8,7 +8,7 @@ Phases 0–10 core flows are implemented. Phase 11 operational hardening is unde
 
 The monorepo is organized as `backend/`, `frontend/`, and `mobile-app/`. The latter two folders are placeholders for the teams building those clients. The backend API contract and example operations are documented in `GRAPHQL_ENDPOINTS.md`.
 
-Catalog seed data is starter data. Nutrition values are intentionally not populated until a trusted source is selected and reviewed. Do not treat the starter catalog as complete production data.
+The seed catalog is starter data. The development CSV dataset now includes nutrition profiles sourced from USDA FoodData Central, products, safety-category tags, and recipes. These records passed the importer checks but still need specialist review before production use.
 
 ## Seed an existing account's Kitchen (development only)
 
@@ -189,13 +189,12 @@ Migrations `0020_notifications_devices.sql` through `0022_notification_expiry_in
 
 The API enforces GraphQL depth and complexity limits; introspection is disabled unless explicitly enabled. Prometheus-compatible latency and error metrics are available at `/health/metrics` when `METRICS_ENABLED=true` and a 32-character `METRICS_TOKEN` are configured. Operational artifacts are under `docs/phase11`. The runtime database role is a non-superuser.
 
-Verified locally: `pnpm phase11:rls-audit`, `pnpm phase11:query-baseline`, and `pnpm phase11:backup-restore` pass against isolated test databases. Load and soak testing, point-in-time recovery validation, and final access review for identity, sessions, memberships, and outbox data remain open. Docker was unavailable during the latest local check; Mailpit and S3 were not running, so those integrations need environment-backed verification.
+Verified locally: `pnpm phase11:rls-audit`, `pnpm phase11:query-baseline`, and `pnpm phase11:backup-restore` pass against isolated test databases. Docker is installed and running. The S3 and Mailpit Compose services are up; PostgreSQL is using the local Windows service on port 5432 because the Compose database cannot bind that occupied port. Load and soak testing, point-in-time recovery validation, final access review for identity, sessions, memberships, and outbox data, and end-to-end email delivery checks remain open.
 
 For local semantic search development, install the optional Python runtime with `python -m venv .venv` and `.\.venv\Scripts\python.exe -m pip install -r requirements-embeddings.txt`, then run `pnpm embeddings:local`. It serves `intfloat/multilingual-e5-small` on `127.0.0.1:8088`; set `EMBEDDING_API_URL=http://127.0.0.1:8088/v1/embeddings` and `EMBEDDING_MODEL=intfloat/multilingual-e5-small` in `.env`. Model weights are cached under `.local-models` and excluded from Git.
 
 ## Notes
 * SQL in `prisma/migrations` is the source of truth; `prisma/schema.prisma` mirrors it (refresh with `pnpm db:pull`).
-* Latest local verification: `pnpm lint`, `pnpm typecheck`, `pnpm test` (58 tests), `pnpm build`, and `pnpm db:validate` passed. Phase 5, 6, 7, 10, and safety-category integration checks passed on the dedicated test database.
-* API verification: `/health/live`, `/health/ready`, and a GraphQL catalog search responded successfully. The local catalog currently has 336 foods and 37 safety-category memberships; nutrition, product, and recipe data still need reviewed data entry.
-* Data-entry CSV validation passes in dry-run mode. See `data/README.md` and `data/` for the templates. Nutrition values must come from an approved, trusted source.
-
+* Latest local verification: `pnpm lint`, `pnpm typecheck`, `pnpm test` (65 tests), `pnpm build`, `pnpm db:validate`, the full `pnpm data:check`, and `pnpm data:import` passed. The data import ran transactionally against the local development database.
+* API verification after import: `/health/live` and `/health/ready` returned 200, and GraphQL returned tomato with its imported nutrition values. The local development database contains 851 foods, 676 nutrition profiles, 79 products, and 401 recipes. All 1,252 food and recipe search documents now have 384-dimensional embeddings from the local model. The imported records remain subject to specialist review.
+* The supported handoff dataset is in `data/`; unsupported source tables are preserved in `data/pending-import/` until an importer is available. See `data/README.md` for counts and review status.

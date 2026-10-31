@@ -1,2 +1,1386 @@
-# Steps in order: step_number 1, 2, 3 ... per recipe_key.
+﻿# Remi AI development dataset. Steps in order.
 recipe_key,step_number,instruction,duration_min
+eg_mesh_salad,1,Dice the tomatoes and chili finely.,3
+eg_mesh_salad,2,Stir into the mish with the olive oil; serve a little at a time with bread.,2
+eg_asal_tehina,1,Spoon the molasses into a shallow dish.,1
+eg_asal_tehina,2,"Pour the tahini on top, swirl lightly and serve with bread.",2
+eg_couscous_sweet,1,"Pour boiling water over the couscous, cover and leave 5 minutes.",6
+eg_couscous_sweet,2,Fluff with the melted butter.,3
+eg_couscous_sweet,3,Mix in sugar and raisins and top with coconut and nuts.,3
+eg_ashura,1,Use wheat that has been soaked overnight and boiled until very tender.,
+eg_ashura,2,"Simmer the cooked wheat in the milk with the sugar for 20 minutes, stirring.",20
+eg_ashura,3,Thicken with the corn starch dissolved in a little cold milk and boil 2 minutes; add vanilla.,5
+eg_ashura,4,"Pour into a dish, cool and decorate with raisins, nuts and coconut.",5
+eg_kunafa,1,Boil 350 g sugar with the water and lemon juice for 10 minutes to make syrup; cool.,12
+eg_kunafa,2,"Cook the milk, cream, corn starch and remaining sugar, stirring, into a thick cream; cool.",10
+eg_kunafa,3,Pull the kunafa apart and rub with melted ghee.,8
+eg_kunafa,4,"Press half into a tray, spread the cream and cover with the rest.",5
+eg_kunafa,5,Bake at 200 °C until deep golden; pour over the syrup and top with pistachios.,40
+eg_om_ali,1,Bake the puff pastry until golden and break into pieces.,15
+eg_om_ali,2,"Spread the pastry, nuts, raisins and coconut in an ovenproof dish.",5
+eg_om_ali,3,Heat the milk with sugar and vanilla and pour over.,5
+eg_om_ali,4,Top with the cream and bake at 220 °C until bubbling and browned.,20
+eg_ghorayeba,1,Beat the ghee with the powdered sugar until white and fluffy.,8
+eg_ghorayeba,2,Add the vanilla and fold in the flour to a soft dough.,5
+eg_ghorayeba,3,Shape into rings or balls and press a pistachio on top.,10
+eg_ghorayeba,4,Bake at 160 °C until set but still pale.,15
+eg_khoshaf,1,Rinse the dried fruits.,5
+eg_khoshaf,2,Dissolve the sugar in the water and add the fruit.,3
+eg_khoshaf,3,Soak in the refrigerator for at least 8 hours; add nuts before serving.,
+eg_creme_caramel,1,Melt 100 g sugar with the water to a golden caramel and pour into a mould.,8
+eg_creme_caramel,2,Warm the milk; whisk the eggs with remaining sugar and vanilla and stir in the milk.,5
+eg_creme_caramel,3,Strain into the mould and bake in a water bath at 160 °C until set.,45
+eg_creme_caramel,4,Chill well and turn out.,
+eg_balah_el_sham,1,"Boil 300 ml water with the butter, add the flour at once and stir until the dough leaves the pan.",5
+eg_balah_el_sham,2,Cool slightly and beat in the eggs one at a time with the vanilla.,8
+eg_balah_el_sham,3,"Make a syrup from the sugar, remaining water and lemon; cool.",10
+eg_balah_el_sham,4,"Pipe fingers into warm oil, raise the heat and fry until golden.",20
+eg_balah_el_sham,5,Drain and dip in the cold syrup.,3
+eg_halawet_semid,1,Toast the semolina in butter until golden.,10
+eg_halawet_semid,2,Heat the milk with sugar and add carefully (it will spit); stir until thick.,8
+eg_halawet_semid,3,Press into a mould and decorate with nuts.,3
+eg_feteer_asal,1,Warm the feteer in the oven.,5
+eg_feteer_asal,2,"Cut into pieces and serve with honey, cream or molasses.",2
+eg_karkade,1,Rinse the hibiscus.,2
+eg_karkade,2,"Bring the water to a boil, add the hibiscus and simmer 5 minutes; steep 15 minutes.",20
+eg_karkade,3,"Strain, sweeten with the sugar and serve hot or chilled.",3
+eg_sobia,1,Soak the rice in the water for 2 hours.,
+eg_sobia,2,Blend the rice and water with the coconut until very smooth and strain.,10
+eg_sobia,3,"Mix with cold milk, sugar and vanilla and chill well.",5
+eg_lemon_mint,1,Peel two of the lemons; quarter all four and remove seeds.,5
+eg_lemon_mint,2,"Blend with mint, sugar and water, strain and serve over ice.",5
+eg_shai_bel_naana,1,Brew strong tea.,5
+eg_shai_bel_naana,2,Pour over mint leaves in glasses and sweeten.,1
+eg_mango_milk,1,Peel and cube the mangoes.,4
+eg_mango_milk,2,Blend with milk and sugar until smooth; serve cold.,2
+eg_guava_milk,1,Cut the guavas and blend with milk and sugar.,4
+eg_guava_milk,2,Strain to remove seeds and serve cold.,3
+eg_ful_medames,1,Put the fava beans and their liquid in a pot with the water and bring to a simmer over medium heat.,10
+eg_ful_medames,2,"Mash the beans lightly with a fork or masher, leaving some whole.",2
+eg_ful_medames,3,Crush the garlic with the salt and cumin and stir it into the beans with the lemon juice.,3
+eg_ful_medames,4,"Spoon into bowls, drizzle with olive oil and top with diced tomato and chopped parsley if using.",2
+eg_ful_zeit_har,1,Heat the fava beans with the water until simmering.,10
+eg_ful_zeit_har,2,"Mash coarsely and season with salt, cumin and lemon juice.",3
+eg_ful_zeit_har,3,Serve topped with linseed oil and sliced chili.,2
+eg_ful_eskandarani,1,"Dice the onion, pepper and tomatoes; mince the garlic and chili.",8
+eg_ful_eskandarani,2,"Fry the onion and pepper in the oil until soft, then add garlic and chili for 1 minute.",7
+eg_ful_eskandarani,3,Add the tomatoes and cook until saucy.,5
+eg_ful_eskandarani,4,"Stir in the fava beans with their liquid, cumin, salt and black pepper; simmer and mash lightly.",8
+eg_ful_eskandarani,5,Finish with lemon juice and serve hot.,1
+eg_ful_tahina,1,Heat the beans with half the water and mash.,10
+eg_ful_tahina,2,"Whisk the tahini with lemon juice, crushed garlic and the remaining water until smooth.",3
+eg_ful_tahina,3,Stir most of the tahini into the beans with cumin and salt; top with the rest and the olive oil.,2
+eg_taameya,1,"Soak the dried split fava beans in plenty of water overnight, then drain very well.",
+eg_taameya,2,"Mince the beans with the onion, leek, herbs, garlic and chili in a food processor until a fine green paste forms.",15
+eg_taameya,3,"Mix in the cumin, ground coriander and salt; rest the mixture in the refrigerator for 30 minutes.",
+eg_taameya,4,"Just before frying, stir in the baking soda.",1
+eg_taameya,5,Shape into flat discs and press one side into sesame seeds if using.,10
+eg_taameya,6,"Deep-fry in hot oil (about 175 °C) in batches until deep golden, 3 to 4 minutes per batch.",15
+eg_taameya,7,Drain on paper and serve hot with tahini sauce and bread.,2
+eg_beid_basterma,1,Melt the butter in a frying pan and fry the basterma slices for 1 minute until fragrant.,2
+eg_beid_basterma,2,Crack the eggs over the basterma and cook until the whites set.,5
+eg_beid_basterma,3,Season with pepper (basterma is already salty) and serve.,1
+eg_beid_tamatem,1,"Dice the onion, pepper and tomatoes.",5
+eg_beid_tamatem,2,"Soften the onion and pepper in the oil, then add the tomatoes and cook down to a thick sauce.",8
+eg_beid_tamatem,3,"Pour in the beaten eggs seasoned with salt, pepper and cumin and stir gently until just set.",4
+eg_gebna_tamatem,1,Mash the cheese with a fork.,3
+eg_gebna_tamatem,2,Dice the tomatoes and chili finely and fold into the cheese.,5
+eg_gebna_tamatem,3,"Dress with olive oil, lemon juice and dried mint.",2
+eg_shakshouka,1,"Chop the onion, pepper and tomatoes; slice the garlic.",8
+eg_shakshouka,2,"Fry the onion and pepper in olive oil until soft, then add garlic, cumin and paprika.",6
+eg_shakshouka,3,Add tomatoes and tomato paste; simmer until thick.,8
+eg_shakshouka,4,"Make six wells, crack in the eggs, cover and cook until the whites set.",6
+eg_shakshouka,5,Season and serve in the pan.,1
+eg_batates_mehamara,1,Peel the potatoes and cut into thin slices or fingers; rinse and dry thoroughly.,12
+eg_batates_mehamara,2,Fry in hot oil in batches until golden and crisp.,18
+eg_batates_mehamara,3,Drain and sprinkle with salt and cumin.,2
+eg_eggah,1,Grate the onion and chop the herbs finely.,6
+eg_eggah,2,"Beat the eggs with flour, onion, herbs and spices.",4
+eg_eggah,3,"Pour into a hot oiled pan, cover and cook on low heat until set underneath.",10
+eg_eggah,4,"Flip and cook the second side, then cut into wedges.",5
+eg_salata_baladi,1,"Dice the tomatoes, cucumbers, onion and pepper very small.",12
+eg_salata_baladi,2,Chop the parsley and chili.,3
+eg_salata_baladi,3,"Dress with lemon juice, vinegar, oil, salt and cumin just before serving.",2
+eg_tehina_sauce,1,Whisk the tahini with lemon juice and vinegar; it will thicken.,2
+eg_tehina_sauce,2,"Add the water gradually, whisking until smooth and pourable.",3
+eg_tehina_sauce,3,"Stir in crushed garlic, cumin, salt and chopped parsley.",3
+eg_baba_ghanoug,1,"Char the whole eggplants over a gas flame or under the grill, turning, until collapsed and soft.",25
+eg_baba_ghanoug,2,"Cool slightly, peel and drain the flesh in a colander.",10
+eg_baba_ghanoug,3,"Mash the flesh with tahini, crushed garlic, lemon juice, cumin and salt.",5
+eg_baba_ghanoug,4,Serve drizzled with olive oil and parsley.,1
+eg_salatet_zabadi,1,Grate or finely dice the cucumber and squeeze out excess water.,6
+eg_salatet_zabadi,2,"Stir into the yogurt with crushed garlic, dried mint and salt; chill before serving.",4
+eg_bitingan_mekhalel,1,"Slice the eggplants into rounds, salt them lightly and leave for 10 minutes; pat dry.",12
+eg_bitingan_mekhalel,2,Fry in hot oil until golden on both sides; drain on paper.,18
+eg_bitingan_mekhalel,3,"Mix crushed garlic, chopped chili and pepper, vinegar and cumin.",4
+eg_bitingan_mekhalel,4,Layer the eggplant in a dish and pour the dressing over; rest at least 30 minutes.,
+eg_beet_salad,1,"Boil the beetroots in their skins until tender, about 45 minutes.",45
+eg_beet_salad,2,"Cool, peel and dice; slice the onion thinly.",8
+eg_beet_salad,3,"Toss with vinegar, oil, salt and cumin.",2
+eg_potato_salad,1,Boil the potatoes in salted water until tender; peel and cube.,22
+eg_potato_salad,2,Chop the onion and parsley.,5
+eg_potato_salad,3,"Toss the warm potatoes with the onion, parsley, lemon juice, olive oil, salt, black pepper and cumin.",2
+eg_renga_salad,1,Skin and bone the herring and flake the flesh.,12
+eg_renga_salad,2,"Dice the tomatoes, onion and pepper.",6
+eg_renga_salad,3,"Mix with the herring, lemon juice, oil and pepper.",2
+eg_lupini_salad,1,Rinse the lupini beans if they are brined.,2
+eg_lupini_salad,2,"Toss with lemon juice, cumin, chili and a little salt.",3
+eg_hummus_tehina,1,"Blend the chickpeas with tahini, lemon juice, garlic, cumin and salt.",5
+eg_hummus_tehina,2,Add water gradually until very smooth.,3
+eg_hummus_tehina,3,Spread on a plate and finish with olive oil and paprika.,1
+eg_garlic_vinegar_dakka,1,Crush the garlic with the salt.,3
+eg_garlic_vinegar_dakka,2,"Fry the garlic briefly in the oil until fragrant, not brown.",1
+eg_garlic_vinegar_dakka,3,"Add vinegar, water, lemon juice and cumin; bring to a boil and remove from heat.",2
+eg_koshari_tomato_sauce,1,Blend or grate the tomatoes.,4
+eg_koshari_tomato_sauce,2,"Fry crushed garlic in oil for 1 minute, add tomato paste and cook 2 minutes.",3
+eg_koshari_tomato_sauce,3,"Add the tomatoes, water, cumin, chili and salt; simmer until thickened.",15
+eg_koshari_tomato_sauce,4,Stir in the vinegar at the end.,1
+eg_taleya,1,Crush the garlic.,3
+eg_taleya,2,"Fry the garlic in the ghee until pale golden, add the ground coriander and stir 30 seconds; use immediately.",4
+eg_bechamel,1,"Melt the butter, stir in the flour and cook for 2 minutes without browning.",3
+eg_bechamel,2,"Whisk in the milk gradually and cook, whisking, until thick and smooth.",9
+eg_bechamel,3,"Season with salt, white pepper and nutmeg.",1
+eg_torshi_lift,1,Peel the turnips and beetroot and cut into wedges.,12
+eg_torshi_lift,2,Pack into a clean jar with the garlic and chilies.,5
+eg_torshi_lift,3,"Dissolve the salt in the water, add the vinegar and pour over the vegetables to cover.",3
+eg_torshi_lift,4,Close the jar and keep at room temperature for about one week before eating; then refrigerate.,
+eg_fried_cauliflower,1,Cut the cauliflower into florets and boil in salted water for 5 minutes; drain well.,10
+eg_fried_cauliflower,2,"Beat the eggs with flour, crushed garlic, spices and salt into a thick batter.",4
+eg_fried_cauliflower,3,Dip the florets in the batter and fry in hot oil until golden.,20
+eg_fried_cauliflower,4,Drain on paper and serve with lemon or tahini.,1
+eg_shorbet_ads,1,"Rinse the lentils; roughly chop the onion, carrots, tomato and potato.",8
+eg_shorbet_ads,2,"Put the lentils, vegetables, garlic and water in a pot, bring to a boil and skim.",10
+eg_shorbet_ads,3,Simmer covered until the lentils and vegetables are very soft.,30
+eg_shorbet_ads,4,"Blend until smooth, season with cumin, salt and pepper and stir in the butter.",4
+eg_shorbet_ads,5,Serve with lemon wedges and toasted bread.,1
+eg_shorbet_shareya,1,"Toast the vermicelli in the butter, stirring, until golden.",4
+eg_shorbet_shareya,2,"Add water, stock cube and tomato paste; bring to a boil.",8
+eg_shorbet_shareya,3,Simmer until the vermicelli is tender; season and garnish with parsley.,12
+eg_chicken_soup,1,"Wash the chicken, put it in a pot with the water and bring to a boil; skim the foam well.",15
+eg_chicken_soup,2,"Add the onion, bay leaf, cardamom, cinnamon stick and peppercorns.",3
+eg_chicken_soup,3,Simmer gently until the chicken is cooked through.,45
+eg_chicken_soup,4,"Remove the chicken; add diced carrot, celery and tomato and simmer until tender.",15
+eg_chicken_soup,5,Season with salt and serve the broth; use the chicken for another dish.,2
+eg_molokhia_chicken,1,"Boil the chicken with onion, bay leaf and cardamom, skimming, to make broth; reserve the chicken.",40
+eg_molokhia_chicken,2,"Strip the molokhia leaves from the stems, wash, dry well and mince very finely with a mezzaluna.",20
+eg_molokhia_chicken,3,"Bring 1.5 litres of broth to a boil, season and add the molokhia; stir and bring back just to the boil.",5
+eg_molokhia_chicken,4,"Fry crushed garlic in ghee until golden, add ground coriander and pour sizzling into the pot.",4
+eg_molokhia_chicken,5,Serve at once with rice and the chicken (browned in the oven if liked).,2
+eg_molokhia_rabbit,1,Rub the rabbit pieces with lemon and salt and rinse.,8
+eg_molokhia_rabbit,2,"Simmer the rabbit with onion, bay leaf and cardamom, skimming, until tender.",70
+eg_molokhia_rabbit,3,Mince the molokhia finely.,20
+eg_molokhia_rabbit,4,"Boil 1.5 litres of the broth, add the molokhia and bring back to the boil.",5
+eg_molokhia_rabbit,5,Add the garlic and coriander ta'leya fried in ghee and serve with rice and the rabbit. Season with salt and black pepper.,5
+eg_molokhia_shrimp,1,Peel the shrimp; simmer the shells with onion in the water for 15 minutes and strain.,20
+eg_molokhia_shrimp,2,Mince the molokhia finely.,15
+eg_molokhia_shrimp,3,Fry the shrimp with half the garlic in oil for 2 minutes and set aside.,3
+eg_molokhia_shrimp,4,"Boil the stock, add molokhia and the shrimp, and bring back just to the boil.",5
+eg_molokhia_shrimp,5,Fry the remaining garlic with coriander and cumin and pour over; serve with rice. Season with salt.,4
+eg_dried_molokhia,1,"Rub the dried molokhia between the palms to a powder, removing any stems.",5
+eg_dried_molokhia,2,"Bring the water and stock cube to a boil and whisk in the molokhia; simmer 10 minutes, whisking.",12
+eg_dried_molokhia,3,Fry garlic and coriander in ghee and add to the pot; season and serve.,5
+eg_bisara,1,Soak the split fava beans overnight and drain.,
+eg_bisara,2,Cook the beans with half the garlic and the water until very soft.,45
+eg_bisara,3,"Add the chopped herbs, leek, molokhia and chili and simmer 10 minutes.",10
+eg_bisara,4,"Blend until smooth and season with cumin, coriander and salt.",4
+eg_bisara,5,Fry the sliced onions in oil until dark golden and spoon over the bissara with some of the oil.,15
+eg_shorbet_khodar,1,Dice all the vegetables.,12
+eg_shorbet_khodar,2,"Soften the onion in butter, add tomato and tomato paste and cook 3 minutes.",6
+eg_shorbet_khodar,3,"Add water, stock cube, carrots and potato; simmer 15 minutes.",15
+eg_shorbet_khodar,4,Add zucchini and peas and cook until tender; season.,12
+eg_freekeh_soup,1,Pick over and rinse the freekeh.,5
+eg_freekeh_soup,2,"Soften the chopped onion in butter, add the freekeh and stir 2 minutes.",6
+eg_freekeh_soup,3,Add water and stock cube and simmer until the freekeh is tender.,40
+eg_freekeh_soup,4,Season and serve with lemon.,1
+eg_shorbet_tomatem,1,"Chop the tomatoes, onion and garlic.",8
+eg_shorbet_tomatem,2,"Soften onion and garlic in butter, add tomatoes and cook 5 minutes.",7
+eg_shorbet_tomatem,3,"Add water, stock cube and rice and simmer until the rice is very soft.",18
+eg_shorbet_tomatem,4,Blend smooth and season.,3
+eg_chicken_vermicelli_soup,1,Dice the chicken and vegetables.,10
+eg_chicken_vermicelli_soup,2,"Toast the vermicelli in butter, remove; brown the chicken lightly in the same pot.",8
+eg_chicken_vermicelli_soup,3,Add water and vegetables and simmer 15 minutes.,15
+eg_chicken_vermicelli_soup,4,"Return the vermicelli, cook until tender and season; serve with lemon.",8
+eg_kersha_soup,1,Scrub the tripe well with lemon and salt and rinse several times.,20
+eg_kersha_soup,2,"Blanch for 10 minutes, discard the water and cut into pieces.",15
+eg_kersha_soup,3,"Simmer in fresh water with onions, bay leaf and cardamom until very tender, skimming.",150
+eg_kersha_soup,4,"Fry crushed garlic, add vinegar and cumin and stir into the pot; season with lemon, salt and pepper.",8
+eg_roz_shareya,1,Rinse the rice and drain well.,5
+eg_roz_shareya,2,Toast the vermicelli in the ghee until deep golden.,4
+eg_roz_shareya,3,Add the rice and stir to coat; add boiling water and salt.,3
+eg_roz_shareya,4,Cover and cook on very low heat until the water is absorbed; rest 5 minutes off the heat.,20
+eg_roz_abyad,1,Rinse and drain the rice.,5
+eg_roz_abyad,2,"Coat in melted ghee for 2 minutes, add boiling salted water.",3
+eg_roz_abyad,3,"Cover and cook on low heat until absorbed, then rest 5 minutes.",20
+eg_koshari,1,Slice the onions thinly and fry in the oil until dark golden and crisp; drain and keep the oil.,20
+eg_koshari,2,"Boil the brown lentils in salted water until just tender, about 20 minutes; drain.",20
+eg_koshari,3,"Fry the vermicelli in 2 tablespoons of the onion oil, add the rice, lentils, cumin and salt, then boiling water; cover and cook 20 minutes.",25
+eg_koshari,4,Boil the macaroni in salted water until al dente and drain.,12
+eg_koshari,5,"For the sauce, fry half the garlic in onion oil, add tomato paste, grated tomatoes, chili and salt; simmer 15 minutes and add 2 tablespoons vinegar.",18
+eg_koshari,6,"For the dakka, crush the remaining garlic with cumin, add the ground coriander, the rest of the vinegar and a little water and bring to a boil.",4
+eg_koshari,7,"Layer rice-lentils, macaroni and chickpeas; top with sauce, dakka and crispy onions.",5
+eg_mudardara,1,Cook the lentils in 700 ml water for 15 minutes.,15
+eg_mudardara,2,Fry the sliced onions in oil until deep brown; remove half for topping.,15
+eg_mudardara,3,"Add the rinsed rice, cumin, salt and the lentils with their liquid (topped up to cover by 1 cm); cook covered on low until done.",25
+eg_mudardara,4,Serve topped with the reserved onions.,1
+eg_roz_bel_khalta,1,Boil the gizzards until tender (about 30 minutes) and chop; dice the livers.,30
+eg_roz_bel_khalta,2,"Fry the chopped onion in half the ghee, add the beef and brown; add livers and gizzards and cook 5 minutes with the spices.",12
+eg_roz_bel_khalta,3,"Add rinsed rice, stir, then pour in boiling water with the stock cube; cover and cook on low for 20 minutes.",22
+eg_roz_bel_khalta,4,Toast the almonds and pine nuts in the remaining ghee; plump the raisins in the same pan.,5
+eg_roz_bel_khalta,5,Fluff the rice and scatter the nuts and raisins on top.,2
+eg_roz_moammar,1,Heat the oven to 180 °C and butter a clay or ovenproof dish.,5
+eg_roz_moammar,2,"Bring milk, water and stock cube to a boil.",5
+eg_roz_moammar,3,"Put the rinsed rice and salt in the dish, pour over the hot liquid and dot with butter.",3
+eg_roz_moammar,4,"Bake uncovered for 45 minutes, pour over the cream and bake 25 more minutes until browned on top.",70
+eg_roz_bel_shabat,1,Chop the onion and dill.,6
+eg_roz_bel_shabat,2,"Soften the onion in oil, add the rice and dill and stir 2 minutes.",5
+eg_roz_bel_shabat,3,"Add boiling salted water, cover and cook on low until done.",20
+eg_roz_ahmar,1,Grate the tomatoes; chop the onion.,6
+eg_roz_ahmar,2,"Fry the onion in oil, add tomato paste and tomatoes and cook 5 minutes.",8
+eg_roz_ahmar,3,"Add rice, cumin, salt and water; cover and cook on low until tender.",22
+eg_roz_sayadeya,1,Simmer the fish trimmings (or one small fish) in the water for 20 minutes and strain to make stock.,20
+eg_roz_sayadeya,2,Fry the sliced onions in oil until very dark brown but not burnt.,20
+eg_roz_sayadeya,3,"Add the rice and spices and stir, then 700 ml hot fish stock; cover and cook on low until done.",22
+eg_freekeh_chicken,1,"Boil the chicken with one onion, cardamom and bay leaf to make broth; reserve the chicken.",40
+eg_freekeh_chicken,2,"Fry the second onion in butter, add rinsed freekeh and stir 3 minutes.",6
+eg_freekeh_chicken,3,"Add 900 ml broth, cover and cook until the freekeh is tender.",35
+eg_freekeh_chicken,4,Place the chicken on top and brown in a hot oven for 15 minutes. Season with salt and black pepper.,15
+eg_fattah,1,"Boil the beef with onion, bay leaf and cardamom, skimming, until tender; keep the broth.",100
+eg_fattah,2,Cut the bread into pieces and toast in the oven with a little ghee until crisp.,10
+eg_fattah,3,Cook the rice with ghee and 550 ml broth.,20
+eg_fattah,4,"Fry half the garlic in ghee, add vinegar and boil; separately fry the rest of the garlic, add tomato paste and grated tomatoes, and simmer to a sauce.",15
+eg_fattah,5,"Moisten the bread with hot broth and the garlic vinegar, top with rice, then tomato sauce and the beef. Season the broth with salt and black pepper before using it.",5
+eg_roz_bel_bisella,1,"Melt the butter, add peas and stir 2 minutes.",3
+eg_roz_bel_bisella,2,"Add rinsed rice, boiling water and salt; cover and cook on low until done.",22
+eg_bulgur_pilaf,1,"Fry the onion, add tomatoes and tomato paste and cook 5 minutes.",8
+eg_bulgur_pilaf,2,"Add bulgur, salt and boiling water; cover and cook on low for 15 minutes; rest 5 minutes.",20
+eg_roz_bel_laban,1,Cook the rinsed rice in the water until absorbed.,10
+eg_roz_bel_laban,2,"Add most of the milk and simmer, stirring often, until creamy.",25
+eg_roz_bel_laban,3,Dissolve the corn starch in the remaining cold milk and stir in with the sugar; boil 2 minutes.,4
+eg_roz_bel_laban,4,"Add vanilla, pour into bowls and chill; top with cinnamon or nuts.",3
+eg_belila,1,"Soak the wheat overnight and boil in fresh water until the grains split and are tender (about 2 hours), or use pre-cooked wheat.",
+eg_belila,2,Heat the milk with the sugar.,6
+eg_belila,3,"Spoon the wheat into bowls, pour over hot milk and top with raisins, coconut, nuts and cinnamon.",4
+eg_mahshi_kousa,1,"Cut the zucchini into 8 cm lengths and core with a corer, leaving a thin wall.",25
+eg_mahshi_kousa,2,"Mix the rinsed rice with grated tomato, finely chopped onion and herbs, half the tomato paste, oil and spices.",12
+eg_mahshi_kousa,3,Fill the zucchini three-quarters full to leave room for the rice to swell.,20
+eg_mahshi_kousa,4,Arrange upright in a pot; pour over water with the stock cube and remaining tomato paste to come halfway up.,5
+eg_mahshi_kousa,5,"Bring to a boil, cover and simmer on low until the rice is tender.",45
+eg_mahshi_bitingan,1,"Core the small eggplants, leaving a thin wall; soak briefly in salted water.",25
+eg_mahshi_bitingan,2,"Make the filling from rice, grated tomato, chopped onion, garlic, herbs, half the tomato paste, oil and spices.",12
+eg_mahshi_bitingan,3,Stuff the eggplants three-quarters full.,20
+eg_mahshi_bitingan,4,"Arrange in a pot, add water mixed with the remaining tomato paste and salt.",5
+eg_mahshi_bitingan,5,Cover and simmer until tender.,45
+eg_mahshi_felfel,1,Cut the tops off the peppers and remove the seeds; keep the tops.,15
+eg_mahshi_felfel,2,"Mix the filling: rice, grated tomato, chopped onion and herbs, half the tomato paste, oil and spices.",12
+eg_mahshi_felfel,3,Fill the peppers three-quarters full and replace the tops.,15
+eg_mahshi_felfel,4,"Stand them in a pot, add water with the remaining tomato paste and salt.",5
+eg_mahshi_felfel,5,Cover and simmer until the rice is tender.,45
+eg_mahshi_waraa_enab,1,Blanch the vine leaves in boiling water for 1 to 2 minutes and drain; trim the stems.,10
+eg_mahshi_waraa_enab,2,"Mix the rice with grated tomato, finely chopped onion and herbs, oil and spices.",15
+eg_mahshi_waraa_enab,3,"Place a teaspoon of filling on each leaf (shiny side down) and roll tightly, tucking in the sides.",60
+eg_mahshi_waraa_enab,4,"Line the pot with the lamb chops or extra leaves, arrange the rolls in tight layers and weigh down with a plate.",8
+eg_mahshi_waraa_enab,5,Add water with the stock cube and lemon juice to just cover; simmer covered on low until the rice is cooked.,55
+eg_mahshi_koromb,1,"Core the cabbage and boil whole, peeling off the leaves as they soften; cut large leaves in half and trim the ribs.",20
+eg_mahshi_koromb,2,"Mix the rice with grated tomato, chopped onion, herbs, half the tomato paste, oil, cumin and caraway.",12
+eg_mahshi_koromb,3,Roll each leaf around a line of filling into a finger-thick roll.,45
+eg_mahshi_koromb,4,Pack in a pot with the garlic cloves between layers; add water with the remaining tomato paste and salt.,8
+eg_mahshi_koromb,5,"Weigh down with a plate, cover and simmer until tender.",55
+eg_mahshi_tomatem,1,Slice the tops off the tomatoes and scoop out the pulp; chop the pulp.,15
+eg_mahshi_tomatem,2,"Mix the rice with half the pulp, onion, herbs, oil and seasoning.",8
+eg_mahshi_tomatem,3,"Fill the tomatoes, replace the tops and arrange in a baking dish.",8
+eg_mahshi_tomatem,4,"Add the remaining pulp and water, cover with foil and bake at 190 °C until the rice is tender.",40
+eg_mahshi_mix,1,"Core the zucchini and eggplant, deseed the peppers and blanch the vine leaves.",30
+eg_mahshi_mix,2,"Prepare one filling of rice, grated tomato, chopped onion, herbs, half the tomato paste, oil and spices.",15
+eg_mahshi_mix,3,Stuff the vegetables three-quarters full and roll the vine leaves.,45
+eg_mahshi_mix,4,Arrange vine leaves at the bottom and the vegetables upright on top.,8
+eg_mahshi_mix,5,Add water with stock cubes and remaining tomato paste; cover and simmer until all is tender.,55
+eg_mahshi_basal,1,Cut a slit to the centre of each onion and boil 8 minutes until the layers separate.,12
+eg_mahshi_basal,2,"Prepare the rice filling with grated tomato, herbs, half the tomato paste, oil and seasoning.",10
+eg_mahshi_basal,3,Roll a little filling inside each onion layer.,35
+eg_mahshi_basal,4,"Pack into a pot, add water with remaining tomato paste and pomegranate molasses.",5
+eg_mahshi_basal,5,Cover and simmer until tender.,45
+eg_mahshi_kousa_lahma,1,Core the zucchini.,25
+eg_mahshi_kousa_lahma,2,"Mix the beef with rice, grated onion, allspice, salt and pepper.",8
+eg_mahshi_kousa_lahma,3,Stuff the zucchini loosely.,15
+eg_mahshi_kousa_lahma,4,"Make a sauce of garlic fried in oil with tomato paste, grated tomatoes and water.",8
+eg_mahshi_kousa_lahma,5,"Lay the zucchini in the sauce, cover and simmer until tender.",45
+eg_bamia_lahma,1,Simmer the beef cubes with onion in the water until tender; keep the broth.,70
+eg_bamia_lahma,2,Trim the okra caps.,15
+eg_bamia_lahma,3,"Fry garlic and coriander in ghee, add tomato paste and grated tomatoes and cook 5 minutes.",8
+eg_bamia_lahma,4,"Add okra, beef and 500 ml broth; simmer until the okra is tender (or bake in a clay pot).",25
+eg_bamia_lahma,5,Season and add lemon juice if liked.,1
+eg_fasolia_khadra,1,Simmer the beef with half the onion until tender.,60
+eg_fasolia_khadra,2,Top and cut the beans; dice the carrots.,15
+eg_fasolia_khadra,3,"Fry the remaining onion and garlic, add tomato paste and tomatoes and cook 5 minutes.",8
+eg_fasolia_khadra,4,"Add beans, carrots, beef and broth; simmer until tender. Season with salt and black pepper.",25
+eg_bisella_gazar,1,Simmer the beef with half the onion until tender.,60
+eg_bisella_gazar,2,Dice the carrots.,5
+eg_bisella_gazar,3,"Fry the remaining onion, add tomato paste and grated tomatoes and cook 5 minutes.",8
+eg_bisella_gazar,4,"Add peas, carrots, beef and broth and simmer until tender. Season with salt and black pepper.",20
+eg_batatis_lahma,1,Simmer the beef with the onion until nearly tender.,55
+eg_batatis_lahma,2,Peel and cube the potatoes.,10
+eg_batatis_lahma,3,"Make a sauce with garlic, tomato paste, tomatoes and spices.",8
+eg_batatis_lahma,4,"Toss the potatoes in the oil, combine with the beef, sauce and broth in an oven dish and bake at 200 °C until the potatoes are tender.",35
+eg_torly,1,Boil the beef until tender.,50
+eg_torly,2,Cut all vegetables into large chunks.,20
+eg_torly,3,"Toss the vegetables with oil, garlic, tomato paste, grated tomatoes, salt and pepper.",5
+eg_torly,4,Add the beef and broth in a deep tray and bake at 200 °C until the vegetables are soft and browned.,50
+eg_sabanekh_lahma,1,Simmer the beef with one onion until tender.,50
+eg_sabanekh_lahma,2,Wash and chop the spinach.,10
+eg_sabanekh_lahma,3,"Fry the other onion and garlic in ghee with coriander, then add the spinach until wilted.",8
+eg_sabanekh_lahma,4,"Add beef, broth, tomato paste and the rice (to thicken); simmer 15 minutes. Season with salt and black pepper.",15
+eg_kolkas_salk,1,"Peel the taro (wear gloves), cube and rinse well.",20
+eg_kolkas_salk,2,Blend the chard leaves and fresh coriander with a little water to a green paste.,10
+eg_kolkas_salk,3,"Fry the garlic in ghee, add the green paste and cook 5 minutes.",6
+eg_kolkas_salk,4,"Add the taro, water and stock cubes; simmer until the taro is tender and the sauce thickens.",45
+eg_kolkas_salk,5,Season and add lemon juice.,1
+eg_kharshouf,1,Simmer the beef with the onion until tender.,50
+eg_kharshouf,2,Trim the artichokes to hearts and keep in water with lemon juice.,25
+eg_kharshouf,3,"Melt the butter, stir in the flour, then add broth and lemon juice.",5
+eg_kharshouf,4,"Add the hearts, peas and beef and simmer until the artichokes are tender. Season with salt and black pepper.",25
+eg_fasolia_beida,1,"Soak the beans overnight, drain and boil in fresh water until tender.",60
+eg_fasolia_beida,2,"Fry the onion and garlic, add tomato paste and tomatoes and cook 5 minutes.",8
+eg_fasolia_beida,3,"Add beans, boiled meat if using and cooking liquid; simmer until thick. Season with cumin, salt and black pepper.",30
+eg_lobia,1,"Soak the peas for 4 hours, drain and boil until tender.",50
+eg_lobia,2,"Fry onion and garlic, add tomato paste and tomatoes.",8
+eg_lobia,3,Add the peas and some of their liquid and simmer until thick. Season with cumin and salt.,25
+eg_moussaka,1,"Slice the eggplant, salt, then fry until golden; fry the pepper strips too.",30
+eg_moussaka,2,"Fry the onion, garlic and chili (and beef if using), add tomato paste, tomatoes and spices and cook 10 minutes.",15
+eg_moussaka,3,"Layer eggplant, peppers and sauce in a tray; add vinegar.",5
+eg_moussaka,4,Bake at 190 °C for 25 minutes.,25
+eg_kousa_bechamel,1,Slice and lightly fry the zucchini in a little butter.,12
+eg_kousa_bechamel,2,"Brown the beef with the onion, salt and pepper.",10
+eg_kousa_bechamel,3,"Make a béchamel with the remaining butter, flour and milk; season with nutmeg and beat in the egg.",12
+eg_kousa_bechamel,4,"Layer zucchini and meat in a tray, cover with béchamel and cheese and bake at 200 °C until golden.",30
+eg_bamia_zeit,1,Trim the okra.,12
+eg_bamia_zeit,2,"Fry onion, garlic and coriander in olive oil, add tomato paste and tomatoes.",8
+eg_bamia_zeit,3,Add okra and water and simmer until tender; finish with lemon. Season with salt.,25
+eg_chicken_salsa,1,"Simmer the chicken pieces with one onion, cardamom and bay leaf for 25 minutes.",25
+eg_chicken_salsa,2,"Fry the second onion, garlic and pepper, add tomato paste and tomatoes.",10
+eg_chicken_salsa,3,Add the chicken and 400 ml of its broth and simmer until the sauce thickens.,30
+eg_kofta_dawood_basha,1,"Mix the beef with one grated onion, parsley, breadcrumbs, egg and spices; knead well.",10
+eg_kofta_dawood_basha,2,Roll into walnut-sized balls.,15
+eg_kofta_dawood_basha,3,Brown the meatballs in oil and set aside.,10
+eg_kofta_dawood_basha,4,"Fry the second onion and garlic, add tomato paste, tomatoes and water.",8
+eg_kofta_dawood_basha,5,Add the meatballs and simmer covered for 20 minutes.,20
+eg_lesan_salsa,1,"Scrub the tongue and boil with onion, bay leaf and cardamom until tender.",130
+eg_lesan_salsa,2,Peel off the skin while warm and slice.,10
+eg_lesan_salsa,3,"Make a tomato sauce with the second onion, garlic, paste and tomatoes; add some broth.",10
+eg_lesan_salsa,4,Simmer the slices in the sauce for 10 minutes. Season with salt and black pepper.,10
+eg_kebda_eskandarani,1,Cut the liver into thin strips and the chili and pepper into slices.,10
+eg_kebda_eskandarani,2,Heat the oil until very hot; add the liver and stir-fry for 2 to 3 minutes.,4
+eg_kebda_eskandarani,3,"Add garlic, chili and pepper, then cumin and black pepper, and cook 2 minutes more.",3
+eg_kebda_eskandarani,4,Season with salt off the heat (salting earlier toughens liver) and add lemon juice.,1
+eg_kebda_qawanes,1,Clean the gizzards and simmer in the water with half the onion until tender.,35
+eg_kebda_qawanes,2,"Fry the remaining onion, pepper and garlic in oil.",5
+eg_kebda_qawanes,3,"Add the livers and cook 4 minutes, then the drained gizzards and spices.",5
+eg_kebda_qawanes,4,Finish with lemon juice and salt.,1
+eg_sinyet_batatis_frakh,1,"Marinate the chicken with garlic, oil, spices and half the salt.",15
+eg_sinyet_batatis_frakh,2,"Slice potatoes, onions and tomatoes and layer in a tray with the remaining salt.",10
+eg_sinyet_batatis_frakh,3,Pour over water mixed with tomato paste and place the chicken on top.,5
+eg_sinyet_batatis_frakh,4,"Cover and bake at 200 °C for 45 minutes, uncover and bake until browned.",60
+eg_sinyet_samak,1,"Marinate the fish in garlic, lemon, cumin, salt and pepper.",15
+eg_sinyet_samak,2,"Slice the potatoes, peppers, onions and tomatoes and layer in a tray with oil.",10
+eg_sinyet_samak,3,"Lay the fish on top, add the water, cover and bake at 200 °C for 30 minutes.",30
+eg_sinyet_samak,4,Uncover and bake 15 minutes more.,15
+eg_tagen_samak,1,"Cut the fish into steaks and marinate with garlic, cumin, lemon and salt.",15
+eg_tagen_samak,2,"Fry the onions and peppers in oil, add tomato paste and tomatoes and cook 10 minutes.",12
+eg_tagen_samak,3,"Put half the sauce in a clay pot, add the fish and cover with the rest.",5
+eg_tagen_samak,4,Bake at 200 °C until the fish is cooked. Sprinkle with ground coriander before baking.,30
+eg_tagen_gambari,1,"Peel and devein the shrimp; marinate with garlic, cumin and lemon.",15
+eg_tagen_gambari,2,"Cook onion, pepper and chili in oil; add tomato paste and tomatoes.",10
+eg_tagen_gambari,3,Combine with the shrimp in a clay pot and bake at 200 °C for 15 to 20 minutes. Season with salt.,20
+eg_tagen_lahma_basal,1,Cut the beef into cubes and slice the onions.,15
+eg_tagen_lahma_basal,2,"Brown the beef in ghee, add the onions and cook until soft.",20
+eg_tagen_lahma_basal,3,"Add tomatoes, tomato paste, spices and water; transfer to a clay pot.",5
+eg_tagen_lahma_basal,4,Cover and bake at 170 °C until the meat is very tender.,100
+eg_macarona_bechamel,1,Boil the macaroni in salted water for 2 minutes less than the packet time; drain.,12
+eg_macarona_bechamel,2,"Brown the beef with chopped onion, tomato paste, allspice, salt and pepper.",15
+eg_macarona_bechamel,3,"Make a béchamel with butter, flour and milk; season with nutmeg; mix one egg and a quarter of the béchamel into the pasta.",15
+eg_macarona_bechamel,4,"Layer half the pasta, the meat, then the remaining pasta in a buttered tray.",5
+eg_macarona_bechamel,5,"Beat the second egg into the remaining béchamel, pour over and sprinkle with cheese.",3
+eg_macarona_bechamel,6,Bake at 200 °C until golden on top.,35
+eg_ads_bigebba,1,Rinse the lentils and boil in the water until tender.,35
+eg_ads_bigebba,2,"Fry onion and garlic, add the tomatoes and cumin.",8
+eg_ads_bigebba,3,Stir into the lentils and simmer 10 minutes; season.,10
+eg_hummus_sham,1,Simmer the chickpeas in the water for 10 minutes.,12
+eg_hummus_sham,2,"Add diced tomato, cumin, chili and salt.",2
+eg_hummus_sham,3,Serve hot in cups with lemon and coriander.,1
+eg_ful_nabet,1,"Soak whole dried fava beans for 2 to 3 days, changing the water, until small sprouts appear.",
+eg_ful_nabet,2,Boil the beans with the onion in the water until tender.,55
+eg_ful_nabet,3,Season with cumin and salt and serve the broth and beans with lemon.,3
+eg_bamia_salsa_lamb,1,"Simmer the lamb shanks with the onion until tender, skimming.",80
+eg_bamia_salsa_lamb,2,Trim the okra.,15
+eg_bamia_salsa_lamb,3,Fry garlic and coriander in ghee; add tomato paste and tomatoes.,8
+eg_bamia_salsa_lamb,4,"Add okra, lamb and broth and simmer until tender. Season with salt and black pepper.",25
+eg_bitingan_rumi,1,Slice and fry the eggplant; drain.,25
+eg_bitingan_rumi,2,Cook a garlic tomato sauce for 10 minutes.,10
+eg_bitingan_rumi,3,"Layer eggplant, sauce and grated cheese in a dish and bake at 200 °C for 20 minutes. Season the sauce with salt and black pepper.",20
+eg_mashed_potato_beef,1,"Boil and mash the potatoes with butter, milk, nutmeg and half the salt.",25
+eg_mashed_potato_beef,2,"Brown the beef with onion, salt and pepper.",12
+eg_mashed_potato_beef,3,"Spread half the mash in a tray, add the meat, cover with the rest of the mash.",8
+eg_mashed_potato_beef,4,"Brush with beaten egg, sprinkle breadcrumbs and bake at 200 °C until golden.",25
+eg_kofta_mashwia,1,Grate the onion and squeeze out the juice; chop the parsley finely.,8
+eg_kofta_mashwia,2,"Knead the meats with onion, parsley, garlic and spices for 5 minutes; chill 30 minutes.",8
+eg_kofta_mashwia,3,Shape onto skewers or into fingers.,10
+eg_kofta_mashwia,4,"Brush with oil and grill over hot charcoal or a grill pan, turning, until cooked through.",12
+eg_kebab,1,Cut the lamb into 4 cm cubes with some fat.,12
+eg_kebab,2,"Grate one onion over the meat, add spices and marinate at least 2 hours.",
+eg_kebab,3,Thread onto skewers with onion and tomato pieces.,8
+eg_kebab,4,"Grill over hot charcoal, basting with ghee, until browned.",15
+eg_kebab,5,Salt after grilling and serve with tahini and salad.,1
+eg_hawawshi,1,"Finely chop the onion, peppers and parsley and squeeze excess liquid from the onion.",10
+eg_hawawshi,2,Mix the beef with the vegetables and spices.,5
+eg_hawawshi,3,"Open each loaf (about 6 loaves in total) into a pocket and spread a thin, even layer of meat inside.",8
+eg_hawawshi,4,Brush the outside with melted ghee.,2
+eg_hawawshi,5,"Bake at 220 °C on a tray, turning once, until the bread is crisp and the meat cooked (or cook in a pan pressed under a weight).",25
+eg_escalope_pane,1,Slice the breasts horizontally into thin cutlets and pound lightly.,10
+eg_escalope_pane,2,"Marinate with garlic, lemon, salt, pepper and paprika for 15 minutes.",15
+eg_escalope_pane,3,"Coat in flour, then beaten egg, then breadcrumbs.",8
+eg_escalope_pane,4,"Fry in hot oil until golden and cooked through, about 3 minutes per side.",12
+eg_frakh_mashwi,1,Butterfly or quarter the chicken and slash the thick parts.,10
+eg_frakh_mashwi,2,"Blend the yogurt, lemon, garlic, grated onion, spices, salt and oil; marinate the chicken at least 2 hours.",
+eg_frakh_mashwi,3,"Roast at 210 °C, skin up, until the juices run clear.",50
+eg_frakh_mashwi,4,Grill for the last 5 minutes to crisp the skin.,5
+eg_hamam_mahshi,1,Clean the pigeons inside and out.,15
+eg_hamam_mahshi,2,"Cook the freekeh in ghee with chopped onion and diced liver, then add water to half-cook it.",20
+eg_hamam_mahshi,3,Stuff the pigeons loosely and sew or skewer shut.,15
+eg_hamam_mahshi,4,"Simmer the pigeons in water with onion, cardamom, cinnamon and bay leaf for 30 minutes.",30
+eg_hamam_mahshi,5,Brush with ghee and roast at 220 °C (or fry) until golden.,20
+eg_rabbit_salsa,1,Rub the rabbit with lemon and salt and rinse.,8
+eg_rabbit_salsa,2,"Simmer in the water with one onion, bay leaf and cardamom until tender.",55
+eg_rabbit_salsa,3,"Make a tomato sauce with the second onion, garlic, tomato paste and tomatoes.",10
+eg_rabbit_salsa,4,Brown the rabbit pieces in oil and simmer in the sauce for 15 minutes.,20
+eg_duck_roasted,1,Clean the duck and remove excess fat.,15
+eg_duck_roasted,2,"Simmer the duck in the water with onion, cardamom, bay leaf and cinnamon for 60 minutes, skimming.",60
+eg_duck_roasted,3,"Drain, season and stuff with orange wedges.",5
+eg_duck_roasted,4,"Roast at 200 °C, basting with orange juice, until deep brown and crisp.",50
+eg_lamb_shank_fatta,1,Brown the shanks in ghee.,10
+eg_lamb_shank_fatta,2,"Add water, onion, cardamom and bay leaf and simmer until falling off the bone.",120
+eg_lamb_shank_fatta,3,Brush the shanks with tomato paste and roast at 220 °C for 15 minutes.,15
+eg_lamb_shank_fatta,4,Cook the rice with vermicelli in ghee and 560 ml shank broth. Season the shanks and rice with salt and black pepper.,25
+eg_rosto,1,Make slits in the meat and insert garlic slivers; season.,10
+eg_rosto,2,Brown the joint on all sides in ghee.,12
+eg_rosto,3,"Add sliced onions, carrots, spices and water; cover and braise on low heat until tender.",130
+eg_rosto,4,"Cool slightly, slice and reduce the sauce (with tomato paste if liked) to pour over.",15
+eg_rayash_mashwia,1,"Marinate the chops with grated onion, rosemary, lemon, pepper and oil for 1 hour.",
+eg_rayash_mashwia,2,"Grill on high heat, 4 to 5 minutes per side.",10
+eg_rayash_mashwia,3,Salt and rest 3 minutes before serving.,3
+eg_kersha_tomato,1,Scrub the tripe with lemon and salt and rinse very well.,20
+eg_kersha_tomato,2,Boil in the water with onion and bay leaf until tender.,150
+eg_kersha_tomato,3,"Cut into pieces and simmer in a garlic tomato sauce for 15 minutes. Season with cumin, salt and black pepper.",20
+eg_samak_mashwi,1,Scale and gut the fish and make diagonal cuts on each side.,10
+eg_samak_mashwi,2,"Rub with garlic, lemon, cumin, coriander, chili, salt and oil, inside and out.",8
+eg_samak_mashwi,3,Coat with bran.,3
+eg_samak_mashwi,4,"Grill over charcoal or under a hot grill until the flesh flakes, turning once.",25
+eg_bolti_maqli,1,Clean the fish and score both sides.,10
+eg_bolti_maqli,2,"Rub with garlic, lemon, cumin and salt and leave 15 minutes.",15
+eg_bolti_maqli,3,Dust with flour and deep-fry until crisp and golden.,18
+eg_calamari_maqli,1,Clean the squid and cut into rings.,12
+eg_calamari_maqli,2,"Marinate briefly with lemon, garlic, cumin and salt.",5
+eg_calamari_maqli,3,Toss in flour and fry in very hot oil for 1 to 2 minutes only.,8
+eg_gambari_mashwi,1,"Devein the shrimp, leaving the shells on if liked.",12
+eg_gambari_mashwi,2,"Toss with garlic, lemon, spices, oil and salt.",3
+eg_gambari_mashwi,3,Grill on high heat 2 to 3 minutes per side.,6
+eg_shorbet_samak,1,Simmer the fish heads and shrimp shells with onion and celery for 20 minutes and strain.,25
+eg_shorbet_samak,2,"Fry garlic, add grated tomato and cumin.",5
+eg_shorbet_samak,3,Add the stock and rice and simmer 15 minutes.,15
+eg_shorbet_samak,4,Add fish pieces and shrimp and cook 5 minutes; serve with lemon. Season with salt.,6
+eg_crab_kaboria,1,Scrub the crabs and boil in salted water for 8 minutes.,12
+eg_crab_kaboria,2,"Fry garlic and chili in oil, add grated tomato and cumin.",6
+eg_crab_kaboria,3,Toss the crabs in the sauce for 5 minutes and finish with lemon.,6
+eg_eish_baladi,1,"Dissolve the yeast in a little warm water, then mix with the flours, salt and the remaining water into a sticky dough.",10
+eg_eish_baladi,2,"Knead for 10 minutes, cover and leave to rise until doubled.",
+eg_eish_baladi,3,"Divide into balls, flatten on a bran-dusted board and rest 20 minutes.",20
+eg_eish_baladi,4,"Bake on a preheated stone or tray at the highest oven temperature until puffed, 4 to 6 minutes each.",20
+eg_feteer_meshaltet,1,"Mix the flour, salt and water into a soft dough; knead 10 minutes and divide into 4 balls; rest 30 minutes in a little oil.",45
+eg_feteer_meshaltet,2,Stretch each ball on an oiled surface until paper-thin and brush generously with melted ghee.,15
+eg_feteer_meshaltet,3,"Fold into a square, stack the four folded sheets, then stretch the stack gently into a round.",10
+eg_feteer_meshaltet,4,"Brush with egg, bake at 220 °C until golden and puffed.",35
+eg_feteer_meshaltet,5,"Serve with honey, molasses or cheese.",1
+eg_goulash_lahma,1,Brown the beef with onion and spices; cool.,15
+eg_goulash_lahma,2,"Brush a tray with ghee and layer half the phyllo, brushing every sheet.",12
+eg_goulash_lahma,3,"Spread the meat and cover with the remaining sheets, buttering each.",10
+eg_goulash_lahma,4,"Cut into squares, pour over milk beaten with eggs and bake at 190 °C until golden.",40
+eg_goulash_gebna,1,Mash the cheeses with one egg and parsley.,8
+eg_goulash_gebna,2,"Layer half the phyllo in a ghee-brushed tray, brushing each sheet.",10
+eg_goulash_gebna,3,Spread the filling and cover with the remaining sheets.,8
+eg_goulash_gebna,4,"Cut, pour over milk beaten with two eggs, sprinkle black seed and bake at 190 °C until golden.",40
+eg_sambousek,1,"Rub the butter into the flour and salt, add water and knead to a smooth dough; rest 20 minutes.",25
+eg_sambousek,2,Mix the cheese with egg and parsley.,5
+eg_sambousek,3,"Roll the dough thin, cut circles, fill and seal into half-moons.",20
+eg_sambousek,4,Fry in hot oil until golden (or bake at 200 °C for 20 minutes).,15
+eg_hawawshi_eskandarani,1,"Make a yeast dough with the flour, yeast, oil, half the salt and water; rise 1 hour.",
+eg_hawawshi_eskandarani,2,"Mix the beef with chopped onion, bell pepper, chili, spices and remaining salt.",10
+eg_hawawshi_eskandarani,3,"Roll the dough into rounds, spread meat on half, fold and seal.",20
+eg_hawawshi_eskandarani,4,Bake at 220 °C until golden and cooked through.,30
+eg_qaraqeesh,1,"Mix the flour, yeast, sugar, salt, ghee and warm milk to a firm dough; rest 40 minutes.",
+eg_qaraqeesh,2,"Shape into rings, brush with milk and dip in sesame and black seed.",25
+eg_qaraqeesh,3,"Bake at 190 °C for 20 minutes, then dry at 120 °C for 15 minutes.",35
+eg_roqaq_lahma,1,Brown the beef with the onion and spices.,15
+eg_roqaq_lahma,2,Dissolve the stock cube in hot water.,2
+eg_roqaq_lahma,3,"Layer the sheets in a ghee-brushed tray, moistening every few layers with broth; spread the meat in the middle.",15
+eg_roqaq_lahma,4,Top with ghee and bake at 190 °C until crisp.,35
+eg_basbousa,1,"Make a syrup: boil 300 g sugar with the water for 8 minutes, add lemon juice, and cool.",10
+eg_basbousa,2,"Mix the semolina, remaining sugar, coconut and baking powder; add melted butter, yogurt and vanilla.",8
+eg_basbousa,3,"Spread in a buttered tray, score into diamonds and press an almond into each.",5
+eg_basbousa,4,"Bake at 190 °C until golden, about 30 minutes.",30
+eg_basbousa,5,Pour the cool syrup over the hot basbousa and let it absorb.,
+eg_mahalabeya,1,Dissolve the corn starch in 250 ml cold milk.,2
+eg_mahalabeya,2,"Heat the remaining milk with the sugar, add the starch mixture and stir until thick, about 8 minutes.",10
+eg_mahalabeya,3,"Remove from heat, add vanilla or rose water and pour into cups.",3
+eg_mahalabeya,4,Chill and garnish with chopped pistachios.,
+eg_sahlab,1,Whisk the sahlab powder and sugar into cold milk.,2
+eg_sahlab,2,"Heat, stirring constantly, until thick.",8
+eg_sahlab,3,"Serve topped with coconut, raisins, nuts and cinnamon.",2
+eg_zalabya,1,"Mix flour, yeast, 10 g sugar, salt and 300 ml warm water into a thick batter; rise 1 hour.",
+eg_zalabya,2,Boil the remaining sugar and water with lemon juice for 8 minutes for syrup.,10
+eg_zalabya,3,Drop teaspoonfuls of batter into hot oil and fry until golden.,20
+eg_zalabya,4,Drain and dip in the syrup.,3
+eg_kahk,1,Rub hot melted ghee into the flour until it looks like wet sand; cool.,15
+eg_kahk,2,"Add yeast, sugar, sesame, salt and warm milk and knead lightly; rest 30 minutes.",
+eg_kahk,3,Shape into balls (filling if liked) and decorate with a kahk mould or tongs.,45
+eg_kahk,4,Bake at 180 °C until just golden underneath.,25
+eg_kahk,5,Cool and dust heavily with powdered sugar.,5
+eg_basbousa_coconut,1,"Make a syrup with 300 g sugar, the water and lemon; cool.",10
+eg_basbousa_coconut,2,Cook the milk with corn starch and 30 g sugar into a thick cream; cool.,10
+eg_basbousa_coconut,3,"Make the basbousa mixture from semolina, remaining sugar, coconut, baking powder, butter and yogurt.",8
+eg_basbousa_coconut,4,"Spread half in a tray, then the cream, then the rest of the mixture.",6
+eg_basbousa_coconut,5,Bake at 190 °C for 35 minutes and pour over the syrup.,35
+eg_atayef,1,"Whisk the flour, semolina, yeast, baking powder, 20 g sugar and milk; rest 30 minutes.",
+eg_atayef,2,Cook small rounds on one side only on a hot pan until bubbles cover the top.,20
+eg_atayef,3,"Make a syrup from 300 g sugar, the water and lemon.",10
+eg_atayef,4,"Fill with chopped walnuts, raisins and cinnamon, pinch closed and fry until golden.",20
+eg_atayef,5,Dip in the syrup.,3
+eg_mehalabeya_roz,1,Whisk the rice flour into 250 ml cold milk.,2
+eg_mehalabeya_roz,2,"Heat the rest of the milk with the sugar, add the rice mixture and cook, stirring, until thick.",15
+eg_mehalabeya_roz,3,"Flavour with vanilla or orange blossom water, pour into cups and chill.",3
+eg_tamr_hindi,1,Soak the tamarind in 500 ml warm water for 4 hours or overnight.,
+eg_tamr_hindi,2,"Squeeze and strain, pressing the pulp.",8
+eg_tamr_hindi,3,Add the remaining water and sugar; chill.,3
+eg_helba,1,Rinse the seeds and simmer in the water for 10 minutes.,10
+eg_helba,2,Strain or drink with the seeds; sweeten with honey or add milk.,2
+eg_yansoon,1,"Simmer the anise seeds in the water for 5 minutes, then steep 3 minutes.",8
+eg_yansoon,2,Strain and sweeten if liked.,1
+eg_irfa,1,Simmer the cinnamon in the water for 5 minutes.,5
+eg_irfa,2,Add the milk and sugar and heat through.,3
+it_tiramisu,1,Whisk the egg yolks with sugar over simmering water until thick and hot; cool.,10
+it_tiramisu,2,"Beat in the cream cheese and vanilla, then fold in the whipped cream.",8
+it_tiramisu,3,Dip the butter cookies briefly in cooled espresso and layer with the cream twice.,10
+it_tiramisu,4,Dust with cocoa and chill at least 6 hours.,
+it_panna_cotta,1,Sprinkle the gelatin over 3 tablespoons of the cold milk and leave 5 minutes.,5
+it_panna_cotta,2,"Heat the cream, remaining milk and sugar until steaming; stir in the gelatin until dissolved, then add vanilla.",5
+it_panna_cotta,3,"Pour into moulds and chill until set, at least 4 hours; serve with berries.",
+it_spaghetti_bolognese,1,"Finely chop the onion, carrot, celery and garlic.",8
+it_spaghetti_bolognese,2,"Soften the vegetables in olive oil, add the beef and brown well.",12
+it_spaghetti_bolognese,3,"Add tomato paste, canned tomatoes, oregano, salt and pepper and simmer gently.",30
+it_spaghetti_bolognese,4,"Boil the spaghetti in salted water until al dente, drain and toss with the sauce; serve with parmesan.",12
+it_penne_arrabbiata,1,Boil the pasta in salted water until al dente.,12
+it_penne_arrabbiata,2,Gently fry sliced garlic and chili in olive oil.,3
+it_penne_arrabbiata,3,"Add the tomatoes, season and simmer 10 minutes.",10
+it_penne_arrabbiata,4,Toss the pasta in the sauce and finish with parsley.,2
+it_pasta_pomodoro,1,"Score, blanch and peel the tomatoes, then chop.",8
+it_pasta_pomodoro,2,"Warm the garlic in olive oil, add tomatoes and salt and cook to a sauce.",15
+it_pasta_pomodoro,3,Boil the spaghetti until al dente and toss with the sauce and torn basil.,12
+it_fettuccine_alfredo_chicken,1,Slice and season the chicken and sear in half the butter until cooked; set aside.,10
+it_fettuccine_alfredo_chicken,2,Boil the pasta until al dente.,12
+it_fettuccine_alfredo_chicken,3,"Melt the remaining butter with garlic, add cream and simmer 3 minutes, then stir in parmesan.",5
+it_fettuccine_alfredo_chicken,4,Toss the pasta and chicken in the sauce and season with pepper.,2
+it_lasagna,1,"Make the ragù: soften onion and garlic in oil, brown the beef, add tomatoes and paste and simmer 25 minutes.",30
+it_lasagna,2,"Make a béchamel with butter, flour and milk; season with nutmeg and salt.",12
+it_lasagna,3,Cook the lasagna sheets (pasta) if they are not oven-ready.,8
+it_lasagna,4,"Layer ragù, pasta, béchamel and mozzarella three times; finish with béchamel and parmesan.",10
+it_lasagna,5,Bake at 190 °C until bubbling and golden; rest 10 minutes before cutting.,40
+it_margherita_pizza,1,"Mix flour, yeast, salt, water and half the oil into a dough; knead 8 minutes and rise until doubled.",
+it_margherita_pizza,2,"Divide, stretch into thin rounds and place on a floured tray.",10
+it_margherita_pizza,3,"Spread with tomato sauce, add torn mozzarella and drizzle with oil.",5
+it_margherita_pizza,4,"Bake on the highest oven setting until the crust is blistered, then add basil.",12
+it_risotto_mushroom,1,Dissolve the stock cubes in the hot water and keep simmering.,3
+it_risotto_mushroom,2,Sauté the sliced mushrooms in oil until golden; set aside.,8
+it_risotto_mushroom,3,"Soften the onion in half the butter, add the rice and toast 2 minutes.",5
+it_risotto_mushroom,4,"Add stock a ladle at a time, stirring, until the rice is creamy and just tender.",20
+it_risotto_mushroom,5,"Stir in mushrooms, remaining butter and parmesan; season.",2
+it_minestrone,1,Dice all the vegetables.,12
+it_minestrone,2,"Soften onion, carrot, celery and garlic in olive oil.",8
+it_minestrone,3,"Add potato, tomatoes and water and simmer 15 minutes.",15
+it_minestrone,4,"Add zucchini, beans and macaroni and cook until the pasta is tender; season and serve with parmesan.",15
+it_caprese,1,Slice the tomatoes and mozzarella.,6
+it_caprese,2,"Alternate on a plate with basil leaves, drizzle with olive oil and season.",4
+it_bruschetta,1,"Dice the tomatoes and mix with chopped basil, olive oil and salt.",6
+it_bruschetta,2,Toast the bread slices and rub with the cut garlic.,5
+it_bruschetta,3,Spoon the tomatoes on top and serve at once.,2
+it_chicken_parmigiana,1,Slice the chicken into thin cutlets and season.,8
+it_chicken_parmigiana,2,"Coat in flour, egg and breadcrumbs mixed with parmesan, and shallow-fry until golden.",12
+it_chicken_parmigiana,3,"Place in a dish, top with tomato sauce, oregano and mozzarella.",5
+it_chicken_parmigiana,4,Bake at 200 °C until the cheese melts and bubbles.,15
+it_gnocchi_tomato,1,"Boil the potatoes in their skins until tender, peel while hot and mash smooth.",30
+it_gnocchi_tomato,2,"Work in flour, egg and salt to a soft dough; roll into ropes and cut into pieces.",20
+it_gnocchi_tomato,3,Warm the garlic in oil and add the tomato sauce.,5
+it_gnocchi_tomato,4,"Boil the gnocchi until they float, then toss in the sauce.",5
+it_pesto_pasta,1,"Blend basil, pine nuts, garlic, parmesan and olive oil into a paste; season.",5
+it_pesto_pasta,2,"Boil the pasta until al dente, reserving a little cooking water.",12
+it_pesto_pasta,3,"Toss the pasta with the pesto, loosening with the reserved water.",2
+it_frittata,1,Dice and fry the potato and onion in olive oil until soft; add spinach to wilt.,12
+it_frittata,2,"Beat the eggs with parmesan, salt and pepper and pour over.",3
+it_frittata,3,"Cook on low until the edges set, then finish under the grill until puffed.",10
+it_aglio_olio,1,Boil the spaghetti in salted water until al dente; keep a cup of the water.,12
+it_aglio_olio,2,Gently fry sliced garlic and chili in olive oil until pale gold.,4
+it_aglio_olio,3,Toss the pasta in the oil with a splash of pasta water and chopped parsley.,2
+it_shrimp_linguine,1,Peel and devein the shrimp; dice the tomatoes.,12
+it_shrimp_linguine,2,Boil the spaghetti until al dente.,12
+it_shrimp_linguine,3,"Sauté garlic and chili in oil, add shrimp and cook 2 minutes, then add tomatoes.",6
+it_shrimp_linguine,4,"Toss in the pasta, parsley and lemon juice; season.",2
+it_eggplant_parmigiana,1,"Slice and salt the eggplant for 15 minutes, pat dry and fry in olive oil until golden.",25
+it_eggplant_parmigiana,2,"Layer eggplant, tomato sauce, basil, mozzarella and parmesan in a dish.",8
+it_eggplant_parmigiana,3,Bake at 190 °C until bubbling and browned.,30
+it_focaccia,1,"Mix flour, yeast, salt, water and half the oil into a wet dough; rise until doubled.",
+it_focaccia,2,"Pour into an oiled tray, stretch to the corners and dimple with your fingers.",10
+it_focaccia,3,"Drizzle with remaining oil, scatter rosemary and coarse salt and rise 30 minutes.",
+it_focaccia,4,Bake at 220 °C until golden.,25
+it_mac_cheese_baked,1,Boil the macaroni until just al dente.,10
+it_mac_cheese_baked,2,"Make a white sauce with butter, flour and milk, melt in the cheeses and season with salt.",10
+it_mac_cheese_baked,3,"Mix with the pasta, pour into a dish and bake at 200 °C until golden.",20
+it_osso_buco_style_veal,1,Dust the veal with flour and brown in olive oil; remove.,12
+it_osso_buco_style_veal,2,Soften the diced vegetables and garlic in the same pan.,8
+it_osso_buco_style_veal,3,"Return the veal with tomatoes and water, cover and braise on low until very tender.",100
+it_osso_buco_style_veal,4,Season and finish with grated lemon zest.,2
+it_tuna_pasta_salad,1,"Boil the pasta until al dente, rinse under cold water and drain.",14
+it_tuna_pasta_salad,2,Dice the tomato and onion and slice the olives.,6
+it_tuna_pasta_salad,3,"Toss everything with the oil, lemon juice and parsley; season.",3
+it_italian_meatballs,1,"Mix beef, breadcrumbs, parmesan, egg, half the garlic, parsley, salt and pepper; roll into balls.",15
+it_italian_meatballs,2,Brown the meatballs in olive oil.,10
+it_italian_meatballs,3,"Add remaining garlic, tomatoes and oregano and simmer 20 minutes.",20
+gr_greek_salad,1,"Cut the tomatoes, cucumber, onion and pepper into chunks.",10
+gr_greek_salad,2,Add olives and a slab of feta.,2
+gr_greek_salad,3,"Dress with olive oil, vinegar, oregano and a little salt.",2
+gr_tzatziki,1,Grate the cucumber and squeeze out as much water as possible.,6
+gr_tzatziki,2,"Mix with yogurt, crushed garlic, dill, olive oil, lemon and salt; chill.",4
+gr_moussaka,1,Slice the eggplant and potatoes; brush with olive oil and roast at 200 °C until soft.,25
+gr_moussaka,2,"Brown the lamb with onion and garlic, add tomatoes and cinnamon and simmer 20 minutes; season.",25
+gr_moussaka,3,"Make a béchamel with butter, flour and milk; add nutmeg, then beat in the eggs and half the cheese.",12
+gr_moussaka,4,"Layer potato, eggplant and meat in a dish, cover with béchamel and the remaining cheese.",8
+gr_moussaka,5,Bake at 180 °C until deep golden; rest 20 minutes before cutting.,45
+gr_spanakopita,1,"Wilt the spinach, squeeze dry and chop.",12
+gr_spanakopita,2,"Mix with crumbled feta, chopped spring onion, dill, eggs and pepper.",6
+gr_spanakopita,3,"Layer half the phyllo in an oiled tin, brushing each sheet with oil; add the filling.",12
+gr_spanakopita,4,"Cover with the remaining oiled sheets, score the top and bake at 180 °C until golden.",45
+gr_souvlaki_chicken,1,"Cube the chicken and marinate with lemon, oil, garlic, oregano, salt and pepper for at least 1 hour.",
+gr_souvlaki_chicken,2,Thread onto skewers.,8
+gr_souvlaki_chicken,3,"Grill on high heat, turning, until cooked through.",12
+gr_souvlaki_chicken,4,Serve in warm pita.,3
+gr_gigantes,1,Soak the beans overnight and simmer until just tender; drain.,
+gr_gigantes,2,Soften onion and garlic in olive oil and add the tomatoes.,10
+gr_gigantes,3,"Combine with the beans, dill and seasoning in a dish and bake at 180 °C until thick.",50
+gr_lemon_potatoes,1,Cut the potatoes into wedges.,8
+gr_lemon_potatoes,2,"Toss with lemon, oil, garlic, oregano, salt and water in a roasting tin.",3
+gr_lemon_potatoes,3,"Roast at 200 °C, turning once, until the liquid is absorbed and the potatoes are golden.",60
+me_shakshuka_feta,1,"Soften the sliced onion and peppers in olive oil, then add garlic and spices.",10
+me_shakshuka_feta,2,Add the tomatoes and simmer until thick; season.,10
+me_shakshuka_feta,3,"Crack in the eggs, cover and cook until set; crumble over feta and parsley.",7
+me_grilled_vegetables,1,Slice all the vegetables thickly.,10
+me_grilled_vegetables,2,Brush with olive oil and grill until charred and tender.,20
+me_grilled_vegetables,3,"Dress with garlic, thyme, remaining oil and salt.",3
+me_lentil_salad,1,"Simmer the lentils until just tender, drain and cool.",25
+me_lentil_salad,2,Dice the tomato and cucumber and chop the spring onion and parsley.,8
+me_lentil_salad,3,"Toss with the lentils, oil, lemon and salt; top with feta.",3
+me_baked_fish_herbs,1,Clean the fish and slash both sides.,8
+me_baked_fish_herbs,2,"Stuff with lemon slices, garlic and parsley; rub with oil, thyme, salt and pepper.",5
+me_baked_fish_herbs,3,Bake at 200 °C until the flesh flakes.,25
+fr_quiche_lorraine_style,1,"Rub the butter into the flour and salt, bind with one egg and the water; chill 30 minutes.",35
+fr_quiche_lorraine_style,2,"Roll out, line a tart tin and blind-bake at 190 °C for 15 minutes.",18
+fr_quiche_lorraine_style,3,Soften the onion and scatter with chopped basterma and cheese in the case.,8
+fr_quiche_lorraine_style,4,"Whisk the remaining eggs with cream and nutmeg, pour in and bake until just set.",25
+fr_french_onion_soup,1,"Slice the onions thinly and cook in butter on low heat, stirring, until deep brown.",40
+fr_french_onion_soup,2,"Stir in the flour, then add water, stock powder and thyme; simmer 20 minutes and season.",20
+fr_french_onion_soup,3,"Toast the bread, float on the soup in bowls, cover with cheese and grill until bubbling.",6
+fr_ratatouille,1,Cut all the vegetables into chunks.,15
+fr_ratatouille,2,Sauté the eggplant and zucchini in batches in olive oil until lightly browned.,15
+fr_ratatouille,3,"Soften onion, pepper and garlic, add the tomatoes and thyme, then return the vegetables.",8
+fr_ratatouille,4,Simmer gently until soft; season with salt and finish with basil.,30
+fr_crepes,1,"Whisk flour, sugar, salt, eggs and milk into a smooth batter; add half the melted butter and rest 30 minutes.",8
+fr_crepes,2,"Cook thin crêpes in a lightly buttered pan, about 1 minute per side.",20
+fr_crepes,3,"Fill with spread, jam or lemon and sugar.",3
+fr_chicken_mushroom_cream,1,Season and sear the chicken in butter until golden; set aside.,10
+fr_chicken_mushroom_cream,2,"Sauté onion, garlic and sliced mushrooms until browned.",8
+fr_chicken_mushroom_cream,3,"Add water with the stock cube, thyme and cream and simmer 5 minutes.",6
+fr_chicken_mushroom_cream,4,Return the chicken and cook until done; season.,8
+es_spanish_omelette,1,Thinly slice the potatoes and onion.,10
+es_spanish_omelette,2,Cook slowly in olive oil until tender but not browned; drain.,20
+es_spanish_omelette,3,"Mix with the beaten, salted eggs and rest 10 minutes.",10
+es_spanish_omelette,4,"Cook in a pan on low heat until set underneath, flip with a plate and cook the other side.",12
+es_gazpacho,1,Roughly chop the vegetables and soak the bread in a little water.,10
+es_gazpacho,2,"Blend the vegetables and bread with the olive oil, vinegar and salt until very smooth.",5
+es_gazpacho,3,Chill well before serving.,
+es_chicken_paella,1,"Brown the chicken pieces in olive oil in a wide pan; push aside and fry onion, pepper and garlic.",15
+es_chicken_paella,2,Add grated tomato and paprika and cook 3 minutes; stir in the rice.,5
+es_chicken_paella,3,Pour in hot water with stock cubes and saffron; do not stir again after this point.,3
+es_chicken_paella,4,"Season with salt, simmer 15 minutes, then add shrimp, squid and peas and cook until the rice is done and a crust forms.",20
+es_chicken_paella,5,Rest 5 minutes and serve with lemon.,5
+es_garlic_shrimp,1,Peel the shrimp and slice the garlic and chili.,8
+es_garlic_shrimp,2,Warm garlic and chili in olive oil until fragrant.,3
+es_garlic_shrimp,3,Add the shrimp and paprika and cook 2 to 3 minutes; finish with parsley and salt.,4
+lb_tabbouleh,1,Rinse the fine bulgur and leave it to soften in a little lemon juice for 15 minutes.,15
+lb_tabbouleh,2,Chop the parsley and mint very finely and dice the tomatoes and spring onion.,20
+lb_tabbouleh,3,"Combine with the bulgur, olive oil, salt and allspice just before serving.",3
+lb_mutabbal,1,Char the eggplants over a flame until collapsed; peel and drain.,30
+lb_mutabbal,2,"Mash with tahini, yogurt, crushed garlic, lemon and salt.",5
+lb_mutabbal,3,Top with olive oil and pomegranate seeds.,2
+lb_shish_tawook,1,"Cube the chicken and marinate in yogurt, lemon, garlic, tomato paste, paprika, oil, salt and pepper for at least 2 hours.",
+lb_shish_tawook,2,Thread onto skewers.,8
+lb_shish_tawook,3,"Grill, turning, until charred and cooked through.",15
+lb_kibbeh_saniyeh,1,Soak the fine bulgur 15 minutes and squeeze dry.,15
+lb_kibbeh_saniyeh,2,"Knead with 600 g of beef, one grated onion, half the spices and salt into a smooth paste.",12
+lb_kibbeh_saniyeh,3,"For the filling, brown the remaining beef with two chopped onions, pine nuts and the rest of the spices in some ghee.",15
+lb_kibbeh_saniyeh,4,"Press half the paste into a ghee-brushed tray, spread the filling, cover with the rest of the paste and score into diamonds.",12
+lb_kibbeh_saniyeh,5,Pour over the remaining melted ghee and bake at 200 °C until browned.,35
+lb_kafta_saniyeh,1,"Mix the beef with grated onion, parsley, allspice, salt and pepper and press into a tray.",12
+lb_kafta_saniyeh,2,Fry the sliced potatoes lightly in the oil.,12
+lb_kafta_saniyeh,3,Arrange potatoes and tomato slices over the kafta.,5
+lb_kafta_saniyeh,4,Pour over tomato paste dissolved in the water and bake at 200 °C until cooked.,40
+lb_manakish_thyme,1,"Make a dough from the flour, yeast, salt, water and 2 tablespoons of oil; rise 1 hour.",
+lb_manakish_thyme,2,Mix the thyme and toasted sesame with the remaining olive oil.,4
+lb_manakish_thyme,3,Divide and roll the dough into rounds and spread with the thyme mixture.,12
+lb_manakish_thyme,4,Bake at 240 °C until the edges are golden.,10
+lb_lahm_bi_ajeen,1,"Make a yeast dough with the flour, yeast, oil, half the salt and water; rise 1 hour.",
+lb_lahm_bi_ajeen,2,"Mix the lamb with finely chopped onion and tomato, pomegranate molasses, allspice and remaining salt.",10
+lb_lahm_bi_ajeen,3,Roll the dough into thin rounds and spread thinly with the meat; scatter pine nuts.,15
+lb_lahm_bi_ajeen,4,Bake at 240 °C until the meat is cooked and the edges crisp.,10
+lb_fatayer_sabanekh,1,"Make a dough from the flour, yeast, half the oil, some salt and the water; rest 1 hour.",
+lb_fatayer_sabanekh,2,"Chop the spinach, rub with salt and squeeze; mix with chopped onion, lemon, molasses and remaining oil.",15
+lb_fatayer_sabanekh,3,"Roll out, cut circles, fill and pinch into triangles.",25
+lb_fatayer_sabanekh,4,Bake at 220 °C until golden.,20
+lb_labneh_plate,1,"Spread the labneh on a plate with a spoon, making a well.",2
+lb_labneh_plate,2,"Fill the well with olive oil, sprinkle with mint and serve with olives and cucumber.",3
+lb_chicken_shawarma_plate,1,"Marinate the chicken in yogurt, lemon, half the garlic, spices, oil and salt for at least 2 hours.",
+lb_chicken_shawarma_plate,2,"Roast at 220 °C until charred at the edges, then slice thinly.",25
+lb_chicken_shawarma_plate,3,"Serve with the remaining garlic crushed into a little lemon and oil, pickles and pita bread.",5
+lb_toum,1,Blend the peeled garlic with salt to a paste.,4
+lb_toum,2,"With the motor running, add the oil in a very thin stream, alternating with the lemon juice and water.",10
+lb_toum,3,"Continue until thick, white and fluffy; refrigerate.",2
+lb_batata_harra,1,Cut the potatoes into cubes and fry until golden; drain.,20
+lb_batata_harra,2,"Fry garlic, chili and coriander briefly in a little oil.",3
+lb_batata_harra,3,"Toss the potatoes in the garlic mixture with cayenne, salt and lemon.",2
+lb_riz_a_djej,1,"Simmer the chicken with one onion, bay leaf and cinnamon to make broth; shred the meat.",45
+lb_riz_a_djej,2,Brown the beef with the second onion and allspice in ghee.,10
+lb_riz_a_djej,3,"Add the rice, then 650 ml broth; cover and cook until tender.",20
+lb_riz_a_djej,4,Toast the nuts in ghee and serve the rice topped with chicken and nuts.,5
+lb_loubieh_bi_zeit,1,Trim the beans and halve them.,10
+lb_loubieh_bi_zeit,2,Soften sliced onion and whole garlic cloves in olive oil.,8
+lb_loubieh_bi_zeit,3,"Add beans and stir 5 minutes, then the chopped tomatoes, allspice and salt.",6
+lb_loubieh_bi_zeit,4,Cover and cook on low heat until very tender; serve at room temperature.,30
+lb_fattet_hummus,1,Cut the bread into squares and toast until crisp.,8
+lb_fattet_hummus,2,Warm the chickpeas in a little of their liquid with cumin.,5
+lb_fattet_hummus,3,"Whisk yogurt, tahini, crushed garlic, lemon and salt.",3
+lb_fattet_hummus,4,"Layer bread, chickpeas and sauce; top with pine nuts toasted in ghee.",4
+lb_adas_bi_hamod,1,Simmer the lentils in the water for 15 minutes.,15
+lb_adas_bi_hamod,2,Add diced potato and chopped chard and cook until tender.,15
+lb_adas_bi_hamod,3,Fry garlic and coriander in olive oil and stir in with the lemon juice; season.,6
+lb_muhammara,1,"Roast the peppers until blackened, peel and seed.",20
+lb_muhammara,2,"Blend with walnuts, breadcrumbs, molasses, oil, cumin, cayenne, lemon and salt to a coarse paste.",5
+lb_sfouf,1,"Mix the semolina, flour, sugar, turmeric, ground anise and baking powder.",5
+lb_sfouf,2,Stir in the milk and oil to a smooth batter.,4
+lb_sfouf,3,"Grease a tin with tahini, pour in the batter and scatter pine nuts.",3
+lb_sfouf,4,Bake at 180 °C until a skewer comes out clean.,35
+lb_sawdat_djej,1,Trim and halve the livers.,6
+lb_sawdat_djej,2,"Sear in very hot oil for 3 minutes, then add garlic.",5
+lb_sawdat_djej,3,"Add molasses and lemon, toss and season; finish with coriander.",3
+lb_kousa_bi_laban,1,"Core the zucchini and stuff with beef, rice, allspice and salt.",35
+lb_kousa_bi_laban,2,Simmer the stuffed zucchini in salted water until tender.,30
+lb_kousa_bi_laban,3,Whisk the yogurt with corn starch and egg and stir constantly over heat until it boils (to stop it splitting).,10
+lb_kousa_bi_laban,4,"Add the zucchini to the yogurt, then a mixture of garlic and mint fried in ghee; simmer 5 minutes.",7
+tr_menemen,1,Soften the chopped peppers (and onion) in butter and oil.,6
+tr_menemen,2,Add diced tomatoes and cook until saucy.,6
+tr_menemen,3,Stir in the beaten eggs gently until just set; season with salt and chili.,3
+tr_mercimek,1,"Soften the onion and carrot in half the butter, stir in flour and tomato paste.",8
+tr_mercimek,2,"Add lentils, water and cumin and simmer until soft.",25
+tr_mercimek,3,Blend smooth and season.,4
+tr_mercimek,4,Sizzle paprika and mint in the remaining butter and drizzle over; serve with lemon.,3
+tr_imam_bayildi,1,"Peel the eggplants in stripes, slit lengthwise and fry in some oil until soft.",15
+tr_imam_bayildi,2,"Cook sliced onions and garlic slowly in oil, add chopped tomato, parsley, sugar and salt.",15
+tr_imam_bayildi,3,"Fill the eggplants, add the water and remaining oil, cover and simmer on low until meltingly soft.",40
+tr_imam_bayildi,4,Serve at room temperature.,
+tr_karniyarik,1,Peel the eggplants in stripes and fry until soft; slit open lengthwise.,15
+tr_karniyarik,2,"Brown the beef with onion, garlic, one tomato and the seasoning.",12
+tr_karniyarik,3,"Fill the eggplants, top with tomato and pepper slices.",5
+tr_karniyarik,4,Pour tomato paste dissolved in water around them and bake at 190 °C for 30 minutes.,30
+tr_adana_kebab,1,Finely chop the pepper and onion and squeeze out the juice.,10
+tr_adana_kebab,2,"Knead with the lamb, chili, paprika and salt for 10 minutes; chill.",12
+tr_adana_kebab,3,"Press onto wide skewers and grill over hot coals, turning.",12
+tr_lahmacun,1,"Make a yeast dough with flour, yeast, half the salt and water; rest 1 hour.",
+tr_lahmacun,2,"Blend the lamb with tomato, pepper, onion, parsley, tomato paste, chili and salt to a paste.",10
+tr_lahmacun,3,Roll the dough paper-thin and spread thinly with the topping.,15
+tr_lahmacun,4,"Bake at the highest temperature until crisp, and serve with lemon.",10
+tr_sigara_borek,1,Mix the crumbled cheese with parsley and egg.,5
+tr_sigara_borek,2,"Cut phyllo into triangles, place filling at the wide end and roll tightly into cigars, sealing with water.",20
+tr_sigara_borek,3,Fry until golden and drain.,15
+tr_bulgur_pilavi,1,"Soften onion and pepper in butter, add tomato and tomato paste.",8
+tr_bulgur_pilavi,2,"Stir in bulgur, add boiling water and salt; cover and cook 15 minutes, then rest 10.",25
+tr_kisir,1,"Pour boiling water over the fine bulgur, cover and leave 15 minutes.",15
+tr_kisir,2,"Knead in the tomato paste, chili and salt.",3
+tr_kisir,3,"Mix in chopped herbs, tomato and spring onion, molasses, lemon and oil.",8
+tr_cilbir,1,Mix the yogurt with crushed garlic and salt and spread on plates.,3
+tr_cilbir,2,Poach the eggs in simmering water with the vinegar for 3 minutes.,5
+tr_cilbir,3,"Melt the butter with paprika and chili, place eggs on the yogurt and drizzle over.",3
+tr_hunkar_begendi,1,"Brown the cubed lamb with onion, add tomato, paste and water and stew until tender.",80
+tr_hunkar_begendi,2,"Char, peel and mash the eggplants.",25
+tr_hunkar_begendi,3,"Make a roux with butter and flour, whisk in the milk, then the eggplant and cheese.",10
+tr_hunkar_begendi,4,Season both with salt and black pepper and serve the lamb on the eggplant purée.,2
+tr_baklava,1,"Boil the sugar and water 10 minutes, add lemon and cool completely.",12
+tr_baklava,2,Chop the walnuts with cinnamon; melt the butter.,8
+tr_baklava,3,"Layer half the phyllo in a tray, buttering every sheet; spread walnuts; finish with buttered sheets.",25
+tr_baklava,4,Cut into diamonds and bake at 170 °C until deep golden.,45
+tr_baklava,5,Pour the cold syrup over the hot baklava and leave to absorb for several hours.,
+ma_chicken_tagine_olives,1,"Rub the chicken with garlic, grated ginger, turmeric, saffron, salt, pepper and oil.",10
+ma_chicken_tagine_olives,2,Brown with sliced onions in the tagine or a heavy pot.,10
+ma_chicken_tagine_olives,3,"Add water, cover and simmer until tender.",40
+ma_chicken_tagine_olives,4,Add olives and lemon slices for the last 10 minutes and finish with coriander.,10
+ma_harira,1,Brown the diced lamb with onion and celery; add spices.,10
+ma_harira,2,"Add the lentils, tomatoes, paste and water and simmer 40 minutes.",40
+ma_harira,3,Add chickpeas and chopped herbs and cook 10 minutes.,10
+ma_harira,4,Whisk the flour with a little water and stir in; simmer until silky; serve with lemon.,10
+ma_kefta_tagine,1,"Mix the beef with grated onion, half the parsley, cumin, paprika and salt; roll small meatballs.",15
+ma_kefta_tagine,2,"Make a sauce with garlic, tomatoes and oil; simmer 10 minutes.",10
+ma_kefta_tagine,3,"Add meatballs and cook 15 minutes, then crack in the eggs and cover until set; add parsley.",20
+ma_zaalouk,1,Peel and dice the eggplant and tomatoes.,10
+ma_zaalouk,2,"Cook with garlic, spices and olive oil, mashing as it softens.",25
+ma_zaalouk,3,Finish with coriander and lemon; serve warm or cold.,3
+ma_couscous_vegetables,1,Brown the lamb with onions and spices; add water and tomatoes and simmer 30 minutes.,35
+ma_couscous_vegetables,2,"Add carrots and turnip, then zucchini, pumpkin and chickpeas, and cook until tender.",25
+ma_couscous_vegetables,3,Steam or soak the couscous with boiling broth and fluff with butter.,10
+ma_couscous_vegetables,4,Mound the couscous and arrange the meat and vegetables on top with broth.,4
+gf_chicken_kabsa,1,Brown the chicken pieces with onion and garlic in oil; add spices.,12
+gf_chicken_kabsa,2,"Add tomatoes, paste, grated carrot, the lemon (pierced) and water; simmer 30 minutes.",30
+gf_chicken_kabsa,3,Remove the chicken and roast to brown; add rinsed rice to the broth and cook covered until done.,25
+gf_chicken_kabsa,4,"Serve the rice topped with chicken, raisins and almonds.",3
+gf_harees,1,Soak the wheat overnight and drain.,
+gf_harees,2,"Simmer the wheat and chicken with the spices in the water on very low heat, stirring often, until the wheat breaks down.",170
+gf_harees,3,"Beat with a wooden spoon to a smooth paste, season and serve with ghee.",10
+gf_luqaimat,1,"Mix flour, corn starch, yeast, sugar, cardamom and warm water into a sticky batter; rise 1 hour.",
+gf_luqaimat,2,Drop small balls of batter into hot oil and fry until golden and crisp.,20
+gf_luqaimat,3,Drain and drizzle with date syrup and toasted sesame.,3
+gf_saloona,1,Brown the chicken with onion and garlic in the oil; add spices.,10
+gf_saloona,2,"Add tomatoes, paste and water and simmer 20 minutes.",20
+gf_saloona,3,Add the cubed vegetables and cook until tender.,25
+in_chicken_curry,1,Fry the chopped onions in oil until deep golden.,12
+in_chicken_curry,2,"Add crushed garlic and ginger, then the spices, and cook 2 minutes.",4
+in_chicken_curry,3,Add chopped tomatoes and cook until the oil separates.,8
+in_chicken_curry,4,"Add the chicken, yogurt, water and salt; cover and simmer until tender.",25
+in_chicken_curry,5,Finish with coriander.,1
+in_butter_chicken,1,"Marinate the chicken pieces in yogurt, half the garlic and ginger, half the spices and salt for at least 1 hour.",
+in_butter_chicken,2,Sear or grill the chicken until charred; set aside.,12
+in_butter_chicken,3,"Cook the remaining garlic, ginger and spices in butter, add blended tomatoes and sugar and simmer 10 minutes.",12
+in_butter_chicken,4,Add the chicken and cream and simmer 8 minutes.,10
+in_dal_tadka,1,"Simmer the lentils with water, turmeric and chopped tomato until soft; whisk smooth.",25
+in_dal_tadka,2,"Heat the ghee, fry cumin seeds, then onion, garlic and chili until golden.",8
+in_dal_tadka,3,"Pour the tempering over the dal, salt and garnish with coriander.",2
+in_chana_masala,1,"Fry the onions until browned, add garlic, ginger and spices.",12
+in_chana_masala,2,Add tomatoes and cook to a thick masala.,8
+in_chana_masala,3,"Add chickpeas and water and simmer 10 minutes, crushing a few chickpeas; finish with lemon and coriander.",12
+in_aloo_palak,1,Blanch the spinach and blend to a purée.,8
+in_aloo_palak,2,"Fry cumin, onion, garlic and ginger, then add the cubed potatoes and spices.",10
+in_aloo_palak,3,"Add a little water, cover and cook until the potatoes are tender, then stir in the spinach and salt.",15
+in_aloo_gobi,1,Cut the potatoes and cauliflower into florets and cubes.,10
+in_aloo_gobi,2,"Fry cumin, onion and ginger, then add the vegetables and spices.",8
+in_aloo_gobi,3,"Add chopped tomato, cover and cook on low, stirring, until tender; garnish with coriander.",20
+in_chicken_biryani,1,"Marinate the chicken with yogurt, garlic, ginger, curry powder and salt for 1 hour.",
+in_chicken_biryani,2,Fry the sliced onions in ghee until crisp; keep half for topping.,15
+in_chicken_biryani,3,"Parboil the rice for 5 minutes in salted water with cardamom, cloves, cinnamon and bay leaf; drain.",12
+in_chicken_biryani,4,"Cook the chicken in the onion ghee for 15 minutes; layer with rice, herbs, fried onions and saffron soaked in warm milk.",20
+in_chicken_biryani,5,Seal the pot and cook on the lowest heat for 25 minutes.,25
+in_jeera_rice,1,Fry the cumin seeds and bay leaf in ghee until fragrant.,2
+in_jeera_rice,2,"Add rinsed rice, stir, then the boiling salted water.",3
+in_jeera_rice,3,Cover and cook on low until done; rest 5 minutes.,18
+in_cucumber_raita,1,Grate the cucumber and squeeze lightly.,5
+in_cucumber_raita,2,"Mix with yogurt, toasted ground cumin, mint and salt.",3
+in_keema_matar,1,"Fry onions until golden, add garlic, ginger and spices.",10
+in_keema_matar,2,"Add the lamb and brown, breaking it up.",10
+in_keema_matar,3,Add tomatoes and peas with a little water and cook until thick.,15
+in_rajma,1,"Fry onion, garlic and ginger, then add spices and tomatoes and cook to a masala.",15
+in_rajma,2,"Add beans and water and simmer 15 minutes, mashing a few beans to thicken.",15
+in_egg_curry,1,"Boil the eggs 10 minutes, peel and prick.",12
+in_egg_curry,2,"Fry the onion, garlic, ginger and spices; add tomatoes and cook down.",12
+in_egg_curry,3,Add the eggs and water and simmer 8 minutes.,8
+in_tandoori_chicken,1,Slash the chicken and rub with lemon and salt.,5
+in_tandoori_chicken,2,"Coat with yogurt mixed with garlic, ginger and spices; marinate at least 4 hours.",
+in_tandoori_chicken,3,"Roast at 230 °C on a rack, brushing with oil, until charred and cooked.",40
+in_samosa,1,"Rub ghee into flour and salt, add water to form a stiff dough; rest 30 minutes.",35
+in_samosa,2,"Boil and dice the potatoes; cook with peas, cumin, ginger, chili, curry powder and coriander.",25
+in_samosa,3,"Roll ovals, cut in half, form cones, fill and seal.",25
+in_samosa,4,Fry in medium-hot oil until golden and crisp.,20
+in_onion_bhaji,1,Slice the onions thinly.,8
+in_onion_bhaji,2,"Mix with chickpea flour, spices, coriander, salt and just enough water to bind.",4
+in_onion_bhaji,3,Fry spoonfuls in hot oil until golden.,15
+in_mango_lassi,1,Peel and dice the mango.,3
+in_mango_lassi,2,"Blend with yogurt, milk, sugar and cardamom until smooth; serve cold.",2
+in_kheer,1,"Rinse the rice and simmer in the milk, stirring often, until thick and creamy.",45
+in_kheer,2,"Stir in sugar, cardamom, raisins and saffron and cook 5 minutes.",5
+in_kheer,3,Serve warm or chilled with chopped nuts.,2
+in_chapati,1,"Mix the flour, salt and water into a soft dough; knead 5 minutes and rest 20 minutes.",25
+in_chapati,2,Divide into balls and roll thin.,10
+in_chapati,3,"Cook on a hot dry pan, turning, until puffed and spotted; brush with ghee.",20
+in_rogan_josh,1,Brown the lamb in ghee with the whole spices.,15
+in_rogan_josh,2,"Add onions, garlic and ginger and cook until soft.",10
+in_rogan_josh,3,"Stir in paprika, cayenne and ground fennel, then the yogurt a spoon at a time.",8
+in_rogan_josh,4,"Add water and salt, cover and simmer until the lamb is tender.",70
+in_baingan_bharta,1,"Char the eggplants over a flame, peel and mash.",25
+in_baingan_bharta,2,"Fry cumin, onion, garlic, ginger and chili, then add tomatoes and turmeric.",8
+in_baingan_bharta,3,"Stir in the eggplant, cook 5 minutes, salt and garnish with fresh coriander.",6
+as_egg_fried_rice,1,Dice the carrot and slice the spring onion.,5
+as_egg_fried_rice,2,Scramble the eggs in a hot wok with oil and remove.,3
+as_egg_fried_rice,3,"Stir-fry carrot and peas, add rice and toss until hot.",6
+as_egg_fried_rice,4,"Add soy sauce, egg, spring onion and sesame oil; season.",2
+as_chicken_vegetable_stirfry,1,"Slice the chicken and vegetables; mix soy sauce, honey, corn starch and water.",12
+as_chicken_vegetable_stirfry,2,Stir-fry the chicken in a very hot wok until browned; remove.,5
+as_chicken_vegetable_stirfry,3,Stir-fry the vegetables with garlic and ginger for 3 minutes.,4
+as_chicken_vegetable_stirfry,4,"Return the chicken, add the sauce and toss until glossy.",2
+as_sweet_sour_chicken,1,"Cube and salt the chicken, coat in egg then corn starch and fry until crisp; drain.",15
+as_sweet_sour_chicken,2,"Mix ketchup, vinegar, sugar, soy sauce and water with a teaspoon of corn starch.",3
+as_sweet_sour_chicken,3,"Stir-fry pepper, onion and pineapple briefly, add the sauce and bring to a boil.",5
+as_sweet_sour_chicken,4,Toss the chicken in the sauce and serve at once.,2
+as_kung_pao_chicken,1,Dice the chicken and toss with a tablespoon of soy sauce and the corn starch.,8
+as_kung_pao_chicken,2,"Mix the remaining soy sauce, vinegar and sugar.",2
+as_kung_pao_chicken,3,"Stir-fry the chili, then the chicken until cooked; add garlic, ginger and spring onion.",7
+as_kung_pao_chicken,4,Add the sauce and peanuts and toss.,2
+as_beef_broccoli,1,Slice the beef thinly against the grain and toss with half the corn starch and a spoon of soy sauce.,10
+as_beef_broccoli,2,Blanch the broccoli for 1 minute.,3
+as_beef_broccoli,3,Sear the beef in a very hot wok and remove; fry garlic and ginger.,5
+as_beef_broccoli,4,"Add broccoli, beef and the remaining soy, sugar, starch and water; toss until thick.",3
+as_chow_mein,1,"Boil the noodles, drain and rinse.",8
+as_chow_mein,2,"Stir-fry the sliced chicken until cooked; add garlic, carrot and cabbage.",7
+as_chow_mein,3,"Add noodles, sprouts and soy sauce and toss on high heat; finish with spring onion and sesame oil.",4
+as_hot_sour_soup,1,Bring the water and stock cube to a boil; add sliced mushrooms and tofu strips.,8
+as_hot_sour_soup,2,"Add soy sauce, vinegar and white pepper.",2
+as_hot_sour_soup,3,"Thicken with corn starch mixed with water, then drizzle in the beaten egg while stirring.",4
+as_hot_sour_soup,4,Finish with spring onion.,1
+as_steamed_fish_ginger,1,Clean and score the fish; scatter with half the ginger.,5
+as_steamed_fish_ginger,2,Steam over boiling water until the flesh flakes.,12
+as_steamed_fish_ginger,3,"Top with shredded ginger and spring onion, pour over soy sauce, then sizzling hot oil and sesame oil.",3
+as_chicken_teriyaki,1,"Mix soy sauce, honey, water, grated ginger and garlic.",4
+as_chicken_teriyaki,2,"Sear the chicken skin-side down in the oil until crisp, then turn and cook through.",14
+as_chicken_teriyaki,3,Pour in the sauce and reduce until sticky; sprinkle with sesame.,4
+as_salmon_teriyaki,1,"Mix soy sauce, honey and grated ginger.",3
+as_salmon_teriyaki,2,"Sear the salmon in the oil, 3 minutes per side.",7
+as_salmon_teriyaki,3,Add the sauce and spoon over the fish until glazed; top with spring onion.,3
+as_sunomono,1,"Slice the cucumbers paper-thin, salt and squeeze after 5 minutes.",8
+as_sunomono,2,"Dress with vinegar, sugar and soy sauce and top with sesame.",2
+as_pad_thai,1,Soak the rice noodles in warm water until pliable; drain.,15
+as_pad_thai,2,"Dissolve the tamarind pulp in 3 tablespoons hot water, strain, and mix with sugar and soy sauce.",5
+as_pad_thai,3,"Stir-fry garlic and shrimp, push aside and scramble the eggs.",4
+as_pad_thai,4,Add noodles and sauce and toss until absorbed; add sprouts and spring onion.,5
+as_pad_thai,5,"Serve with crushed peanuts, chili and lime.",2
+as_thai_basil_chicken,1,Pound garlic and chili together.,4
+as_thai_basil_chicken,2,"Fry the paste briefly, add the chicken and stir-fry until cooked.",7
+as_thai_basil_chicken,3,Season with soy sauce and sugar and toss in the basil; serve with rice and a fried egg.,2
+as_bibimbap,1,"Slice the beef thinly and marinate in half the soy sauce, garlic and a little sesame oil.",10
+as_bibimbap,2,Blanch the spinach and sprouts; season each with sesame oil and salt from the soy; sauté carrots and mushrooms.,15
+as_bibimbap,3,Stir-fry the beef until browned.,5
+as_bibimbap,4,Fry the eggs sunny-side up.,4
+as_bibimbap,5,"Arrange the toppings over rice, add the egg, sesame seeds and hot sauce.",5
+as_bulgogi,1,Slice the beef paper-thin.,10
+as_bulgogi,2,"Grate the apple and mix with soy sauce, sugar, garlic, ginger and sesame oil; marinate the beef at least 1 hour.",
+as_bulgogi,3,Sear in batches in a very hot pan.,8
+as_bulgogi,4,Garnish with spring onion and sesame seeds.,2
+as_chicken_satay,1,"Cut the chicken into strips and marinate with turmeric, curry powder, half the soy and sugar, garlic and oil.",10
+as_chicken_satay,2,Thread onto skewers and grill until charred and cooked.,12
+as_chicken_satay,3,"Warm the peanut butter with water, the remaining soy and sugar and the lime juice to a pourable sauce.",5
+as_sesame_noodles,1,"Boil the noodles, rinse in cold water and drain.",8
+as_sesame_noodles,2,"Whisk tahini, soy sauce, vinegar, sugar, garlic and sesame oil with a little water.",4
+as_sesame_noodles,3,Toss with the noodles and top with cucumber strips and spring onion.,3
+as_tofu_stirfry,1,"Press the tofu, cube and toss in corn starch; fry until crisp.",10
+as_tofu_stirfry,2,Stir-fry the vegetables with garlic and ginger.,5
+as_tofu_stirfry,3,Add tofu and soy sauce and toss.,2
+as_mapo_tofu,1,Cube the tofu and blanch in hot salted water.,5
+as_mapo_tofu,2,"Fry the beef until crisp, then add garlic, ginger and hot sauce.",6
+as_mapo_tofu,3,"Add water, soy sauce and tofu and simmer 3 minutes; thicken with corn starch.",5
+as_mapo_tofu,4,Top with spring onion.,1
+as_chicken_corn_soup,1,Poach the chicken in the water with stock cubes; shred.,12
+as_chicken_corn_soup,2,Add half the corn whole and half blended; simmer 5 minutes.,6
+as_chicken_corn_soup,3,"Thicken with corn starch, then drizzle in beaten egg; season with soy and white pepper and top with spring onion.",4
+us_beef_burger,1,Shape the beef into four patties slightly wider than the buns; season both sides.,8
+us_beef_burger,2,"Grill or pan-sear 3 to 4 minutes per side, adding cheese for the last minute.",8
+us_beef_burger,3,"Toast the buns and assemble with lettuce, tomato, onion, pickles, ketchup and mustard.",5
+us_mac_and_cheese,1,Boil the macaroni until al dente.,10
+us_mac_and_cheese,2,"Cook butter and flour 2 minutes, whisk in the milk until thick.",8
+us_mac_and_cheese,3,"Melt in the cheddar and mustard, season and stir in the pasta.",4
+us_pancakes,1,"Whisk the flour, baking powder, sugar and salt.",3
+us_pancakes,2,Beat the eggs with milk and melted butter and fold into the dry ingredients until just combined.,4
+us_pancakes,3,"Cook ladlefuls on a lightly buttered pan until bubbles appear, then flip.",20
+us_pancakes,4,Serve with maple syrup.,1
+us_chocolate_chip_cookies,1,"Cream the soft butter with both sugars, then beat in the egg and vanilla.",5
+us_chocolate_chip_cookies,2,"Mix in flour, baking soda and salt, then the chopped chocolate.",5
+us_chocolate_chip_cookies,3,Scoop onto lined trays and bake at 180 °C until golden at the edges.,12
+us_brownies,1,Melt the chocolate and butter together.,5
+us_brownies,2,"Whisk in the sugar and eggs, then fold in flour, cocoa, salt and nuts.",6
+us_brownies,3,Bake in a lined tin at 175 °C until just set in the middle; cool before cutting.,25
+us_buffalo_wings,1,Pat the wings dry and toss with baking powder and salt.,5
+us_buffalo_wings,2,"Roast on a rack at 220 °C, turning once, until crisp.",45
+us_buffalo_wings,3,Melt butter with hot sauce and garlic powder and toss the wings in it.,3
+us_bbq_chicken,1,"Season the chicken with paprika, garlic powder, salt and oil.",5
+us_bbq_chicken,2,Bake at 200 °C for 30 minutes.,30
+us_bbq_chicken,3,"Brush with barbecue sauce and bake 15 minutes more, basting twice.",15
+us_coleslaw,1,Finely shred the cabbage and grate the carrots.,12
+us_coleslaw,2,"Whisk the mayonnaise, vinegar, sugar, salt and pepper and toss with the vegetables.",3
+us_clam_chowder,1,Steam the clams in the water until open; chop the meat and strain the liquid.,12
+us_clam_chowder,2,"Soften onion and celery in butter, stir in the flour.",8
+us_clam_chowder,3,"Add the clam liquid, diced potatoes and thyme; simmer until tender.",15
+us_clam_chowder,4,"Add milk, cream and clams and heat without boiling; season.",5
+us_mashed_potatoes,1,Peel and boil the potatoes in salted water until very tender.,20
+us_mashed_potatoes,2,Drain and mash with butter and warm milk; season with pepper.,5
+us_cornbread,1,"Mix the cornmeal, flour, sugar, baking powder and salt.",3
+us_cornbread,2,"Whisk in eggs, milk and melted butter.",3
+us_cornbread,3,Pour into a buttered tin and bake at 200 °C until golden.,25
+us_apple_pie,1,"Rub cold butter into flour and salt, bind with iced water and chill 30 minutes.",35
+us_apple_pie,2,"Slice the apples and toss with sugar, cinnamon, lemon and corn starch.",12
+us_apple_pie,3,"Roll out two crusts, fill the pie and seal; brush with egg and cut vents.",15
+us_apple_pie,4,"Bake at 200 °C for 20 minutes, then 180 °C until golden and bubbling.",50
+us_banana_bread,1,"Mash the bananas and beat in melted butter, sugar, eggs and vanilla.",6
+us_banana_bread,2,"Fold in flour, baking soda, salt and nuts.",4
+us_banana_bread,3,Bake in a lined loaf tin at 175 °C until a skewer comes out clean.,55
+mx_guacamole,1,Mash the avocado flesh with lime juice and salt.,4
+mx_guacamole,2,"Fold in finely chopped onion, tomato, jalapeño and coriander.",6
+mx_pico_de_gallo,1,"Dice the tomatoes, onion and jalapeño finely and chop the coriander.",8
+mx_pico_de_gallo,2,Mix with lime juice and salt and rest 10 minutes.,2
+mx_chicken_fajitas,1,"Slice the chicken, peppers and onion into strips.",10
+mx_chicken_fajitas,2,"Toss the chicken with spices, salt, lime juice and oil.",3
+mx_chicken_fajitas,3,"Sear the chicken on high heat, then add the vegetables until charred but crisp.",12
+mx_chicken_fajitas,4,Serve in warm tortillas with sour cream.,3
+mx_beef_tacos,1,Brown the beef with onion and garlic.,8
+mx_beef_tacos,2,"Add the spices, tomato paste, water and salt and cook until thick.",7
+mx_beef_tacos,3,"Warm the tortillas and fill with beef, shredded lettuce, diced tomato and cheese.",5
+mx_bean_burrito,1,"Cook the black beans (soaked overnight) until tender, or use cooked beans; drain.",
+mx_bean_burrito,2,"Fry the onion in the oil, add beans, cumin and salt and mash lightly.",6
+mx_bean_burrito,3,"Warm the tortillas, fill with rice, beans, cheese and chopped tomato, and roll tightly.",6
+mx_bean_burrito,4,Toast seam-side down in a dry pan.,4
+mx_chicken_quesadilla,1,Shred the chicken and dice the pepper; season with chili powder.,6
+mx_chicken_quesadilla,2,"Fill half of each tortilla with cheese, chicken and pepper and fold.",4
+mx_chicken_quesadilla,3,Toast in a lightly oiled pan until golden and the cheese melts.,10
+mx_chili_con_carne,1,"Brown the beef in oil, then add onions, garlic and pepper.",12
+mx_chili_con_carne,2,"Stir in the spices and tomato paste, then the tomatoes.",5
+mx_chili_con_carne,3,"Simmer 40 minutes, add the beans and cook 15 minutes more; season.",55
+mx_mexican_rice,1,"Blend the tomatoes, onion and garlic.",4
+mx_mexican_rice,2,Toast the rice in oil until golden.,5
+mx_mexican_rice,3,"Add the tomato purée, water, stock cube and salt; cover and cook until tender.",20
+mx_black_bean_soup,1,Soak the beans overnight and drain.,
+mx_black_bean_soup,2,"Simmer with onion, garlic, stock cube and water until very soft.",80
+mx_black_bean_soup,3,"Add spices, blend partly and season; serve with lime and sour cream.",8
+mx_huevos_rancheros,1,"Blend the tomatoes, onion, jalapeño and garlic and simmer in a little oil for 8 minutes; season.",10
+mx_huevos_rancheros,2,Warm the tortillas and fry the eggs.,6
+mx_huevos_rancheros,3,Top tortillas with eggs and sauce and sprinkle with coriander.,2
+mx_chicken_enchiladas,1,"Simmer the tomato sauce with garlic, spices and salt for 8 minutes.",10
+mx_chicken_enchiladas,2,Mix the shredded chicken with chopped onion and half the cheese.,5
+mx_chicken_enchiladas,3,"Dip each tortilla in sauce, fill and roll; arrange in an oiled dish.",10
+mx_chicken_enchiladas,4,Cover with the remaining sauce and cheese and bake at 190 °C for 20 minutes.,20
+mx_elote,1,Char the boiled corn on a hot grill pan.,8
+mx_elote,2,"Brush with mayonnaise, roll in crumbled cheese and sprinkle with chili; serve with lime.",3
+eg_asir_farawla,1,Hull and wash the strawberries.,4
+eg_asir_farawla,2,Blend with water and sugar and serve chilled.,2
+eg_roz_bel_laban_mango,1,Cook the rice in the water until absorbed.,10
+eg_roz_bel_laban_mango,2,Add the milk and sugar and simmer until creamy; thicken with corn starch.,28
+eg_roz_bel_laban_mango,3,Cool and layer with diced mango.,5
+eg_konafa_manga,1,Boil 250 g sugar with the water and lemon juice for 10 minutes; cool.,12
+eg_konafa_manga,2,"Cook the milk, cream, corn starch and remaining sugar into a thick cream; cool.",10
+eg_konafa_manga,3,"Rub the kunafa with melted ghee, press half into a tray, add the cream and diced mango, and cover with the rest.",12
+eg_konafa_manga,4,Bake at 200 °C until golden and pour over the syrup.,30
+eg_petit_four,1,Beat the butter and powdered sugar until pale; beat in the egg and vanilla.,8
+eg_petit_four,2,Fold in the flour and corn starch to a pipeable dough.,5
+eg_petit_four,3,Pipe small rosettes onto trays and bake at 180 °C until just golden.,15
+eg_petit_four,4,Sandwich pairs with jam once cool.,15
+eg_fouliya,1,Roast the peanuts and rub off the skins.,10
+eg_fouliya,2,"Cook the sugar, honey and water to an amber caramel.",8
+eg_fouliya,3,"Stir in the peanuts, spread on an oiled tray and break into pieces when cool.",5
+eg_mehalabeya_chocolate,1,"Whisk the corn starch, cocoa and sugar into 250 ml cold milk.",3
+eg_mehalabeya_chocolate,2,"Heat the remaining milk, add the cocoa mixture and stir until thick.",10
+eg_mehalabeya_chocolate,3,"Add vanilla, pour into cups and chill.",3
+as_miso_soup,1,Bring the water to a simmer and add the cubed tofu and torn nori.,6
+as_miso_soup,2,Dissolve the miso in a ladle of the broth and stir it back in; do not boil.,2
+as_miso_soup,3,Serve topped with spring onion.,1
+us_grilled_cheese,1,Butter the outside of the bread slices and sandwich the cheese between them.,3
+us_grilled_cheese,2,"Toast in a pan on medium-low heat until golden and the cheese has melted, turning once.",8
+it_affogato,1,Scoop the ice cream into glasses.,1
+it_affogato,2,Pour over freshly made hot espresso and serve at once.,1
+eg_bid_maslouk_salata,1,"Boil the eggs for 10 minutes, cool in cold water and peel.",12
+eg_bid_maslouk_salata,2,"Chop the eggs, tomatoes and spring onion.",5
+eg_bid_maslouk_salata,3,"Mix with olive oil, salt and cumin.",1
+eg_tomato_onion_salad,1,Slice the tomatoes and onion thinly.,6
+eg_tomato_onion_salad,2,"Dress with vinegar, oil, mint and salt.",2
+eg_fried_eggplant,1,"Slice the eggplant, salt and leave 10 minutes; pat dry.",12
+eg_fried_eggplant,2,Fry in hot oil until golden; drain on paper.,18
+eg_fried_eggplant,3,Optionally sprinkle with crushed garlic in vinegar.,2
+eg_kromb_sauteed,1,Shred the cabbage.,8
+eg_kromb_sauteed,2,"Fry onion and garlic, add the cabbage and stir until wilted.",10
+eg_kromb_sauteed,3,Add grated tomatoes and spices; cover and cook until tender.,20
+eg_fasolia_zeit,1,Trim and cut the beans.,10
+eg_fasolia_zeit,2,"Soften onion and garlic in olive oil, add tomatoes.",8
+eg_fasolia_zeit,3,Add beans and water; cover and simmer until tender. Season with salt and black pepper.,25
+eg_macarona_salsa_lahma,1,Boil the macaroni until just al dente.,12
+eg_macarona_salsa_lahma,2,Brown the beef with onion and garlic; add tomato paste and tomatoes and simmer 15 minutes.,20
+eg_macarona_salsa_lahma,3,"Mix pasta and sauce in a tray, top with cheese if liked and bake at 200 °C for 10 minutes. Season the sauce with salt and black pepper.",10
+eg_pasta_salsa,1,Boil the spaghetti in salted water until al dente.,12
+eg_pasta_salsa,2,"Fry the garlic, add tomato paste and grated tomatoes and simmer 10 minutes.",12
+eg_pasta_salsa,3,Toss the spaghetti in the sauce. Season with black pepper.,2
+eg_spinach_eggs,1,Wash and chop the spinach.,8
+eg_spinach_eggs,2,"Fry the onion and garlic, add spinach and cook until wilted.",6
+eg_spinach_eggs,3,"Make wells, crack in the eggs, cover and cook until set. Season with salt and black pepper.",6
+eg_pumpkin_stew,1,Peel and cube the pumpkin.,12
+eg_pumpkin_stew,2,"Soften the onion in the oil, add tomatoes and spices.",8
+eg_pumpkin_stew,3,"Add pumpkin and water, cover and simmer until tender.",20
+eg_chicken_peas_carrots,1,Brown the chicken in oil with the onion.,12
+eg_chicken_peas_carrots,2,"Add tomato paste, tomatoes and water; simmer 25 minutes.",25
+eg_chicken_peas_carrots,3,Add peas and carrots and simmer until tender. Season with salt and black pepper.,20
+eg_shawerma_frakh,1,Cut the chicken into thin strips.,8
+eg_shawerma_frakh,2,"Marinate with yogurt, lemon, garlic, vinegar and spices for at least 1 hour.",
+eg_shawerma_frakh,3,Sear in a very hot pan with oil in batches until charred at the edges.,15
+eg_shawerma_frakh,4,Serve in bread with tahini and pickles.,4
+eg_kofta_frakh,1,Grate the onion and squeeze; chop the parsley.,6
+eg_kofta_frakh,2,"Mix with the chicken, garlic and spices; chill 20 minutes.",6
+eg_kofta_frakh,3,Shape into fingers and grill or pan-fry until cooked through.,15
+eg_tuna_salad,1,Drain the tuna and flake.,2
+eg_tuna_salad,2,Dice the vegetables finely and mix everything together. Season with cumin and black pepper.,8
+eg_sardine_tomato,1,"Fry onion and garlic, add the tomatoes and cumin and cook 5 minutes.",8
+eg_sardine_tomato,2,Add the sardines and warm through gently; finish with lemon.,4
+eg_mokh_pane,1,Soak the brain in cold water with the vinegar for 30 minutes and peel off the membrane.,
+eg_mokh_pane,2,Poach gently in salted water with the lemon juice for 10 minutes; cool and slice.,12
+eg_mokh_pane,3,"Season with cumin, salt and black pepper, then coat in flour, beaten egg and breadcrumbs.",8
+eg_mokh_pane,4,Shallow-fry in the oil until golden on both sides.,8
+eg_halawiyat,1,"Soak the sweetbreads in cold water for 1 hour, then blanch for 5 minutes and peel off the membrane.",
+eg_halawiyat,2,Cut into pieces and sauté in hot oil until golden.,12
+eg_halawiyat,3,"Add garlic and chili, then cumin, salt and pepper, and cook 3 minutes.",5
+eg_halawiyat,4,Finish with lemon juice.,1
+eg_ful_akhdar_beid,1,Shell the fava beans; chop the onion and dill.,12
+eg_ful_akhdar_beid,2,"Soften the onion in oil, add the beans and water, cover and cook until tender.",15
+eg_ful_akhdar_beid,3,"Stir in the dill, season with salt and pepper and add the beaten eggs, stirring until set.",5
+eg_bamia_gambari,1,Trim the okra and peel the shrimp.,20
+eg_bamia_gambari,2,"Fry garlic and coriander in the oil, add tomato paste and tomatoes and cook 5 minutes.",8
+eg_bamia_gambari,3,Add the okra and water and simmer 15 minutes.,15
+eg_bamia_gambari,4,Add the shrimp and cook 5 minutes; season with salt and lemon.,6
+eg_samak_tahina,1,"Season the fish with cumin, salt and half the lemon and place in a baking dish.",5
+eg_samak_tahina,2,Fry the sliced onions in olive oil until golden and spread over the fish.,10
+eg_samak_tahina,3,"Whisk the tahini with water, the remaining lemon and crushed garlic and pour over.",4
+eg_samak_tahina,4,Bake at 200 °C until the fish flakes and the top is golden.,25
+eg_batates_bechamel,1,Slice the potatoes and parboil for 5 minutes; drain.,12
+eg_batates_bechamel,2,"Brown the beef with the onion, salt and pepper.",12
+eg_batates_bechamel,3,"Make a béchamel with butter, flour and milk; season with nutmeg.",12
+eg_batates_bechamel,4,"Layer potatoes and beef in a dish, cover with béchamel and cheese and bake at 200 °C until golden.",35
+eg_beid_luncheon,1,Dice the luncheon and fry in the butter for 2 minutes.,3
+eg_beid_luncheon,2,Add the beaten eggs and stir until just set; season with pepper.,5
+eg_fattet_frakh,1,"Boil the chicken with the onion and cardamom to make broth, then roast the pieces until browned.",50
+eg_fattet_frakh,2,Toast the bread pieces with a little ghee; cook the rice in ghee with 550 ml broth.,20
+eg_fattet_frakh,3,Make the garlic-vinegar and the garlic tomato sauce in the remaining ghee.,12
+eg_fattet_frakh,4,"Layer bread moistened with broth and vinegar, rice, sauce and the chicken; season with salt.",5
+eg_gambari_pane,1,"Peel and butterfly the shrimp; marinate with garlic, lemon, cumin and salt for 15 minutes.",15
+eg_gambari_pane,2,"Coat in flour, egg and breadcrumbs.",8
+eg_gambari_pane,3,"Fry in hot oil until golden, about 2 minutes per batch.",10
+eg_samak_fillet_pane,1,"Marinate the fillets with garlic, lemon, cumin and salt for 15 minutes.",15
+eg_samak_fillet_pane,2,Dip in egg and breadcrumbs.,6
+eg_samak_fillet_pane,3,Shallow-fry until golden and cooked through.,10
+eg_shish_frakh,1,"Marinate the cubed chicken in yogurt, garlic, lemon, spices, oil and salt for 2 hours.",
+eg_shish_frakh,2,Thread onto skewers with pepper and onion pieces.,10
+eg_shish_frakh,3,Grill on high heat until charred and cooked through.,15
+eg_kabab_halla,1,Brown the beef cubes in the ghee.,15
+eg_kabab_halla,2,Add the sliced onions and cook until soft and golden.,20
+eg_kabab_halla,3,"Add spices, tomato paste and water; cover and simmer until the beef is very tender and the sauce thick; season with salt.",100
+eg_batates_fel_forn,1,Cut the potatoes into wedges.,8
+eg_batates_fel_forn,2,"Toss with oil, crushed garlic, paprika, cumin and salt.",3
+eg_batates_fel_forn,3,"Roast at 220 °C, turning once, until crisp.",40
+eg_feteer_lahma,1,"Make a soft dough from the flour, salt and water; rest 30 minutes in a little oil.",35
+eg_feteer_lahma,2,"Brown the beef with chopped onion, pepper and spices.",12
+eg_feteer_lahma,3,"Stretch the dough paper-thin, brush with ghee, spread the filling and fold into a square, adding ghee between layers.",20
+eg_feteer_lahma,4,Bake at 220 °C until golden and flaky.,30
+eg_hawawshi_frakh,1,"Mix the chicken with finely chopped onion, peppers, chili and the spices.",10
+eg_hawawshi_frakh,2,Open the loaves (about 6) into pockets and spread the filling thinly inside.,8
+eg_hawawshi_frakh,3,Brush with ghee and bake at 220 °C until crisp and cooked through.,25
+eg_shorbet_bisella,1,Soften the chopped onion and carrot in butter.,8
+eg_shorbet_bisella,2,"Add the split peas, water and stock cube and simmer until very soft.",45
+eg_shorbet_bisella,3,"Blend and season with cumin, salt and pepper.",4
+eg_batata_asal,1,Scrub the sweet potatoes and bake whole at 200 °C until very soft.,45
+eg_batata_asal,2,"Split open and drizzle with honey, cinnamon and melted butter.",3
+eg_hommos_mehammas,1,Dry the chickpeas very well on a towel.,5
+eg_hommos_mehammas,2,"Toss with olive oil, cumin and salt.",2
+eg_hommos_mehammas,3,"Roast at 200 °C, shaking the tray, until crunchy.",35
+eg_asabe_zeinab,1,"Make a syrup from 350 g sugar, 250 ml water and the lemon juice; cool.",12
+eg_asabe_zeinab,2,"Mix semolina, flour, baking powder, remaining sugar, 100 ml oil and remaining water into a dough.",8
+eg_asabe_zeinab,3,Roll into fingers and press on a grater to pattern them.,20
+eg_asabe_zeinab,4,"Fry until golden, dip in the syrup and sprinkle with sesame.",20
+eg_simsimiya,1,Toast the sesame in a dry pan until golden.,6
+eg_simsimiya,2,Melt the sugar with the honey and lemon to a light caramel.,8
+eg_simsimiya,3,"Stir in the sesame, spread thinly on an oiled surface and cut into squares while warm.",5
+as_thai_coconut_chicken_curry,1,"Fry the garlic, ginger, chili and curry powder in the oil for 1 minute.",3
+as_thai_coconut_chicken_curry,2,Add the sliced chicken and stir until sealed.,5
+as_thai_coconut_chicken_curry,3,"Pour in the coconut milk, fish sauce and sugar and simmer 15 minutes; add the pepper for the last 5 minutes.",15
+as_thai_coconut_chicken_curry,4,Finish with basil.,1
+as_coconut_shrimp_soup,1,"Simmer the water, stock cube, sliced ginger and chili for 5 minutes.",6
+as_coconut_shrimp_soup,2,Add coconut milk and mushrooms and simmer 5 minutes.,5
+as_coconut_shrimp_soup,3,Add shrimp and cook 3 minutes; season with fish sauce and lime juice and top with coriander.,4
+in_coconut_fish_curry,1,"Fry onion, garlic and ginger, then the spices.",10
+in_coconut_fish_curry,2,"Add tomatoes, tamarind pulp dissolved in a little water and coconut milk; simmer 8 minutes.",10
+in_coconut_fish_curry,3,Add the fish pieces and salt and simmer gently until cooked.,8
+in_chicken_korma,1,Soak the cashews in hot water and blend to a paste.,10
+in_chicken_korma,2,"Fry onions in ghee until golden, add garlic, ginger and spices.",12
+in_chicken_korma,3,"Add chicken, then yogurt a spoon at a time, and cook 10 minutes.",12
+in_chicken_korma,4,Stir in the cashew paste and coconut milk and simmer until thick; salt.,10
+as_salmon_rice_bowl,1,Cook the rice and season with vinegar and sugar.,15
+as_salmon_rice_bowl,2,Sear the salmon in the oil and flake.,8
+as_salmon_rice_bowl,3,"Top the rice with salmon, sliced cucumber and avocado, nori, sesame and soy sauce.",5
+as_hoisin_chicken,1,Toss the sliced chicken with corn starch and soy sauce.,5
+as_hoisin_chicken,2,"Stir-fry in hot oil until browned, add garlic and pepper.",8
+as_hoisin_chicken,3,Add the hoisin sauce and spring onion and toss until glossy.,2
+as_oyster_beef_mushroom,1,Slice the beef thinly and toss with corn starch and soy sauce.,8
+as_oyster_beef_mushroom,2,Sear the beef in very hot oil and remove.,4
+as_oyster_beef_mushroom,3,"Stir-fry mushrooms with garlic and ginger, return the beef with the oyster sauce and spring onion.",6
+as_chicken_lo_mein,1,Boil and drain the noodles.,8
+as_chicken_lo_mein,2,"Stir-fry the sliced chicken, then the vegetables with garlic.",8
+as_chicken_lo_mein,3,"Toss in the noodles, soy and oyster sauce and finish with sesame oil.",3
+as_chicken_adobo,1,"Combine the chicken with vinegar, soy sauce, garlic, bay leaf, pepper, sugar and water; marinate 30 minutes.",
+as_chicken_adobo,2,Simmer covered for 30 minutes.,30
+as_chicken_adobo,3,"Remove the chicken, brown it in the oil, and reduce the sauce to pour over.",15
+us_turkey_club,1,Toast the bread.,5
+us_turkey_club,2,"Spread with mayonnaise and layer turkey, lettuce, tomato and cheese in two tiers.",6
+us_turkey_club,3,Cut into quarters and secure with sticks.,2
+us_caesar_salad,1,Tear the lettuce and slice the chicken.,8
+us_caesar_salad,2,Toss with the dressing and lemon.,2
+us_caesar_salad,3,Top with croutons and shaved parmesan.,2
+us_cobb_salad,1,Chop the lettuce and arrange in a bowl.,5
+us_cobb_salad,2,"Arrange rows of sliced chicken, chopped egg, avocado, tomato and crumbled blue cheese on top.",12
+us_cobb_salad,3,Serve with the dressing.,1
+us_meatloaf,1,"Mix the beef with grated onion, breadcrumbs soaked in milk, eggs, Worcestershire, salt and pepper.",10
+us_meatloaf,2,Shape into a loaf in a tin.,4
+us_meatloaf,3,Mix ketchup and brown sugar and spread over the top.,2
+us_meatloaf,4,Bake at 180 °C for about 1 hour; rest 10 minutes before slicing.,60
+us_sloppy_joes,1,Brown the beef with onion and pepper.,10
+us_sloppy_joes,2,"Stir in ketchup, tomato paste, mustard, sugar and salt and simmer 10 minutes.",10
+us_sloppy_joes,3,Spoon into toasted buns.,2
+us_chicken_noodle_soup,1,Simmer the chicken with onion and bay leaf in the water for 30 minutes; shred the meat.,30
+us_chicken_noodle_soup,2,Add sliced carrots and celery and cook 8 minutes.,8
+us_chicken_noodle_soup,3,Add the noodles and chicken and cook until tender; season and add parsley.,8
+us_potato_salad,1,"Boil the potatoes until tender, peel and cube.",22
+us_potato_salad,2,"Chop the eggs, celery, onion and pickles.",8
+us_potato_salad,3,"Fold everything with mayonnaise, mustard, salt and pepper; chill.",3
+us_deviled_eggs,1,"Hard-boil the eggs for 11 minutes, cool and peel.",15
+us_deviled_eggs,2,"Halve the eggs, mash the yolks with mayonnaise, mustard and salt.",5
+us_deviled_eggs,3,Pipe back into the whites and dust with paprika.,5
+us_french_toast,1,"Whisk the eggs with milk, cinnamon and sugar.",3
+us_french_toast,2,Soak the bread slices briefly.,3
+us_french_toast,3,Fry in butter until golden on both sides and serve with syrup.,12
+us_blueberry_muffins,1,"Mix the flour, sugar, baking powder and salt.",3
+us_blueberry_muffins,2,"Whisk the eggs, milk, oil and vanilla and stir into the dry ingredients until just combined; fold in the blueberries.",5
+us_blueberry_muffins,3,Divide into lined muffin tins and bake at 190 °C until golden.,22
+it_carbonara_smoked_beef,1,Boil the spaghetti in salted water; keep a cup of the water.,12
+it_carbonara_smoked_beef,2,Crisp the diced smoked beef in olive oil.,5
+it_carbonara_smoked_beef,3,"Beat the eggs, yolks, parmesan and pepper.",3
+it_carbonara_smoked_beef,4,"Off the heat, toss the hot pasta with the beef, then the egg mixture, loosening with pasta water until creamy.",2
+it_risotto_milanese,1,Dissolve the stock cubes in hot water and steep the saffron in a ladle of it.,3
+it_risotto_milanese,2,Soften the onion in half the butter and toast the rice.,5
+it_risotto_milanese,3,"Add stock gradually, stirring, until creamy; add the saffron halfway.",20
+it_risotto_milanese,4,Beat in the remaining butter and parmesan; season with salt.,2
+it_tomato_basil_soup,1,"Roast the halved tomatoes, onion and garlic with olive oil at 220 °C for 25 minutes.",25
+it_tomato_basil_soup,2,Simmer with the water and stock cube for 5 minutes.,5
+it_tomato_basil_soup,3,"Blend with the basil, stir in the cream and season.",4
+it_chicken_piccata,1,"Slice the chicken into thin cutlets, season and dust with flour.",8
+it_chicken_piccata,2,Fry in oil and half the butter until golden; set aside.,10
+it_chicken_piccata,3,"Add water, stock cube, lemon juice and capers to the pan and reduce by half.",6
+it_chicken_piccata,4,"Swirl in the remaining butter, return the chicken and add parsley.",2
+it_chicken_cacciatore,1,Season and brown the chicken in olive oil; remove.,12
+it_chicken_cacciatore,2,"Sauté the onion, peppers, mushrooms and garlic.",8
+it_chicken_cacciatore,3,"Add tomatoes and oregano, return the chicken and simmer covered until tender.",35
+it_pasta_e_fagioli,1,"Soften the chopped onion, carrot, celery and garlic in olive oil with the rosemary.",10
+it_pasta_e_fagioli,2,"Add tomatoes, half the beans mashed, the whole beans and water; simmer 15 minutes.",15
+it_pasta_e_fagioli,3,Add the macaroni and cook until tender; season.,12
+mx_chicken_tortilla_soup,1,Simmer the chicken in the water with stock cubes for 15 minutes; shred.,15
+mx_chicken_tortilla_soup,2,"Fry onion, garlic and spices, add tomatoes and the broth.",8
+mx_chicken_tortilla_soup,3,"Add beans, corn and chicken and simmer 10 minutes.",10
+mx_chicken_tortilla_soup,4,"Serve topped with tortilla chips, avocado and lime.",3
+mx_nachos,1,Spread the chips on a tray and dot with refried beans.,4
+mx_nachos,2,Cover with grated cheese and jalapeños.,3
+mx_nachos,3,Bake at 200 °C until melted; serve with salsa and sour cream.,8
+mx_burrito_bowl,1,Season the chicken with spices and salt and sear in the oil until cooked; slice.,15
+mx_burrito_bowl,2,Warm the beans and corn.,5
+mx_burrito_bowl,3,"Assemble bowls of rice, chicken, beans, corn, salsa and avocado with lime.",5
+mx_horchata,1,Soak the rice and cinnamon in 500 ml water overnight.,
+mx_horchata,2,Blend until very smooth and strain through a cloth.,8
+mx_horchata,3,"Add the remaining water, milk, sugar and vanilla and chill.",3
+es_churros,1,"Boil the water with butter and salt, add the flour at once and stir until smooth; cool slightly and beat in the egg.",8
+es_churros,2,Pipe strips into hot oil and fry until golden.,15
+es_churros,3,Roll in sugar mixed with cinnamon.,3
+es_patatas_bravas,1,"Cube the potatoes, toss with half the oil and salt and roast at 220 °C until crisp.",35
+es_patatas_bravas,2,"Warm the garlic in the remaining oil, add paprika, cayenne and tomato sauce and simmer 5 minutes.",6
+es_patatas_bravas,3,Spoon the sauce over the potatoes.,1
+gr_avgolemono,1,Simmer the chicken in the water with stock cubes for 15 minutes; shred.,15
+gr_avgolemono,2,Add the rice and cook until tender.,15
+gr_avgolemono,3,"Whisk the eggs with lemon juice, temper with hot broth, then stir into the pot off the boil until silky; return the chicken and season.",5
+gr_yogurt_honey_walnuts,1,Toast the walnuts lightly.,3
+gr_yogurt_honey_walnuts,2,Spoon the yogurt into bowls and top with honey and walnuts.,1
+tr_mercimek_koftesi,1,"Simmer the lentils in the water until soft, add the bulgur, cover off the heat and leave 20 minutes.",20
+tr_mercimek_koftesi,2,Fry the onion in oil with tomato paste and spices and knead into the lentil mixture.,8
+tr_mercimek_koftesi,3,"Add parsley, spring onion, lemon and salt and shape into oval patties.",15
+tr_mercimek_koftesi,4,Serve in lettuce leaves.,2
+tr_ayran,1,"Whisk the yogurt, cold water and salt until frothy.",2
+tr_ayran,2,Pour into glasses and serve chilled.,1
+ma_chicken_bastilla,1,"Stew the chicken with onions, ginger, saffron, half the cinnamon and the water until tender; shred the meat.",45
+ma_chicken_bastilla,2,Reduce the broth and scramble the eggs in it with the parsley.,8
+ma_chicken_bastilla,3,Toast and chop the almonds with half the sugar and a little cinnamon.,5
+ma_chicken_bastilla,4,"Layer buttered phyllo in a tin, add egg, chicken and almonds, fold over and top with more buttered sheets.",15
+ma_chicken_bastilla,5,Bake at 190 °C until golden; dust with the remaining sugar and cinnamon.,30
+ma_carrot_salad,1,Slice the carrots and boil until just tender.,10
+ma_carrot_salad,2,"Toss with garlic, spices, lemon, oil, salt and parsley; serve cold.",3
+ma_mint_tea,1,Brew the green tea.,4
+ma_mint_tea,2,Add the mint and sugar and steep 3 minutes; pour from a height into glasses.,3
+in_vegetable_pulao,1,"Fry the whole spices in ghee, add the sliced onion and cook until golden.",8
+in_vegetable_pulao,2,"Add the diced carrot, peas and rinsed rice and stir.",3
+in_vegetable_pulao,3,"Add the boiling salted water, cover and cook on low until done.",18
+in_aloo_paratha,1,"Make a soft dough from the flour, water and a little salt; rest 20 minutes.",25
+in_aloo_paratha,2,"Boil and mash the potatoes with chili, coriander, cumin and salt.",20
+in_aloo_paratha,3,"Fill dough balls with the potato, seal and roll out gently.",15
+in_aloo_paratha,4,"Cook on a hot pan, brushing with ghee, until golden on both sides.",25
+in_masala_chai,1,"Simmer the tea with crushed ginger, cardamom and cinnamon for 5 minutes.",5
+in_masala_chai,2,"Add milk and sugar, bring to a boil and strain.",5
+in_lemon_rice,1,"Fry the peanuts, mustard seed and chili in oil until the peanuts colour.",5
+in_lemon_rice,2,"Add the turmeric, then the rice and salt, and toss until hot.",4
+in_lemon_rice,3,Finish with lemon juice.,1
+in_gulab_jamun,1,"Simmer the sugar, water and cardamom for 8 minutes; add rose water and keep warm.",10
+in_gulab_jamun,2,"Mix milk powder, flour, baking soda and ghee with enough milk for a soft dough; roll into smooth balls.",15
+in_gulab_jamun,3,Fry slowly in medium oil until deep brown.,15
+in_gulab_jamun,4,Soak in the warm syrup for at least 1 hour.,
+in_pav_bhaji,1,"Boil the potatoes, cauliflower and peas until soft and mash.",20
+in_pav_bhaji,2,"Cook onion and pepper in half the butter, add tomatoes and curry powder and cook down.",10
+in_pav_bhaji,3,"Add the mashed vegetables and a little water, mash together and season with salt and lemon.",8
+in_pav_bhaji,4,Toast the buns in the remaining butter and serve with the bhaji.,4
+as_egg_drop_soup,1,Bring the water and stock cubes to a boil; thicken with corn starch mixed with water.,5
+as_egg_drop_soup,2,Stir the broth in a circle and drizzle in the beaten eggs.,2
+as_egg_drop_soup,3,Season with soy and white pepper and top with spring onion.,1
+as_garlic_green_beans,1,Trim the beans.,6
+as_garlic_green_beans,2,"Stir-fry in very hot oil until blistered, add garlic and chili for 1 minute.",7
+as_garlic_green_beans,3,Add soy sauce and toss.,1
+as_chicken_katsu,1,"Flatten the breasts, season and coat in flour, egg and breadcrumbs.",10
+as_chicken_katsu,2,Fry until golden and cooked through; slice.,12
+as_chicken_katsu,3,"Mix ketchup, Worcestershire and soy sauce for the dipping sauce.",2
+as_korean_fried_chicken,1,Toss the wings with salt and corn starch.,5
+as_korean_fried_chicken,2,"Fry at 160 °C for 10 minutes, rest, then fry again at 190 °C until very crisp.",25
+as_korean_fried_chicken,3,"Simmer hot sauce, honey, soy and garlic to a glaze and toss the wings; sprinkle with sesame.",5
+as_mango_sticky_rice,1,Soak the sticky rice for at least 4 hours and steam until tender.,25
+as_mango_sticky_rice,2,Warm 300 ml coconut milk with the sugar and salt and pour over the hot rice; cover 20 minutes.,
+as_mango_sticky_rice,3,Serve with sliced mango and the remaining coconut milk.,5
+uk_shepherds_pie,1,"Brown the lamb with onion and carrot, add tomato paste, Worcestershire, stock powder, water and peas; simmer 20 minutes.",25
+uk_shepherds_pie,2,"Boil and mash the potatoes with butter, milk, salt and pepper.",25
+uk_shepherds_pie,3,"Put the meat in a dish, top with the mash and bake at 200 °C until golden.",25
+uk_fish_and_chips,1,"Cut the potatoes into thick chips, rinse and dry; fry at 150 °C until soft, then drain.",15
+uk_fish_and_chips,2,"Whisk the flour, baking powder and salt with cold sparkling water into a batter.",4
+uk_fish_and_chips,3,Dip the fish in the batter and fry at 180 °C until golden.,8
+uk_fish_and_chips,4,Fry the chips again until crisp; serve with lemon and vinegar.,6
+uk_scones,1,"Rub the butter into the flour, baking powder, sugar and salt.",5
+uk_scones,2,"Mix in the milk to a soft dough, pat 3 cm thick and cut rounds.",8
+uk_scones,3,Brush with beaten egg and bake at 220 °C until risen and golden.,15
+fr_croque_monsieur,1,"Make a small béchamel with half the butter, the flour and milk; season with nutmeg.",6
+fr_croque_monsieur,2,"Spread bread with mustard, fill with turkey and half the cheese.",4
+fr_croque_monsieur,3,"Top with béchamel and the remaining cheese and bake at 220 °C until bubbling, after toasting in the remaining butter.",12
+fr_chocolate_mousse,1,Melt the chocolate gently.,5
+fr_chocolate_mousse,2,Whisk the yolks with sugar over simmering water until thick and hot; fold into the chocolate.,8
+fr_chocolate_mousse,3,Whip the cream to soft peaks and fold in; chill at least 4 hours.,7
+fr_creme_brulee,1,Heat the cream with vanilla; whisk the yolks with 80 g sugar and stir in the cream.,8
+fr_creme_brulee,2,Pour into ramekins and bake in a water bath at 150 °C until just set.,35
+fr_creme_brulee,3,"Chill, then sprinkle with the remaining sugar and caramelise with a torch or hot grill.",5
+fr_nicoise_salad,1,Boil the potatoes and blanch the green beans; cool.,15
+fr_nicoise_salad,2,"Whisk the oil, vinegar, mustard and salt.",2
+fr_nicoise_salad,3,"Arrange lettuce, potatoes, beans, tomatoes, eggs, tuna and olives and dress.",8
+us_buttermilk_biscuits,1,"Mix the flour, baking powder, baking soda and salt and cut in the cold butter.",5
+us_buttermilk_biscuits,2,Stir in the buttermilk just until the dough holds; fold twice and cut rounds.,8
+us_buttermilk_biscuits,3,Bake at 230 °C until tall and golden.,15

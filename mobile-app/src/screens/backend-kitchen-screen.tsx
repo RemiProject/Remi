@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, View, type ScrollView } from 'react-native';
+import { ActivityIndicator, View, type ScrollViewInstance } from 'react-native';
 import { AppText, ActionRow, Button, Card, Chip, EmptyState, PageHeader, Screen, SearchField, SectionHeader, uiStyles } from '@/components/ui/core';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
 import { useInventory } from '@/providers/inventory-provider';
@@ -54,7 +54,7 @@ export function BackendKitchenScreen() {
   const { items, status, today, owner, additionNotice, additionNoticeKind, dismissAdded } = useBackendKitchen();
   const { language, t, rtl } = useLabels();
   const { colors } = useRemyTheme();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [query, setQuery] = useState('');
   const [storage, setStorage] = useState('all');
   const [sort, setSort] = useState<'name' | 'expiry'>('name');
@@ -103,7 +103,7 @@ export function BackendFoodDetailScreen() {
   const { detail, owner, loadDetail, additionNotice, additionNoticeKind, dismissAdded } = useBackendKitchen();
   const { language, t, rtl } = useLabels();
   const { colors } = useRemyTheme();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   useEffect(() => { if (owner) void loadDetail(id); }, [owner, id, loadDetail]);
   useFocusEffect(useCallback(() => {
     if (!owner || additionNotice == null || additionNoticeKind !== 'updated') return;

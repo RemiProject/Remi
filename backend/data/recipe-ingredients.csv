@@ -1,3 +1,3525 @@
-# One row per ingredient. food: English name or Arabic alias. unit: GRAM | KILOGRAM | MILLILITER | LITER | PIECE | CUP | TABLESPOON | TEASPOON.
-# CUP / TABLESPOON / TEASPOON only work for foods with density_g_per_ml (or a MILLILITER default unit). optional: true | false
+﻿# Remi AI development dataset. One row per ingredient.
 recipe_key,food,quantity,unit,optional
+eg_mesh_salad,mish,120,GRAM,false
+eg_mesh_salad,tomato,2,PIECE,false
+eg_mesh_salad,chili pepper,1,PIECE,true
+eg_mesh_salad,olive oil,1,TABLESPOON,false
+eg_asal_tehina,molasses,120,GRAM,false
+eg_asal_tehina,tahini,80,GRAM,false
+eg_couscous_sweet,couscous,300,GRAM,false
+eg_couscous_sweet,water,330,MILLILITER,false
+eg_couscous_sweet,butter,50,GRAM,false
+eg_couscous_sweet,white sugar,60,GRAM,false
+eg_couscous_sweet,raisins,40,GRAM,false
+eg_couscous_sweet,desiccated coconut,30,GRAM,true
+eg_couscous_sweet,almonds,30,GRAM,true
+eg_ashura,whole wheat grain,250,GRAM,false
+eg_ashura,whole milk,1000,MILLILITER,false
+eg_ashura,white sugar,150,GRAM,false
+eg_ashura,corn starch,20,GRAM,false
+eg_ashura,vanilla extract,1,TEASPOON,false
+eg_ashura,raisins,40,GRAM,false
+eg_ashura,walnuts,40,GRAM,false
+eg_ashura,desiccated coconut,30,GRAM,false
+eg_ashura,hazelnuts,30,GRAM,true
+eg_kunafa,kunafa dough,500,GRAM,false
+eg_kunafa,ghee,200,GRAM,false
+eg_kunafa,whole milk,500,MILLILITER,false
+eg_kunafa,corn starch,40,GRAM,false
+eg_kunafa,heavy cream,200,MILLILITER,false
+eg_kunafa,white sugar,400,GRAM,false
+eg_kunafa,water,300,MILLILITER,false
+eg_kunafa,lemon juice,1,TABLESPOON,false
+eg_kunafa,pistachios,30,GRAM,true
+eg_om_ali,puff pastry,400,GRAM,false
+eg_om_ali,whole milk,1000,MILLILITER,false
+eg_om_ali,heavy cream,200,MILLILITER,false
+eg_om_ali,white sugar,120,GRAM,false
+eg_om_ali,raisins,50,GRAM,false
+eg_om_ali,almonds,40,GRAM,false
+eg_om_ali,hazelnuts,40,GRAM,false
+eg_om_ali,desiccated coconut,30,GRAM,false
+eg_om_ali,vanilla extract,1,TEASPOON,false
+eg_ghorayeba,ghee,250,GRAM,false
+eg_ghorayeba,powdered sugar,150,GRAM,false
+eg_ghorayeba,wheat flour,400,GRAM,false
+eg_ghorayeba,vanilla extract,1,TEASPOON,false
+eg_ghorayeba,pistachios,30,GRAM,true
+eg_khoshaf,dried apricots,150,GRAM,false
+eg_khoshaf,prunes,150,GRAM,false
+eg_khoshaf,raisins,100,GRAM,false
+eg_khoshaf,dried figs,100,GRAM,false
+eg_khoshaf,dried dates,100,GRAM,false
+eg_khoshaf,water,1000,MILLILITER,false
+eg_khoshaf,white sugar,50,GRAM,true
+eg_khoshaf,almonds,30,GRAM,true
+eg_creme_caramel,chicken egg,5,PIECE,false
+eg_creme_caramel,whole milk,750,MILLILITER,false
+eg_creme_caramel,white sugar,200,GRAM,false
+eg_creme_caramel,vanilla extract,1,TEASPOON,false
+eg_creme_caramel,water,2,TABLESPOON,false
+eg_balah_el_sham,water,500,MILLILITER,false
+eg_balah_el_sham,butter,80,GRAM,false
+eg_balah_el_sham,wheat flour,200,GRAM,false
+eg_balah_el_sham,chicken egg,4,PIECE,false
+eg_balah_el_sham,white sugar,400,GRAM,false
+eg_balah_el_sham,lemon juice,1,TABLESPOON,false
+eg_balah_el_sham,vanilla extract,1,TEASPOON,false
+eg_balah_el_sham,sunflower oil,800,MILLILITER,false
+eg_halawet_semid,semolina,200,GRAM,false
+eg_halawet_semid,butter,80,GRAM,false
+eg_halawet_semid,whole milk,500,MILLILITER,false
+eg_halawet_semid,white sugar,120,GRAM,false
+eg_halawet_semid,pine nuts,20,GRAM,true
+eg_feteer_asal,feteer meshaltet,400,GRAM,false
+eg_feteer_asal,honey,100,GRAM,false
+eg_feteer_asal,heavy cream,100,MILLILITER,false
+eg_feteer_asal,molasses,50,GRAM,true
+eg_karkade,hibiscus flowers,60,GRAM,false
+eg_karkade,water,1500,MILLILITER,false
+eg_karkade,white sugar,150,GRAM,false
+eg_sobia,white rice,100,GRAM,false
+eg_sobia,desiccated coconut,80,GRAM,false
+eg_sobia,whole milk,1000,MILLILITER,false
+eg_sobia,white sugar,150,GRAM,false
+eg_sobia,vanilla extract,1,TEASPOON,false
+eg_sobia,water,500,MILLILITER,false
+eg_lemon_mint,lemon,4,PIECE,false
+eg_lemon_mint,fresh mint,15,GRAM,false
+eg_lemon_mint,white sugar,100,GRAM,false
+eg_lemon_mint,water,1000,MILLILITER,false
+eg_shai_bel_naana,brewed black tea,800,MILLILITER,false
+eg_shai_bel_naana,fresh mint,10,GRAM,false
+eg_shai_bel_naana,white sugar,40,GRAM,false
+eg_mango_milk,mango,2,PIECE,false
+eg_mango_milk,whole milk,500,MILLILITER,false
+eg_mango_milk,white sugar,30,GRAM,true
+eg_guava_milk,guava,4,PIECE,false
+eg_guava_milk,whole milk,500,MILLILITER,false
+eg_guava_milk,white sugar,40,GRAM,false
+eg_ful_medames,ful medames,800,GRAM,false
+eg_ful_medames,water,120,MILLILITER,false
+eg_ful_medames,garlic,2,PIECE,false
+eg_ful_medames,cumin,3,GRAM,false
+eg_ful_medames,salt,4,GRAM,false
+eg_ful_medames,lemon juice,2,TABLESPOON,false
+eg_ful_medames,olive oil,3,TABLESPOON,false
+eg_ful_medames,tomato,1,PIECE,true
+eg_ful_medames,parsley,10,GRAM,true
+eg_ful_zeit_har,ful medames,800,GRAM,false
+eg_ful_zeit_har,water,100,MILLILITER,false
+eg_ful_zeit_har,flaxseed oil,3,TABLESPOON,false
+eg_ful_zeit_har,cumin,3,GRAM,false
+eg_ful_zeit_har,salt,4,GRAM,false
+eg_ful_zeit_har,lemon juice,1,TABLESPOON,false
+eg_ful_zeit_har,chili pepper,1,PIECE,true
+eg_ful_eskandarani,ful medames,800,GRAM,false
+eg_ful_eskandarani,sunflower oil,3,TABLESPOON,false
+eg_ful_eskandarani,onion,1,PIECE,false
+eg_ful_eskandarani,bell pepper,1,PIECE,false
+eg_ful_eskandarani,tomato,2,PIECE,false
+eg_ful_eskandarani,garlic,3,PIECE,false
+eg_ful_eskandarani,chili pepper,1,PIECE,true
+eg_ful_eskandarani,cumin,3,GRAM,false
+eg_ful_eskandarani,salt,4,GRAM,false
+eg_ful_eskandarani,black pepper,1,GRAM,false
+eg_ful_eskandarani,lemon juice,1,TABLESPOON,false
+eg_ful_tahina,ful medames,800,GRAM,false
+eg_ful_tahina,tahini,60,GRAM,false
+eg_ful_tahina,water,80,MILLILITER,false
+eg_ful_tahina,lemon juice,2,TABLESPOON,false
+eg_ful_tahina,garlic,2,PIECE,false
+eg_ful_tahina,cumin,2,GRAM,false
+eg_ful_tahina,salt,4,GRAM,false
+eg_ful_tahina,olive oil,1,TABLESPOON,false
+eg_taameya,fava beans,500,GRAM,false
+eg_taameya,onion,1,PIECE,false
+eg_taameya,leek,60,GRAM,false
+eg_taameya,parsley,40,GRAM,false
+eg_taameya,dill,30,GRAM,false
+eg_taameya,fresh coriander,40,GRAM,false
+eg_taameya,garlic,5,PIECE,false
+eg_taameya,chili pepper,1,PIECE,true
+eg_taameya,cumin,5,GRAM,false
+eg_taameya,coriander seed,4,GRAM,false
+eg_taameya,salt,8,GRAM,false
+eg_taameya,baking soda,3,GRAM,false
+eg_taameya,sesame seeds,20,GRAM,true
+eg_taameya,sunflower oil,500,MILLILITER,false
+eg_beid_basterma,chicken egg,4,PIECE,false
+eg_beid_basterma,basterma,60,GRAM,false
+eg_beid_basterma,butter,15,GRAM,false
+eg_beid_basterma,black pepper,1,GRAM,true
+eg_beid_tamatem,chicken egg,6,PIECE,false
+eg_beid_tamatem,tomato,3,PIECE,false
+eg_beid_tamatem,onion,1,PIECE,false
+eg_beid_tamatem,bell pepper,1,PIECE,true
+eg_beid_tamatem,sunflower oil,2,TABLESPOON,false
+eg_beid_tamatem,salt,4,GRAM,false
+eg_beid_tamatem,black pepper,1,GRAM,false
+eg_beid_tamatem,cumin,1,GRAM,false
+eg_gebna_tamatem,domiati cheese,250,GRAM,false
+eg_gebna_tamatem,tomato,2,PIECE,false
+eg_gebna_tamatem,chili pepper,1,PIECE,true
+eg_gebna_tamatem,olive oil,2,TABLESPOON,false
+eg_gebna_tamatem,lemon juice,1,TABLESPOON,false
+eg_gebna_tamatem,dried mint,1,GRAM,true
+eg_shakshouka,chicken egg,6,PIECE,false
+eg_shakshouka,tomato,5,PIECE,false
+eg_shakshouka,bell pepper,1,PIECE,false
+eg_shakshouka,onion,1,PIECE,false
+eg_shakshouka,garlic,3,PIECE,false
+eg_shakshouka,tomato paste,20,GRAM,false
+eg_shakshouka,olive oil,3,TABLESPOON,false
+eg_shakshouka,cumin,2,GRAM,false
+eg_shakshouka,paprika,2,GRAM,false
+eg_shakshouka,salt,5,GRAM,false
+eg_shakshouka,black pepper,1,GRAM,false
+eg_batates_mehamara,potato,4,PIECE,false
+eg_batates_mehamara,sunflower oil,500,MILLILITER,false
+eg_batates_mehamara,salt,4,GRAM,false
+eg_batates_mehamara,cumin,1,GRAM,true
+eg_eggah,chicken egg,6,PIECE,false
+eg_eggah,onion,1,PIECE,false
+eg_eggah,parsley,20,GRAM,false
+eg_eggah,dill,10,GRAM,false
+eg_eggah,wheat flour,20,GRAM,false
+eg_eggah,sunflower oil,3,TABLESPOON,false
+eg_eggah,salt,4,GRAM,false
+eg_eggah,black pepper,1,GRAM,false
+eg_eggah,cumin,1,GRAM,false
+eg_salata_baladi,tomato,3,PIECE,false
+eg_salata_baladi,cucumber,2,PIECE,false
+eg_salata_baladi,onion,1,PIECE,false
+eg_salata_baladi,bell pepper,1,PIECE,false
+eg_salata_baladi,parsley,20,GRAM,false
+eg_salata_baladi,chili pepper,1,PIECE,true
+eg_salata_baladi,lemon juice,3,TABLESPOON,false
+eg_salata_baladi,vinegar,1,TABLESPOON,true
+eg_salata_baladi,sunflower oil,1,TABLESPOON,false
+eg_salata_baladi,salt,4,GRAM,false
+eg_salata_baladi,cumin,1,GRAM,false
+eg_tehina_sauce,tahini,150,GRAM,false
+eg_tehina_sauce,water,120,MILLILITER,false
+eg_tehina_sauce,lemon juice,3,TABLESPOON,false
+eg_tehina_sauce,vinegar,1,TABLESPOON,false
+eg_tehina_sauce,garlic,2,PIECE,false
+eg_tehina_sauce,cumin,2,GRAM,false
+eg_tehina_sauce,salt,3,GRAM,false
+eg_tehina_sauce,parsley,10,GRAM,true
+eg_baba_ghanoug,eggplant,800,GRAM,false
+eg_baba_ghanoug,tahini,80,GRAM,false
+eg_baba_ghanoug,garlic,2,PIECE,false
+eg_baba_ghanoug,lemon juice,3,TABLESPOON,false
+eg_baba_ghanoug,cumin,1,GRAM,false
+eg_baba_ghanoug,salt,4,GRAM,false
+eg_baba_ghanoug,olive oil,2,TABLESPOON,false
+eg_baba_ghanoug,parsley,5,GRAM,true
+eg_salatet_zabadi,yogurt,500,GRAM,false
+eg_salatet_zabadi,cucumber,1,PIECE,false
+eg_salatet_zabadi,garlic,1,PIECE,false
+eg_salatet_zabadi,dried mint,2,GRAM,false
+eg_salatet_zabadi,salt,3,GRAM,false
+eg_bitingan_mekhalel,eggplant,700,GRAM,false
+eg_bitingan_mekhalel,sunflower oil,400,MILLILITER,false
+eg_bitingan_mekhalel,garlic,6,PIECE,false
+eg_bitingan_mekhalel,chili pepper,1,PIECE,false
+eg_bitingan_mekhalel,vinegar,60,MILLILITER,false
+eg_bitingan_mekhalel,cumin,2,GRAM,false
+eg_bitingan_mekhalel,salt,5,GRAM,false
+eg_bitingan_mekhalel,bell pepper,1,PIECE,true
+eg_beet_salad,beetroot,500,GRAM,false
+eg_beet_salad,onion,1,PIECE,false
+eg_beet_salad,vinegar,2,TABLESPOON,false
+eg_beet_salad,sunflower oil,1,TABLESPOON,false
+eg_beet_salad,salt,3,GRAM,false
+eg_beet_salad,cumin,1,GRAM,false
+eg_potato_salad,potato,4,PIECE,false
+eg_potato_salad,onion,1,PIECE,false
+eg_potato_salad,parsley,20,GRAM,false
+eg_potato_salad,lemon juice,2,TABLESPOON,false
+eg_potato_salad,olive oil,2,TABLESPOON,false
+eg_potato_salad,salt,4,GRAM,false
+eg_potato_salad,black pepper,1,GRAM,false
+eg_potato_salad,cumin,1,GRAM,false
+eg_renga_salad,smoked herring,300,GRAM,false
+eg_renga_salad,tomato,2,PIECE,false
+eg_renga_salad,onion,1,PIECE,false
+eg_renga_salad,bell pepper,1,PIECE,false
+eg_renga_salad,lemon juice,3,TABLESPOON,false
+eg_renga_salad,olive oil,2,TABLESPOON,false
+eg_renga_salad,black pepper,1,GRAM,false
+eg_lupini_salad,cooked lupini beans,400,GRAM,false
+eg_lupini_salad,lemon juice,3,TABLESPOON,false
+eg_lupini_salad,cumin,2,GRAM,false
+eg_lupini_salad,cayenne pepper,1,GRAM,true
+eg_lupini_salad,salt,2,GRAM,false
+eg_hummus_tehina,cooked chickpeas,500,GRAM,false
+eg_hummus_tehina,tahini,100,GRAM,false
+eg_hummus_tehina,lemon juice,4,TABLESPOON,false
+eg_hummus_tehina,garlic,2,PIECE,false
+eg_hummus_tehina,water,60,MILLILITER,false
+eg_hummus_tehina,cumin,1,GRAM,false
+eg_hummus_tehina,salt,4,GRAM,false
+eg_hummus_tehina,olive oil,2,TABLESPOON,false
+eg_hummus_tehina,paprika,1,GRAM,true
+eg_garlic_vinegar_dakka,garlic,8,PIECE,false
+eg_garlic_vinegar_dakka,vinegar,120,MILLILITER,false
+eg_garlic_vinegar_dakka,water,120,MILLILITER,false
+eg_garlic_vinegar_dakka,lemon juice,1,TABLESPOON,false
+eg_garlic_vinegar_dakka,cumin,2,GRAM,false
+eg_garlic_vinegar_dakka,salt,3,GRAM,false
+eg_garlic_vinegar_dakka,sunflower oil,1,TABLESPOON,false
+eg_koshari_tomato_sauce,tomato,5,PIECE,false
+eg_koshari_tomato_sauce,tomato paste,40,GRAM,false
+eg_koshari_tomato_sauce,garlic,4,PIECE,false
+eg_koshari_tomato_sauce,sunflower oil,2,TABLESPOON,false
+eg_koshari_tomato_sauce,vinegar,2,TABLESPOON,false
+eg_koshari_tomato_sauce,cumin,2,GRAM,false
+eg_koshari_tomato_sauce,cayenne pepper,1,GRAM,false
+eg_koshari_tomato_sauce,salt,5,GRAM,false
+eg_koshari_tomato_sauce,water,200,MILLILITER,false
+eg_taleya,garlic,8,PIECE,false
+eg_taleya,coriander seed,5,GRAM,false
+eg_taleya,ghee,30,GRAM,false
+eg_bechamel,butter,60,GRAM,false
+eg_bechamel,wheat flour,60,GRAM,false
+eg_bechamel,whole milk,750,MILLILITER,false
+eg_bechamel,nutmeg,1,GRAM,true
+eg_bechamel,salt,4,GRAM,false
+eg_bechamel,white pepper,1,GRAM,false
+eg_torshi_lift,turnip,1000,GRAM,false
+eg_torshi_lift,beetroot,100,GRAM,false
+eg_torshi_lift,garlic,4,PIECE,false
+eg_torshi_lift,water,1000,MILLILITER,false
+eg_torshi_lift,vinegar,250,MILLILITER,false
+eg_torshi_lift,salt,60,GRAM,false
+eg_torshi_lift,chili pepper,2,PIECE,true
+eg_fried_cauliflower,cauliflower,800,GRAM,false
+eg_fried_cauliflower,chicken egg,2,PIECE,false
+eg_fried_cauliflower,wheat flour,60,GRAM,false
+eg_fried_cauliflower,garlic,2,PIECE,false
+eg_fried_cauliflower,cumin,2,GRAM,false
+eg_fried_cauliflower,coriander seed,2,GRAM,false
+eg_fried_cauliflower,salt,5,GRAM,false
+eg_fried_cauliflower,sunflower oil,500,MILLILITER,false
+eg_shorbet_ads,red lentils,400,GRAM,false
+eg_shorbet_ads,onion,1,PIECE,false
+eg_shorbet_ads,carrot,2,PIECE,false
+eg_shorbet_ads,tomato,1,PIECE,false
+eg_shorbet_ads,potato,1,PIECE,true
+eg_shorbet_ads,garlic,2,PIECE,false
+eg_shorbet_ads,water,2000,MILLILITER,false
+eg_shorbet_ads,cumin,4,GRAM,false
+eg_shorbet_ads,salt,8,GRAM,false
+eg_shorbet_ads,black pepper,1,GRAM,false
+eg_shorbet_ads,butter,20,GRAM,false
+eg_shorbet_ads,lemon,1,PIECE,false
+eg_shorbet_shareya,vermicelli,100,GRAM,false
+eg_shorbet_shareya,butter,20,GRAM,false
+eg_shorbet_shareya,chicken stock cube,1,PIECE,false
+eg_shorbet_shareya,water,1200,MILLILITER,false
+eg_shorbet_shareya,tomato paste,20,GRAM,true
+eg_shorbet_shareya,salt,3,GRAM,false
+eg_shorbet_shareya,black pepper,1,GRAM,false
+eg_shorbet_shareya,parsley,5,GRAM,true
+eg_chicken_soup,chicken,1500,GRAM,false
+eg_chicken_soup,water,2500,MILLILITER,false
+eg_chicken_soup,onion,1,PIECE,false
+eg_chicken_soup,carrot,2,PIECE,false
+eg_chicken_soup,celery,60,GRAM,false
+eg_chicken_soup,bay leaf,1,GRAM,false
+eg_chicken_soup,cardamom,2,GRAM,false
+eg_chicken_soup,cinnamon,2,GRAM,false
+eg_chicken_soup,black pepper,2,GRAM,false
+eg_chicken_soup,salt,10,GRAM,false
+eg_chicken_soup,tomato,1,PIECE,true
+eg_molokhia_chicken,molokhia,1000,GRAM,false
+eg_molokhia_chicken,chicken,1200,GRAM,false
+eg_molokhia_chicken,water,2000,MILLILITER,false
+eg_molokhia_chicken,onion,1,PIECE,false
+eg_molokhia_chicken,bay leaf,1,GRAM,false
+eg_molokhia_chicken,cardamom,2,GRAM,false
+eg_molokhia_chicken,garlic,10,PIECE,false
+eg_molokhia_chicken,coriander seed,6,GRAM,false
+eg_molokhia_chicken,ghee,40,GRAM,false
+eg_molokhia_chicken,salt,10,GRAM,false
+eg_molokhia_chicken,black pepper,1,GRAM,false
+eg_molokhia_rabbit,molokhia,1000,GRAM,false
+eg_molokhia_rabbit,rabbit,1500,GRAM,false
+eg_molokhia_rabbit,water,2200,MILLILITER,false
+eg_molokhia_rabbit,onion,2,PIECE,false
+eg_molokhia_rabbit,bay leaf,1,GRAM,false
+eg_molokhia_rabbit,cardamom,2,GRAM,false
+eg_molokhia_rabbit,lemon,1,PIECE,false
+eg_molokhia_rabbit,garlic,10,PIECE,false
+eg_molokhia_rabbit,coriander seed,6,GRAM,false
+eg_molokhia_rabbit,ghee,40,GRAM,false
+eg_molokhia_rabbit,salt,10,GRAM,false
+eg_molokhia_rabbit,black pepper,1,GRAM,false
+eg_molokhia_shrimp,molokhia,800,GRAM,false
+eg_molokhia_shrimp,shrimp,500,GRAM,false
+eg_molokhia_shrimp,water,1500,MILLILITER,false
+eg_molokhia_shrimp,onion,1,PIECE,false
+eg_molokhia_shrimp,garlic,10,PIECE,false
+eg_molokhia_shrimp,coriander seed,5,GRAM,false
+eg_molokhia_shrimp,sunflower oil,3,TABLESPOON,false
+eg_molokhia_shrimp,cumin,2,GRAM,false
+eg_molokhia_shrimp,salt,8,GRAM,false
+eg_molokhia_shrimp,chili pepper,1,PIECE,true
+eg_dried_molokhia,dried molokhia,80,GRAM,false
+eg_dried_molokhia,water,1200,MILLILITER,false
+eg_dried_molokhia,chicken stock cube,1,PIECE,false
+eg_dried_molokhia,garlic,6,PIECE,false
+eg_dried_molokhia,coriander seed,4,GRAM,false
+eg_dried_molokhia,ghee,25,GRAM,false
+eg_dried_molokhia,salt,4,GRAM,false
+eg_bisara,fava beans,400,GRAM,false
+eg_bisara,molokhia,150,GRAM,false
+eg_bisara,parsley,40,GRAM,false
+eg_bisara,dill,30,GRAM,false
+eg_bisara,fresh coriander,40,GRAM,false
+eg_bisara,leek,50,GRAM,false
+eg_bisara,garlic,6,PIECE,false
+eg_bisara,chili pepper,1,PIECE,false
+eg_bisara,onion,2,PIECE,false
+eg_bisara,water,1500,MILLILITER,false
+eg_bisara,cumin,4,GRAM,false
+eg_bisara,coriander seed,3,GRAM,false
+eg_bisara,salt,8,GRAM,false
+eg_bisara,sunflower oil,100,MILLILITER,false
+eg_shorbet_khodar,carrot,2,PIECE,false
+eg_shorbet_khodar,zucchini,200,GRAM,false
+eg_shorbet_khodar,potato,1,PIECE,false
+eg_shorbet_khodar,green peas,150,GRAM,false
+eg_shorbet_khodar,onion,1,PIECE,false
+eg_shorbet_khodar,tomato,2,PIECE,false
+eg_shorbet_khodar,tomato paste,20,GRAM,false
+eg_shorbet_khodar,chicken stock cube,1,PIECE,false
+eg_shorbet_khodar,water,1800,MILLILITER,false
+eg_shorbet_khodar,butter,20,GRAM,false
+eg_shorbet_khodar,salt,5,GRAM,false
+eg_shorbet_khodar,black pepper,1,GRAM,false
+eg_freekeh_soup,freekeh,200,GRAM,false
+eg_freekeh_soup,onion,1,PIECE,false
+eg_freekeh_soup,butter,25,GRAM,false
+eg_freekeh_soup,chicken stock cube,1,PIECE,false
+eg_freekeh_soup,water,1800,MILLILITER,false
+eg_freekeh_soup,salt,4,GRAM,false
+eg_freekeh_soup,black pepper,1,GRAM,false
+eg_freekeh_soup,lemon,1,PIECE,true
+eg_shorbet_tomatem,tomato,8,PIECE,false
+eg_shorbet_tomatem,onion,1,PIECE,false
+eg_shorbet_tomatem,garlic,2,PIECE,false
+eg_shorbet_tomatem,white rice,40,GRAM,false
+eg_shorbet_tomatem,butter,20,GRAM,false
+eg_shorbet_tomatem,chicken stock cube,1,PIECE,false
+eg_shorbet_tomatem,water,800,MILLILITER,false
+eg_shorbet_tomatem,salt,4,GRAM,false
+eg_shorbet_tomatem,black pepper,1,GRAM,false
+eg_chicken_vermicelli_soup,chicken breast,400,GRAM,false
+eg_chicken_vermicelli_soup,vermicelli,80,GRAM,false
+eg_chicken_vermicelli_soup,carrot,2,PIECE,false
+eg_chicken_vermicelli_soup,onion,1,PIECE,false
+eg_chicken_vermicelli_soup,celery,40,GRAM,false
+eg_chicken_vermicelli_soup,butter,20,GRAM,false
+eg_chicken_vermicelli_soup,water,1800,MILLILITER,false
+eg_chicken_vermicelli_soup,salt,8,GRAM,false
+eg_chicken_vermicelli_soup,black pepper,1,GRAM,false
+eg_chicken_vermicelli_soup,lemon,1,PIECE,true
+eg_kersha_soup,beef tripe,1000,GRAM,false
+eg_kersha_soup,onion,2,PIECE,false
+eg_kersha_soup,lemon,2,PIECE,false
+eg_kersha_soup,bay leaf,1,GRAM,false
+eg_kersha_soup,cardamom,2,GRAM,false
+eg_kersha_soup,garlic,8,PIECE,false
+eg_kersha_soup,vinegar,2,TABLESPOON,false
+eg_kersha_soup,water,3000,MILLILITER,false
+eg_kersha_soup,salt,12,GRAM,false
+eg_kersha_soup,black pepper,2,GRAM,false
+eg_kersha_soup,cumin,2,GRAM,false
+eg_roz_shareya,white rice,400,GRAM,false
+eg_roz_shareya,vermicelli,60,GRAM,false
+eg_roz_shareya,ghee,30,GRAM,false
+eg_roz_shareya,water,560,MILLILITER,false
+eg_roz_shareya,salt,6,GRAM,false
+eg_roz_abyad,short grain rice,400,GRAM,false
+eg_roz_abyad,ghee,20,GRAM,false
+eg_roz_abyad,water,520,MILLILITER,false
+eg_roz_abyad,salt,5,GRAM,false
+eg_koshari,brown lentils,250,GRAM,false
+eg_koshari,white rice,300,GRAM,false
+eg_koshari,vermicelli,50,GRAM,false
+eg_koshari,macaroni,300,GRAM,false
+eg_koshari,cooked chickpeas,250,GRAM,false
+eg_koshari,onion,3,PIECE,false
+eg_koshari,sunflower oil,200,MILLILITER,false
+eg_koshari,tomato,5,PIECE,false
+eg_koshari,tomato paste,40,GRAM,false
+eg_koshari,garlic,10,PIECE,false
+eg_koshari,vinegar,120,MILLILITER,false
+eg_koshari,cumin,5,GRAM,false
+eg_koshari,cayenne pepper,2,GRAM,false
+eg_koshari,coriander seed,2,GRAM,false
+eg_koshari,salt,14,GRAM,false
+eg_koshari,water,1600,MILLILITER,false
+eg_mudardara,brown lentils,250,GRAM,false
+eg_mudardara,white rice,300,GRAM,false
+eg_mudardara,onion,3,PIECE,false
+eg_mudardara,sunflower oil,100,MILLILITER,false
+eg_mudardara,cumin,3,GRAM,false
+eg_mudardara,salt,10,GRAM,false
+eg_mudardara,water,1100,MILLILITER,false
+eg_roz_bel_khalta,white rice,500,GRAM,false
+eg_roz_bel_khalta,chicken liver,200,GRAM,false
+eg_roz_bel_khalta,chicken gizzard,150,GRAM,true
+eg_roz_bel_khalta,ground beef,200,GRAM,false
+eg_roz_bel_khalta,almonds,50,GRAM,false
+eg_roz_bel_khalta,raisins,40,GRAM,false
+eg_roz_bel_khalta,pine nuts,30,GRAM,true
+eg_roz_bel_khalta,onion,1,PIECE,false
+eg_roz_bel_khalta,ghee,60,GRAM,false
+eg_roz_bel_khalta,chicken stock cube,1,PIECE,false
+eg_roz_bel_khalta,water,700,MILLILITER,false
+eg_roz_bel_khalta,cinnamon,2,GRAM,false
+eg_roz_bel_khalta,cardamom,1,GRAM,false
+eg_roz_bel_khalta,allspice,2,GRAM,false
+eg_roz_bel_khalta,salt,8,GRAM,false
+eg_roz_bel_khalta,black pepper,2,GRAM,false
+eg_roz_moammar,short grain rice,400,GRAM,false
+eg_roz_moammar,whole milk,500,MILLILITER,false
+eg_roz_moammar,heavy cream,200,MILLILITER,false
+eg_roz_moammar,butter,60,GRAM,false
+eg_roz_moammar,chicken stock cube,1,PIECE,false
+eg_roz_moammar,water,250,MILLILITER,false
+eg_roz_moammar,salt,5,GRAM,false
+eg_roz_bel_shabat,white rice,400,GRAM,false
+eg_roz_bel_shabat,dill,50,GRAM,false
+eg_roz_bel_shabat,onion,1,PIECE,false
+eg_roz_bel_shabat,sunflower oil,3,TABLESPOON,false
+eg_roz_bel_shabat,water,560,MILLILITER,false
+eg_roz_bel_shabat,salt,6,GRAM,false
+eg_roz_ahmar,white rice,400,GRAM,false
+eg_roz_ahmar,tomato,3,PIECE,false
+eg_roz_ahmar,tomato paste,30,GRAM,false
+eg_roz_ahmar,onion,1,PIECE,false
+eg_roz_ahmar,sunflower oil,3,TABLESPOON,false
+eg_roz_ahmar,water,450,MILLILITER,false
+eg_roz_ahmar,salt,6,GRAM,false
+eg_roz_ahmar,cumin,1,GRAM,false
+eg_roz_sayadeya,white rice,500,GRAM,false
+eg_roz_sayadeya,onion,3,PIECE,false
+eg_roz_sayadeya,sunflower oil,100,MILLILITER,false
+eg_roz_sayadeya,tilapia,300,GRAM,false
+eg_roz_sayadeya,water,1000,MILLILITER,false
+eg_roz_sayadeya,cumin,3,GRAM,false
+eg_roz_sayadeya,coriander seed,2,GRAM,false
+eg_roz_sayadeya,salt,8,GRAM,false
+eg_roz_sayadeya,black pepper,1,GRAM,false
+eg_freekeh_chicken,freekeh,400,GRAM,false
+eg_freekeh_chicken,chicken,1200,GRAM,false
+eg_freekeh_chicken,onion,2,PIECE,false
+eg_freekeh_chicken,butter,50,GRAM,false
+eg_freekeh_chicken,water,1500,MILLILITER,false
+eg_freekeh_chicken,cardamom,2,GRAM,false
+eg_freekeh_chicken,bay leaf,1,GRAM,false
+eg_freekeh_chicken,salt,10,GRAM,false
+eg_freekeh_chicken,black pepper,2,GRAM,false
+eg_fattah,beef,1000,GRAM,false
+eg_fattah,white rice,400,GRAM,false
+eg_fattah,baladi bread,300,GRAM,false
+eg_fattah,onion,1,PIECE,false
+eg_fattah,garlic,10,PIECE,false
+eg_fattah,vinegar,80,MILLILITER,false
+eg_fattah,tomato paste,40,GRAM,false
+eg_fattah,tomato,3,PIECE,false
+eg_fattah,ghee,60,GRAM,false
+eg_fattah,water,2500,MILLILITER,false
+eg_fattah,bay leaf,1,GRAM,false
+eg_fattah,cardamom,2,GRAM,false
+eg_fattah,salt,14,GRAM,false
+eg_fattah,black pepper,2,GRAM,false
+eg_roz_bel_bisella,white rice,400,GRAM,false
+eg_roz_bel_bisella,green peas,200,GRAM,false
+eg_roz_bel_bisella,butter,30,GRAM,false
+eg_roz_bel_bisella,water,560,MILLILITER,false
+eg_roz_bel_bisella,salt,6,GRAM,false
+eg_bulgur_pilaf,bulgur,300,GRAM,false
+eg_bulgur_pilaf,onion,1,PIECE,false
+eg_bulgur_pilaf,tomato,2,PIECE,false
+eg_bulgur_pilaf,tomato paste,20,GRAM,false
+eg_bulgur_pilaf,sunflower oil,2,TABLESPOON,false
+eg_bulgur_pilaf,water,500,MILLILITER,false
+eg_bulgur_pilaf,salt,5,GRAM,false
+eg_roz_bel_laban,short grain rice,150,GRAM,false
+eg_roz_bel_laban,water,300,MILLILITER,false
+eg_roz_bel_laban,whole milk,1000,MILLILITER,false
+eg_roz_bel_laban,white sugar,120,GRAM,false
+eg_roz_bel_laban,corn starch,15,GRAM,false
+eg_roz_bel_laban,vanilla extract,1,TEASPOON,false
+eg_roz_bel_laban,cinnamon,1,GRAM,true
+eg_roz_bel_laban,pistachios,20,GRAM,true
+eg_belila,whole wheat grain,250,GRAM,false
+eg_belila,whole milk,600,MILLILITER,false
+eg_belila,white sugar,60,GRAM,false
+eg_belila,raisins,30,GRAM,false
+eg_belila,desiccated coconut,20,GRAM,false
+eg_belila,walnuts,30,GRAM,false
+eg_belila,cinnamon,1,GRAM,true
+eg_mahshi_kousa,zucchini,1500,GRAM,false
+eg_mahshi_kousa,short grain rice,400,GRAM,false
+eg_mahshi_kousa,tomato,4,PIECE,false
+eg_mahshi_kousa,onion,2,PIECE,false
+eg_mahshi_kousa,parsley,30,GRAM,false
+eg_mahshi_kousa,dill,30,GRAM,false
+eg_mahshi_kousa,fresh coriander,30,GRAM,false
+eg_mahshi_kousa,tomato paste,40,GRAM,false
+eg_mahshi_kousa,sunflower oil,4,TABLESPOON,false
+eg_mahshi_kousa,chicken stock cube,1,PIECE,false
+eg_mahshi_kousa,water,800,MILLILITER,false
+eg_mahshi_kousa,salt,10,GRAM,false
+eg_mahshi_kousa,black pepper,2,GRAM,false
+eg_mahshi_kousa,cumin,2,GRAM,false
+eg_mahshi_bitingan,eggplant,1500,GRAM,false
+eg_mahshi_bitingan,short grain rice,400,GRAM,false
+eg_mahshi_bitingan,tomato,4,PIECE,false
+eg_mahshi_bitingan,onion,2,PIECE,false
+eg_mahshi_bitingan,garlic,4,PIECE,false
+eg_mahshi_bitingan,parsley,30,GRAM,false
+eg_mahshi_bitingan,dill,20,GRAM,false
+eg_mahshi_bitingan,tomato paste,40,GRAM,false
+eg_mahshi_bitingan,sunflower oil,4,TABLESPOON,false
+eg_mahshi_bitingan,water,800,MILLILITER,false
+eg_mahshi_bitingan,salt,10,GRAM,false
+eg_mahshi_bitingan,black pepper,2,GRAM,false
+eg_mahshi_bitingan,cumin,3,GRAM,false
+eg_mahshi_felfel,bell pepper,10,PIECE,false
+eg_mahshi_felfel,short grain rice,400,GRAM,false
+eg_mahshi_felfel,tomato,4,PIECE,false
+eg_mahshi_felfel,onion,2,PIECE,false
+eg_mahshi_felfel,parsley,30,GRAM,false
+eg_mahshi_felfel,dill,30,GRAM,false
+eg_mahshi_felfel,tomato paste,40,GRAM,false
+eg_mahshi_felfel,sunflower oil,4,TABLESPOON,false
+eg_mahshi_felfel,water,700,MILLILITER,false
+eg_mahshi_felfel,salt,10,GRAM,false
+eg_mahshi_felfel,black pepper,2,GRAM,false
+eg_mahshi_waraa_enab,grape leaves,500,GRAM,false
+eg_mahshi_waraa_enab,short grain rice,500,GRAM,false
+eg_mahshi_waraa_enab,tomato,3,PIECE,false
+eg_mahshi_waraa_enab,onion,2,PIECE,false
+eg_mahshi_waraa_enab,parsley,40,GRAM,false
+eg_mahshi_waraa_enab,dill,40,GRAM,false
+eg_mahshi_waraa_enab,fresh mint,20,GRAM,false
+eg_mahshi_waraa_enab,sunflower oil,5,TABLESPOON,false
+eg_mahshi_waraa_enab,lemon juice,4,TABLESPOON,false
+eg_mahshi_waraa_enab,chicken stock cube,1,PIECE,false
+eg_mahshi_waraa_enab,water,900,MILLILITER,false
+eg_mahshi_waraa_enab,salt,10,GRAM,false
+eg_mahshi_waraa_enab,black pepper,2,GRAM,false
+eg_mahshi_waraa_enab,cumin,3,GRAM,false
+eg_mahshi_waraa_enab,lamb chops,500,GRAM,true
+eg_mahshi_koromb,cabbage,1500,GRAM,false
+eg_mahshi_koromb,short grain rice,500,GRAM,false
+eg_mahshi_koromb,tomato,4,PIECE,false
+eg_mahshi_koromb,onion,2,PIECE,false
+eg_mahshi_koromb,dill,50,GRAM,false
+eg_mahshi_koromb,parsley,30,GRAM,false
+eg_mahshi_koromb,garlic,6,PIECE,false
+eg_mahshi_koromb,tomato paste,40,GRAM,false
+eg_mahshi_koromb,sunflower oil,5,TABLESPOON,false
+eg_mahshi_koromb,cumin,4,GRAM,false
+eg_mahshi_koromb,caraway seed,2,GRAM,true
+eg_mahshi_koromb,water,900,MILLILITER,false
+eg_mahshi_koromb,salt,12,GRAM,false
+eg_mahshi_koromb,black pepper,2,GRAM,false
+eg_mahshi_tomatem,tomato,10,PIECE,false
+eg_mahshi_tomatem,short grain rice,300,GRAM,false
+eg_mahshi_tomatem,onion,1,PIECE,false
+eg_mahshi_tomatem,parsley,20,GRAM,false
+eg_mahshi_tomatem,dill,20,GRAM,false
+eg_mahshi_tomatem,sunflower oil,3,TABLESPOON,false
+eg_mahshi_tomatem,salt,8,GRAM,false
+eg_mahshi_tomatem,black pepper,1,GRAM,false
+eg_mahshi_tomatem,water,300,MILLILITER,false
+eg_mahshi_mix,zucchini,700,GRAM,false
+eg_mahshi_mix,eggplant,700,GRAM,false
+eg_mahshi_mix,bell pepper,5,PIECE,false
+eg_mahshi_mix,grape leaves,250,GRAM,false
+eg_mahshi_mix,short grain rice,700,GRAM,false
+eg_mahshi_mix,tomato,6,PIECE,false
+eg_mahshi_mix,onion,3,PIECE,false
+eg_mahshi_mix,parsley,40,GRAM,false
+eg_mahshi_mix,dill,40,GRAM,false
+eg_mahshi_mix,fresh coriander,30,GRAM,false
+eg_mahshi_mix,tomato paste,60,GRAM,false
+eg_mahshi_mix,sunflower oil,6,TABLESPOON,false
+eg_mahshi_mix,chicken stock cube,2,PIECE,false
+eg_mahshi_mix,water,1200,MILLILITER,false
+eg_mahshi_mix,salt,14,GRAM,false
+eg_mahshi_mix,black pepper,3,GRAM,false
+eg_mahshi_mix,cumin,3,GRAM,false
+eg_mahshi_basal,onion,8,PIECE,false
+eg_mahshi_basal,short grain rice,350,GRAM,false
+eg_mahshi_basal,tomato,3,PIECE,false
+eg_mahshi_basal,parsley,20,GRAM,false
+eg_mahshi_basal,dill,20,GRAM,false
+eg_mahshi_basal,tomato paste,30,GRAM,false
+eg_mahshi_basal,sunflower oil,4,TABLESPOON,false
+eg_mahshi_basal,pomegranate molasses,30,GRAM,true
+eg_mahshi_basal,water,600,MILLILITER,false
+eg_mahshi_basal,salt,8,GRAM,false
+eg_mahshi_basal,black pepper,1,GRAM,false
+eg_mahshi_kousa_lahma,zucchini,1500,GRAM,false
+eg_mahshi_kousa_lahma,ground beef,400,GRAM,false
+eg_mahshi_kousa_lahma,short grain rice,200,GRAM,false
+eg_mahshi_kousa_lahma,onion,1,PIECE,false
+eg_mahshi_kousa_lahma,tomato,4,PIECE,false
+eg_mahshi_kousa_lahma,tomato paste,40,GRAM,false
+eg_mahshi_kousa_lahma,garlic,3,PIECE,false
+eg_mahshi_kousa_lahma,allspice,3,GRAM,false
+eg_mahshi_kousa_lahma,salt,10,GRAM,false
+eg_mahshi_kousa_lahma,black pepper,2,GRAM,false
+eg_mahshi_kousa_lahma,water,700,MILLILITER,false
+eg_mahshi_kousa_lahma,sunflower oil,2,TABLESPOON,false
+eg_bamia_lahma,okra,800,GRAM,false
+eg_bamia_lahma,beef,700,GRAM,false
+eg_bamia_lahma,onion,1,PIECE,false
+eg_bamia_lahma,tomato,4,PIECE,false
+eg_bamia_lahma,tomato paste,40,GRAM,false
+eg_bamia_lahma,garlic,6,PIECE,false
+eg_bamia_lahma,coriander seed,4,GRAM,false
+eg_bamia_lahma,ghee,30,GRAM,false
+eg_bamia_lahma,water,1000,MILLILITER,false
+eg_bamia_lahma,salt,10,GRAM,false
+eg_bamia_lahma,black pepper,2,GRAM,false
+eg_bamia_lahma,lemon juice,1,TABLESPOON,true
+eg_fasolia_khadra,green beans,800,GRAM,false
+eg_fasolia_khadra,beef,600,GRAM,false
+eg_fasolia_khadra,onion,1,PIECE,false
+eg_fasolia_khadra,carrot,2,PIECE,true
+eg_fasolia_khadra,tomato,4,PIECE,false
+eg_fasolia_khadra,tomato paste,40,GRAM,false
+eg_fasolia_khadra,garlic,4,PIECE,false
+eg_fasolia_khadra,sunflower oil,3,TABLESPOON,false
+eg_fasolia_khadra,water,900,MILLILITER,false
+eg_fasolia_khadra,salt,10,GRAM,false
+eg_fasolia_khadra,black pepper,2,GRAM,false
+eg_bisella_gazar,green peas,700,GRAM,false
+eg_bisella_gazar,carrot,3,PIECE,false
+eg_bisella_gazar,beef,600,GRAM,false
+eg_bisella_gazar,onion,1,PIECE,false
+eg_bisella_gazar,tomato,4,PIECE,false
+eg_bisella_gazar,tomato paste,40,GRAM,false
+eg_bisella_gazar,sunflower oil,3,TABLESPOON,false
+eg_bisella_gazar,water,900,MILLILITER,false
+eg_bisella_gazar,salt,10,GRAM,false
+eg_bisella_gazar,black pepper,2,GRAM,false
+eg_batatis_lahma,potato,6,PIECE,false
+eg_batatis_lahma,beef,600,GRAM,false
+eg_batatis_lahma,onion,1,PIECE,false
+eg_batatis_lahma,tomato,4,PIECE,false
+eg_batatis_lahma,tomato paste,40,GRAM,false
+eg_batatis_lahma,garlic,4,PIECE,false
+eg_batatis_lahma,sunflower oil,3,TABLESPOON,false
+eg_batatis_lahma,water,800,MILLILITER,false
+eg_batatis_lahma,cumin,2,GRAM,false
+eg_batatis_lahma,salt,10,GRAM,false
+eg_batatis_lahma,black pepper,2,GRAM,false
+eg_torly,potato,2,PIECE,false
+eg_torly,zucchini,400,GRAM,false
+eg_torly,eggplant,400,GRAM,false
+eg_torly,green beans,250,GRAM,false
+eg_torly,carrot,2,PIECE,false
+eg_torly,bell pepper,2,PIECE,false
+eg_torly,onion,2,PIECE,false
+eg_torly,beef,500,GRAM,false
+eg_torly,tomato,5,PIECE,false
+eg_torly,tomato paste,40,GRAM,false
+eg_torly,garlic,4,PIECE,false
+eg_torly,sunflower oil,4,TABLESPOON,false
+eg_torly,water,600,MILLILITER,false
+eg_torly,salt,12,GRAM,false
+eg_torly,black pepper,2,GRAM,false
+eg_sabanekh_lahma,spinach,1000,GRAM,false
+eg_sabanekh_lahma,beef,500,GRAM,false
+eg_sabanekh_lahma,onion,2,PIECE,false
+eg_sabanekh_lahma,garlic,6,PIECE,false
+eg_sabanekh_lahma,coriander seed,3,GRAM,false
+eg_sabanekh_lahma,tomato paste,20,GRAM,true
+eg_sabanekh_lahma,ghee,30,GRAM,false
+eg_sabanekh_lahma,white rice,30,GRAM,true
+eg_sabanekh_lahma,water,800,MILLILITER,false
+eg_sabanekh_lahma,salt,10,GRAM,false
+eg_sabanekh_lahma,black pepper,2,GRAM,false
+eg_kolkas_salk,taro,1000,GRAM,false
+eg_kolkas_salk,chard,500,GRAM,false
+eg_kolkas_salk,fresh coriander,60,GRAM,false
+eg_kolkas_salk,garlic,6,PIECE,false
+eg_kolkas_salk,ghee,40,GRAM,false
+eg_kolkas_salk,chicken stock cube,2,PIECE,false
+eg_kolkas_salk,water,1500,MILLILITER,false
+eg_kolkas_salk,lemon juice,2,TABLESPOON,false
+eg_kolkas_salk,salt,8,GRAM,false
+eg_kolkas_salk,black pepper,2,GRAM,false
+eg_kharshouf,artichoke,1500,GRAM,false
+eg_kharshouf,green peas,300,GRAM,false
+eg_kharshouf,beef,500,GRAM,false
+eg_kharshouf,onion,1,PIECE,false
+eg_kharshouf,lemon juice,4,TABLESPOON,false
+eg_kharshouf,wheat flour,15,GRAM,false
+eg_kharshouf,butter,30,GRAM,false
+eg_kharshouf,water,800,MILLILITER,false
+eg_kharshouf,salt,10,GRAM,false
+eg_kharshouf,black pepper,2,GRAM,false
+eg_fasolia_beida,white beans,500,GRAM,false
+eg_fasolia_beida,onion,1,PIECE,false
+eg_fasolia_beida,garlic,4,PIECE,false
+eg_fasolia_beida,tomato,4,PIECE,false
+eg_fasolia_beida,tomato paste,50,GRAM,false
+eg_fasolia_beida,sunflower oil,3,TABLESPOON,false
+eg_fasolia_beida,beef,400,GRAM,true
+eg_fasolia_beida,water,1500,MILLILITER,false
+eg_fasolia_beida,cumin,2,GRAM,false
+eg_fasolia_beida,salt,10,GRAM,false
+eg_fasolia_beida,black pepper,2,GRAM,false
+eg_lobia,black eyed peas,500,GRAM,false
+eg_lobia,onion,1,PIECE,false
+eg_lobia,garlic,4,PIECE,false
+eg_lobia,tomato,4,PIECE,false
+eg_lobia,tomato paste,40,GRAM,false
+eg_lobia,sunflower oil,3,TABLESPOON,false
+eg_lobia,water,1500,MILLILITER,false
+eg_lobia,cumin,2,GRAM,false
+eg_lobia,salt,10,GRAM,false
+eg_lobia,black pepper,2,GRAM,false
+eg_moussaka,eggplant,1200,GRAM,false
+eg_moussaka,bell pepper,2,PIECE,false
+eg_moussaka,chili pepper,1,PIECE,false
+eg_moussaka,tomato,5,PIECE,false
+eg_moussaka,tomato paste,40,GRAM,false
+eg_moussaka,garlic,6,PIECE,false
+eg_moussaka,onion,1,PIECE,false
+eg_moussaka,sunflower oil,400,MILLILITER,false
+eg_moussaka,vinegar,1,TABLESPOON,false
+eg_moussaka,cumin,2,GRAM,false
+eg_moussaka,salt,10,GRAM,false
+eg_moussaka,black pepper,2,GRAM,false
+eg_moussaka,ground beef,300,GRAM,true
+eg_kousa_bechamel,zucchini,1200,GRAM,false
+eg_kousa_bechamel,ground beef,400,GRAM,false
+eg_kousa_bechamel,onion,1,PIECE,false
+eg_kousa_bechamel,butter,60,GRAM,false
+eg_kousa_bechamel,wheat flour,50,GRAM,false
+eg_kousa_bechamel,whole milk,700,MILLILITER,false
+eg_kousa_bechamel,chicken egg,1,PIECE,false
+eg_kousa_bechamel,mozzarella cheese,100,GRAM,true
+eg_kousa_bechamel,salt,10,GRAM,false
+eg_kousa_bechamel,black pepper,2,GRAM,false
+eg_kousa_bechamel,nutmeg,1,GRAM,false
+eg_bamia_zeit,okra,600,GRAM,false
+eg_bamia_zeit,onion,1,PIECE,false
+eg_bamia_zeit,garlic,5,PIECE,false
+eg_bamia_zeit,tomato,4,PIECE,false
+eg_bamia_zeit,tomato paste,30,GRAM,false
+eg_bamia_zeit,olive oil,4,TABLESPOON,false
+eg_bamia_zeit,lemon juice,2,TABLESPOON,false
+eg_bamia_zeit,coriander seed,3,GRAM,false
+eg_bamia_zeit,water,400,MILLILITER,false
+eg_bamia_zeit,salt,6,GRAM,false
+eg_chicken_salsa,chicken,1500,GRAM,false
+eg_chicken_salsa,onion,2,PIECE,false
+eg_chicken_salsa,tomato,5,PIECE,false
+eg_chicken_salsa,tomato paste,40,GRAM,false
+eg_chicken_salsa,garlic,5,PIECE,false
+eg_chicken_salsa,sunflower oil,3,TABLESPOON,false
+eg_chicken_salsa,bell pepper,1,PIECE,true
+eg_chicken_salsa,cardamom,2,GRAM,false
+eg_chicken_salsa,bay leaf,1,GRAM,false
+eg_chicken_salsa,salt,12,GRAM,false
+eg_chicken_salsa,black pepper,2,GRAM,false
+eg_chicken_salsa,water,600,MILLILITER,false
+eg_kofta_dawood_basha,ground beef,800,GRAM,false
+eg_kofta_dawood_basha,onion,2,PIECE,false
+eg_kofta_dawood_basha,parsley,20,GRAM,false
+eg_kofta_dawood_basha,breadcrumbs,40,GRAM,false
+eg_kofta_dawood_basha,chicken egg,1,PIECE,false
+eg_kofta_dawood_basha,tomato,5,PIECE,false
+eg_kofta_dawood_basha,tomato paste,40,GRAM,false
+eg_kofta_dawood_basha,garlic,4,PIECE,false
+eg_kofta_dawood_basha,sunflower oil,4,TABLESPOON,false
+eg_kofta_dawood_basha,allspice,3,GRAM,false
+eg_kofta_dawood_basha,cumin,2,GRAM,false
+eg_kofta_dawood_basha,salt,12,GRAM,false
+eg_kofta_dawood_basha,black pepper,2,GRAM,false
+eg_kofta_dawood_basha,water,400,MILLILITER,false
+eg_lesan_salsa,beef tongue,1200,GRAM,false
+eg_lesan_salsa,onion,2,PIECE,false
+eg_lesan_salsa,bay leaf,1,GRAM,false
+eg_lesan_salsa,cardamom,2,GRAM,false
+eg_lesan_salsa,tomato,4,PIECE,false
+eg_lesan_salsa,tomato paste,40,GRAM,false
+eg_lesan_salsa,garlic,4,PIECE,false
+eg_lesan_salsa,sunflower oil,3,TABLESPOON,false
+eg_lesan_salsa,salt,12,GRAM,false
+eg_lesan_salsa,black pepper,2,GRAM,false
+eg_lesan_salsa,water,2500,MILLILITER,false
+eg_kebda_eskandarani,beef liver,600,GRAM,false
+eg_kebda_eskandarani,garlic,6,PIECE,false
+eg_kebda_eskandarani,chili pepper,2,PIECE,false
+eg_kebda_eskandarani,bell pepper,1,PIECE,false
+eg_kebda_eskandarani,sunflower oil,3,TABLESPOON,false
+eg_kebda_eskandarani,cumin,3,GRAM,false
+eg_kebda_eskandarani,black pepper,1,GRAM,false
+eg_kebda_eskandarani,lemon juice,2,TABLESPOON,false
+eg_kebda_eskandarani,salt,5,GRAM,false
+eg_kebda_eskandarani,vinegar,1,TABLESPOON,true
+eg_kebda_qawanes,chicken liver,400,GRAM,false
+eg_kebda_qawanes,chicken gizzard,400,GRAM,false
+eg_kebda_qawanes,garlic,5,PIECE,false
+eg_kebda_qawanes,bell pepper,1,PIECE,false
+eg_kebda_qawanes,onion,1,PIECE,false
+eg_kebda_qawanes,sunflower oil,3,TABLESPOON,false
+eg_kebda_qawanes,cumin,2,GRAM,false
+eg_kebda_qawanes,lemon juice,2,TABLESPOON,false
+eg_kebda_qawanes,salt,6,GRAM,false
+eg_kebda_qawanes,black pepper,1,GRAM,false
+eg_kebda_qawanes,water,800,MILLILITER,false
+eg_sinyet_batatis_frakh,chicken,1500,GRAM,false
+eg_sinyet_batatis_frakh,potato,6,PIECE,false
+eg_sinyet_batatis_frakh,onion,2,PIECE,false
+eg_sinyet_batatis_frakh,tomato,4,PIECE,false
+eg_sinyet_batatis_frakh,tomato paste,30,GRAM,false
+eg_sinyet_batatis_frakh,garlic,5,PIECE,false
+eg_sinyet_batatis_frakh,sunflower oil,4,TABLESPOON,false
+eg_sinyet_batatis_frakh,paprika,3,GRAM,false
+eg_sinyet_batatis_frakh,cumin,2,GRAM,false
+eg_sinyet_batatis_frakh,salt,14,GRAM,false
+eg_sinyet_batatis_frakh,black pepper,2,GRAM,false
+eg_sinyet_batatis_frakh,water,300,MILLILITER,false
+eg_sinyet_samak,tilapia,1000,GRAM,false
+eg_sinyet_samak,potato,4,PIECE,false
+eg_sinyet_samak,bell pepper,2,PIECE,false
+eg_sinyet_samak,onion,2,PIECE,false
+eg_sinyet_samak,tomato,4,PIECE,false
+eg_sinyet_samak,garlic,6,PIECE,false
+eg_sinyet_samak,lemon juice,3,TABLESPOON,false
+eg_sinyet_samak,cumin,4,GRAM,false
+eg_sinyet_samak,sunflower oil,4,TABLESPOON,false
+eg_sinyet_samak,salt,12,GRAM,false
+eg_sinyet_samak,black pepper,2,GRAM,false
+eg_sinyet_samak,water,200,MILLILITER,false
+eg_tagen_samak,sea bass,900,GRAM,false
+eg_tagen_samak,onion,2,PIECE,false
+eg_tagen_samak,bell pepper,2,PIECE,false
+eg_tagen_samak,tomato,4,PIECE,false
+eg_tagen_samak,tomato paste,30,GRAM,false
+eg_tagen_samak,garlic,6,PIECE,false
+eg_tagen_samak,cumin,4,GRAM,false
+eg_tagen_samak,coriander seed,2,GRAM,false
+eg_tagen_samak,lemon juice,3,TABLESPOON,false
+eg_tagen_samak,olive oil,4,TABLESPOON,false
+eg_tagen_samak,salt,10,GRAM,false
+eg_tagen_samak,chili pepper,1,PIECE,true
+eg_tagen_gambari,shrimp,800,GRAM,false
+eg_tagen_gambari,onion,1,PIECE,false
+eg_tagen_gambari,bell pepper,2,PIECE,false
+eg_tagen_gambari,tomato,4,PIECE,false
+eg_tagen_gambari,tomato paste,30,GRAM,false
+eg_tagen_gambari,garlic,6,PIECE,false
+eg_tagen_gambari,cumin,3,GRAM,false
+eg_tagen_gambari,chili pepper,1,PIECE,false
+eg_tagen_gambari,olive oil,3,TABLESPOON,false
+eg_tagen_gambari,lemon juice,2,TABLESPOON,false
+eg_tagen_gambari,salt,8,GRAM,false
+eg_tagen_lahma_basal,beef,1000,GRAM,false
+eg_tagen_lahma_basal,onion,5,PIECE,false
+eg_tagen_lahma_basal,tomato,3,PIECE,false
+eg_tagen_lahma_basal,tomato paste,30,GRAM,false
+eg_tagen_lahma_basal,ghee,40,GRAM,false
+eg_tagen_lahma_basal,allspice,3,GRAM,false
+eg_tagen_lahma_basal,salt,12,GRAM,false
+eg_tagen_lahma_basal,black pepper,3,GRAM,false
+eg_tagen_lahma_basal,water,300,MILLILITER,false
+eg_macarona_bechamel,macaroni,500,GRAM,false
+eg_macarona_bechamel,ground beef,500,GRAM,false
+eg_macarona_bechamel,onion,1,PIECE,false
+eg_macarona_bechamel,tomato paste,30,GRAM,false
+eg_macarona_bechamel,butter,100,GRAM,false
+eg_macarona_bechamel,wheat flour,100,GRAM,false
+eg_macarona_bechamel,whole milk,1000,MILLILITER,false
+eg_macarona_bechamel,chicken egg,2,PIECE,false
+eg_macarona_bechamel,nutmeg,1,GRAM,false
+eg_macarona_bechamel,allspice,2,GRAM,false
+eg_macarona_bechamel,salt,14,GRAM,false
+eg_macarona_bechamel,black pepper,3,GRAM,false
+eg_macarona_bechamel,roumi cheese,60,GRAM,true
+eg_ads_bigebba,brown lentils,400,GRAM,false
+eg_ads_bigebba,onion,1,PIECE,false
+eg_ads_bigebba,garlic,4,PIECE,false
+eg_ads_bigebba,tomato,2,PIECE,false
+eg_ads_bigebba,sunflower oil,3,TABLESPOON,false
+eg_ads_bigebba,cumin,3,GRAM,false
+eg_ads_bigebba,salt,8,GRAM,false
+eg_ads_bigebba,water,1300,MILLILITER,false
+eg_hummus_sham,cooked chickpeas,400,GRAM,false
+eg_hummus_sham,water,800,MILLILITER,false
+eg_hummus_sham,tomato,1,PIECE,false
+eg_hummus_sham,lemon juice,3,TABLESPOON,false
+eg_hummus_sham,cumin,2,GRAM,false
+eg_hummus_sham,cayenne pepper,1,GRAM,false
+eg_hummus_sham,salt,5,GRAM,false
+eg_hummus_sham,fresh coriander,10,GRAM,true
+eg_ful_nabet,fava beans,500,GRAM,false
+eg_ful_nabet,water,1800,MILLILITER,false
+eg_ful_nabet,lemon,2,PIECE,false
+eg_ful_nabet,cumin,3,GRAM,false
+eg_ful_nabet,salt,8,GRAM,false
+eg_ful_nabet,onion,1,PIECE,false
+eg_bamia_salsa_lamb,okra,800,GRAM,false
+eg_bamia_salsa_lamb,lamb shank,1000,GRAM,false
+eg_bamia_salsa_lamb,onion,1,PIECE,false
+eg_bamia_salsa_lamb,tomato,4,PIECE,false
+eg_bamia_salsa_lamb,tomato paste,40,GRAM,false
+eg_bamia_salsa_lamb,garlic,6,PIECE,false
+eg_bamia_salsa_lamb,coriander seed,4,GRAM,false
+eg_bamia_salsa_lamb,ghee,30,GRAM,false
+eg_bamia_salsa_lamb,water,1200,MILLILITER,false
+eg_bamia_salsa_lamb,salt,10,GRAM,false
+eg_bamia_salsa_lamb,black pepper,2,GRAM,false
+eg_bitingan_rumi,eggplant,1000,GRAM,false
+eg_bitingan_rumi,tomato,4,PIECE,false
+eg_bitingan_rumi,tomato paste,30,GRAM,false
+eg_bitingan_rumi,garlic,3,PIECE,false
+eg_bitingan_rumi,roumi cheese,150,GRAM,false
+eg_bitingan_rumi,sunflower oil,300,MILLILITER,false
+eg_bitingan_rumi,salt,8,GRAM,false
+eg_bitingan_rumi,black pepper,1,GRAM,false
+eg_mashed_potato_beef,potato,6,PIECE,false
+eg_mashed_potato_beef,ground beef,500,GRAM,false
+eg_mashed_potato_beef,onion,1,PIECE,false
+eg_mashed_potato_beef,butter,50,GRAM,false
+eg_mashed_potato_beef,whole milk,150,MILLILITER,false
+eg_mashed_potato_beef,chicken egg,1,PIECE,false
+eg_mashed_potato_beef,nutmeg,1,GRAM,false
+eg_mashed_potato_beef,salt,12,GRAM,false
+eg_mashed_potato_beef,black pepper,2,GRAM,false
+eg_mashed_potato_beef,breadcrumbs,30,GRAM,false
+eg_kofta_mashwia,ground beef,700,GRAM,false
+eg_kofta_mashwia,lamb mince,300,GRAM,false
+eg_kofta_mashwia,onion,1,PIECE,false
+eg_kofta_mashwia,parsley,30,GRAM,false
+eg_kofta_mashwia,garlic,2,PIECE,false
+eg_kofta_mashwia,allspice,3,GRAM,false
+eg_kofta_mashwia,cumin,2,GRAM,false
+eg_kofta_mashwia,black pepper,2,GRAM,false
+eg_kofta_mashwia,salt,12,GRAM,false
+eg_kofta_mashwia,sunflower oil,1,TABLESPOON,false
+eg_kebab,lamb,1200,GRAM,false
+eg_kebab,onion,2,PIECE,false
+eg_kebab,tomato,3,PIECE,true
+eg_kebab,black pepper,2,GRAM,false
+eg_kebab,allspice,2,GRAM,false
+eg_kebab,salt,12,GRAM,false
+eg_kebab,ghee,20,GRAM,false
+eg_hawawshi,baladi bread,500,GRAM,false
+eg_hawawshi,ground beef,600,GRAM,false
+eg_hawawshi,onion,2,PIECE,false
+eg_hawawshi,bell pepper,1,PIECE,false
+eg_hawawshi,chili pepper,1,PIECE,false
+eg_hawawshi,parsley,15,GRAM,false
+eg_hawawshi,allspice,3,GRAM,false
+eg_hawawshi,cumin,2,GRAM,false
+eg_hawawshi,paprika,2,GRAM,false
+eg_hawawshi,salt,10,GRAM,false
+eg_hawawshi,black pepper,2,GRAM,false
+eg_hawawshi,ghee,30,GRAM,false
+eg_escalope_pane,chicken breast,700,GRAM,false
+eg_escalope_pane,chicken egg,2,PIECE,false
+eg_escalope_pane,breadcrumbs,120,GRAM,false
+eg_escalope_pane,wheat flour,50,GRAM,false
+eg_escalope_pane,garlic,2,PIECE,false
+eg_escalope_pane,lemon juice,2,TABLESPOON,false
+eg_escalope_pane,paprika,2,GRAM,false
+eg_escalope_pane,salt,8,GRAM,false
+eg_escalope_pane,black pepper,1,GRAM,false
+eg_escalope_pane,sunflower oil,300,MILLILITER,false
+eg_frakh_mashwi,chicken,1500,GRAM,false
+eg_frakh_mashwi,yogurt,150,GRAM,false
+eg_frakh_mashwi,lemon juice,3,TABLESPOON,false
+eg_frakh_mashwi,garlic,6,PIECE,false
+eg_frakh_mashwi,onion,1,PIECE,false
+eg_frakh_mashwi,paprika,4,GRAM,false
+eg_frakh_mashwi,cumin,2,GRAM,false
+eg_frakh_mashwi,cardamom,1,GRAM,false
+eg_frakh_mashwi,black pepper,2,GRAM,false
+eg_frakh_mashwi,salt,14,GRAM,false
+eg_frakh_mashwi,sunflower oil,2,TABLESPOON,false
+eg_hamam_mahshi,pigeon,1600,GRAM,false
+eg_hamam_mahshi,freekeh,250,GRAM,false
+eg_hamam_mahshi,onion,2,PIECE,false
+eg_hamam_mahshi,ghee,60,GRAM,false
+eg_hamam_mahshi,cardamom,2,GRAM,false
+eg_hamam_mahshi,cinnamon,1,GRAM,false
+eg_hamam_mahshi,bay leaf,1,GRAM,false
+eg_hamam_mahshi,chicken liver,100,GRAM,true
+eg_hamam_mahshi,salt,12,GRAM,false
+eg_hamam_mahshi,black pepper,2,GRAM,false
+eg_hamam_mahshi,water,1500,MILLILITER,false
+eg_rabbit_salsa,rabbit,1500,GRAM,false
+eg_rabbit_salsa,onion,2,PIECE,false
+eg_rabbit_salsa,lemon,1,PIECE,false
+eg_rabbit_salsa,tomato,4,PIECE,false
+eg_rabbit_salsa,tomato paste,40,GRAM,false
+eg_rabbit_salsa,garlic,5,PIECE,false
+eg_rabbit_salsa,sunflower oil,3,TABLESPOON,false
+eg_rabbit_salsa,bay leaf,1,GRAM,false
+eg_rabbit_salsa,cardamom,2,GRAM,false
+eg_rabbit_salsa,salt,12,GRAM,false
+eg_rabbit_salsa,black pepper,2,GRAM,false
+eg_rabbit_salsa,water,1500,MILLILITER,false
+eg_duck_roasted,duck,2500,GRAM,false
+eg_duck_roasted,onion,2,PIECE,false
+eg_duck_roasted,orange,2,PIECE,false
+eg_duck_roasted,orange juice,200,MILLILITER,false
+eg_duck_roasted,cardamom,2,GRAM,false
+eg_duck_roasted,bay leaf,1,GRAM,false
+eg_duck_roasted,cinnamon,2,GRAM,false
+eg_duck_roasted,salt,14,GRAM,false
+eg_duck_roasted,black pepper,2,GRAM,false
+eg_duck_roasted,water,3000,MILLILITER,false
+eg_lamb_shank_fatta,lamb shank,1200,GRAM,false
+eg_lamb_shank_fatta,onion,2,PIECE,false
+eg_lamb_shank_fatta,tomato paste,30,GRAM,false
+eg_lamb_shank_fatta,cardamom,2,GRAM,false
+eg_lamb_shank_fatta,bay leaf,1,GRAM,false
+eg_lamb_shank_fatta,ghee,30,GRAM,false
+eg_lamb_shank_fatta,white rice,400,GRAM,false
+eg_lamb_shank_fatta,vermicelli,50,GRAM,false
+eg_lamb_shank_fatta,salt,12,GRAM,false
+eg_lamb_shank_fatta,black pepper,2,GRAM,false
+eg_lamb_shank_fatta,water,2500,MILLILITER,false
+eg_rosto,beef,1500,GRAM,false
+eg_rosto,onion,3,PIECE,false
+eg_rosto,garlic,6,PIECE,false
+eg_rosto,carrot,2,PIECE,false
+eg_rosto,bay leaf,1,GRAM,false
+eg_rosto,cardamom,2,GRAM,false
+eg_rosto,black pepper,3,GRAM,false
+eg_rosto,salt,14,GRAM,false
+eg_rosto,ghee,40,GRAM,false
+eg_rosto,water,1200,MILLILITER,false
+eg_rosto,tomato paste,20,GRAM,true
+eg_rayash_mashwia,lamb chops,1000,GRAM,false
+eg_rayash_mashwia,onion,1,PIECE,false
+eg_rayash_mashwia,dried rosemary,2,GRAM,false
+eg_rayash_mashwia,lemon juice,2,TABLESPOON,false
+eg_rayash_mashwia,black pepper,2,GRAM,false
+eg_rayash_mashwia,salt,10,GRAM,false
+eg_rayash_mashwia,olive oil,2,TABLESPOON,false
+eg_kersha_tomato,beef tripe,1000,GRAM,false
+eg_kersha_tomato,lemon,2,PIECE,false
+eg_kersha_tomato,onion,2,PIECE,false
+eg_kersha_tomato,tomato,4,PIECE,false
+eg_kersha_tomato,tomato paste,40,GRAM,false
+eg_kersha_tomato,garlic,6,PIECE,false
+eg_kersha_tomato,sunflower oil,3,TABLESPOON,false
+eg_kersha_tomato,cumin,2,GRAM,false
+eg_kersha_tomato,bay leaf,1,GRAM,false
+eg_kersha_tomato,salt,12,GRAM,false
+eg_kersha_tomato,black pepper,2,GRAM,false
+eg_kersha_tomato,water,3000,MILLILITER,false
+eg_samak_mashwi,mullet,1200,GRAM,false
+eg_samak_mashwi,bran,80,GRAM,false
+eg_samak_mashwi,garlic,6,PIECE,false
+eg_samak_mashwi,lemon juice,4,TABLESPOON,false
+eg_samak_mashwi,cumin,5,GRAM,false
+eg_samak_mashwi,coriander seed,2,GRAM,false
+eg_samak_mashwi,cayenne pepper,1,GRAM,false
+eg_samak_mashwi,salt,12,GRAM,false
+eg_samak_mashwi,sunflower oil,2,TABLESPOON,false
+eg_bolti_maqli,tilapia,1200,GRAM,false
+eg_bolti_maqli,garlic,4,PIECE,false
+eg_bolti_maqli,lemon juice,3,TABLESPOON,false
+eg_bolti_maqli,cumin,4,GRAM,false
+eg_bolti_maqli,salt,12,GRAM,false
+eg_bolti_maqli,wheat flour,80,GRAM,false
+eg_bolti_maqli,sunflower oil,600,MILLILITER,false
+eg_calamari_maqli,squid,700,GRAM,false
+eg_calamari_maqli,wheat flour,100,GRAM,false
+eg_calamari_maqli,lemon juice,2,TABLESPOON,false
+eg_calamari_maqli,garlic,2,PIECE,false
+eg_calamari_maqli,cumin,2,GRAM,false
+eg_calamari_maqli,salt,8,GRAM,false
+eg_calamari_maqli,sunflower oil,600,MILLILITER,false
+eg_gambari_mashwi,shrimp,800,GRAM,false
+eg_gambari_mashwi,garlic,5,PIECE,false
+eg_gambari_mashwi,lemon juice,3,TABLESPOON,false
+eg_gambari_mashwi,cumin,2,GRAM,false
+eg_gambari_mashwi,paprika,2,GRAM,false
+eg_gambari_mashwi,olive oil,3,TABLESPOON,false
+eg_gambari_mashwi,salt,6,GRAM,false
+eg_shorbet_samak,grouper,500,GRAM,false
+eg_shorbet_samak,shrimp,250,GRAM,false
+eg_shorbet_samak,onion,1,PIECE,false
+eg_shorbet_samak,tomato,3,PIECE,false
+eg_shorbet_samak,garlic,4,PIECE,false
+eg_shorbet_samak,celery,40,GRAM,false
+eg_shorbet_samak,white rice,50,GRAM,false
+eg_shorbet_samak,cumin,3,GRAM,false
+eg_shorbet_samak,sunflower oil,2,TABLESPOON,false
+eg_shorbet_samak,water,1800,MILLILITER,false
+eg_shorbet_samak,salt,10,GRAM,false
+eg_shorbet_samak,lemon,1,PIECE,false
+eg_crab_kaboria,crab,1500,GRAM,false
+eg_crab_kaboria,garlic,8,PIECE,false
+eg_crab_kaboria,chili pepper,2,PIECE,false
+eg_crab_kaboria,tomato,2,PIECE,false
+eg_crab_kaboria,cumin,3,GRAM,false
+eg_crab_kaboria,olive oil,3,TABLESPOON,false
+eg_crab_kaboria,lemon juice,2,TABLESPOON,false
+eg_crab_kaboria,salt,10,GRAM,false
+eg_crab_kaboria,water,2000,MILLILITER,false
+eg_eish_baladi,whole wheat flour,700,GRAM,false
+eg_eish_baladi,wheat flour,300,GRAM,false
+eg_eish_baladi,dry yeast,10,GRAM,false
+eg_eish_baladi,water,700,MILLILITER,false
+eg_eish_baladi,salt,12,GRAM,false
+eg_eish_baladi,bran,60,GRAM,false
+eg_feteer_meshaltet,wheat flour,1000,GRAM,false
+eg_feteer_meshaltet,water,550,MILLILITER,false
+eg_feteer_meshaltet,salt,10,GRAM,false
+eg_feteer_meshaltet,ghee,300,GRAM,false
+eg_feteer_meshaltet,chicken egg,1,PIECE,true
+eg_goulash_lahma,phyllo dough,500,GRAM,false
+eg_goulash_lahma,ground beef,500,GRAM,false
+eg_goulash_lahma,onion,1,PIECE,false
+eg_goulash_lahma,ghee,150,GRAM,false
+eg_goulash_lahma,whole milk,250,MILLILITER,false
+eg_goulash_lahma,chicken egg,2,PIECE,false
+eg_goulash_lahma,allspice,3,GRAM,false
+eg_goulash_lahma,salt,10,GRAM,false
+eg_goulash_lahma,black pepper,2,GRAM,false
+eg_goulash_gebna,phyllo dough,500,GRAM,false
+eg_goulash_gebna,domiati cheese,300,GRAM,false
+eg_goulash_gebna,mozzarella cheese,200,GRAM,false
+eg_goulash_gebna,chicken egg,3,PIECE,false
+eg_goulash_gebna,whole milk,250,MILLILITER,false
+eg_goulash_gebna,ghee,150,GRAM,false
+eg_goulash_gebna,parsley,15,GRAM,true
+eg_goulash_gebna,black seed,2,GRAM,true
+eg_sambousek,wheat flour,400,GRAM,false
+eg_sambousek,butter,100,GRAM,false
+eg_sambousek,water,150,MILLILITER,false
+eg_sambousek,salt,4,GRAM,false
+eg_sambousek,domiati cheese,250,GRAM,false
+eg_sambousek,chicken egg,1,PIECE,false
+eg_sambousek,parsley,10,GRAM,false
+eg_sambousek,sunflower oil,500,MILLILITER,false
+eg_hawawshi_eskandarani,wheat flour,500,GRAM,false
+eg_hawawshi_eskandarani,dry yeast,7,GRAM,false
+eg_hawawshi_eskandarani,water,300,MILLILITER,false
+eg_hawawshi_eskandarani,sunflower oil,3,TABLESPOON,false
+eg_hawawshi_eskandarani,ground beef,600,GRAM,false
+eg_hawawshi_eskandarani,onion,2,PIECE,false
+eg_hawawshi_eskandarani,bell pepper,1,PIECE,false
+eg_hawawshi_eskandarani,chili pepper,1,PIECE,false
+eg_hawawshi_eskandarani,allspice,3,GRAM,false
+eg_hawawshi_eskandarani,salt,12,GRAM,false
+eg_hawawshi_eskandarani,black pepper,2,GRAM,false
+eg_qaraqeesh,wheat flour,500,GRAM,false
+eg_qaraqeesh,dry yeast,7,GRAM,false
+eg_qaraqeesh,ghee,100,GRAM,false
+eg_qaraqeesh,whole milk,250,MILLILITER,false
+eg_qaraqeesh,sesame seeds,40,GRAM,false
+eg_qaraqeesh,black seed,5,GRAM,false
+eg_qaraqeesh,salt,6,GRAM,false
+eg_qaraqeesh,white sugar,10,GRAM,false
+eg_roqaq_lahma,phyllo dough,400,GRAM,false
+eg_roqaq_lahma,ground beef,500,GRAM,false
+eg_roqaq_lahma,onion,1,PIECE,false
+eg_roqaq_lahma,ghee,120,GRAM,false
+eg_roqaq_lahma,chicken stock cube,1,PIECE,false
+eg_roqaq_lahma,water,300,MILLILITER,false
+eg_roqaq_lahma,allspice,2,GRAM,false
+eg_roqaq_lahma,salt,8,GRAM,false
+eg_roqaq_lahma,black pepper,2,GRAM,false
+eg_basbousa,semolina,400,GRAM,false
+eg_basbousa,white sugar,400,GRAM,false
+eg_basbousa,yogurt,200,GRAM,false
+eg_basbousa,butter,120,GRAM,false
+eg_basbousa,desiccated coconut,50,GRAM,false
+eg_basbousa,baking powder,8,GRAM,false
+eg_basbousa,water,300,MILLILITER,false
+eg_basbousa,lemon juice,1,TABLESPOON,false
+eg_basbousa,almonds,30,GRAM,true
+eg_basbousa,vanilla extract,1,TEASPOON,false
+eg_mahalabeya,whole milk,1000,MILLILITER,false
+eg_mahalabeya,corn starch,70,GRAM,false
+eg_mahalabeya,white sugar,120,GRAM,false
+eg_mahalabeya,rose water,10,GRAM,true
+eg_mahalabeya,vanilla extract,1,TEASPOON,false
+eg_mahalabeya,pistachios,20,GRAM,true
+eg_sahlab,whole milk,800,MILLILITER,false
+eg_sahlab,sahlab powder,40,GRAM,false
+eg_sahlab,white sugar,50,GRAM,false
+eg_sahlab,desiccated coconut,15,GRAM,false
+eg_sahlab,raisins,20,GRAM,false
+eg_sahlab,walnuts,20,GRAM,false
+eg_sahlab,cinnamon,1,GRAM,false
+eg_zalabya,wheat flour,300,GRAM,false
+eg_zalabya,dry yeast,7,GRAM,false
+eg_zalabya,white sugar,310,GRAM,false
+eg_zalabya,water,500,MILLILITER,false
+eg_zalabya,salt,2,GRAM,false
+eg_zalabya,lemon juice,1,TABLESPOON,false
+eg_zalabya,sunflower oil,800,MILLILITER,false
+eg_kahk,wheat flour,1000,GRAM,false
+eg_kahk,ghee,500,GRAM,false
+eg_kahk,whole milk,250,MILLILITER,false
+eg_kahk,dry yeast,10,GRAM,false
+eg_kahk,white sugar,30,GRAM,false
+eg_kahk,sesame seeds,30,GRAM,false
+eg_kahk,powdered sugar,150,GRAM,false
+eg_kahk,salt,3,GRAM,false
+eg_kahk,walnuts,150,GRAM,true
+eg_basbousa_coconut,semolina,400,GRAM,false
+eg_basbousa_coconut,white sugar,400,GRAM,false
+eg_basbousa_coconut,yogurt,200,GRAM,false
+eg_basbousa_coconut,butter,120,GRAM,false
+eg_basbousa_coconut,desiccated coconut,80,GRAM,false
+eg_basbousa_coconut,baking powder,8,GRAM,false
+eg_basbousa_coconut,whole milk,400,MILLILITER,false
+eg_basbousa_coconut,corn starch,30,GRAM,false
+eg_basbousa_coconut,water,300,MILLILITER,false
+eg_basbousa_coconut,lemon juice,1,TABLESPOON,false
+eg_atayef,wheat flour,300,GRAM,false
+eg_atayef,semolina,50,GRAM,false
+eg_atayef,dry yeast,5,GRAM,false
+eg_atayef,baking powder,4,GRAM,false
+eg_atayef,whole milk,450,MILLILITER,false
+eg_atayef,white sugar,320,GRAM,false
+eg_atayef,walnuts,150,GRAM,false
+eg_atayef,raisins,40,GRAM,false
+eg_atayef,cinnamon,1,GRAM,false
+eg_atayef,water,250,MILLILITER,false
+eg_atayef,lemon juice,1,TABLESPOON,false
+eg_atayef,sunflower oil,500,MILLILITER,false
+eg_mehalabeya_roz,whole milk,1000,MILLILITER,false
+eg_mehalabeya_roz,rice flour,80,GRAM,false
+eg_mehalabeya_roz,white sugar,120,GRAM,false
+eg_mehalabeya_roz,vanilla extract,1,TEASPOON,false
+eg_mehalabeya_roz,orange blossom water,10,GRAM,true
+eg_tamr_hindi,tamarind,200,GRAM,false
+eg_tamr_hindi,water,1500,MILLILITER,false
+eg_tamr_hindi,white sugar,200,GRAM,false
+eg_tamr_hindi,rose water,5,GRAM,true
+eg_helba,fenugreek seed,20,GRAM,false
+eg_helba,water,500,MILLILITER,false
+eg_helba,honey,30,GRAM,true
+eg_helba,whole milk,100,MILLILITER,true
+eg_yansoon,anise seed,8,GRAM,false
+eg_yansoon,water,500,MILLILITER,false
+eg_yansoon,honey,20,GRAM,true
+eg_irfa,cinnamon,6,GRAM,false
+eg_irfa,water,250,MILLILITER,false
+eg_irfa,whole milk,250,MILLILITER,false
+eg_irfa,white sugar,20,GRAM,false
+it_tiramisu,butter cookies,300,GRAM,false
+it_tiramisu,espresso,250,MILLILITER,false
+it_tiramisu,cream cheese,400,GRAM,false
+it_tiramisu,heavy cream,250,MILLILITER,false
+it_tiramisu,white sugar,100,GRAM,false
+it_tiramisu,egg yolk,3,PIECE,false
+it_tiramisu,cocoa powder,15,GRAM,false
+it_tiramisu,vanilla extract,1,TEASPOON,false
+it_panna_cotta,heavy cream,500,MILLILITER,false
+it_panna_cotta,whole milk,200,MILLILITER,false
+it_panna_cotta,white sugar,80,GRAM,false
+it_panna_cotta,gelatin powder,8,GRAM,false
+it_panna_cotta,vanilla extract,1,TEASPOON,false
+it_panna_cotta,strawberry,200,GRAM,true
+it_spaghetti_bolognese,spaghetti,400,GRAM,false
+it_spaghetti_bolognese,ground beef,500,GRAM,false
+it_spaghetti_bolognese,onion,1,PIECE,false
+it_spaghetti_bolognese,carrot,1,PIECE,false
+it_spaghetti_bolognese,celery,50,GRAM,false
+it_spaghetti_bolognese,garlic,2,PIECE,false
+it_spaghetti_bolognese,canned tomatoes,400,GRAM,false
+it_spaghetti_bolognese,tomato paste,30,GRAM,false
+it_spaghetti_bolognese,olive oil,2,TABLESPOON,false
+it_spaghetti_bolognese,dried oregano,1,GRAM,false
+it_spaghetti_bolognese,salt,8,GRAM,false
+it_spaghetti_bolognese,black pepper,1,GRAM,false
+it_spaghetti_bolognese,parmesan cheese,40,GRAM,true
+it_penne_arrabbiata,pasta,400,GRAM,false
+it_penne_arrabbiata,canned tomatoes,500,GRAM,false
+it_penne_arrabbiata,garlic,4,PIECE,false
+it_penne_arrabbiata,chili pepper,1,PIECE,false
+it_penne_arrabbiata,olive oil,3,TABLESPOON,false
+it_penne_arrabbiata,salt,8,GRAM,false
+it_penne_arrabbiata,parsley,10,GRAM,true
+it_pasta_pomodoro,spaghetti,400,GRAM,false
+it_pasta_pomodoro,tomato,6,PIECE,false
+it_pasta_pomodoro,garlic,2,PIECE,false
+it_pasta_pomodoro,olive oil,3,TABLESPOON,false
+it_pasta_pomodoro,fresh basil,10,GRAM,false
+it_pasta_pomodoro,salt,8,GRAM,false
+it_pasta_pomodoro,parmesan cheese,30,GRAM,true
+it_fettuccine_alfredo_chicken,pasta,400,GRAM,false
+it_fettuccine_alfredo_chicken,chicken breast,400,GRAM,false
+it_fettuccine_alfredo_chicken,butter,40,GRAM,false
+it_fettuccine_alfredo_chicken,heavy cream,250,MILLILITER,false
+it_fettuccine_alfredo_chicken,parmesan cheese,80,GRAM,false
+it_fettuccine_alfredo_chicken,garlic,2,PIECE,false
+it_fettuccine_alfredo_chicken,salt,6,GRAM,false
+it_fettuccine_alfredo_chicken,black pepper,1,GRAM,false
+it_lasagna,pasta,400,GRAM,false
+it_lasagna,ground beef,700,GRAM,false
+it_lasagna,onion,1,PIECE,false
+it_lasagna,garlic,3,PIECE,false
+it_lasagna,canned tomatoes,800,GRAM,false
+it_lasagna,tomato paste,40,GRAM,false
+it_lasagna,olive oil,2,TABLESPOON,false
+it_lasagna,butter,60,GRAM,false
+it_lasagna,wheat flour,60,GRAM,false
+it_lasagna,whole milk,750,MILLILITER,false
+it_lasagna,mozzarella cheese,250,GRAM,false
+it_lasagna,parmesan cheese,50,GRAM,false
+it_lasagna,nutmeg,1,GRAM,false
+it_lasagna,salt,12,GRAM,false
+it_lasagna,black pepper,2,GRAM,false
+it_margherita_pizza,wheat flour,300,GRAM,false
+it_margherita_pizza,dry yeast,4,GRAM,false
+it_margherita_pizza,water,190,MILLILITER,false
+it_margherita_pizza,olive oil,2,TABLESPOON,false
+it_margherita_pizza,salt,6,GRAM,false
+it_margherita_pizza,tomato sauce,150,GRAM,false
+it_margherita_pizza,mozzarella cheese,200,GRAM,false
+it_margherita_pizza,fresh basil,8,GRAM,false
+it_risotto_mushroom,short grain rice,320,GRAM,false
+it_risotto_mushroom,mushroom,300,GRAM,false
+it_risotto_mushroom,onion,1,PIECE,false
+it_risotto_mushroom,butter,50,GRAM,false
+it_risotto_mushroom,olive oil,1,TABLESPOON,false
+it_risotto_mushroom,chicken stock cube,2,PIECE,false
+it_risotto_mushroom,water,1200,MILLILITER,false
+it_risotto_mushroom,parmesan cheese,60,GRAM,false
+it_risotto_mushroom,salt,4,GRAM,false
+it_risotto_mushroom,black pepper,1,GRAM,false
+it_minestrone,onion,1,PIECE,false
+it_minestrone,carrot,2,PIECE,false
+it_minestrone,celery,80,GRAM,false
+it_minestrone,zucchini,200,GRAM,false
+it_minestrone,potato,1,PIECE,false
+it_minestrone,canned tomatoes,400,GRAM,false
+it_minestrone,cooked white beans,250,GRAM,false
+it_minestrone,macaroni,100,GRAM,false
+it_minestrone,olive oil,3,TABLESPOON,false
+it_minestrone,garlic,2,PIECE,false
+it_minestrone,water,1500,MILLILITER,false
+it_minestrone,salt,8,GRAM,false
+it_minestrone,black pepper,1,GRAM,false
+it_minestrone,parmesan cheese,30,GRAM,true
+it_caprese,tomato,4,PIECE,false
+it_caprese,mozzarella cheese,250,GRAM,false
+it_caprese,fresh basil,10,GRAM,false
+it_caprese,olive oil,3,TABLESPOON,false
+it_caprese,salt,2,GRAM,false
+it_caprese,black pepper,1,GRAM,false
+it_bruschetta,white bread,200,GRAM,false
+it_bruschetta,tomato,3,PIECE,false
+it_bruschetta,garlic,1,PIECE,false
+it_bruschetta,fresh basil,8,GRAM,false
+it_bruschetta,olive oil,3,TABLESPOON,false
+it_bruschetta,salt,2,GRAM,false
+it_chicken_parmigiana,chicken breast,700,GRAM,false
+it_chicken_parmigiana,chicken egg,2,PIECE,false
+it_chicken_parmigiana,breadcrumbs,100,GRAM,false
+it_chicken_parmigiana,wheat flour,40,GRAM,false
+it_chicken_parmigiana,tomato sauce,300,GRAM,false
+it_chicken_parmigiana,mozzarella cheese,200,GRAM,false
+it_chicken_parmigiana,parmesan cheese,40,GRAM,false
+it_chicken_parmigiana,sunflower oil,150,MILLILITER,false
+it_chicken_parmigiana,dried oregano,1,GRAM,false
+it_chicken_parmigiana,salt,6,GRAM,false
+it_gnocchi_tomato,potato,4,PIECE,false
+it_gnocchi_tomato,wheat flour,200,GRAM,false
+it_gnocchi_tomato,chicken egg,1,PIECE,false
+it_gnocchi_tomato,salt,8,GRAM,false
+it_gnocchi_tomato,tomato sauce,300,GRAM,false
+it_gnocchi_tomato,olive oil,2,TABLESPOON,false
+it_gnocchi_tomato,garlic,2,PIECE,false
+it_gnocchi_tomato,parmesan cheese,30,GRAM,true
+it_pesto_pasta,pasta,400,GRAM,false
+it_pesto_pasta,fresh basil,50,GRAM,false
+it_pesto_pasta,pine nuts,30,GRAM,false
+it_pesto_pasta,garlic,1,PIECE,false
+it_pesto_pasta,parmesan cheese,50,GRAM,false
+it_pesto_pasta,olive oil,100,MILLILITER,false
+it_pesto_pasta,salt,8,GRAM,false
+it_frittata,chicken egg,8,PIECE,false
+it_frittata,potato,1,PIECE,false
+it_frittata,onion,1,PIECE,false
+it_frittata,spinach,100,GRAM,false
+it_frittata,parmesan cheese,40,GRAM,false
+it_frittata,olive oil,2,TABLESPOON,false
+it_frittata,salt,5,GRAM,false
+it_frittata,black pepper,1,GRAM,false
+it_aglio_olio,spaghetti,400,GRAM,false
+it_aglio_olio,garlic,6,PIECE,false
+it_aglio_olio,olive oil,80,MILLILITER,false
+it_aglio_olio,chili pepper,1,PIECE,false
+it_aglio_olio,parsley,15,GRAM,false
+it_aglio_olio,salt,8,GRAM,false
+it_shrimp_linguine,spaghetti,400,GRAM,false
+it_shrimp_linguine,shrimp,400,GRAM,false
+it_shrimp_linguine,garlic,4,PIECE,false
+it_shrimp_linguine,tomato,3,PIECE,false
+it_shrimp_linguine,olive oil,3,TABLESPOON,false
+it_shrimp_linguine,chili pepper,1,PIECE,true
+it_shrimp_linguine,parsley,15,GRAM,false
+it_shrimp_linguine,lemon juice,1,TABLESPOON,false
+it_shrimp_linguine,salt,8,GRAM,false
+it_eggplant_parmigiana,eggplant,1000,GRAM,false
+it_eggplant_parmigiana,tomato sauce,500,GRAM,false
+it_eggplant_parmigiana,mozzarella cheese,250,GRAM,false
+it_eggplant_parmigiana,parmesan cheese,60,GRAM,false
+it_eggplant_parmigiana,fresh basil,10,GRAM,false
+it_eggplant_parmigiana,olive oil,150,MILLILITER,false
+it_eggplant_parmigiana,salt,8,GRAM,false
+it_focaccia,wheat flour,500,GRAM,false
+it_focaccia,dry yeast,7,GRAM,false
+it_focaccia,water,400,MILLILITER,false
+it_focaccia,olive oil,80,MILLILITER,false
+it_focaccia,salt,10,GRAM,false
+it_focaccia,fresh rosemary,5,GRAM,false
+it_mac_cheese_baked,macaroni,400,GRAM,false
+it_mac_cheese_baked,butter,40,GRAM,false
+it_mac_cheese_baked,wheat flour,40,GRAM,false
+it_mac_cheese_baked,whole milk,600,MILLILITER,false
+it_mac_cheese_baked,mozzarella cheese,100,GRAM,false
+it_mac_cheese_baked,parmesan cheese,40,GRAM,false
+it_mac_cheese_baked,cheddar cheese,100,GRAM,false
+it_mac_cheese_baked,cream cheese,80,GRAM,false
+it_mac_cheese_baked,salt,6,GRAM,false
+it_osso_buco_style_veal,veal,1000,GRAM,false
+it_osso_buco_style_veal,wheat flour,30,GRAM,false
+it_osso_buco_style_veal,onion,1,PIECE,false
+it_osso_buco_style_veal,carrot,2,PIECE,false
+it_osso_buco_style_veal,celery,80,GRAM,false
+it_osso_buco_style_veal,garlic,2,PIECE,false
+it_osso_buco_style_veal,canned tomatoes,400,GRAM,false
+it_osso_buco_style_veal,olive oil,3,TABLESPOON,false
+it_osso_buco_style_veal,water,400,MILLILITER,false
+it_osso_buco_style_veal,lemon,1,PIECE,false
+it_osso_buco_style_veal,salt,8,GRAM,false
+it_osso_buco_style_veal,black pepper,2,GRAM,false
+it_tuna_pasta_salad,pasta,300,GRAM,false
+it_tuna_pasta_salad,canned tuna,200,GRAM,false
+it_tuna_pasta_salad,black olives,60,GRAM,false
+it_tuna_pasta_salad,tomato,2,PIECE,false
+it_tuna_pasta_salad,onion,1,PIECE,false
+it_tuna_pasta_salad,olive oil,3,TABLESPOON,false
+it_tuna_pasta_salad,lemon juice,2,TABLESPOON,false
+it_tuna_pasta_salad,parsley,10,GRAM,false
+it_tuna_pasta_salad,salt,5,GRAM,false
+it_italian_meatballs,ground beef,600,GRAM,false
+it_italian_meatballs,breadcrumbs,50,GRAM,false
+it_italian_meatballs,parmesan cheese,40,GRAM,false
+it_italian_meatballs,chicken egg,1,PIECE,false
+it_italian_meatballs,garlic,3,PIECE,false
+it_italian_meatballs,parsley,15,GRAM,false
+it_italian_meatballs,canned tomatoes,800,GRAM,false
+it_italian_meatballs,olive oil,3,TABLESPOON,false
+it_italian_meatballs,dried oregano,1,GRAM,false
+it_italian_meatballs,salt,10,GRAM,false
+it_italian_meatballs,black pepper,2,GRAM,false
+gr_greek_salad,tomato,4,PIECE,false
+gr_greek_salad,cucumber,1,PIECE,false
+gr_greek_salad,onion,1,PIECE,false
+gr_greek_salad,bell pepper,1,PIECE,false
+gr_greek_salad,black olives,80,GRAM,false
+gr_greek_salad,feta cheese,200,GRAM,false
+gr_greek_salad,olive oil,4,TABLESPOON,false
+gr_greek_salad,dried oregano,1,GRAM,false
+gr_greek_salad,vinegar,1,TABLESPOON,false
+gr_greek_salad,salt,2,GRAM,false
+gr_tzatziki,greek yogurt,500,GRAM,false
+gr_tzatziki,cucumber,1,PIECE,false
+gr_tzatziki,garlic,2,PIECE,false
+gr_tzatziki,dill,10,GRAM,false
+gr_tzatziki,olive oil,2,TABLESPOON,false
+gr_tzatziki,lemon juice,1,TABLESPOON,false
+gr_tzatziki,salt,3,GRAM,false
+gr_moussaka,eggplant,1000,GRAM,false
+gr_moussaka,potato,3,PIECE,false
+gr_moussaka,lamb mince,700,GRAM,false
+gr_moussaka,onion,1,PIECE,false
+gr_moussaka,garlic,2,PIECE,false
+gr_moussaka,canned tomatoes,400,GRAM,false
+gr_moussaka,cinnamon,2,GRAM,false
+gr_moussaka,olive oil,100,MILLILITER,false
+gr_moussaka,butter,60,GRAM,false
+gr_moussaka,wheat flour,60,GRAM,false
+gr_moussaka,whole milk,700,MILLILITER,false
+gr_moussaka,chicken egg,2,PIECE,false
+gr_moussaka,parmesan cheese,50,GRAM,false
+gr_moussaka,nutmeg,1,GRAM,false
+gr_moussaka,salt,12,GRAM,false
+gr_moussaka,black pepper,2,GRAM,false
+gr_spanakopita,phyllo dough,400,GRAM,false
+gr_spanakopita,spinach,800,GRAM,false
+gr_spanakopita,feta cheese,250,GRAM,false
+gr_spanakopita,spring onion,60,GRAM,false
+gr_spanakopita,dill,20,GRAM,false
+gr_spanakopita,chicken egg,2,PIECE,false
+gr_spanakopita,olive oil,100,MILLILITER,false
+gr_spanakopita,black pepper,1,GRAM,false
+gr_souvlaki_chicken,chicken breast,700,GRAM,false
+gr_souvlaki_chicken,lemon juice,3,TABLESPOON,false
+gr_souvlaki_chicken,olive oil,3,TABLESPOON,false
+gr_souvlaki_chicken,garlic,3,PIECE,false
+gr_souvlaki_chicken,dried oregano,2,GRAM,false
+gr_souvlaki_chicken,salt,7,GRAM,false
+gr_souvlaki_chicken,black pepper,1,GRAM,false
+gr_souvlaki_chicken,pita bread,4,PIECE,false
+gr_gigantes,lima beans,500,GRAM,false
+gr_gigantes,onion,1,PIECE,false
+gr_gigantes,garlic,3,PIECE,false
+gr_gigantes,canned tomatoes,400,GRAM,false
+gr_gigantes,olive oil,80,MILLILITER,false
+gr_gigantes,dill,15,GRAM,false
+gr_gigantes,salt,8,GRAM,false
+gr_gigantes,black pepper,1,GRAM,false
+gr_lemon_potatoes,potato,5,PIECE,false
+gr_lemon_potatoes,lemon juice,4,TABLESPOON,false
+gr_lemon_potatoes,olive oil,60,MILLILITER,false
+gr_lemon_potatoes,garlic,3,PIECE,false
+gr_lemon_potatoes,dried oregano,2,GRAM,false
+gr_lemon_potatoes,water,150,MILLILITER,false
+gr_lemon_potatoes,salt,8,GRAM,false
+me_shakshuka_feta,chicken egg,6,PIECE,false
+me_shakshuka_feta,canned tomatoes,500,GRAM,false
+me_shakshuka_feta,red bell pepper,2,PIECE,false
+me_shakshuka_feta,onion,1,PIECE,false
+me_shakshuka_feta,garlic,3,PIECE,false
+me_shakshuka_feta,paprika,2,GRAM,false
+me_shakshuka_feta,cumin,2,GRAM,false
+me_shakshuka_feta,olive oil,3,TABLESPOON,false
+me_shakshuka_feta,feta cheese,100,GRAM,false
+me_shakshuka_feta,parsley,10,GRAM,false
+me_shakshuka_feta,salt,4,GRAM,false
+me_grilled_vegetables,zucchini,400,GRAM,false
+me_grilled_vegetables,eggplant,400,GRAM,false
+me_grilled_vegetables,red bell pepper,2,PIECE,false
+me_grilled_vegetables,onion,1,PIECE,false
+me_grilled_vegetables,olive oil,4,TABLESPOON,false
+me_grilled_vegetables,garlic,2,PIECE,false
+me_grilled_vegetables,dried thyme,1,GRAM,false
+me_grilled_vegetables,salt,5,GRAM,false
+me_lentil_salad,brown lentils,250,GRAM,false
+me_lentil_salad,tomato,2,PIECE,false
+me_lentil_salad,cucumber,1,PIECE,false
+me_lentil_salad,spring onion,40,GRAM,false
+me_lentil_salad,parsley,20,GRAM,false
+me_lentil_salad,feta cheese,80,GRAM,true
+me_lentil_salad,olive oil,3,TABLESPOON,false
+me_lentil_salad,lemon juice,2,TABLESPOON,false
+me_lentil_salad,salt,4,GRAM,false
+me_baked_fish_herbs,sea bass,1000,GRAM,false
+me_baked_fish_herbs,lemon,2,PIECE,false
+me_baked_fish_herbs,garlic,3,PIECE,false
+me_baked_fish_herbs,parsley,15,GRAM,false
+me_baked_fish_herbs,dried thyme,1,GRAM,false
+me_baked_fish_herbs,olive oil,3,TABLESPOON,false
+me_baked_fish_herbs,salt,8,GRAM,false
+me_baked_fish_herbs,black pepper,1,GRAM,false
+fr_quiche_lorraine_style,wheat flour,200,GRAM,false
+fr_quiche_lorraine_style,butter,100,GRAM,false
+fr_quiche_lorraine_style,chicken egg,4,PIECE,false
+fr_quiche_lorraine_style,heavy cream,300,MILLILITER,false
+fr_quiche_lorraine_style,swiss cheese,100,GRAM,false
+fr_quiche_lorraine_style,basterma,80,GRAM,false
+fr_quiche_lorraine_style,onion,1,PIECE,false
+fr_quiche_lorraine_style,nutmeg,1,GRAM,false
+fr_quiche_lorraine_style,salt,4,GRAM,false
+fr_quiche_lorraine_style,water,3,TABLESPOON,false
+fr_french_onion_soup,onion,6,PIECE,false
+fr_french_onion_soup,butter,50,GRAM,false
+fr_french_onion_soup,wheat flour,15,GRAM,false
+fr_french_onion_soup,beef stock cube,10,GRAM,false
+fr_french_onion_soup,water,1200,MILLILITER,false
+fr_french_onion_soup,dried thyme,1,GRAM,false
+fr_french_onion_soup,white bread,120,GRAM,false
+fr_french_onion_soup,swiss cheese,120,GRAM,false
+fr_french_onion_soup,salt,3,GRAM,false
+fr_french_onion_soup,black pepper,1,GRAM,false
+fr_ratatouille,eggplant,500,GRAM,false
+fr_ratatouille,zucchini,500,GRAM,false
+fr_ratatouille,red bell pepper,2,PIECE,false
+fr_ratatouille,onion,1,PIECE,false
+fr_ratatouille,garlic,3,PIECE,false
+fr_ratatouille,canned tomatoes,400,GRAM,false
+fr_ratatouille,olive oil,5,TABLESPOON,false
+fr_ratatouille,dried thyme,1,GRAM,false
+fr_ratatouille,fresh basil,8,GRAM,false
+fr_ratatouille,salt,8,GRAM,false
+fr_crepes,wheat flour,125,GRAM,false
+fr_crepes,chicken egg,2,PIECE,false
+fr_crepes,whole milk,300,MILLILITER,false
+fr_crepes,butter,30,GRAM,false
+fr_crepes,white sugar,15,GRAM,false
+fr_crepes,salt,1,GRAM,false
+fr_crepes,chocolate hazelnut spread,100,GRAM,true
+fr_chicken_mushroom_cream,chicken breast,700,GRAM,false
+fr_chicken_mushroom_cream,mushroom,300,GRAM,false
+fr_chicken_mushroom_cream,onion,1,PIECE,false
+fr_chicken_mushroom_cream,garlic,2,PIECE,false
+fr_chicken_mushroom_cream,heavy cream,200,MILLILITER,false
+fr_chicken_mushroom_cream,butter,30,GRAM,false
+fr_chicken_mushroom_cream,chicken stock cube,1,PIECE,false
+fr_chicken_mushroom_cream,water,150,MILLILITER,false
+fr_chicken_mushroom_cream,dried thyme,1,GRAM,false
+fr_chicken_mushroom_cream,salt,5,GRAM,false
+fr_chicken_mushroom_cream,black pepper,1,GRAM,false
+es_spanish_omelette,potato,4,PIECE,false
+es_spanish_omelette,onion,1,PIECE,false
+es_spanish_omelette,chicken egg,6,PIECE,false
+es_spanish_omelette,olive oil,150,MILLILITER,false
+es_spanish_omelette,salt,6,GRAM,false
+es_gazpacho,tomato,8,PIECE,false
+es_gazpacho,cucumber,1,PIECE,false
+es_gazpacho,bell pepper,1,PIECE,false
+es_gazpacho,garlic,1,PIECE,false
+es_gazpacho,white bread,50,GRAM,false
+es_gazpacho,olive oil,60,MILLILITER,false
+es_gazpacho,vinegar,2,TABLESPOON,false
+es_gazpacho,salt,6,GRAM,false
+es_chicken_paella,short grain rice,400,GRAM,false
+es_chicken_paella,chicken thigh,500,GRAM,false
+es_chicken_paella,shrimp,300,GRAM,false
+es_chicken_paella,squid,200,GRAM,true
+es_chicken_paella,green peas,150,GRAM,false
+es_chicken_paella,red bell pepper,1,PIECE,false
+es_chicken_paella,onion,1,PIECE,false
+es_chicken_paella,garlic,3,PIECE,false
+es_chicken_paella,tomato,2,PIECE,false
+es_chicken_paella,saffron,0.2,GRAM,false
+es_chicken_paella,paprika,3,GRAM,false
+es_chicken_paella,olive oil,4,TABLESPOON,false
+es_chicken_paella,chicken stock cube,2,PIECE,false
+es_chicken_paella,water,1100,MILLILITER,false
+es_chicken_paella,salt,6,GRAM,false
+es_chicken_paella,lemon,1,PIECE,false
+es_garlic_shrimp,shrimp,500,GRAM,false
+es_garlic_shrimp,garlic,6,PIECE,false
+es_garlic_shrimp,chili pepper,1,PIECE,false
+es_garlic_shrimp,olive oil,80,MILLILITER,false
+es_garlic_shrimp,paprika,1,GRAM,false
+es_garlic_shrimp,parsley,10,GRAM,false
+es_garlic_shrimp,salt,4,GRAM,false
+lb_tabbouleh,parsley,150,GRAM,false
+lb_tabbouleh,fresh mint,20,GRAM,false
+lb_tabbouleh,bulgur,40,GRAM,false
+lb_tabbouleh,tomato,3,PIECE,false
+lb_tabbouleh,spring onion,40,GRAM,false
+lb_tabbouleh,lemon juice,4,TABLESPOON,false
+lb_tabbouleh,olive oil,60,MILLILITER,false
+lb_tabbouleh,salt,4,GRAM,false
+lb_tabbouleh,allspice,1,GRAM,true
+lb_mutabbal,eggplant,800,GRAM,false
+lb_mutabbal,tahini,60,GRAM,false
+lb_mutabbal,yogurt,100,GRAM,false
+lb_mutabbal,garlic,2,PIECE,false
+lb_mutabbal,lemon juice,2,TABLESPOON,false
+lb_mutabbal,olive oil,2,TABLESPOON,false
+lb_mutabbal,salt,4,GRAM,false
+lb_mutabbal,pomegranate,30,GRAM,true
+lb_shish_tawook,chicken breast,800,GRAM,false
+lb_shish_tawook,yogurt,100,GRAM,false
+lb_shish_tawook,lemon juice,3,TABLESPOON,false
+lb_shish_tawook,garlic,4,PIECE,false
+lb_shish_tawook,tomato paste,15,GRAM,false
+lb_shish_tawook,paprika,3,GRAM,false
+lb_shish_tawook,olive oil,3,TABLESPOON,false
+lb_shish_tawook,salt,8,GRAM,false
+lb_shish_tawook,black pepper,1,GRAM,false
+lb_kibbeh_saniyeh,bulgur,300,GRAM,false
+lb_kibbeh_saniyeh,ground beef,900,GRAM,false
+lb_kibbeh_saniyeh,onion,3,PIECE,false
+lb_kibbeh_saniyeh,pine nuts,50,GRAM,false
+lb_kibbeh_saniyeh,allspice,4,GRAM,false
+lb_kibbeh_saniyeh,cinnamon,2,GRAM,false
+lb_kibbeh_saniyeh,ghee,80,GRAM,false
+lb_kibbeh_saniyeh,salt,14,GRAM,false
+lb_kibbeh_saniyeh,black pepper,2,GRAM,false
+lb_kafta_saniyeh,ground beef,700,GRAM,false
+lb_kafta_saniyeh,onion,1,PIECE,false
+lb_kafta_saniyeh,parsley,25,GRAM,false
+lb_kafta_saniyeh,potato,4,PIECE,false
+lb_kafta_saniyeh,tomato,3,PIECE,false
+lb_kafta_saniyeh,tomato paste,30,GRAM,false
+lb_kafta_saniyeh,water,300,MILLILITER,false
+lb_kafta_saniyeh,allspice,3,GRAM,false
+lb_kafta_saniyeh,sunflower oil,3,TABLESPOON,false
+lb_kafta_saniyeh,salt,12,GRAM,false
+lb_kafta_saniyeh,black pepper,2,GRAM,false
+lb_manakish_thyme,wheat flour,500,GRAM,false
+lb_manakish_thyme,dry yeast,7,GRAM,false
+lb_manakish_thyme,water,300,MILLILITER,false
+lb_manakish_thyme,olive oil,120,MILLILITER,false
+lb_manakish_thyme,salt,8,GRAM,false
+lb_manakish_thyme,dried thyme,20,GRAM,false
+lb_manakish_thyme,sesame seeds,20,GRAM,false
+lb_lahm_bi_ajeen,wheat flour,500,GRAM,false
+lb_lahm_bi_ajeen,dry yeast,7,GRAM,false
+lb_lahm_bi_ajeen,water,300,MILLILITER,false
+lb_lahm_bi_ajeen,olive oil,3,TABLESPOON,false
+lb_lahm_bi_ajeen,lamb mince,500,GRAM,false
+lb_lahm_bi_ajeen,onion,1,PIECE,false
+lb_lahm_bi_ajeen,tomato,2,PIECE,false
+lb_lahm_bi_ajeen,pomegranate molasses,30,GRAM,false
+lb_lahm_bi_ajeen,allspice,3,GRAM,false
+lb_lahm_bi_ajeen,salt,12,GRAM,false
+lb_lahm_bi_ajeen,pine nuts,30,GRAM,true
+lb_fatayer_sabanekh,wheat flour,500,GRAM,false
+lb_fatayer_sabanekh,dry yeast,5,GRAM,false
+lb_fatayer_sabanekh,water,280,MILLILITER,false
+lb_fatayer_sabanekh,olive oil,100,MILLILITER,false
+lb_fatayer_sabanekh,spinach,600,GRAM,false
+lb_fatayer_sabanekh,onion,1,PIECE,false
+lb_fatayer_sabanekh,lemon juice,4,TABLESPOON,false
+lb_fatayer_sabanekh,pomegranate molasses,15,GRAM,true
+lb_fatayer_sabanekh,salt,10,GRAM,false
+lb_labneh_plate,labneh,250,GRAM,false
+lb_labneh_plate,olive oil,3,TABLESPOON,false
+lb_labneh_plate,dried mint,1,GRAM,false
+lb_labneh_plate,black olives,50,GRAM,false
+lb_labneh_plate,cucumber,1,PIECE,true
+lb_chicken_shawarma_plate,chicken thigh,900,GRAM,false
+lb_chicken_shawarma_plate,yogurt,100,GRAM,false
+lb_chicken_shawarma_plate,lemon juice,3,TABLESPOON,false
+lb_chicken_shawarma_plate,garlic,6,PIECE,false
+lb_chicken_shawarma_plate,cumin,2,GRAM,false
+lb_chicken_shawarma_plate,paprika,3,GRAM,false
+lb_chicken_shawarma_plate,cinnamon,1,GRAM,false
+lb_chicken_shawarma_plate,allspice,2,GRAM,false
+lb_chicken_shawarma_plate,olive oil,3,TABLESPOON,false
+lb_chicken_shawarma_plate,salt,9,GRAM,false
+lb_chicken_shawarma_plate,pickled cucumber,100,GRAM,false
+lb_chicken_shawarma_plate,pita bread,4,PIECE,false
+lb_toum,garlic,20,PIECE,false
+lb_toum,sunflower oil,400,MILLILITER,false
+lb_toum,lemon juice,4,TABLESPOON,false
+lb_toum,salt,5,GRAM,false
+lb_toum,water,3,TABLESPOON,false
+lb_batata_harra,potato,5,PIECE,false
+lb_batata_harra,sunflower oil,400,MILLILITER,false
+lb_batata_harra,garlic,5,PIECE,false
+lb_batata_harra,chili pepper,1,PIECE,false
+lb_batata_harra,fresh coriander,25,GRAM,false
+lb_batata_harra,lemon juice,1,TABLESPOON,false
+lb_batata_harra,salt,6,GRAM,false
+lb_batata_harra,cayenne pepper,1,GRAM,false
+lb_riz_a_djej,chicken,1300,GRAM,false
+lb_riz_a_djej,white rice,450,GRAM,false
+lb_riz_a_djej,ground beef,250,GRAM,false
+lb_riz_a_djej,onion,2,PIECE,false
+lb_riz_a_djej,almonds,40,GRAM,false
+lb_riz_a_djej,pine nuts,30,GRAM,false
+lb_riz_a_djej,ghee,50,GRAM,false
+lb_riz_a_djej,cinnamon,2,GRAM,false
+lb_riz_a_djej,allspice,3,GRAM,false
+lb_riz_a_djej,bay leaf,1,GRAM,false
+lb_riz_a_djej,water,2000,MILLILITER,false
+lb_riz_a_djej,salt,12,GRAM,false
+lb_loubieh_bi_zeit,green beans,700,GRAM,false
+lb_loubieh_bi_zeit,onion,1,PIECE,false
+lb_loubieh_bi_zeit,garlic,5,PIECE,false
+lb_loubieh_bi_zeit,tomato,4,PIECE,false
+lb_loubieh_bi_zeit,olive oil,80,MILLILITER,false
+lb_loubieh_bi_zeit,salt,6,GRAM,false
+lb_loubieh_bi_zeit,allspice,1,GRAM,false
+lb_fattet_hummus,pita bread,3,PIECE,false
+lb_fattet_hummus,cooked chickpeas,400,GRAM,false
+lb_fattet_hummus,yogurt,400,GRAM,false
+lb_fattet_hummus,tahini,40,GRAM,false
+lb_fattet_hummus,garlic,2,PIECE,false
+lb_fattet_hummus,lemon juice,1,TABLESPOON,false
+lb_fattet_hummus,pine nuts,30,GRAM,false
+lb_fattet_hummus,ghee,20,GRAM,false
+lb_fattet_hummus,cumin,1,GRAM,false
+lb_fattet_hummus,salt,4,GRAM,false
+lb_adas_bi_hamod,brown lentils,300,GRAM,false
+lb_adas_bi_hamod,chard,400,GRAM,false
+lb_adas_bi_hamod,potato,2,PIECE,false
+lb_adas_bi_hamod,garlic,6,PIECE,false
+lb_adas_bi_hamod,fresh coriander,30,GRAM,false
+lb_adas_bi_hamod,olive oil,4,TABLESPOON,false
+lb_adas_bi_hamod,lemon juice,6,TABLESPOON,false
+lb_adas_bi_hamod,water,1500,MILLILITER,false
+lb_adas_bi_hamod,salt,8,GRAM,false
+lb_muhammara,red bell pepper,3,PIECE,false
+lb_muhammara,walnuts,100,GRAM,false
+lb_muhammara,breadcrumbs,30,GRAM,false
+lb_muhammara,pomegranate molasses,30,GRAM,false
+lb_muhammara,olive oil,3,TABLESPOON,false
+lb_muhammara,cumin,2,GRAM,false
+lb_muhammara,cayenne pepper,1,GRAM,false
+lb_muhammara,lemon juice,1,TABLESPOON,false
+lb_muhammara,salt,3,GRAM,false
+lb_sfouf,semolina,300,GRAM,false
+lb_sfouf,wheat flour,100,GRAM,false
+lb_sfouf,white sugar,200,GRAM,false
+lb_sfouf,turmeric,5,GRAM,false
+lb_sfouf,anise seed,3,GRAM,false
+lb_sfouf,baking powder,8,GRAM,false
+lb_sfouf,whole milk,250,MILLILITER,false
+lb_sfouf,sunflower oil,150,MILLILITER,false
+lb_sfouf,tahini,15,GRAM,false
+lb_sfouf,pine nuts,20,GRAM,true
+lb_sawdat_djej,chicken liver,500,GRAM,false
+lb_sawdat_djej,garlic,4,PIECE,false
+lb_sawdat_djej,pomegranate molasses,30,GRAM,false
+lb_sawdat_djej,lemon juice,2,TABLESPOON,false
+lb_sawdat_djej,olive oil,3,TABLESPOON,false
+lb_sawdat_djej,fresh coriander,15,GRAM,false
+lb_sawdat_djej,salt,4,GRAM,false
+lb_sawdat_djej,black pepper,1,GRAM,false
+lb_kousa_bi_laban,zucchini,1500,GRAM,false
+lb_kousa_bi_laban,ground beef,300,GRAM,false
+lb_kousa_bi_laban,white rice,200,GRAM,false
+lb_kousa_bi_laban,yogurt,1000,GRAM,false
+lb_kousa_bi_laban,corn starch,20,GRAM,false
+lb_kousa_bi_laban,chicken egg,1,PIECE,false
+lb_kousa_bi_laban,garlic,4,PIECE,false
+lb_kousa_bi_laban,dried mint,2,GRAM,false
+lb_kousa_bi_laban,ghee,20,GRAM,false
+lb_kousa_bi_laban,allspice,2,GRAM,false
+lb_kousa_bi_laban,water,500,MILLILITER,false
+lb_kousa_bi_laban,salt,12,GRAM,false
+tr_menemen,chicken egg,5,PIECE,false
+tr_menemen,tomato,3,PIECE,false
+tr_menemen,bell pepper,2,PIECE,false
+tr_menemen,onion,1,PIECE,true
+tr_menemen,butter,20,GRAM,false
+tr_menemen,olive oil,1,TABLESPOON,false
+tr_menemen,salt,3,GRAM,false
+tr_menemen,cayenne pepper,1,GRAM,false
+tr_mercimek,red lentils,300,GRAM,false
+tr_mercimek,onion,1,PIECE,false
+tr_mercimek,carrot,1,PIECE,false
+tr_mercimek,tomato paste,20,GRAM,false
+tr_mercimek,wheat flour,15,GRAM,false
+tr_mercimek,butter,40,GRAM,false
+tr_mercimek,water,1600,MILLILITER,false
+tr_mercimek,paprika,3,GRAM,false
+tr_mercimek,dried mint,2,GRAM,false
+tr_mercimek,cumin,2,GRAM,false
+tr_mercimek,salt,8,GRAM,false
+tr_mercimek,lemon,1,PIECE,false
+tr_imam_bayildi,eggplant,1000,GRAM,false
+tr_imam_bayildi,onion,2,PIECE,false
+tr_imam_bayildi,garlic,5,PIECE,false
+tr_imam_bayildi,tomato,3,PIECE,false
+tr_imam_bayildi,parsley,20,GRAM,false
+tr_imam_bayildi,olive oil,120,MILLILITER,false
+tr_imam_bayildi,white sugar,5,GRAM,false
+tr_imam_bayildi,water,200,MILLILITER,false
+tr_imam_bayildi,salt,8,GRAM,false
+tr_karniyarik,eggplant,1000,GRAM,false
+tr_karniyarik,ground beef,400,GRAM,false
+tr_karniyarik,onion,1,PIECE,false
+tr_karniyarik,garlic,2,PIECE,false
+tr_karniyarik,tomato,3,PIECE,false
+tr_karniyarik,bell pepper,2,PIECE,false
+tr_karniyarik,tomato paste,20,GRAM,false
+tr_karniyarik,sunflower oil,200,MILLILITER,false
+tr_karniyarik,water,200,MILLILITER,false
+tr_karniyarik,salt,8,GRAM,false
+tr_karniyarik,black pepper,2,GRAM,false
+tr_adana_kebab,lamb mince,800,GRAM,false
+tr_adana_kebab,red bell pepper,1,PIECE,false
+tr_adana_kebab,onion,1,PIECE,false
+tr_adana_kebab,cayenne pepper,3,GRAM,false
+tr_adana_kebab,paprika,3,GRAM,false
+tr_adana_kebab,salt,10,GRAM,false
+tr_adana_kebab,pita bread,4,PIECE,true
+tr_lahmacun,wheat flour,500,GRAM,false
+tr_lahmacun,dry yeast,5,GRAM,false
+tr_lahmacun,water,300,MILLILITER,false
+tr_lahmacun,lamb mince,400,GRAM,false
+tr_lahmacun,tomato,2,PIECE,false
+tr_lahmacun,red bell pepper,1,PIECE,false
+tr_lahmacun,onion,1,PIECE,false
+tr_lahmacun,parsley,20,GRAM,false
+tr_lahmacun,tomato paste,30,GRAM,false
+tr_lahmacun,cayenne pepper,2,GRAM,false
+tr_lahmacun,salt,12,GRAM,false
+tr_lahmacun,lemon,2,PIECE,false
+tr_sigara_borek,phyllo dough,250,GRAM,false
+tr_sigara_borek,feta cheese,250,GRAM,false
+tr_sigara_borek,parsley,20,GRAM,false
+tr_sigara_borek,chicken egg,1,PIECE,false
+tr_sigara_borek,sunflower oil,400,MILLILITER,false
+tr_bulgur_pilavi,bulgur,300,GRAM,false
+tr_bulgur_pilavi,onion,1,PIECE,false
+tr_bulgur_pilavi,bell pepper,1,PIECE,false
+tr_bulgur_pilavi,tomato,1,PIECE,false
+tr_bulgur_pilavi,tomato paste,30,GRAM,false
+tr_bulgur_pilavi,butter,30,GRAM,false
+tr_bulgur_pilavi,water,550,MILLILITER,false
+tr_bulgur_pilavi,salt,5,GRAM,false
+tr_kisir,bulgur,250,GRAM,false
+tr_kisir,water,250,MILLILITER,false
+tr_kisir,tomato paste,30,GRAM,false
+tr_kisir,spring onion,50,GRAM,false
+tr_kisir,parsley,40,GRAM,false
+tr_kisir,fresh mint,10,GRAM,false
+tr_kisir,tomato,2,PIECE,false
+tr_kisir,pomegranate molasses,20,GRAM,false
+tr_kisir,lemon juice,2,TABLESPOON,false
+tr_kisir,olive oil,60,MILLILITER,false
+tr_kisir,salt,5,GRAM,false
+tr_kisir,cayenne pepper,1,GRAM,false
+tr_cilbir,chicken egg,4,PIECE,false
+tr_cilbir,greek yogurt,250,GRAM,false
+tr_cilbir,garlic,1,PIECE,false
+tr_cilbir,butter,30,GRAM,false
+tr_cilbir,paprika,2,GRAM,false
+tr_cilbir,cayenne pepper,1,GRAM,false
+tr_cilbir,vinegar,1,TABLESPOON,false
+tr_cilbir,salt,2,GRAM,false
+tr_hunkar_begendi,lamb shoulder,800,GRAM,false
+tr_hunkar_begendi,onion,1,PIECE,false
+tr_hunkar_begendi,tomato,2,PIECE,false
+tr_hunkar_begendi,tomato paste,20,GRAM,false
+tr_hunkar_begendi,eggplant,1000,GRAM,false
+tr_hunkar_begendi,butter,50,GRAM,false
+tr_hunkar_begendi,wheat flour,40,GRAM,false
+tr_hunkar_begendi,whole milk,400,MILLILITER,false
+tr_hunkar_begendi,swiss cheese,60,GRAM,false
+tr_hunkar_begendi,water,500,MILLILITER,false
+tr_hunkar_begendi,salt,10,GRAM,false
+tr_hunkar_begendi,black pepper,2,GRAM,false
+tr_baklava,phyllo dough,500,GRAM,false
+tr_baklava,walnuts,350,GRAM,false
+tr_baklava,butter,250,GRAM,false
+tr_baklava,white sugar,450,GRAM,false
+tr_baklava,water,350,MILLILITER,false
+tr_baklava,lemon juice,1,TABLESPOON,false
+tr_baklava,cinnamon,1,GRAM,true
+ma_chicken_tagine_olives,chicken,1500,GRAM,false
+ma_chicken_tagine_olives,onion,2,PIECE,false
+ma_chicken_tagine_olives,garlic,3,PIECE,false
+ma_chicken_tagine_olives,ginger,10,GRAM,false
+ma_chicken_tagine_olives,saffron,0.2,GRAM,false
+ma_chicken_tagine_olives,turmeric,2,GRAM,false
+ma_chicken_tagine_olives,olive,120,GRAM,false
+ma_chicken_tagine_olives,lemon,1,PIECE,false
+ma_chicken_tagine_olives,fresh coriander,20,GRAM,false
+ma_chicken_tagine_olives,olive oil,3,TABLESPOON,false
+ma_chicken_tagine_olives,water,400,MILLILITER,false
+ma_chicken_tagine_olives,salt,8,GRAM,false
+ma_chicken_tagine_olives,black pepper,2,GRAM,false
+ma_harira,lamb,300,GRAM,false
+ma_harira,brown lentils,150,GRAM,false
+ma_harira,cooked chickpeas,250,GRAM,false
+ma_harira,onion,1,PIECE,false
+ma_harira,celery,60,GRAM,false
+ma_harira,parsley,30,GRAM,false
+ma_harira,fresh coriander,30,GRAM,false
+ma_harira,canned tomatoes,400,GRAM,false
+ma_harira,tomato paste,30,GRAM,false
+ma_harira,wheat flour,40,GRAM,false
+ma_harira,ginger,5,GRAM,false
+ma_harira,turmeric,2,GRAM,false
+ma_harira,cinnamon,1,GRAM,false
+ma_harira,water,2000,MILLILITER,false
+ma_harira,salt,10,GRAM,false
+ma_harira,lemon,1,PIECE,false
+ma_kefta_tagine,ground beef,500,GRAM,false
+ma_kefta_tagine,onion,1,PIECE,false
+ma_kefta_tagine,parsley,20,GRAM,false
+ma_kefta_tagine,cumin,3,GRAM,false
+ma_kefta_tagine,paprika,3,GRAM,false
+ma_kefta_tagine,canned tomatoes,500,GRAM,false
+ma_kefta_tagine,garlic,3,PIECE,false
+ma_kefta_tagine,chicken egg,4,PIECE,false
+ma_kefta_tagine,olive oil,2,TABLESPOON,false
+ma_kefta_tagine,salt,8,GRAM,false
+ma_zaalouk,eggplant,800,GRAM,false
+ma_zaalouk,tomato,4,PIECE,false
+ma_zaalouk,garlic,3,PIECE,false
+ma_zaalouk,cumin,2,GRAM,false
+ma_zaalouk,paprika,2,GRAM,false
+ma_zaalouk,olive oil,4,TABLESPOON,false
+ma_zaalouk,fresh coriander,15,GRAM,false
+ma_zaalouk,lemon juice,1,TABLESPOON,false
+ma_zaalouk,salt,5,GRAM,false
+ma_couscous_vegetables,couscous,400,GRAM,false
+ma_couscous_vegetables,lamb,600,GRAM,false
+ma_couscous_vegetables,onion,2,PIECE,false
+ma_couscous_vegetables,carrot,3,PIECE,false
+ma_couscous_vegetables,zucchini,300,GRAM,false
+ma_couscous_vegetables,pumpkin,300,GRAM,false
+ma_couscous_vegetables,turnip,200,GRAM,false
+ma_couscous_vegetables,cooked chickpeas,200,GRAM,false
+ma_couscous_vegetables,tomato,2,PIECE,false
+ma_couscous_vegetables,ginger,5,GRAM,false
+ma_couscous_vegetables,turmeric,2,GRAM,false
+ma_couscous_vegetables,butter,40,GRAM,false
+ma_couscous_vegetables,water,2000,MILLILITER,false
+ma_couscous_vegetables,salt,12,GRAM,false
+ma_couscous_vegetables,black pepper,2,GRAM,false
+gf_chicken_kabsa,chicken,1500,GRAM,false
+gf_chicken_kabsa,white rice,500,GRAM,false
+gf_chicken_kabsa,onion,2,PIECE,false
+gf_chicken_kabsa,tomato,3,PIECE,false
+gf_chicken_kabsa,tomato paste,30,GRAM,false
+gf_chicken_kabsa,garlic,4,PIECE,false
+gf_chicken_kabsa,carrot,1,PIECE,false
+gf_chicken_kabsa,cardamom,3,GRAM,false
+gf_chicken_kabsa,cinnamon,2,GRAM,false
+gf_chicken_kabsa,cloves,1,GRAM,false
+gf_chicken_kabsa,black pepper,2,GRAM,false
+gf_chicken_kabsa,lemon,1,PIECE,false
+gf_chicken_kabsa,raisins,40,GRAM,true
+gf_chicken_kabsa,almonds,40,GRAM,true
+gf_chicken_kabsa,sunflower oil,4,TABLESPOON,false
+gf_chicken_kabsa,water,1200,MILLILITER,false
+gf_chicken_kabsa,salt,14,GRAM,false
+gf_harees,whole wheat grain,400,GRAM,false
+gf_harees,chicken breast,500,GRAM,false
+gf_harees,water,2000,MILLILITER,false
+gf_harees,ghee,40,GRAM,false
+gf_harees,cinnamon,1,GRAM,false
+gf_harees,cardamom,1,GRAM,false
+gf_harees,salt,8,GRAM,false
+gf_luqaimat,wheat flour,300,GRAM,false
+gf_luqaimat,dry yeast,7,GRAM,false
+gf_luqaimat,corn starch,20,GRAM,false
+gf_luqaimat,white sugar,15,GRAM,false
+gf_luqaimat,cardamom,1,GRAM,false
+gf_luqaimat,water,350,MILLILITER,false
+gf_luqaimat,sunflower oil,700,MILLILITER,false
+gf_luqaimat,date syrup,150,GRAM,false
+gf_luqaimat,sesame seeds,10,GRAM,false
+gf_saloona,chicken thigh,800,GRAM,false
+gf_saloona,potato,2,PIECE,false
+gf_saloona,zucchini,300,GRAM,false
+gf_saloona,carrot,2,PIECE,false
+gf_saloona,onion,1,PIECE,false
+gf_saloona,tomato,4,PIECE,false
+gf_saloona,tomato paste,30,GRAM,false
+gf_saloona,garlic,3,PIECE,false
+gf_saloona,turmeric,2,GRAM,false
+gf_saloona,cumin,2,GRAM,false
+gf_saloona,cardamom,1,GRAM,false
+gf_saloona,sunflower oil,3,TABLESPOON,false
+gf_saloona,water,800,MILLILITER,false
+gf_saloona,salt,10,GRAM,false
+in_chicken_curry,chicken thigh,1000,GRAM,false
+in_chicken_curry,onion,2,PIECE,false
+in_chicken_curry,tomato,3,PIECE,false
+in_chicken_curry,garlic,5,PIECE,false
+in_chicken_curry,ginger,20,GRAM,false
+in_chicken_curry,sunflower oil,4,TABLESPOON,false
+in_chicken_curry,curry powder,10,GRAM,false
+in_chicken_curry,turmeric,2,GRAM,false
+in_chicken_curry,cumin,3,GRAM,false
+in_chicken_curry,cayenne pepper,2,GRAM,false
+in_chicken_curry,yogurt,100,GRAM,false
+in_chicken_curry,water,300,MILLILITER,false
+in_chicken_curry,fresh coriander,15,GRAM,false
+in_chicken_curry,salt,10,GRAM,false
+in_butter_chicken,chicken breast,700,GRAM,false
+in_butter_chicken,yogurt,150,GRAM,false
+in_butter_chicken,garlic,4,PIECE,false
+in_butter_chicken,ginger,15,GRAM,false
+in_butter_chicken,curry powder,8,GRAM,false
+in_butter_chicken,cayenne pepper,2,GRAM,false
+in_butter_chicken,canned tomatoes,400,GRAM,false
+in_butter_chicken,butter,50,GRAM,false
+in_butter_chicken,heavy cream,150,MILLILITER,false
+in_butter_chicken,white sugar,5,GRAM,false
+in_butter_chicken,salt,8,GRAM,false
+in_dal_tadka,red lentils,250,GRAM,false
+in_dal_tadka,water,900,MILLILITER,false
+in_dal_tadka,turmeric,2,GRAM,false
+in_dal_tadka,tomato,1,PIECE,false
+in_dal_tadka,ghee,30,GRAM,false
+in_dal_tadka,cumin,3,GRAM,false
+in_dal_tadka,garlic,4,PIECE,false
+in_dal_tadka,chili pepper,1,PIECE,false
+in_dal_tadka,onion,1,PIECE,false
+in_dal_tadka,salt,7,GRAM,false
+in_dal_tadka,fresh coriander,10,GRAM,false
+in_chana_masala,cooked chickpeas,500,GRAM,false
+in_chana_masala,onion,2,PIECE,false
+in_chana_masala,tomato,3,PIECE,false
+in_chana_masala,garlic,4,PIECE,false
+in_chana_masala,ginger,15,GRAM,false
+in_chana_masala,sunflower oil,3,TABLESPOON,false
+in_chana_masala,curry powder,8,GRAM,false
+in_chana_masala,cumin,2,GRAM,false
+in_chana_masala,lemon juice,1,TABLESPOON,false
+in_chana_masala,water,250,MILLILITER,false
+in_chana_masala,salt,7,GRAM,false
+in_chana_masala,fresh coriander,10,GRAM,false
+in_aloo_palak,spinach,600,GRAM,false
+in_aloo_palak,potato,3,PIECE,false
+in_aloo_palak,onion,1,PIECE,false
+in_aloo_palak,garlic,4,PIECE,false
+in_aloo_palak,ginger,10,GRAM,false
+in_aloo_palak,cumin,2,GRAM,false
+in_aloo_palak,turmeric,1,GRAM,false
+in_aloo_palak,cayenne pepper,1,GRAM,false
+in_aloo_palak,sunflower oil,3,TABLESPOON,false
+in_aloo_palak,salt,6,GRAM,false
+in_aloo_gobi,potato,3,PIECE,false
+in_aloo_gobi,cauliflower,600,GRAM,false
+in_aloo_gobi,onion,1,PIECE,false
+in_aloo_gobi,tomato,1,PIECE,false
+in_aloo_gobi,ginger,10,GRAM,false
+in_aloo_gobi,cumin,3,GRAM,false
+in_aloo_gobi,turmeric,2,GRAM,false
+in_aloo_gobi,curry powder,5,GRAM,false
+in_aloo_gobi,sunflower oil,4,TABLESPOON,false
+in_aloo_gobi,salt,6,GRAM,false
+in_aloo_gobi,fresh coriander,10,GRAM,false
+in_chicken_biryani,chicken thigh,1000,GRAM,false
+in_chicken_biryani,white rice,500,GRAM,false
+in_chicken_biryani,yogurt,200,GRAM,false
+in_chicken_biryani,onion,3,PIECE,false
+in_chicken_biryani,garlic,5,PIECE,false
+in_chicken_biryani,ginger,20,GRAM,false
+in_chicken_biryani,curry powder,10,GRAM,false
+in_chicken_biryani,cardamom,2,GRAM,false
+in_chicken_biryani,cloves,1,GRAM,false
+in_chicken_biryani,cinnamon,2,GRAM,false
+in_chicken_biryani,bay leaf,1,GRAM,false
+in_chicken_biryani,saffron,0.2,GRAM,false
+in_chicken_biryani,whole milk,3,TABLESPOON,false
+in_chicken_biryani,ghee,60,GRAM,false
+in_chicken_biryani,fresh mint,10,GRAM,false
+in_chicken_biryani,fresh coriander,10,GRAM,false
+in_chicken_biryani,water,2500,MILLILITER,false
+in_chicken_biryani,salt,16,GRAM,false
+in_jeera_rice,white rice,300,GRAM,false
+in_jeera_rice,ghee,25,GRAM,false
+in_jeera_rice,cumin,3,GRAM,false
+in_jeera_rice,bay leaf,1,GRAM,false
+in_jeera_rice,water,450,MILLILITER,false
+in_jeera_rice,salt,5,GRAM,false
+in_cucumber_raita,yogurt,400,GRAM,false
+in_cucumber_raita,cucumber,1,PIECE,false
+in_cucumber_raita,cumin,2,GRAM,false
+in_cucumber_raita,fresh mint,5,GRAM,false
+in_cucumber_raita,salt,3,GRAM,false
+in_keema_matar,lamb mince,500,GRAM,false
+in_keema_matar,green peas,250,GRAM,false
+in_keema_matar,onion,2,PIECE,false
+in_keema_matar,tomato,2,PIECE,false
+in_keema_matar,garlic,4,PIECE,false
+in_keema_matar,ginger,15,GRAM,false
+in_keema_matar,curry powder,8,GRAM,false
+in_keema_matar,turmeric,1,GRAM,false
+in_keema_matar,sunflower oil,2,TABLESPOON,false
+in_keema_matar,salt,8,GRAM,false
+in_rajma,cooked kidney beans,500,GRAM,false
+in_rajma,onion,2,PIECE,false
+in_rajma,tomato,3,PIECE,false
+in_rajma,garlic,4,PIECE,false
+in_rajma,ginger,10,GRAM,false
+in_rajma,curry powder,8,GRAM,false
+in_rajma,cumin,2,GRAM,false
+in_rajma,sunflower oil,3,TABLESPOON,false
+in_rajma,water,300,MILLILITER,false
+in_rajma,salt,7,GRAM,false
+in_egg_curry,chicken egg,8,PIECE,false
+in_egg_curry,onion,2,PIECE,false
+in_egg_curry,tomato,3,PIECE,false
+in_egg_curry,garlic,3,PIECE,false
+in_egg_curry,ginger,10,GRAM,false
+in_egg_curry,curry powder,8,GRAM,false
+in_egg_curry,turmeric,1,GRAM,false
+in_egg_curry,sunflower oil,3,TABLESPOON,false
+in_egg_curry,water,250,MILLILITER,false
+in_egg_curry,salt,6,GRAM,false
+in_tandoori_chicken,chicken drumstick,1200,GRAM,false
+in_tandoori_chicken,yogurt,200,GRAM,false
+in_tandoori_chicken,lemon juice,2,TABLESPOON,false
+in_tandoori_chicken,garlic,4,PIECE,false
+in_tandoori_chicken,ginger,15,GRAM,false
+in_tandoori_chicken,paprika,5,GRAM,false
+in_tandoori_chicken,curry powder,6,GRAM,false
+in_tandoori_chicken,cayenne pepper,2,GRAM,false
+in_tandoori_chicken,salt,10,GRAM,false
+in_tandoori_chicken,sunflower oil,1,TABLESPOON,false
+in_samosa,wheat flour,300,GRAM,false
+in_samosa,ghee,50,GRAM,false
+in_samosa,water,120,MILLILITER,false
+in_samosa,potato,4,PIECE,false
+in_samosa,green peas,100,GRAM,false
+in_samosa,cumin,2,GRAM,false
+in_samosa,curry powder,5,GRAM,false
+in_samosa,ginger,10,GRAM,false
+in_samosa,chili pepper,1,PIECE,false
+in_samosa,fresh coriander,10,GRAM,false
+in_samosa,salt,8,GRAM,false
+in_samosa,sunflower oil,700,MILLILITER,false
+in_onion_bhaji,onion,3,PIECE,false
+in_onion_bhaji,chickpea flour,150,GRAM,false
+in_onion_bhaji,cumin,2,GRAM,false
+in_onion_bhaji,turmeric,1,GRAM,false
+in_onion_bhaji,cayenne pepper,1,GRAM,false
+in_onion_bhaji,fresh coriander,10,GRAM,false
+in_onion_bhaji,water,100,MILLILITER,false
+in_onion_bhaji,salt,5,GRAM,false
+in_onion_bhaji,sunflower oil,600,MILLILITER,false
+in_mango_lassi,mango,1,PIECE,false
+in_mango_lassi,yogurt,250,GRAM,false
+in_mango_lassi,whole milk,100,MILLILITER,false
+in_mango_lassi,white sugar,20,GRAM,false
+in_mango_lassi,cardamom,1,GRAM,false
+in_kheer,white rice,80,GRAM,false
+in_kheer,whole milk,1200,MILLILITER,false
+in_kheer,white sugar,100,GRAM,false
+in_kheer,cardamom,2,GRAM,false
+in_kheer,raisins,30,GRAM,false
+in_kheer,almonds,30,GRAM,false
+in_kheer,pistachios,20,GRAM,false
+in_kheer,saffron,0.1,GRAM,true
+in_chapati,whole wheat flour,300,GRAM,false
+in_chapati,water,200,MILLILITER,false
+in_chapati,salt,3,GRAM,false
+in_chapati,ghee,20,GRAM,true
+in_rogan_josh,lamb shoulder,1000,GRAM,false
+in_rogan_josh,onion,2,PIECE,false
+in_rogan_josh,yogurt,200,GRAM,false
+in_rogan_josh,garlic,5,PIECE,false
+in_rogan_josh,ginger,20,GRAM,false
+in_rogan_josh,paprika,8,GRAM,false
+in_rogan_josh,cayenne pepper,2,GRAM,false
+in_rogan_josh,cardamom,2,GRAM,false
+in_rogan_josh,cloves,1,GRAM,false
+in_rogan_josh,cinnamon,2,GRAM,false
+in_rogan_josh,fennel seed,2,GRAM,false
+in_rogan_josh,ghee,50,GRAM,false
+in_rogan_josh,water,500,MILLILITER,false
+in_rogan_josh,salt,10,GRAM,false
+in_baingan_bharta,eggplant,800,GRAM,false
+in_baingan_bharta,onion,1,PIECE,false
+in_baingan_bharta,tomato,2,PIECE,false
+in_baingan_bharta,garlic,3,PIECE,false
+in_baingan_bharta,ginger,10,GRAM,false
+in_baingan_bharta,chili pepper,1,PIECE,false
+in_baingan_bharta,cumin,2,GRAM,false
+in_baingan_bharta,turmeric,1,GRAM,false
+in_baingan_bharta,sunflower oil,3,TABLESPOON,false
+in_baingan_bharta,salt,6,GRAM,false
+in_baingan_bharta,fresh coriander,10,GRAM,false
+as_egg_fried_rice,cooked white rice,700,GRAM,false
+as_egg_fried_rice,chicken egg,3,PIECE,false
+as_egg_fried_rice,green peas,100,GRAM,false
+as_egg_fried_rice,carrot,1,PIECE,false
+as_egg_fried_rice,spring onion,40,GRAM,false
+as_egg_fried_rice,soy sauce,3,TABLESPOON,false
+as_egg_fried_rice,sunflower oil,3,TABLESPOON,false
+as_egg_fried_rice,sesame oil,1,TEASPOON,false
+as_egg_fried_rice,salt,2,GRAM,false
+as_chicken_vegetable_stirfry,chicken breast,500,GRAM,false
+as_chicken_vegetable_stirfry,broccoli,250,GRAM,false
+as_chicken_vegetable_stirfry,red bell pepper,1,PIECE,false
+as_chicken_vegetable_stirfry,carrot,1,PIECE,false
+as_chicken_vegetable_stirfry,garlic,3,PIECE,false
+as_chicken_vegetable_stirfry,ginger,10,GRAM,false
+as_chicken_vegetable_stirfry,soy sauce,4,TABLESPOON,false
+as_chicken_vegetable_stirfry,corn starch,10,GRAM,false
+as_chicken_vegetable_stirfry,honey,15,GRAM,false
+as_chicken_vegetable_stirfry,sunflower oil,3,TABLESPOON,false
+as_chicken_vegetable_stirfry,water,80,MILLILITER,false
+as_sweet_sour_chicken,chicken breast,600,GRAM,false
+as_sweet_sour_chicken,corn starch,60,GRAM,false
+as_sweet_sour_chicken,chicken egg,1,PIECE,false
+as_sweet_sour_chicken,bell pepper,1,PIECE,false
+as_sweet_sour_chicken,onion,1,PIECE,false
+as_sweet_sour_chicken,canned pineapple,200,GRAM,false
+as_sweet_sour_chicken,ketchup,60,GRAM,false
+as_sweet_sour_chicken,vinegar,3,TABLESPOON,false
+as_sweet_sour_chicken,white sugar,40,GRAM,false
+as_sweet_sour_chicken,soy sauce,1,TABLESPOON,false
+as_sweet_sour_chicken,water,100,MILLILITER,false
+as_sweet_sour_chicken,sunflower oil,500,MILLILITER,false
+as_sweet_sour_chicken,salt,3,GRAM,false
+as_kung_pao_chicken,chicken thigh,500,GRAM,false
+as_kung_pao_chicken,roasted peanuts,80,GRAM,false
+as_kung_pao_chicken,chili pepper,3,PIECE,false
+as_kung_pao_chicken,garlic,3,PIECE,false
+as_kung_pao_chicken,ginger,10,GRAM,false
+as_kung_pao_chicken,spring onion,40,GRAM,false
+as_kung_pao_chicken,soy sauce,3,TABLESPOON,false
+as_kung_pao_chicken,vinegar,1,TABLESPOON,false
+as_kung_pao_chicken,white sugar,10,GRAM,false
+as_kung_pao_chicken,corn starch,10,GRAM,false
+as_kung_pao_chicken,sunflower oil,3,TABLESPOON,false
+as_beef_broccoli,beef sirloin,500,GRAM,false
+as_beef_broccoli,broccoli,400,GRAM,false
+as_beef_broccoli,garlic,3,PIECE,false
+as_beef_broccoli,ginger,10,GRAM,false
+as_beef_broccoli,soy sauce,4,TABLESPOON,false
+as_beef_broccoli,brown sugar,15,GRAM,false
+as_beef_broccoli,corn starch,12,GRAM,false
+as_beef_broccoli,sunflower oil,3,TABLESPOON,false
+as_beef_broccoli,water,100,MILLILITER,false
+as_chow_mein,noodles,300,GRAM,false
+as_chow_mein,chicken breast,300,GRAM,false
+as_chow_mein,chinese cabbage,200,GRAM,false
+as_chow_mein,bean sprouts,150,GRAM,false
+as_chow_mein,carrot,1,PIECE,false
+as_chow_mein,spring onion,30,GRAM,false
+as_chow_mein,garlic,2,PIECE,false
+as_chow_mein,soy sauce,4,TABLESPOON,false
+as_chow_mein,sesame oil,1,TEASPOON,false
+as_chow_mein,sunflower oil,3,TABLESPOON,false
+as_hot_sour_soup,tofu,200,GRAM,false
+as_hot_sour_soup,mushroom,150,GRAM,false
+as_hot_sour_soup,chicken egg,1,PIECE,false
+as_hot_sour_soup,chicken stock cube,1,PIECE,false
+as_hot_sour_soup,water,1000,MILLILITER,false
+as_hot_sour_soup,soy sauce,2,TABLESPOON,false
+as_hot_sour_soup,vinegar,3,TABLESPOON,false
+as_hot_sour_soup,white pepper,1,GRAM,false
+as_hot_sour_soup,corn starch,20,GRAM,false
+as_hot_sour_soup,spring onion,20,GRAM,false
+as_hot_sour_soup,chili pepper,1,PIECE,true
+as_steamed_fish_ginger,sea bass,900,GRAM,false
+as_steamed_fish_ginger,ginger,20,GRAM,false
+as_steamed_fish_ginger,spring onion,40,GRAM,false
+as_steamed_fish_ginger,soy sauce,3,TABLESPOON,false
+as_steamed_fish_ginger,sesame oil,1,TEASPOON,false
+as_steamed_fish_ginger,sunflower oil,2,TABLESPOON,false
+as_chicken_teriyaki,chicken thigh,700,GRAM,false
+as_chicken_teriyaki,soy sauce,4,TABLESPOON,false
+as_chicken_teriyaki,honey,30,GRAM,false
+as_chicken_teriyaki,ginger,10,GRAM,false
+as_chicken_teriyaki,garlic,2,PIECE,false
+as_chicken_teriyaki,sesame seeds,5,GRAM,false
+as_chicken_teriyaki,sunflower oil,1,TABLESPOON,false
+as_chicken_teriyaki,water,3,TABLESPOON,false
+as_salmon_teriyaki,salmon,600,GRAM,false
+as_salmon_teriyaki,soy sauce,3,TABLESPOON,false
+as_salmon_teriyaki,honey,25,GRAM,false
+as_salmon_teriyaki,ginger,5,GRAM,false
+as_salmon_teriyaki,sunflower oil,1,TABLESPOON,false
+as_salmon_teriyaki,spring onion,20,GRAM,false
+as_sunomono,cucumber,2,PIECE,false
+as_sunomono,vinegar,3,TABLESPOON,false
+as_sunomono,white sugar,15,GRAM,false
+as_sunomono,soy sauce,1,TEASPOON,false
+as_sunomono,sesame seeds,5,GRAM,false
+as_sunomono,salt,2,GRAM,false
+as_pad_thai,rice noodles,250,GRAM,false
+as_pad_thai,shrimp,300,GRAM,false
+as_pad_thai,chicken egg,2,PIECE,false
+as_pad_thai,bean sprouts,150,GRAM,false
+as_pad_thai,spring onion,40,GRAM,false
+as_pad_thai,garlic,3,PIECE,false
+as_pad_thai,tamarind,40,GRAM,false
+as_pad_thai,brown sugar,25,GRAM,false
+as_pad_thai,soy sauce,3,TABLESPOON,false
+as_pad_thai,roasted peanuts,50,GRAM,false
+as_pad_thai,lime,1,PIECE,false
+as_pad_thai,sunflower oil,3,TABLESPOON,false
+as_pad_thai,cayenne pepper,1,GRAM,false
+as_thai_basil_chicken,chicken mince,500,GRAM,false
+as_thai_basil_chicken,garlic,5,PIECE,false
+as_thai_basil_chicken,chili pepper,3,PIECE,false
+as_thai_basil_chicken,soy sauce,3,TABLESPOON,false
+as_thai_basil_chicken,white sugar,5,GRAM,false
+as_thai_basil_chicken,fresh basil,20,GRAM,false
+as_thai_basil_chicken,sunflower oil,2,TABLESPOON,false
+as_thai_basil_chicken,fried egg,4,PIECE,true
+as_bibimbap,cooked white rice,800,GRAM,false
+as_bibimbap,beef sirloin,300,GRAM,false
+as_bibimbap,spinach,200,GRAM,false
+as_bibimbap,carrot,2,PIECE,false
+as_bibimbap,bean sprouts,150,GRAM,false
+as_bibimbap,mushroom,150,GRAM,false
+as_bibimbap,chicken egg,4,PIECE,false
+as_bibimbap,soy sauce,4,TABLESPOON,false
+as_bibimbap,sesame oil,2,TABLESPOON,false
+as_bibimbap,garlic,3,PIECE,false
+as_bibimbap,sesame seeds,8,GRAM,false
+as_bibimbap,hot sauce,40,GRAM,false
+as_bibimbap,sunflower oil,2,TABLESPOON,false
+as_bulgogi,beef sirloin,600,GRAM,false
+as_bulgogi,soy sauce,5,TABLESPOON,false
+as_bulgogi,apple,1,PIECE,false
+as_bulgogi,brown sugar,20,GRAM,false
+as_bulgogi,garlic,4,PIECE,false
+as_bulgogi,ginger,10,GRAM,false
+as_bulgogi,sesame oil,1,TABLESPOON,false
+as_bulgogi,spring onion,40,GRAM,false
+as_bulgogi,sesame seeds,5,GRAM,false
+as_bulgogi,sunflower oil,1,TABLESPOON,false
+as_chicken_satay,chicken thigh,600,GRAM,false
+as_chicken_satay,turmeric,2,GRAM,false
+as_chicken_satay,curry powder,4,GRAM,false
+as_chicken_satay,soy sauce,3,TABLESPOON,false
+as_chicken_satay,brown sugar,20,GRAM,false
+as_chicken_satay,garlic,2,PIECE,false
+as_chicken_satay,peanut butter,100,GRAM,false
+as_chicken_satay,lime,1,PIECE,false
+as_chicken_satay,water,100,MILLILITER,false
+as_chicken_satay,sunflower oil,1,TABLESPOON,false
+as_sesame_noodles,noodles,300,GRAM,false
+as_sesame_noodles,tahini,60,GRAM,false
+as_sesame_noodles,soy sauce,3,TABLESPOON,false
+as_sesame_noodles,vinegar,1,TABLESPOON,false
+as_sesame_noodles,white sugar,10,GRAM,false
+as_sesame_noodles,garlic,1,PIECE,false
+as_sesame_noodles,sesame oil,1,TABLESPOON,false
+as_sesame_noodles,cucumber,1,PIECE,false
+as_sesame_noodles,spring onion,20,GRAM,false
+as_sesame_noodles,hot sauce,10,GRAM,true
+as_tofu_stirfry,tofu,400,GRAM,false
+as_tofu_stirfry,broccoli,200,GRAM,false
+as_tofu_stirfry,red bell pepper,1,PIECE,false
+as_tofu_stirfry,mushroom,150,GRAM,false
+as_tofu_stirfry,garlic,2,PIECE,false
+as_tofu_stirfry,ginger,10,GRAM,false
+as_tofu_stirfry,soy sauce,4,TABLESPOON,false
+as_tofu_stirfry,corn starch,20,GRAM,false
+as_tofu_stirfry,sunflower oil,4,TABLESPOON,false
+as_mapo_tofu,tofu,500,GRAM,false
+as_mapo_tofu,ground beef,200,GRAM,false
+as_mapo_tofu,garlic,3,PIECE,false
+as_mapo_tofu,ginger,10,GRAM,false
+as_mapo_tofu,hot sauce,40,GRAM,false
+as_mapo_tofu,soy sauce,2,TABLESPOON,false
+as_mapo_tofu,corn starch,10,GRAM,false
+as_mapo_tofu,water,200,MILLILITER,false
+as_mapo_tofu,spring onion,20,GRAM,false
+as_mapo_tofu,sunflower oil,2,TABLESPOON,false
+as_chicken_corn_soup,chicken breast,250,GRAM,false
+as_chicken_corn_soup,corn,300,GRAM,false
+as_chicken_corn_soup,chicken stock cube,2,PIECE,false
+as_chicken_corn_soup,water,1200,MILLILITER,false
+as_chicken_corn_soup,chicken egg,2,PIECE,false
+as_chicken_corn_soup,corn starch,25,GRAM,false
+as_chicken_corn_soup,soy sauce,1,TABLESPOON,false
+as_chicken_corn_soup,white pepper,1,GRAM,false
+as_chicken_corn_soup,spring onion,20,GRAM,false
+us_beef_burger,ground beef,600,GRAM,false
+us_beef_burger,hamburger bun,4,PIECE,false
+us_beef_burger,cheddar cheese,80,GRAM,false
+us_beef_burger,lettuce,60,GRAM,false
+us_beef_burger,tomato,1,PIECE,false
+us_beef_burger,onion,1,PIECE,false
+us_beef_burger,pickled cucumber,60,GRAM,false
+us_beef_burger,ketchup,40,GRAM,false
+us_beef_burger,mustard,20,GRAM,false
+us_beef_burger,salt,6,GRAM,false
+us_beef_burger,black pepper,1,GRAM,false
+us_mac_and_cheese,macaroni,300,GRAM,false
+us_mac_and_cheese,butter,40,GRAM,false
+us_mac_and_cheese,wheat flour,30,GRAM,false
+us_mac_and_cheese,whole milk,500,MILLILITER,false
+us_mac_and_cheese,cheddar cheese,200,GRAM,false
+us_mac_and_cheese,mustard,5,GRAM,false
+us_mac_and_cheese,salt,5,GRAM,false
+us_pancakes,wheat flour,250,GRAM,false
+us_pancakes,baking powder,10,GRAM,false
+us_pancakes,white sugar,30,GRAM,false
+us_pancakes,salt,2,GRAM,false
+us_pancakes,chicken egg,2,PIECE,false
+us_pancakes,whole milk,300,MILLILITER,false
+us_pancakes,butter,40,GRAM,false
+us_pancakes,maple syrup,80,GRAM,false
+us_chocolate_chip_cookies,butter,170,GRAM,false
+us_chocolate_chip_cookies,brown sugar,150,GRAM,false
+us_chocolate_chip_cookies,white sugar,50,GRAM,false
+us_chocolate_chip_cookies,chicken egg,1,PIECE,false
+us_chocolate_chip_cookies,vanilla extract,1,TEASPOON,false
+us_chocolate_chip_cookies,wheat flour,250,GRAM,false
+us_chocolate_chip_cookies,baking soda,3,GRAM,false
+us_chocolate_chip_cookies,salt,2,GRAM,false
+us_chocolate_chip_cookies,dark chocolate,180,GRAM,false
+us_brownies,dark chocolate,200,GRAM,false
+us_brownies,butter,150,GRAM,false
+us_brownies,white sugar,200,GRAM,false
+us_brownies,chicken egg,3,PIECE,false
+us_brownies,wheat flour,100,GRAM,false
+us_brownies,cocoa powder,20,GRAM,false
+us_brownies,salt,1,GRAM,false
+us_brownies,walnuts,60,GRAM,true
+us_buffalo_wings,chicken wing,1200,GRAM,false
+us_buffalo_wings,baking powder,10,GRAM,false
+us_buffalo_wings,salt,8,GRAM,false
+us_buffalo_wings,hot sauce,100,GRAM,false
+us_buffalo_wings,butter,50,GRAM,false
+us_buffalo_wings,garlic powder,2,GRAM,false
+us_bbq_chicken,chicken drumstick,1200,GRAM,false
+us_bbq_chicken,barbecue sauce,200,GRAM,false
+us_bbq_chicken,paprika,3,GRAM,false
+us_bbq_chicken,garlic powder,2,GRAM,false
+us_bbq_chicken,salt,8,GRAM,false
+us_bbq_chicken,sunflower oil,1,TABLESPOON,false
+us_coleslaw,cabbage,500,GRAM,false
+us_coleslaw,carrot,2,PIECE,false
+us_coleslaw,mayonnaise,120,GRAM,false
+us_coleslaw,vinegar,1,TABLESPOON,false
+us_coleslaw,white sugar,10,GRAM,false
+us_coleslaw,salt,4,GRAM,false
+us_coleslaw,black pepper,1,GRAM,false
+us_clam_chowder,clam,600,GRAM,false
+us_clam_chowder,potato,3,PIECE,false
+us_clam_chowder,onion,1,PIECE,false
+us_clam_chowder,celery,60,GRAM,false
+us_clam_chowder,butter,40,GRAM,false
+us_clam_chowder,wheat flour,30,GRAM,false
+us_clam_chowder,whole milk,600,MILLILITER,false
+us_clam_chowder,heavy cream,150,MILLILITER,false
+us_clam_chowder,water,400,MILLILITER,false
+us_clam_chowder,dried thyme,1,GRAM,false
+us_clam_chowder,salt,6,GRAM,false
+us_clam_chowder,black pepper,1,GRAM,false
+us_mashed_potatoes,potato,5,PIECE,false
+us_mashed_potatoes,butter,50,GRAM,false
+us_mashed_potatoes,whole milk,150,MILLILITER,false
+us_mashed_potatoes,salt,6,GRAM,false
+us_mashed_potatoes,black pepper,1,GRAM,false
+us_cornbread,cornmeal,150,GRAM,false
+us_cornbread,wheat flour,120,GRAM,false
+us_cornbread,white sugar,50,GRAM,false
+us_cornbread,baking powder,10,GRAM,false
+us_cornbread,salt,3,GRAM,false
+us_cornbread,chicken egg,2,PIECE,false
+us_cornbread,whole milk,250,MILLILITER,false
+us_cornbread,butter,80,GRAM,false
+us_apple_pie,wheat flour,350,GRAM,false
+us_apple_pie,butter,200,GRAM,false
+us_apple_pie,water,6,TABLESPOON,false
+us_apple_pie,apple,6,PIECE,false
+us_apple_pie,white sugar,120,GRAM,false
+us_apple_pie,cinnamon,3,GRAM,false
+us_apple_pie,lemon juice,1,TABLESPOON,false
+us_apple_pie,corn starch,20,GRAM,false
+us_apple_pie,chicken egg,1,PIECE,false
+us_apple_pie,salt,2,GRAM,false
+us_banana_bread,banana,3,PIECE,false
+us_banana_bread,butter,100,GRAM,false
+us_banana_bread,brown sugar,130,GRAM,false
+us_banana_bread,chicken egg,2,PIECE,false
+us_banana_bread,wheat flour,220,GRAM,false
+us_banana_bread,baking soda,5,GRAM,false
+us_banana_bread,salt,2,GRAM,false
+us_banana_bread,vanilla extract,1,TEASPOON,false
+us_banana_bread,walnuts,50,GRAM,true
+mx_guacamole,avocado,500,GRAM,false
+mx_guacamole,lime,2,PIECE,false
+mx_guacamole,onion,1,PIECE,false
+mx_guacamole,tomato,1,PIECE,false
+mx_guacamole,jalapeno pepper,1,PIECE,false
+mx_guacamole,fresh coriander,15,GRAM,false
+mx_guacamole,salt,4,GRAM,false
+mx_pico_de_gallo,tomato,4,PIECE,false
+mx_pico_de_gallo,onion,1,PIECE,false
+mx_pico_de_gallo,jalapeno pepper,1,PIECE,false
+mx_pico_de_gallo,fresh coriander,20,GRAM,false
+mx_pico_de_gallo,lime,1,PIECE,false
+mx_pico_de_gallo,salt,3,GRAM,false
+mx_chicken_fajitas,chicken breast,600,GRAM,false
+mx_chicken_fajitas,red bell pepper,1,PIECE,false
+mx_chicken_fajitas,bell pepper,1,PIECE,false
+mx_chicken_fajitas,onion,1,PIECE,false
+mx_chicken_fajitas,chili powder blend,6,GRAM,false
+mx_chicken_fajitas,cumin,2,GRAM,false
+mx_chicken_fajitas,paprika,2,GRAM,false
+mx_chicken_fajitas,lime,1,PIECE,false
+mx_chicken_fajitas,sunflower oil,3,TABLESPOON,false
+mx_chicken_fajitas,flour tortilla,384,GRAM,false
+mx_chicken_fajitas,salt,6,GRAM,false
+mx_chicken_fajitas,sour cream,100,GRAM,true
+mx_beef_tacos,ground beef,500,GRAM,false
+mx_beef_tacos,onion,1,PIECE,false
+mx_beef_tacos,garlic,2,PIECE,false
+mx_beef_tacos,chili powder blend,6,GRAM,false
+mx_beef_tacos,cumin,2,GRAM,false
+mx_beef_tacos,tomato paste,20,GRAM,false
+mx_beef_tacos,water,100,MILLILITER,false
+mx_beef_tacos,corn tortilla,288,GRAM,false
+mx_beef_tacos,lettuce,80,GRAM,false
+mx_beef_tacos,tomato,2,PIECE,false
+mx_beef_tacos,cheddar cheese,80,GRAM,false
+mx_beef_tacos,salt,6,GRAM,false
+mx_bean_burrito,flour tortilla,288,GRAM,false
+mx_bean_burrito,black beans,0.25,KILOGRAM,false
+mx_bean_burrito,cooked white rice,300,GRAM,false
+mx_bean_burrito,cheddar cheese,100,GRAM,false
+mx_bean_burrito,tomato,2,PIECE,false
+mx_bean_burrito,onion,1,PIECE,false
+mx_bean_burrito,cumin,2,GRAM,false
+mx_bean_burrito,sunflower oil,1,TABLESPOON,false
+mx_bean_burrito,salt,4,GRAM,false
+mx_bean_burrito,sour cream,80,GRAM,true
+mx_chicken_quesadilla,flour tortilla,288,GRAM,false
+mx_chicken_quesadilla,roasted chicken breast,300,GRAM,false
+mx_chicken_quesadilla,cheddar cheese,150,GRAM,false
+mx_chicken_quesadilla,mozzarella cheese,100,GRAM,false
+mx_chicken_quesadilla,red bell pepper,1,PIECE,false
+mx_chicken_quesadilla,chili powder blend,2,GRAM,false
+mx_chicken_quesadilla,sunflower oil,1,TABLESPOON,false
+mx_chili_con_carne,ground beef,700,GRAM,false
+mx_chili_con_carne,cooked kidney beans,400,GRAM,false
+mx_chili_con_carne,onion,2,PIECE,false
+mx_chili_con_carne,garlic,3,PIECE,false
+mx_chili_con_carne,red bell pepper,1,PIECE,false
+mx_chili_con_carne,canned tomatoes,800,GRAM,false
+mx_chili_con_carne,tomato paste,30,GRAM,false
+mx_chili_con_carne,chili powder blend,10,GRAM,false
+mx_chili_con_carne,cumin,3,GRAM,false
+mx_chili_con_carne,sunflower oil,2,TABLESPOON,false
+mx_chili_con_carne,salt,10,GRAM,false
+mx_mexican_rice,white rice,300,GRAM,false
+mx_mexican_rice,tomato,2,PIECE,false
+mx_mexican_rice,onion,1,PIECE,false
+mx_mexican_rice,garlic,2,PIECE,false
+mx_mexican_rice,chicken stock cube,1,PIECE,false
+mx_mexican_rice,water,450,MILLILITER,false
+mx_mexican_rice,sunflower oil,2,TABLESPOON,false
+mx_mexican_rice,salt,3,GRAM,false
+mx_black_bean_soup,black beans,400,GRAM,false
+mx_black_bean_soup,onion,1,PIECE,false
+mx_black_bean_soup,garlic,3,PIECE,false
+mx_black_bean_soup,cumin,3,GRAM,false
+mx_black_bean_soup,chili powder blend,3,GRAM,false
+mx_black_bean_soup,chicken stock cube,1,PIECE,false
+mx_black_bean_soup,water,1800,MILLILITER,false
+mx_black_bean_soup,lime,1,PIECE,false
+mx_black_bean_soup,sour cream,80,GRAM,true
+mx_black_bean_soup,salt,8,GRAM,false
+mx_huevos_rancheros,chicken egg,4,PIECE,false
+mx_huevos_rancheros,corn tortilla,96,GRAM,false
+mx_huevos_rancheros,tomato,3,PIECE,false
+mx_huevos_rancheros,onion,1,PIECE,false
+mx_huevos_rancheros,jalapeno pepper,1,PIECE,false
+mx_huevos_rancheros,garlic,1,PIECE,false
+mx_huevos_rancheros,sunflower oil,2,TABLESPOON,false
+mx_huevos_rancheros,fresh coriander,10,GRAM,false
+mx_huevos_rancheros,salt,3,GRAM,false
+mx_chicken_enchiladas,corn tortilla,192,GRAM,false
+mx_chicken_enchiladas,roasted chicken breast,400,GRAM,false
+mx_chicken_enchiladas,tomato sauce,400,GRAM,false
+mx_chicken_enchiladas,chili powder blend,6,GRAM,false
+mx_chicken_enchiladas,cumin,2,GRAM,false
+mx_chicken_enchiladas,garlic,2,PIECE,false
+mx_chicken_enchiladas,cheddar cheese,150,GRAM,false
+mx_chicken_enchiladas,onion,1,PIECE,false
+mx_chicken_enchiladas,sunflower oil,2,TABLESPOON,false
+mx_chicken_enchiladas,salt,4,GRAM,false
+mx_elote,boiled sweet corn,600,GRAM,false
+mx_elote,mayonnaise,60,GRAM,false
+mx_elote,feta cheese,60,GRAM,false
+mx_elote,chili powder blend,2,GRAM,false
+mx_elote,lime,1,PIECE,false
+eg_asir_farawla,strawberry,400,GRAM,false
+eg_asir_farawla,water,400,MILLILITER,false
+eg_asir_farawla,white sugar,50,GRAM,false
+eg_roz_bel_laban_mango,short grain rice,150,GRAM,false
+eg_roz_bel_laban_mango,whole milk,1000,MILLILITER,false
+eg_roz_bel_laban_mango,white sugar,120,GRAM,false
+eg_roz_bel_laban_mango,corn starch,15,GRAM,false
+eg_roz_bel_laban_mango,mango,2,PIECE,false
+eg_roz_bel_laban_mango,water,300,MILLILITER,false
+eg_konafa_manga,kunafa dough,400,GRAM,false
+eg_konafa_manga,ghee,150,GRAM,false
+eg_konafa_manga,mango,2,PIECE,false
+eg_konafa_manga,whole milk,400,MILLILITER,false
+eg_konafa_manga,corn starch,35,GRAM,false
+eg_konafa_manga,heavy cream,150,MILLILITER,false
+eg_konafa_manga,white sugar,300,GRAM,false
+eg_konafa_manga,water,250,MILLILITER,false
+eg_konafa_manga,lemon juice,1,TABLESPOON,false
+eg_petit_four,butter,250,GRAM,false
+eg_petit_four,powdered sugar,120,GRAM,false
+eg_petit_four,chicken egg,1,PIECE,false
+eg_petit_four,vanilla extract,1,TEASPOON,false
+eg_petit_four,wheat flour,350,GRAM,false
+eg_petit_four,corn starch,30,GRAM,false
+eg_petit_four,jam,120,GRAM,false
+eg_fouliya,peanuts,300,GRAM,false
+eg_fouliya,white sugar,250,GRAM,false
+eg_fouliya,honey,40,GRAM,false
+eg_fouliya,water,3,TABLESPOON,false
+eg_mehalabeya_chocolate,whole milk,1000,MILLILITER,false
+eg_mehalabeya_chocolate,corn starch,70,GRAM,false
+eg_mehalabeya_chocolate,white sugar,130,GRAM,false
+eg_mehalabeya_chocolate,cocoa powder,30,GRAM,false
+eg_mehalabeya_chocolate,vanilla extract,1,TEASPOON,false
+as_miso_soup,miso,60,GRAM,false
+as_miso_soup,water,1000,MILLILITER,false
+as_miso_soup,soft tofu,200,GRAM,false
+as_miso_soup,nori seaweed,3,GRAM,false
+as_miso_soup,spring onion,20,GRAM,false
+us_grilled_cheese,white bread,120,GRAM,false
+us_grilled_cheese,cheddar cheese,100,GRAM,false
+us_grilled_cheese,butter,25,GRAM,false
+it_affogato,ice cream,150,GRAM,false
+it_affogato,espresso,60,MILLILITER,false
+eg_bid_maslouk_salata,chicken egg,6,PIECE,false
+eg_bid_maslouk_salata,tomato,2,PIECE,false
+eg_bid_maslouk_salata,spring onion,30,GRAM,false
+eg_bid_maslouk_salata,olive oil,1,TABLESPOON,false
+eg_bid_maslouk_salata,salt,3,GRAM,false
+eg_bid_maslouk_salata,cumin,1,GRAM,false
+eg_tomato_onion_salad,tomato,4,PIECE,false
+eg_tomato_onion_salad,onion,1,PIECE,false
+eg_tomato_onion_salad,vinegar,1,TABLESPOON,false
+eg_tomato_onion_salad,olive oil,1,TABLESPOON,false
+eg_tomato_onion_salad,dried mint,1,GRAM,false
+eg_tomato_onion_salad,salt,3,GRAM,false
+eg_fried_eggplant,eggplant,700,GRAM,false
+eg_fried_eggplant,salt,6,GRAM,false
+eg_fried_eggplant,sunflower oil,400,MILLILITER,false
+eg_fried_eggplant,garlic,2,PIECE,true
+eg_fried_eggplant,vinegar,2,TABLESPOON,true
+eg_kromb_sauteed,cabbage,800,GRAM,false
+eg_kromb_sauteed,onion,1,PIECE,false
+eg_kromb_sauteed,garlic,4,PIECE,false
+eg_kromb_sauteed,tomato,3,PIECE,false
+eg_kromb_sauteed,sunflower oil,3,TABLESPOON,false
+eg_kromb_sauteed,cumin,2,GRAM,false
+eg_kromb_sauteed,salt,6,GRAM,false
+eg_kromb_sauteed,black pepper,1,GRAM,false
+eg_fasolia_zeit,green beans,600,GRAM,false
+eg_fasolia_zeit,onion,1,PIECE,false
+eg_fasolia_zeit,garlic,3,PIECE,false
+eg_fasolia_zeit,tomato,3,PIECE,false
+eg_fasolia_zeit,olive oil,4,TABLESPOON,false
+eg_fasolia_zeit,water,250,MILLILITER,false
+eg_fasolia_zeit,salt,6,GRAM,false
+eg_fasolia_zeit,black pepper,1,GRAM,false
+eg_macarona_salsa_lahma,macaroni,500,GRAM,false
+eg_macarona_salsa_lahma,ground beef,500,GRAM,false
+eg_macarona_salsa_lahma,onion,1,PIECE,false
+eg_macarona_salsa_lahma,tomato,5,PIECE,false
+eg_macarona_salsa_lahma,tomato paste,40,GRAM,false
+eg_macarona_salsa_lahma,garlic,3,PIECE,false
+eg_macarona_salsa_lahma,sunflower oil,2,TABLESPOON,false
+eg_macarona_salsa_lahma,salt,12,GRAM,false
+eg_macarona_salsa_lahma,black pepper,2,GRAM,false
+eg_macarona_salsa_lahma,mozzarella cheese,100,GRAM,true
+eg_pasta_salsa,spaghetti,400,GRAM,false
+eg_pasta_salsa,tomato,4,PIECE,false
+eg_pasta_salsa,tomato paste,30,GRAM,false
+eg_pasta_salsa,garlic,3,PIECE,false
+eg_pasta_salsa,sunflower oil,2,TABLESPOON,false
+eg_pasta_salsa,salt,10,GRAM,false
+eg_pasta_salsa,black pepper,1,GRAM,false
+eg_pasta_salsa,chili pepper,1,PIECE,true
+eg_spinach_eggs,spinach,600,GRAM,false
+eg_spinach_eggs,onion,1,PIECE,false
+eg_spinach_eggs,garlic,2,PIECE,false
+eg_spinach_eggs,chicken egg,4,PIECE,false
+eg_spinach_eggs,sunflower oil,2,TABLESPOON,false
+eg_spinach_eggs,salt,4,GRAM,false
+eg_spinach_eggs,black pepper,1,GRAM,false
+eg_pumpkin_stew,pumpkin,800,GRAM,false
+eg_pumpkin_stew,onion,1,PIECE,false
+eg_pumpkin_stew,tomato,3,PIECE,false
+eg_pumpkin_stew,sunflower oil,2,TABLESPOON,false
+eg_pumpkin_stew,cumin,1,GRAM,false
+eg_pumpkin_stew,salt,5,GRAM,false
+eg_pumpkin_stew,black pepper,1,GRAM,false
+eg_pumpkin_stew,water,200,MILLILITER,false
+eg_chicken_peas_carrots,chicken thigh,1000,GRAM,false
+eg_chicken_peas_carrots,green peas,500,GRAM,false
+eg_chicken_peas_carrots,carrot,2,PIECE,false
+eg_chicken_peas_carrots,onion,1,PIECE,false
+eg_chicken_peas_carrots,tomato,3,PIECE,false
+eg_chicken_peas_carrots,tomato paste,30,GRAM,false
+eg_chicken_peas_carrots,sunflower oil,3,TABLESPOON,false
+eg_chicken_peas_carrots,water,600,MILLILITER,false
+eg_chicken_peas_carrots,salt,10,GRAM,false
+eg_chicken_peas_carrots,black pepper,2,GRAM,false
+eg_shawerma_frakh,chicken breast,800,GRAM,false
+eg_shawerma_frakh,yogurt,100,GRAM,false
+eg_shawerma_frakh,lemon juice,2,TABLESPOON,false
+eg_shawerma_frakh,garlic,4,PIECE,false
+eg_shawerma_frakh,vinegar,1,TABLESPOON,false
+eg_shawerma_frakh,cumin,2,GRAM,false
+eg_shawerma_frakh,paprika,3,GRAM,false
+eg_shawerma_frakh,cardamom,1,GRAM,false
+eg_shawerma_frakh,cinnamon,1,GRAM,false
+eg_shawerma_frakh,turmeric,1,GRAM,false
+eg_shawerma_frakh,salt,8,GRAM,false
+eg_shawerma_frakh,black pepper,2,GRAM,false
+eg_shawerma_frakh,sunflower oil,3,TABLESPOON,false
+eg_shawerma_frakh,pita bread,4,PIECE,false
+eg_shawerma_frakh,pickled cucumber,80,GRAM,true
+eg_kofta_frakh,chicken mince,700,GRAM,false
+eg_kofta_frakh,onion,1,PIECE,false
+eg_kofta_frakh,parsley,20,GRAM,false
+eg_kofta_frakh,garlic,2,PIECE,false
+eg_kofta_frakh,cumin,2,GRAM,false
+eg_kofta_frakh,paprika,2,GRAM,false
+eg_kofta_frakh,salt,8,GRAM,false
+eg_kofta_frakh,black pepper,1,GRAM,false
+eg_kofta_frakh,sunflower oil,2,TABLESPOON,false
+eg_tuna_salad,canned tuna,300,GRAM,false
+eg_tuna_salad,onion,1,PIECE,false
+eg_tuna_salad,bell pepper,1,PIECE,false
+eg_tuna_salad,tomato,1,PIECE,false
+eg_tuna_salad,lemon juice,2,TABLESPOON,false
+eg_tuna_salad,cumin,1,GRAM,false
+eg_tuna_salad,black pepper,1,GRAM,false
+eg_sardine_tomato,canned sardines,250,GRAM,false
+eg_sardine_tomato,tomato,2,PIECE,false
+eg_sardine_tomato,onion,1,PIECE,false
+eg_sardine_tomato,garlic,2,PIECE,false
+eg_sardine_tomato,cumin,2,GRAM,false
+eg_sardine_tomato,lemon juice,1,TABLESPOON,false
+eg_sardine_tomato,sunflower oil,1,TABLESPOON,false
+eg_mokh_pane,beef brain,500,GRAM,false
+eg_mokh_pane,vinegar,2,TABLESPOON,false
+eg_mokh_pane,lemon juice,2,TABLESPOON,false
+eg_mokh_pane,chicken egg,2,PIECE,false
+eg_mokh_pane,breadcrumbs,100,GRAM,false
+eg_mokh_pane,wheat flour,40,GRAM,false
+eg_mokh_pane,cumin,2,GRAM,false
+eg_mokh_pane,salt,6,GRAM,false
+eg_mokh_pane,black pepper,1,GRAM,false
+eg_mokh_pane,sunflower oil,300,MILLILITER,false
+eg_halawiyat,beef sweetbreads,600,GRAM,false
+eg_halawiyat,garlic,6,PIECE,false
+eg_halawiyat,chili pepper,1,PIECE,false
+eg_halawiyat,lemon juice,3,TABLESPOON,false
+eg_halawiyat,sunflower oil,3,TABLESPOON,false
+eg_halawiyat,cumin,2,GRAM,false
+eg_halawiyat,salt,6,GRAM,false
+eg_halawiyat,black pepper,1,GRAM,false
+eg_ful_akhdar_beid,fresh fava beans,500,GRAM,false
+eg_ful_akhdar_beid,onion,1,PIECE,false
+eg_ful_akhdar_beid,dill,20,GRAM,false
+eg_ful_akhdar_beid,chicken egg,4,PIECE,false
+eg_ful_akhdar_beid,sunflower oil,3,TABLESPOON,false
+eg_ful_akhdar_beid,water,150,MILLILITER,false
+eg_ful_akhdar_beid,salt,5,GRAM,false
+eg_ful_akhdar_beid,black pepper,1,GRAM,false
+eg_bamia_gambari,okra,600,GRAM,false
+eg_bamia_gambari,shrimp,500,GRAM,false
+eg_bamia_gambari,tomato,4,PIECE,false
+eg_bamia_gambari,tomato paste,30,GRAM,false
+eg_bamia_gambari,garlic,6,PIECE,false
+eg_bamia_gambari,coriander seed,3,GRAM,false
+eg_bamia_gambari,sunflower oil,3,TABLESPOON,false
+eg_bamia_gambari,lemon juice,1,TABLESPOON,false
+eg_bamia_gambari,water,400,MILLILITER,false
+eg_bamia_gambari,salt,8,GRAM,false
+eg_samak_tahina,tilapia,800,GRAM,false
+eg_samak_tahina,tahini,120,GRAM,false
+eg_samak_tahina,lemon juice,4,TABLESPOON,false
+eg_samak_tahina,water,150,MILLILITER,false
+eg_samak_tahina,onion,2,PIECE,false
+eg_samak_tahina,garlic,2,PIECE,false
+eg_samak_tahina,olive oil,3,TABLESPOON,false
+eg_samak_tahina,cumin,2,GRAM,false
+eg_samak_tahina,salt,8,GRAM,false
+eg_batates_bechamel,potato,6,PIECE,false
+eg_batates_bechamel,ground beef,400,GRAM,false
+eg_batates_bechamel,onion,1,PIECE,false
+eg_batates_bechamel,butter,60,GRAM,false
+eg_batates_bechamel,wheat flour,60,GRAM,false
+eg_batates_bechamel,whole milk,700,MILLILITER,false
+eg_batates_bechamel,nutmeg,1,GRAM,false
+eg_batates_bechamel,salt,12,GRAM,false
+eg_batates_bechamel,black pepper,2,GRAM,false
+eg_batates_bechamel,mozzarella cheese,100,GRAM,true
+eg_beid_luncheon,chicken egg,4,PIECE,false
+eg_beid_luncheon,beef luncheon,100,GRAM,false
+eg_beid_luncheon,butter,15,GRAM,false
+eg_beid_luncheon,black pepper,1,GRAM,false
+eg_fattet_frakh,chicken,1300,GRAM,false
+eg_fattet_frakh,white rice,400,GRAM,false
+eg_fattet_frakh,baladi bread,300,GRAM,false
+eg_fattet_frakh,garlic,8,PIECE,false
+eg_fattet_frakh,vinegar,60,MILLILITER,false
+eg_fattet_frakh,tomato paste,30,GRAM,false
+eg_fattet_frakh,tomato,3,PIECE,false
+eg_fattet_frakh,ghee,50,GRAM,false
+eg_fattet_frakh,onion,1,PIECE,false
+eg_fattet_frakh,cardamom,2,GRAM,false
+eg_fattet_frakh,water,2000,MILLILITER,false
+eg_fattet_frakh,salt,12,GRAM,false
+eg_gambari_pane,shrimp,600,GRAM,false
+eg_gambari_pane,garlic,3,PIECE,false
+eg_gambari_pane,lemon juice,2,TABLESPOON,false
+eg_gambari_pane,cumin,2,GRAM,false
+eg_gambari_pane,chicken egg,2,PIECE,false
+eg_gambari_pane,breadcrumbs,100,GRAM,false
+eg_gambari_pane,wheat flour,40,GRAM,false
+eg_gambari_pane,salt,6,GRAM,false
+eg_gambari_pane,sunflower oil,500,MILLILITER,false
+eg_samak_fillet_pane,tilapia,700,GRAM,false
+eg_samak_fillet_pane,garlic,3,PIECE,false
+eg_samak_fillet_pane,lemon juice,3,TABLESPOON,false
+eg_samak_fillet_pane,cumin,3,GRAM,false
+eg_samak_fillet_pane,chicken egg,2,PIECE,false
+eg_samak_fillet_pane,breadcrumbs,100,GRAM,false
+eg_samak_fillet_pane,salt,8,GRAM,false
+eg_samak_fillet_pane,sunflower oil,300,MILLILITER,false
+eg_shish_frakh,chicken breast,800,GRAM,false
+eg_shish_frakh,yogurt,100,GRAM,false
+eg_shish_frakh,garlic,4,PIECE,false
+eg_shish_frakh,lemon juice,2,TABLESPOON,false
+eg_shish_frakh,paprika,3,GRAM,false
+eg_shish_frakh,cumin,1,GRAM,false
+eg_shish_frakh,bell pepper,2,PIECE,false
+eg_shish_frakh,onion,1,PIECE,false
+eg_shish_frakh,sunflower oil,2,TABLESPOON,false
+eg_shish_frakh,salt,8,GRAM,false
+eg_kabab_halla,beef,1000,GRAM,false
+eg_kabab_halla,onion,5,PIECE,false
+eg_kabab_halla,ghee,40,GRAM,false
+eg_kabab_halla,tomato paste,20,GRAM,true
+eg_kabab_halla,cardamom,2,GRAM,false
+eg_kabab_halla,allspice,2,GRAM,false
+eg_kabab_halla,water,500,MILLILITER,false
+eg_kabab_halla,salt,12,GRAM,false
+eg_kabab_halla,black pepper,3,GRAM,false
+eg_batates_fel_forn,potato,5,PIECE,false
+eg_batates_fel_forn,sunflower oil,4,TABLESPOON,false
+eg_batates_fel_forn,garlic,3,PIECE,false
+eg_batates_fel_forn,paprika,3,GRAM,false
+eg_batates_fel_forn,cumin,2,GRAM,false
+eg_batates_fel_forn,salt,7,GRAM,false
+eg_feteer_lahma,wheat flour,700,GRAM,false
+eg_feteer_lahma,water,400,MILLILITER,false
+eg_feteer_lahma,salt,10,GRAM,false
+eg_feteer_lahma,ghee,200,GRAM,false
+eg_feteer_lahma,ground beef,400,GRAM,false
+eg_feteer_lahma,onion,1,PIECE,false
+eg_feteer_lahma,bell pepper,1,PIECE,false
+eg_feteer_lahma,allspice,2,GRAM,false
+eg_feteer_lahma,black pepper,2,GRAM,false
+eg_hawawshi_frakh,baladi bread,500,GRAM,false
+eg_hawawshi_frakh,chicken mince,600,GRAM,false
+eg_hawawshi_frakh,onion,1,PIECE,false
+eg_hawawshi_frakh,bell pepper,1,PIECE,false
+eg_hawawshi_frakh,chili pepper,1,PIECE,false
+eg_hawawshi_frakh,paprika,3,GRAM,false
+eg_hawawshi_frakh,cumin,2,GRAM,false
+eg_hawawshi_frakh,salt,9,GRAM,false
+eg_hawawshi_frakh,ghee,30,GRAM,false
+eg_shorbet_bisella,yellow split peas,400,GRAM,false
+eg_shorbet_bisella,onion,1,PIECE,false
+eg_shorbet_bisella,carrot,2,PIECE,false
+eg_shorbet_bisella,butter,30,GRAM,false
+eg_shorbet_bisella,chicken stock cube,1,PIECE,false
+eg_shorbet_bisella,water,1800,MILLILITER,false
+eg_shorbet_bisella,cumin,2,GRAM,false
+eg_shorbet_bisella,salt,6,GRAM,false
+eg_shorbet_bisella,black pepper,1,GRAM,false
+eg_batata_asal,sweet potato,800,GRAM,false
+eg_batata_asal,honey,60,GRAM,false
+eg_batata_asal,cinnamon,2,GRAM,false
+eg_batata_asal,butter,20,GRAM,true
+eg_hommos_mehammas,cooked chickpeas,400,GRAM,false
+eg_hommos_mehammas,olive oil,1,TABLESPOON,false
+eg_hommos_mehammas,cumin,2,GRAM,false
+eg_hommos_mehammas,salt,4,GRAM,false
+eg_asabe_zeinab,semolina,200,GRAM,false
+eg_asabe_zeinab,wheat flour,200,GRAM,false
+eg_asabe_zeinab,baking powder,5,GRAM,false
+eg_asabe_zeinab,sunflower oil,700,MILLILITER,false
+eg_asabe_zeinab,white sugar,400,GRAM,false
+eg_asabe_zeinab,water,400,MILLILITER,false
+eg_asabe_zeinab,lemon juice,1,TABLESPOON,false
+eg_asabe_zeinab,sesame seeds,15,GRAM,true
+eg_simsimiya,sesame seeds,300,GRAM,false
+eg_simsimiya,white sugar,200,GRAM,false
+eg_simsimiya,honey,60,GRAM,false
+eg_simsimiya,lemon juice,1,TEASPOON,false
+as_thai_coconut_chicken_curry,chicken thigh,600,GRAM,false
+as_thai_coconut_chicken_curry,coconut milk,400,MILLILITER,false
+as_thai_coconut_chicken_curry,curry powder,10,GRAM,false
+as_thai_coconut_chicken_curry,fish sauce,30,GRAM,false
+as_thai_coconut_chicken_curry,brown sugar,10,GRAM,false
+as_thai_coconut_chicken_curry,garlic,3,PIECE,false
+as_thai_coconut_chicken_curry,ginger,15,GRAM,false
+as_thai_coconut_chicken_curry,chili pepper,2,PIECE,false
+as_thai_coconut_chicken_curry,red bell pepper,1,PIECE,false
+as_thai_coconut_chicken_curry,fresh basil,10,GRAM,false
+as_thai_coconut_chicken_curry,sunflower oil,1,TABLESPOON,false
+as_coconut_shrimp_soup,shrimp,400,GRAM,false
+as_coconut_shrimp_soup,coconut milk,400,MILLILITER,false
+as_coconut_shrimp_soup,chicken stock cube,1,PIECE,false
+as_coconut_shrimp_soup,water,500,MILLILITER,false
+as_coconut_shrimp_soup,mushroom,150,GRAM,false
+as_coconut_shrimp_soup,fish sauce,30,GRAM,false
+as_coconut_shrimp_soup,lime,2,PIECE,false
+as_coconut_shrimp_soup,chili pepper,2,PIECE,false
+as_coconut_shrimp_soup,ginger,15,GRAM,false
+as_coconut_shrimp_soup,fresh coriander,10,GRAM,false
+in_coconut_fish_curry,grouper,700,GRAM,false
+in_coconut_fish_curry,coconut milk,400,MILLILITER,false
+in_coconut_fish_curry,onion,1,PIECE,false
+in_coconut_fish_curry,tomato,2,PIECE,false
+in_coconut_fish_curry,garlic,3,PIECE,false
+in_coconut_fish_curry,ginger,15,GRAM,false
+in_coconut_fish_curry,curry powder,8,GRAM,false
+in_coconut_fish_curry,turmeric,2,GRAM,false
+in_coconut_fish_curry,tamarind,20,GRAM,false
+in_coconut_fish_curry,sunflower oil,2,TABLESPOON,false
+in_coconut_fish_curry,salt,7,GRAM,false
+in_chicken_korma,chicken breast,700,GRAM,false
+in_chicken_korma,yogurt,150,GRAM,false
+in_chicken_korma,cashews,60,GRAM,false
+in_chicken_korma,coconut milk,200,MILLILITER,false
+in_chicken_korma,onion,2,PIECE,false
+in_chicken_korma,garlic,3,PIECE,false
+in_chicken_korma,ginger,15,GRAM,false
+in_chicken_korma,curry powder,6,GRAM,false
+in_chicken_korma,cardamom,2,GRAM,false
+in_chicken_korma,ghee,40,GRAM,false
+in_chicken_korma,salt,8,GRAM,false
+as_salmon_rice_bowl,sticky rice,200,GRAM,false
+as_salmon_rice_bowl,salmon,300,GRAM,false
+as_salmon_rice_bowl,cucumber,1,PIECE,false
+as_salmon_rice_bowl,avocado,150,GRAM,false
+as_salmon_rice_bowl,soy sauce,3,TABLESPOON,false
+as_salmon_rice_bowl,vinegar,1,TABLESPOON,false
+as_salmon_rice_bowl,white sugar,5,GRAM,false
+as_salmon_rice_bowl,sesame seeds,5,GRAM,false
+as_salmon_rice_bowl,nori seaweed,2,GRAM,false
+as_salmon_rice_bowl,sunflower oil,1,TABLESPOON,false
+as_hoisin_chicken,chicken breast,600,GRAM,false
+as_hoisin_chicken,hoisin sauce,80,GRAM,false
+as_hoisin_chicken,soy sauce,1,TABLESPOON,false
+as_hoisin_chicken,red bell pepper,1,PIECE,false
+as_hoisin_chicken,spring onion,40,GRAM,false
+as_hoisin_chicken,garlic,2,PIECE,false
+as_hoisin_chicken,corn starch,10,GRAM,false
+as_hoisin_chicken,sunflower oil,2,TABLESPOON,false
+as_oyster_beef_mushroom,beef sirloin,500,GRAM,false
+as_oyster_beef_mushroom,mushroom,300,GRAM,false
+as_oyster_beef_mushroom,oyster sauce,60,GRAM,false
+as_oyster_beef_mushroom,soy sauce,1,TABLESPOON,false
+as_oyster_beef_mushroom,garlic,3,PIECE,false
+as_oyster_beef_mushroom,ginger,10,GRAM,false
+as_oyster_beef_mushroom,corn starch,10,GRAM,false
+as_oyster_beef_mushroom,spring onion,30,GRAM,false
+as_oyster_beef_mushroom,sunflower oil,3,TABLESPOON,false
+as_chicken_lo_mein,noodles,300,GRAM,false
+as_chicken_lo_mein,chicken breast,300,GRAM,false
+as_chicken_lo_mein,carrot,1,PIECE,false
+as_chicken_lo_mein,chinese cabbage,200,GRAM,false
+as_chicken_lo_mein,mushroom,100,GRAM,false
+as_chicken_lo_mein,soy sauce,3,TABLESPOON,false
+as_chicken_lo_mein,oyster sauce,30,GRAM,false
+as_chicken_lo_mein,sesame oil,1,TEASPOON,false
+as_chicken_lo_mein,garlic,2,PIECE,false
+as_chicken_lo_mein,sunflower oil,2,TABLESPOON,false
+as_chicken_adobo,chicken thigh,1000,GRAM,false
+as_chicken_adobo,vinegar,100,MILLILITER,false
+as_chicken_adobo,soy sauce,80,MILLILITER,false
+as_chicken_adobo,garlic,8,PIECE,false
+as_chicken_adobo,bay leaf,1,GRAM,false
+as_chicken_adobo,black pepper,2,GRAM,false
+as_chicken_adobo,water,150,MILLILITER,false
+as_chicken_adobo,brown sugar,10,GRAM,false
+as_chicken_adobo,sunflower oil,1,TABLESPOON,false
+us_turkey_club,white bread,180,GRAM,false
+us_turkey_club,roasted turkey breast,200,GRAM,false
+us_turkey_club,lettuce,60,GRAM,false
+us_turkey_club,tomato,1,PIECE,false
+us_turkey_club,mayonnaise,40,GRAM,false
+us_turkey_club,cheddar cheese,40,GRAM,true
+us_caesar_salad,lettuce,300,GRAM,false
+us_caesar_salad,roasted chicken breast,300,GRAM,false
+us_caesar_salad,croutons,60,GRAM,false
+us_caesar_salad,parmesan cheese,40,GRAM,false
+us_caesar_salad,caesar dressing,100,GRAM,false
+us_caesar_salad,lemon juice,1,TABLESPOON,false
+us_cobb_salad,iceberg lettuce,300,GRAM,false
+us_cobb_salad,roasted chicken breast,300,GRAM,false
+us_cobb_salad,hard boiled egg,3,PIECE,false
+us_cobb_salad,avocado,200,GRAM,false
+us_cobb_salad,tomato,2,PIECE,false
+us_cobb_salad,blue cheese,60,GRAM,false
+us_cobb_salad,ranch dressing,80,GRAM,false
+us_meatloaf,ground beef,800,GRAM,false
+us_meatloaf,onion,1,PIECE,false
+us_meatloaf,breadcrumbs,60,GRAM,false
+us_meatloaf,chicken egg,2,PIECE,false
+us_meatloaf,whole milk,100,MILLILITER,false
+us_meatloaf,ketchup,100,GRAM,false
+us_meatloaf,worcestershire sauce,1,TABLESPOON,false
+us_meatloaf,brown sugar,15,GRAM,false
+us_meatloaf,salt,10,GRAM,false
+us_meatloaf,black pepper,2,GRAM,false
+us_sloppy_joes,ground beef,500,GRAM,false
+us_sloppy_joes,onion,1,PIECE,false
+us_sloppy_joes,bell pepper,1,PIECE,false
+us_sloppy_joes,ketchup,120,GRAM,false
+us_sloppy_joes,tomato paste,20,GRAM,false
+us_sloppy_joes,mustard,10,GRAM,false
+us_sloppy_joes,brown sugar,10,GRAM,false
+us_sloppy_joes,hamburger bun,4,PIECE,false
+us_sloppy_joes,salt,5,GRAM,false
+us_chicken_noodle_soup,chicken,1000,GRAM,false
+us_chicken_noodle_soup,carrot,2,PIECE,false
+us_chicken_noodle_soup,celery,80,GRAM,false
+us_chicken_noodle_soup,onion,1,PIECE,false
+us_chicken_noodle_soup,noodles,150,GRAM,false
+us_chicken_noodle_soup,water,2000,MILLILITER,false
+us_chicken_noodle_soup,bay leaf,1,GRAM,false
+us_chicken_noodle_soup,parsley,10,GRAM,false
+us_chicken_noodle_soup,salt,10,GRAM,false
+us_chicken_noodle_soup,black pepper,1,GRAM,false
+us_potato_salad,potato,5,PIECE,false
+us_potato_salad,mayonnaise,150,GRAM,false
+us_potato_salad,mustard,15,GRAM,false
+us_potato_salad,hard boiled egg,3,PIECE,false
+us_potato_salad,celery,60,GRAM,false
+us_potato_salad,onion,1,PIECE,false
+us_potato_salad,pickled cucumber,60,GRAM,false
+us_potato_salad,salt,6,GRAM,false
+us_potato_salad,black pepper,1,GRAM,false
+us_deviled_eggs,chicken egg,6,PIECE,false
+us_deviled_eggs,mayonnaise,50,GRAM,false
+us_deviled_eggs,mustard,8,GRAM,false
+us_deviled_eggs,paprika,1,GRAM,false
+us_deviled_eggs,salt,2,GRAM,false
+us_french_toast,white bread,240,GRAM,false
+us_french_toast,chicken egg,3,PIECE,false
+us_french_toast,whole milk,200,MILLILITER,false
+us_french_toast,cinnamon,1,GRAM,false
+us_french_toast,white sugar,15,GRAM,false
+us_french_toast,butter,30,GRAM,false
+us_french_toast,maple syrup,60,GRAM,true
+us_blueberry_muffins,wheat flour,280,GRAM,false
+us_blueberry_muffins,white sugar,150,GRAM,false
+us_blueberry_muffins,baking powder,10,GRAM,false
+us_blueberry_muffins,salt,2,GRAM,false
+us_blueberry_muffins,chicken egg,2,PIECE,false
+us_blueberry_muffins,whole milk,240,MILLILITER,false
+us_blueberry_muffins,sunflower oil,100,MILLILITER,false
+us_blueberry_muffins,blueberry,200,GRAM,false
+us_blueberry_muffins,vanilla extract,1,TEASPOON,false
+it_carbonara_smoked_beef,spaghetti,400,GRAM,false
+it_carbonara_smoked_beef,smoked beef,120,GRAM,false
+it_carbonara_smoked_beef,chicken egg,2,PIECE,false
+it_carbonara_smoked_beef,egg yolk,2,PIECE,false
+it_carbonara_smoked_beef,parmesan cheese,80,GRAM,false
+it_carbonara_smoked_beef,black pepper,2,GRAM,false
+it_carbonara_smoked_beef,olive oil,1,TABLESPOON,false
+it_carbonara_smoked_beef,salt,8,GRAM,false
+it_risotto_milanese,short grain rice,320,GRAM,false
+it_risotto_milanese,saffron,0.2,GRAM,false
+it_risotto_milanese,onion,1,PIECE,false
+it_risotto_milanese,butter,50,GRAM,false
+it_risotto_milanese,chicken stock cube,2,PIECE,false
+it_risotto_milanese,water,1200,MILLILITER,false
+it_risotto_milanese,parmesan cheese,60,GRAM,false
+it_risotto_milanese,salt,3,GRAM,false
+it_tomato_basil_soup,tomato,8,PIECE,false
+it_tomato_basil_soup,onion,1,PIECE,false
+it_tomato_basil_soup,garlic,4,PIECE,false
+it_tomato_basil_soup,olive oil,3,TABLESPOON,false
+it_tomato_basil_soup,fresh basil,15,GRAM,false
+it_tomato_basil_soup,light cream,100,MILLILITER,false
+it_tomato_basil_soup,chicken stock cube,1,PIECE,false
+it_tomato_basil_soup,water,500,MILLILITER,false
+it_tomato_basil_soup,salt,5,GRAM,false
+it_chicken_piccata,chicken breast,600,GRAM,false
+it_chicken_piccata,wheat flour,40,GRAM,false
+it_chicken_piccata,butter,40,GRAM,false
+it_chicken_piccata,olive oil,2,TABLESPOON,false
+it_chicken_piccata,lemon juice,4,TABLESPOON,false
+it_chicken_piccata,caper,30,GRAM,false
+it_chicken_piccata,chicken stock cube,1,PIECE,false
+it_chicken_piccata,water,200,MILLILITER,false
+it_chicken_piccata,parsley,10,GRAM,false
+it_chicken_piccata,salt,5,GRAM,false
+it_chicken_cacciatore,chicken thigh,1000,GRAM,false
+it_chicken_cacciatore,canned tomatoes,400,GRAM,false
+it_chicken_cacciatore,bell pepper,1,PIECE,false
+it_chicken_cacciatore,red bell pepper,1,PIECE,false
+it_chicken_cacciatore,mushroom,200,GRAM,false
+it_chicken_cacciatore,onion,1,PIECE,false
+it_chicken_cacciatore,garlic,3,PIECE,false
+it_chicken_cacciatore,dried oregano,1,GRAM,false
+it_chicken_cacciatore,olive oil,3,TABLESPOON,false
+it_chicken_cacciatore,salt,8,GRAM,false
+it_chicken_cacciatore,black pepper,2,GRAM,false
+it_pasta_e_fagioli,cooked white beans,500,GRAM,false
+it_pasta_e_fagioli,macaroni,150,GRAM,false
+it_pasta_e_fagioli,canned tomatoes,400,GRAM,false
+it_pasta_e_fagioli,onion,1,PIECE,false
+it_pasta_e_fagioli,carrot,1,PIECE,false
+it_pasta_e_fagioli,celery,60,GRAM,false
+it_pasta_e_fagioli,garlic,2,PIECE,false
+it_pasta_e_fagioli,fresh rosemary,2,GRAM,false
+it_pasta_e_fagioli,olive oil,3,TABLESPOON,false
+it_pasta_e_fagioli,water,1200,MILLILITER,false
+it_pasta_e_fagioli,salt,8,GRAM,false
+mx_chicken_tortilla_soup,chicken breast,500,GRAM,false
+mx_chicken_tortilla_soup,canned tomatoes,400,GRAM,false
+mx_chicken_tortilla_soup,cooked black beans,250,GRAM,false
+mx_chicken_tortilla_soup,corn,200,GRAM,false
+mx_chicken_tortilla_soup,onion,1,PIECE,false
+mx_chicken_tortilla_soup,garlic,3,PIECE,false
+mx_chicken_tortilla_soup,chili powder blend,6,GRAM,false
+mx_chicken_tortilla_soup,cumin,2,GRAM,false
+mx_chicken_tortilla_soup,chicken stock cube,2,PIECE,false
+mx_chicken_tortilla_soup,water,1500,MILLILITER,false
+mx_chicken_tortilla_soup,tortilla chips,80,GRAM,false
+mx_chicken_tortilla_soup,avocado,150,GRAM,false
+mx_chicken_tortilla_soup,lime,1,PIECE,false
+mx_nachos,tortilla chips,200,GRAM,false
+mx_nachos,cheddar cheese,150,GRAM,false
+mx_nachos,refried beans,200,GRAM,false
+mx_nachos,pickled jalapenos,40,GRAM,false
+mx_nachos,salsa,150,GRAM,false
+mx_nachos,sour cream,80,GRAM,true
+mx_burrito_bowl,cooked long grain rice,600,GRAM,false
+mx_burrito_bowl,chicken breast,500,GRAM,false
+mx_burrito_bowl,cooked black beans,250,GRAM,false
+mx_burrito_bowl,corn,150,GRAM,false
+mx_burrito_bowl,salsa,150,GRAM,false
+mx_burrito_bowl,avocado,150,GRAM,false
+mx_burrito_bowl,lime,1,PIECE,false
+mx_burrito_bowl,chili powder blend,5,GRAM,false
+mx_burrito_bowl,cumin,2,GRAM,false
+mx_burrito_bowl,sunflower oil,1,TABLESPOON,false
+mx_burrito_bowl,salt,6,GRAM,false
+mx_horchata,long grain rice,150,GRAM,false
+mx_horchata,cinnamon,4,GRAM,false
+mx_horchata,water,1200,MILLILITER,false
+mx_horchata,whole milk,250,MILLILITER,false
+mx_horchata,white sugar,120,GRAM,false
+mx_horchata,vanilla extract,1,TEASPOON,false
+es_churros,water,250,MILLILITER,false
+es_churros,butter,30,GRAM,false
+es_churros,wheat flour,150,GRAM,false
+es_churros,salt,2,GRAM,false
+es_churros,chicken egg,1,PIECE,false
+es_churros,white sugar,80,GRAM,false
+es_churros,cinnamon,3,GRAM,false
+es_churros,sunflower oil,700,MILLILITER,false
+es_patatas_bravas,potato,5,PIECE,false
+es_patatas_bravas,olive oil,60,MILLILITER,false
+es_patatas_bravas,tomato sauce,200,GRAM,false
+es_patatas_bravas,paprika,3,GRAM,false
+es_patatas_bravas,cayenne pepper,1,GRAM,false
+es_patatas_bravas,garlic,2,PIECE,false
+es_patatas_bravas,salt,6,GRAM,false
+gr_avgolemono,chicken breast,400,GRAM,false
+gr_avgolemono,white rice,100,GRAM,false
+gr_avgolemono,chicken stock cube,2,PIECE,false
+gr_avgolemono,water,1600,MILLILITER,false
+gr_avgolemono,chicken egg,3,PIECE,false
+gr_avgolemono,lemon juice,5,TABLESPOON,false
+gr_avgolemono,salt,6,GRAM,false
+gr_avgolemono,black pepper,1,GRAM,false
+gr_yogurt_honey_walnuts,greek yogurt,300,GRAM,false
+gr_yogurt_honey_walnuts,honey,40,GRAM,false
+gr_yogurt_honey_walnuts,walnuts,40,GRAM,false
+tr_mercimek_koftesi,red lentils,250,GRAM,false
+tr_mercimek_koftesi,bulgur,200,GRAM,false
+tr_mercimek_koftesi,water,700,MILLILITER,false
+tr_mercimek_koftesi,onion,1,PIECE,false
+tr_mercimek_koftesi,tomato paste,30,GRAM,false
+tr_mercimek_koftesi,olive oil,4,TABLESPOON,false
+tr_mercimek_koftesi,cumin,3,GRAM,false
+tr_mercimek_koftesi,cayenne pepper,2,GRAM,false
+tr_mercimek_koftesi,parsley,30,GRAM,false
+tr_mercimek_koftesi,spring onion,40,GRAM,false
+tr_mercimek_koftesi,lemon juice,2,TABLESPOON,false
+tr_mercimek_koftesi,salt,8,GRAM,false
+tr_mercimek_koftesi,lettuce,150,GRAM,false
+tr_ayran,yogurt,300,GRAM,false
+tr_ayran,water,250,MILLILITER,false
+tr_ayran,salt,2,GRAM,false
+ma_chicken_bastilla,chicken,1500,GRAM,false
+ma_chicken_bastilla,onion,2,PIECE,false
+ma_chicken_bastilla,ginger,10,GRAM,false
+ma_chicken_bastilla,saffron,0.2,GRAM,false
+ma_chicken_bastilla,cinnamon,4,GRAM,false
+ma_chicken_bastilla,chicken egg,5,PIECE,false
+ma_chicken_bastilla,almonds,150,GRAM,false
+ma_chicken_bastilla,powdered sugar,50,GRAM,false
+ma_chicken_bastilla,phyllo dough,300,GRAM,false
+ma_chicken_bastilla,butter,120,GRAM,false
+ma_chicken_bastilla,parsley,20,GRAM,false
+ma_chicken_bastilla,water,500,MILLILITER,false
+ma_chicken_bastilla,salt,10,GRAM,false
+ma_carrot_salad,carrot,5,PIECE,false
+ma_carrot_salad,garlic,1,PIECE,false
+ma_carrot_salad,cumin,2,GRAM,false
+ma_carrot_salad,paprika,1,GRAM,false
+ma_carrot_salad,lemon juice,2,TABLESPOON,false
+ma_carrot_salad,olive oil,2,TABLESPOON,false
+ma_carrot_salad,parsley,10,GRAM,false
+ma_carrot_salad,salt,3,GRAM,false
+ma_mint_tea,brewed green tea,800,MILLILITER,false
+ma_mint_tea,fresh mint,20,GRAM,false
+ma_mint_tea,white sugar,60,GRAM,false
+in_vegetable_pulao,white rice,300,GRAM,false
+in_vegetable_pulao,green peas,100,GRAM,false
+in_vegetable_pulao,carrot,1,PIECE,false
+in_vegetable_pulao,onion,1,PIECE,false
+in_vegetable_pulao,ghee,30,GRAM,false
+in_vegetable_pulao,cumin,2,GRAM,false
+in_vegetable_pulao,cardamom,1,GRAM,false
+in_vegetable_pulao,cloves,1,GRAM,false
+in_vegetable_pulao,bay leaf,1,GRAM,false
+in_vegetable_pulao,water,450,MILLILITER,false
+in_vegetable_pulao,salt,6,GRAM,false
+in_aloo_paratha,whole wheat flour,300,GRAM,false
+in_aloo_paratha,water,180,MILLILITER,false
+in_aloo_paratha,potato,3,PIECE,false
+in_aloo_paratha,chili pepper,1,PIECE,false
+in_aloo_paratha,fresh coriander,10,GRAM,false
+in_aloo_paratha,cumin,2,GRAM,false
+in_aloo_paratha,ghee,50,GRAM,false
+in_aloo_paratha,salt,7,GRAM,false
+in_masala_chai,brewed black tea,500,MILLILITER,false
+in_masala_chai,whole milk,400,MILLILITER,false
+in_masala_chai,ginger,10,GRAM,false
+in_masala_chai,cardamom,2,GRAM,false
+in_masala_chai,cinnamon,1,GRAM,false
+in_masala_chai,white sugar,40,GRAM,false
+in_lemon_rice,cooked white rice,600,GRAM,false
+in_lemon_rice,peanuts,50,GRAM,false
+in_lemon_rice,mustard seed,2,GRAM,false
+in_lemon_rice,turmeric,1,GRAM,false
+in_lemon_rice,chili pepper,1,PIECE,false
+in_lemon_rice,lemon juice,3,TABLESPOON,false
+in_lemon_rice,sunflower oil,2,TABLESPOON,false
+in_lemon_rice,salt,4,GRAM,false
+in_gulab_jamun,milk powder,150,GRAM,false
+in_gulab_jamun,wheat flour,50,GRAM,false
+in_gulab_jamun,baking soda,1,GRAM,false
+in_gulab_jamun,ghee,20,GRAM,false
+in_gulab_jamun,whole milk,80,MILLILITER,false
+in_gulab_jamun,white sugar,400,GRAM,false
+in_gulab_jamun,water,400,MILLILITER,false
+in_gulab_jamun,cardamom,2,GRAM,false
+in_gulab_jamun,rose water,10,GRAM,false
+in_gulab_jamun,sunflower oil,600,MILLILITER,false
+in_pav_bhaji,potato,3,PIECE,false
+in_pav_bhaji,cauliflower,200,GRAM,false
+in_pav_bhaji,green peas,100,GRAM,false
+in_pav_bhaji,tomato,3,PIECE,false
+in_pav_bhaji,onion,1,PIECE,false
+in_pav_bhaji,bell pepper,1,PIECE,false
+in_pav_bhaji,butter,60,GRAM,false
+in_pav_bhaji,curry powder,8,GRAM,false
+in_pav_bhaji,lemon juice,1,TABLESPOON,false
+in_pav_bhaji,hamburger bun,4,PIECE,false
+in_pav_bhaji,salt,6,GRAM,false
+as_egg_drop_soup,chicken stock cube,2,PIECE,false
+as_egg_drop_soup,water,1000,MILLILITER,false
+as_egg_drop_soup,chicken egg,3,PIECE,false
+as_egg_drop_soup,corn starch,15,GRAM,false
+as_egg_drop_soup,soy sauce,1,TABLESPOON,false
+as_egg_drop_soup,white pepper,1,GRAM,false
+as_egg_drop_soup,spring onion,20,GRAM,false
+as_garlic_green_beans,green beans,500,GRAM,false
+as_garlic_green_beans,garlic,4,PIECE,false
+as_garlic_green_beans,soy sauce,2,TABLESPOON,false
+as_garlic_green_beans,sunflower oil,2,TABLESPOON,false
+as_garlic_green_beans,chili pepper,1,PIECE,true
+as_chicken_katsu,chicken breast,600,GRAM,false
+as_chicken_katsu,wheat flour,40,GRAM,false
+as_chicken_katsu,chicken egg,2,PIECE,false
+as_chicken_katsu,breadcrumbs,120,GRAM,false
+as_chicken_katsu,sunflower oil,300,MILLILITER,false
+as_chicken_katsu,ketchup,40,GRAM,false
+as_chicken_katsu,worcestershire sauce,2,TABLESPOON,false
+as_chicken_katsu,soy sauce,1,TABLESPOON,false
+as_chicken_katsu,salt,5,GRAM,false
+as_korean_fried_chicken,chicken wing,1000,GRAM,false
+as_korean_fried_chicken,corn starch,80,GRAM,false
+as_korean_fried_chicken,salt,6,GRAM,false
+as_korean_fried_chicken,sunflower oil,1000,MILLILITER,false
+as_korean_fried_chicken,hot sauce,60,GRAM,false
+as_korean_fried_chicken,honey,60,GRAM,false
+as_korean_fried_chicken,soy sauce,2,TABLESPOON,false
+as_korean_fried_chicken,garlic,3,PIECE,false
+as_korean_fried_chicken,sesame seeds,5,GRAM,false
+as_mango_sticky_rice,sticky rice,250,GRAM,false
+as_mango_sticky_rice,coconut milk,400,MILLILITER,false
+as_mango_sticky_rice,white sugar,80,GRAM,false
+as_mango_sticky_rice,salt,2,GRAM,false
+as_mango_sticky_rice,mango,2,PIECE,false
+as_mango_sticky_rice,sesame seeds,5,GRAM,true
+uk_shepherds_pie,lamb mince,700,GRAM,false
+uk_shepherds_pie,onion,1,PIECE,false
+uk_shepherds_pie,carrot,2,PIECE,false
+uk_shepherds_pie,green peas,100,GRAM,false
+uk_shepherds_pie,tomato paste,30,GRAM,false
+uk_shepherds_pie,worcestershire sauce,1,TABLESPOON,false
+uk_shepherds_pie,beef stock cube,10,GRAM,false
+uk_shepherds_pie,water,300,MILLILITER,false
+uk_shepherds_pie,potato,6,PIECE,false
+uk_shepherds_pie,butter,50,GRAM,false
+uk_shepherds_pie,whole milk,120,MILLILITER,false
+uk_shepherds_pie,salt,10,GRAM,false
+uk_shepherds_pie,black pepper,2,GRAM,false
+uk_fish_and_chips,cod,700,GRAM,false
+uk_fish_and_chips,wheat flour,200,GRAM,false
+uk_fish_and_chips,baking powder,5,GRAM,false
+uk_fish_and_chips,sparkling water,250,MILLILITER,false
+uk_fish_and_chips,potato,5,PIECE,false
+uk_fish_and_chips,sunflower oil,1500,MILLILITER,false
+uk_fish_and_chips,salt,8,GRAM,false
+uk_fish_and_chips,lemon,1,PIECE,false
+uk_fish_and_chips,vinegar,2,TABLESPOON,true
+uk_scones,wheat flour,350,GRAM,false
+uk_scones,baking powder,15,GRAM,false
+uk_scones,butter,80,GRAM,false
+uk_scones,white sugar,30,GRAM,false
+uk_scones,whole milk,180,MILLILITER,false
+uk_scones,chicken egg,1,PIECE,false
+uk_scones,salt,2,GRAM,false
+uk_scones,jam,100,GRAM,true
+fr_croque_monsieur,white bread,160,GRAM,false
+fr_croque_monsieur,roasted turkey breast,120,GRAM,false
+fr_croque_monsieur,swiss cheese,100,GRAM,false
+fr_croque_monsieur,butter,30,GRAM,false
+fr_croque_monsieur,wheat flour,15,GRAM,false
+fr_croque_monsieur,whole milk,150,MILLILITER,false
+fr_croque_monsieur,mustard,10,GRAM,false
+fr_croque_monsieur,nutmeg,1,GRAM,false
+fr_chocolate_mousse,dark chocolate,200,GRAM,false
+fr_chocolate_mousse,heavy cream,300,MILLILITER,false
+fr_chocolate_mousse,egg yolk,3,PIECE,false
+fr_chocolate_mousse,white sugar,50,GRAM,false
+fr_creme_brulee,heavy cream,500,MILLILITER,false
+fr_creme_brulee,egg yolk,6,PIECE,false
+fr_creme_brulee,white sugar,120,GRAM,false
+fr_creme_brulee,vanilla extract,1,TEASPOON,false
+fr_nicoise_salad,canned tuna,200,GRAM,false
+fr_nicoise_salad,potato,3,PIECE,false
+fr_nicoise_salad,green beans,200,GRAM,false
+fr_nicoise_salad,hard boiled egg,4,PIECE,false
+fr_nicoise_salad,tomato,2,PIECE,false
+fr_nicoise_salad,black olives,60,GRAM,false
+fr_nicoise_salad,lettuce,150,GRAM,false
+fr_nicoise_salad,olive oil,4,TABLESPOON,false
+fr_nicoise_salad,vinegar,1,TABLESPOON,false
+fr_nicoise_salad,mustard,5,GRAM,false
+fr_nicoise_salad,salt,4,GRAM,false
+us_buttermilk_biscuits,wheat flour,300,GRAM,false
+us_buttermilk_biscuits,baking powder,12,GRAM,false
+us_buttermilk_biscuits,baking soda,2,GRAM,false
+us_buttermilk_biscuits,salt,4,GRAM,false
+us_buttermilk_biscuits,butter,100,GRAM,false
+us_buttermilk_biscuits,buttermilk,220,MILLILITER,false

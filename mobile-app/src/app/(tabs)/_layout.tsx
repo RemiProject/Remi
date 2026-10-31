@@ -2,7 +2,7 @@ import { useLanguage } from '@/providers/language-provider';
 import { appMessages } from '@/i18n/app';
 import { Tabs, TabList, TabTrigger, TabSlot, type TabTriggerSlotProps } from 'expo-router/ui';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ComponentRef, type Ref } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRemyTheme } from '@/theme/provider';
@@ -10,13 +10,13 @@ import { radii, spacing, layout } from '@/theme/tokens';
 import { AppText } from '@/components/ui/core';
 import { Icon, type IconName } from '@/components/ui/icon';
 
-function TabButton({ children, isFocused, emphasized, icon, onPress, onLongPress, onFocus, onBlur, ...props }: TabTriggerSlotProps & { emphasized?: boolean; icon: IconName }) {
+function TabButton({ children, isFocused, emphasized, icon, onPress, onLongPress, onFocus, onBlur, ref, ...props }: TabTriggerSlotProps & { emphasized?: boolean; icon: IconName }) {
   const { colors } = useRemyTheme();
   const { language } = useLanguage();
   const t = appMessages[language];
   const [focused, setFocused] = useState(false);
   return (
-    <Pressable {...props} accessibilityRole={emphasized ? 'button' : 'tab'} accessibilityLabel={emphasized ? t.addAction : undefined}
+    <Pressable {...props} ref={ref as unknown as Ref<ComponentRef<typeof Pressable>>} accessibilityRole={emphasized ? 'button' : 'tab'} accessibilityLabel={emphasized ? t.addAction : undefined}
       accessibilityState={emphasized ? {} : { selected: !!isFocused }}
       onPress={emphasized ? () => router.push('/food-entry') : onPress}
       onLongPress={emphasized ? undefined : onLongPress}

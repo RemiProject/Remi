@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { router, Stack, useLocalSearchParams, useNavigation } from 'expo-router';
+import { useRef, useState } from 'react';
+import { router, Stack, useLocalSearchParams, usePreventRemove } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View } from 'react-native';
 import { AppText, Button, Card, EmptyState, PageHeader, Screen, SectionHeader, uiStyles } from '@/components/ui/core';
@@ -28,8 +28,7 @@ export default function FoodDetail() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const busy = useRef(false);
-  const navigation = useNavigation();
-  useEffect(() => navigation.addListener('beforeRemove', (event) => { if (busy.current) event.preventDefault(); }), [navigation]);
+  const disableRemovePrevention = usePreventRemove(deleting, () => {});
   const remove = async () => {
     if (!item || busy.current) return;
     busy.current = true;
@@ -38,6 +37,8 @@ export default function FoodDetail() {
     try {
       await deleteItem(item.id);
       busy.current = false;
+      setDeleting(false);
+      disableRemovePrevention();
       setConfirming(false);
       router.replace('/kitchen');
     } catch (error) {

@@ -1,6 +1,802 @@
-# Foods to add or update. Match key: name (English, case-insensitive). Lines starting with # are ignored.
-# default_unit: GRAM | MILLILITER | PIECE (never CUP/TABLESPOON/TEASPOON).
-# PIECE needs grams_per_piece. MILLILITER needs density_g_per_ml. Fill both when you know them: it lets users enter any unit.
-# aliases_ar / aliases_en: extra names separated by | (e.g. Egyptian street names). name_ar is the main Arabic name.
+﻿# Remi AI development dataset. Foods to add or update. Match key: name.
 name,name_ar,category_code,default_unit,grams_per_piece,density_g_per_ml,aliases_ar,aliases_en
-# example (remove the leading # to import): baladi bread,عيش بلدي,GRAINS,PIECE,90,,عيش|رغيف بلدي,egyptian flatbread
+tomato,طماطم,VEGETABLES,PIECE,123.0,,قوطة|بندورة,tomatoes
+potato,بطاطس,VEGETABLES,PIECE,213.0,,,potatoes
+onion,بصل,VEGETABLES,PIECE,110.0,,بصل أحمر,onions|yellow onion
+garlic,ثوم,VEGETABLES,GRAM,3.0,,توم,garlic cloves
+cucumber,خيار,VEGETABLES,GRAM,301.0,,,cucumbers
+carrot,جزر,VEGETABLES,PIECE,61.0,,,carrots
+bell pepper,فلفل رومي,VEGETABLES,PIECE,119.0,,فلفل حلو,capsicum|sweet pepper
+chili pepper,فلفل حار,VEGETABLES,GRAM,45.0,,فلفل حامي,hot pepper|green chili
+eggplant,باذنجان,VEGETABLES,GRAM,,,بتنجان|بدنجان,aubergine
+zucchini,كوسة,VEGETABLES,GRAM,,,كوسا,courgette|squash
+okra,بامية,VEGETABLES,GRAM,,,بامي,lady fingers|bamia
+green beans,فاصوليا خضراء,VEGETABLES,GRAM,,,فاصوليا خضرا,string beans|snap beans
+lettuce,خس,VEGETABLES,GRAM,,,خس بلدي,romaine lettuce|cos lettuce
+spinach,سبانخ,VEGETABLES,GRAM,,,سبانخ بلدي,
+arugula,جرجير,VEGETABLES,GRAM,,,,rocket|roquette
+cabbage,كرنب,VEGETABLES,GRAM,,,ملفوف,white cabbage
+cauliflower,قرنبيط,VEGETABLES,GRAM,,,زهرة|قرنبيط مصري,
+broccoli,بروكلي,VEGETABLES,GRAM,,,بروكلى,
+celery,كرفس,VEGETABLES,GRAM,,,كرافس,
+beetroot,بنجر,VEGETABLES,GRAM,,,شمندر,beet|beets
+radish,فجل,VEGETABLES,GRAM,,,فجل بلدي,radishes
+turnip,لفت,VEGETABLES,GRAM,,,لفت أبيض,turnips
+sweet potato,بطاطا حلوة,VEGETABLES,GRAM,,,بطاطا,sweet potatoes
+pumpkin,قرع,VEGETABLES,GRAM,,,يقطين|قرع عسل أحمر,
+mushroom,مشروم,VEGETABLES,GRAM,,,فطر|عيش الغراب,button mushroom|white mushroom
+artichoke,خرشوف,VEGETABLES,GRAM,,,خرشوفة,globe artichoke
+leek,كراث,VEGETABLES,GRAM,,,كرات,leeks
+spring onion,بصل أخضر,VEGETABLES,GRAM,,,بصل اخضر بالعرش,scallion|scallions
+corn,ذرة,VEGETABLES,GRAM,,,درة|درة صفرا,sweet corn|maize
+ginger,زنجبيل,VEGETABLES,GRAM,,,جنزبيل,ginger root|fresh ginger
+avocado,أفوكادو,VEGETABLES,GRAM,,,,avocados
+olive,زيتون,VEGETABLES,GRAM,,,زيتون أخضر,green olives|olives
+taro,قلقاس,VEGETABLES,GRAM,,,قلقاص,colocasia|eddo
+molokhia,ملوخية,VEGETABLES,GRAM,,,ملوخيه خضرا,jute mallow|mulukhiyah|jute leaves
+parsley,بقدونس,VEGETABLES,GRAM,,,بقدونس بلدي,flat-leaf parsley
+dill,شبت,VEGETABLES,GRAM,,,شبت أخضر,dill weed
+fresh coriander,كزبرة خضراء,VEGETABLES,GRAM,,,كسبرة خضرا,cilantro|coriander leaves
+fresh mint,نعناع,VEGETABLES,GRAM,,,نعناع أخضر,spearmint|mint leaves
+grape leaves,ورق عنب,VEGETABLES,GRAM,,,ورق العنب,vine leaves
+purslane,رجلة,VEGETABLES,GRAM,,,بقلة,pigweed
+tomato paste,صلصة طماطم,VEGETABLES,GRAM,,,صلصة|معجون طماطم,tomato puree concentrate
+lemon,ليمون,FRUITS,PIECE,58.0,,ليمون أصفر,lemons
+lime,ليمون أخضر,FRUITS,PIECE,67.0,,,limes
+orange,برتقال,FRUITS,PIECE,131.0,,برتقان,oranges
+mandarin,يوسفي,FRUITS,PIECE,88.0,,يوسف أفندي|ماندرين,mandarin orange
+apple,تفاح,FRUITS,PIECE,182.0,,تفاحة,apples
+banana,موز,FRUITS,PIECE,118.0,,موزة,bananas
+grapes,عنب,FRUITS,GRAM,,,عنب بناتي,grape
+raisins,زبيب,FRUITS,GRAM,,,,
+strawberry,فراولة,FRUITS,GRAM,,,فراولا,strawberries
+guava,جوافة,FRUITS,PIECE,55.0,,جوافه,guavas
+mango,مانجو,FRUITS,GRAM,336.0,,مانجة|منجا,mangoes
+watermelon,بطيخ,FRUITS,GRAM,,,بطيخ أحمر,
+cantaloupe,شمام,FRUITS,GRAM,,,كنتالوب,muskmelon
+fig,تين,FRUITS,PIECE,50.0,,تين بلدي,figs
+dried dates,تمر,FRUITS,GRAM,7.1,,عجوة مجففة,dates|dry dates
+pomegranate,رمان,FRUITS,GRAM,,,رمانة,pomegranates
+peach,خوخ,FRUITS,PIECE,150.0,,خوخة,peaches
+apricot,مشمش,FRUITS,PIECE,35.0,,مشمشة,apricots
+plum,برقوق,FRUITS,PIECE,66.0,,برقوقة,plums
+pear,كمثرى,FRUITS,PIECE,178.0,,كمترى|كمثرة,pears
+coconut,جوز الهند,FRUITS,GRAM,,,نارجيل,coconut meat
+prickly pear,تين شوكي,FRUITS,PIECE,103.0,,تين برشومي,cactus pear
+mulberry,توت,FRUITS,GRAM,,,توت بلدي,mulberries
+loquat,بشملة,FRUITS,GRAM,16.0,,أسكدنيا|اكي دنيا,loquats
+beef,لحم بقري,MEAT,GRAM,,,لحمة|لحمة بقري,beef meat
+ground beef,لحم مفروم,MEAT,GRAM,,,لحمة مفرومة|مفروم بقري,minced beef
+veal,لحم عجل,MEAT,GRAM,,,بتلو|لحمة بتلو,
+lamb,لحم ضأن,MEAT,GRAM,,,ضاني|لحمة ضاني,lamb meat
+rabbit,أرنب,MEAT,GRAM,,,أرانب,
+beef liver,كبدة بقري,MEAT,GRAM,,,كبدة|كبده بقرى,ox liver
+lamb liver,كبدة ضأن,MEAT,GRAM,,,كبدة ضاني,
+beef kidney,كلى بقري,MEAT,GRAM,,,كلاوي,beef kidneys
+beef tripe,كرشة,MEAT,GRAM,,,كرشة بقري,tripe
+chicken,دجاج,POULTRY,GRAM,,,فراخ|فرخة,chicken meat
+chicken breast,صدر دجاج,POULTRY,GRAM,,,صدور فراخ|صدر فراخ,chicken fillet
+chicken thigh,ورك دجاج,POULTRY,GRAM,,,أوراك فراخ|ورك فراخ,chicken thighs
+chicken drumstick,ساق دجاج,POULTRY,GRAM,,,دبوس فراخ,drumsticks
+chicken wing,جناح دجاج,POULTRY,GRAM,,,أجنحة فراخ|جناح فراخ,chicken wings
+chicken liver,كبدة دجاج,POULTRY,GRAM,,,كبدة فراخ,chicken livers
+chicken gizzard,قوانص دجاج,POULTRY,GRAM,,,قوانص|قوانص فراخ,gizzards
+duck,بط,POULTRY,GRAM,,,بطة,duck meat
+quail,سمان,POULTRY,GRAM,,,سمانة,quails
+pigeon,حمام,POULTRY,GRAM,,,حمامة|زغاليل,squab
+tilapia,بلطي,FISH,GRAM,,,سمك بلطي,nile tilapia
+mullet,بوري,FISH,GRAM,,,سمك بوري,grey mullet|striped mullet
+sea bass,قاروص,FISH,GRAM,,,سمك قاروص,seabass
+mackerel,ماكريل,FISH,GRAM,,,سمك ماكريل,atlantic mackerel
+herring,رنجة,FISH,GRAM,,,سمك رنجة,atlantic herring
+smoked herring,رنجة مدخنة,FISH,GRAM,,,رنجه مدخنه,kippered herring|kipper
+salmon,سلمون,FISH,GRAM,,,سالمون,atlantic salmon
+tuna,تونة,FISH,GRAM,,,تونه طازة,fresh tuna|yellowfin tuna
+canned tuna,تونة معلبة,FISH,GRAM,,,تونة علب,tuna in oil
+canned sardines,سردين معلب,FISH,GRAM,,,سردين علب,sardines in oil
+shrimp,جمبري,FISH,GRAM,,,جمبرى|قريدس,prawns
+squid,سبيط,FISH,GRAM,,,كاليماري|كالامارى,calamari
+cuttlefish,حبار,FISH,GRAM,,,,sepia
+crab,سلطعون,FISH,GRAM,,,كابوريا,blue crab
+carp,شبوط,FISH,GRAM,,,مبروك|سمك مبروك,common carp
+white rice,أرز,GRAINS,GRAM,,,رز|رز أبيض,rice|medium grain rice
+short grain rice,أرز قصير الحبة,GRAINS,GRAM,,,رز مصري,egyptian rice|japonica rice
+cooked white rice,أرز مطبوخ,GRAINS,GRAM,,,رز مطبوخ|رز أبيض مسلوق,boiled rice
+brown rice,أرز بني,GRAINS,GRAM,,,رز بني,
+bulgur,برغل,GRAINS,GRAM,,,برغل خشن|بلغور,burghul
+wheat flour,دقيق قمح,GRAINS,GRAM,,,دقيق|دقيق أبيض,all-purpose flour|white flour
+whole wheat flour,دقيق قمح كامل,GRAINS,GRAM,,,دقيق أسمر|دقيق بلدي,wholemeal flour
+oats,شوفان,GRAINS,GRAM,,,شوفان سريع,oatmeal
+barley,شعير,GRAINS,GRAM,,,شعير مقشور,pearl barley
+couscous,كسكسي,GRAINS,GRAM,,,كسكس,cous cous
+semolina,سميد,GRAINS,GRAM,,,سميد ناعم,durum semolina
+white bread,خبز أبيض,GRAINS,GRAM,,,عيش فينو|توست أبيض,sandwich bread
+pita bread,خبز عربي,GRAINS,GRAM,60.0,,عيش شامي|خبز شامي,white pita|syrian bread
+whole wheat bread,خبز قمح كامل,GRAINS,GRAM,,,عيش أسمر|خبز أسمر,brown bread|wholemeal bread
+pasta,باستا,GRAINS,GRAM,,,,dry pasta
+macaroni,مكرونة,GRAINS,GRAM,,,مكرونه,maccheroni
+spaghetti,سباغيتي,GRAINS,GRAM,,,اسباجيتي|إسباجتي,
+cooked pasta,مكرونة مسلوقة,GRAINS,GRAM,,,باستا مسلوقة,boiled pasta
+breadcrumbs,بقسماط,GRAINS,GRAM,,,بقسماط مطحون|فتات خبز,dry breadcrumbs
+corn starch,نشا الذرة,GRAINS,GRAM,,,نشا,cornstarch
+bran,ردة,GRAINS,GRAM,,,نخالة,wheat bran
+chickpeas,حمص,LEGUMES,GRAM,,,حمص ناشف|حمص حب,garbanzo beans
+cooked chickpeas,حمص مسلوق,LEGUMES,GRAM,,,حمص مطبوخ,boiled chickpeas
+red lentils,عدس أحمر,LEGUMES,GRAM,,,عدس أصفر|عدس مجروش,split red lentils|masoor dal
+brown lentils,عدس بني,LEGUMES,GRAM,,,عدس بجبة|عدس أبو جبة,whole lentils
+cooked lentils,عدس مسلوق,LEGUMES,GRAM,,,عدس مطبوخ,boiled lentils
+fava beans,فول,LEGUMES,GRAM,,,فول ناشف|فول بلدي,faba beans
+ful medames,فول مدمس,LEGUMES,GRAM,,,فول مدمس معلب|فول متدمس,foul medames|stewed fava beans
+white beans,فاصوليا بيضاء,LEGUMES,GRAM,,,فاصوليا ناشفة,haricot beans
+black eyed peas,لوبيا,LEGUMES,GRAM,,,لوبيا ناشفة,cowpeas|black-eyed beans
+yellow split peas,بسلة مجروشة,LEGUMES,GRAM,,,بازلاء مجروشة,
+green peas,بازلاء,LEGUMES,GRAM,,,بسلة|بسلة خضرا,garden peas
+soybeans,فول الصويا,LEGUMES,GRAM,,,صويا,soya beans
+lupini beans,ترمس,LEGUMES,GRAM,,,ترمس ناشف,lupin beans|lupins
+hummus,حمص بالطحينة,LEGUMES,GRAM,,,حمص بطحينة,hummus dip|houmous
+whole milk,لبن,DAIRY,MILLILITER,,1.031,حليب|لبن كامل الدسم,full fat milk
+low fat milk,لبن قليل الدسم,DAIRY,MILLILITER,,1.031,حليب قليل الدسم|لبن لايت,1% milk
+skim milk,لبن خالي الدسم,DAIRY,MILLILITER,,1.036,حليب منزوع الدسم,nonfat milk|fat free milk
+buttermilk,لبن رائب,DAIRY,MILLILITER,,1.036,رايب|لبن رايب,cultured buttermilk
+yogurt,زبادي,DAIRY,GRAM,,,زبادى|لبن زبادي,plain yogurt|yoghurt
+greek yogurt,زبادي يوناني,DAIRY,GRAM,,,زبادي جريك,strained yogurt
+heavy cream,كريمة,DAIRY,MILLILITER,,1.008,كريمة خفق|كريمة لباني,whipping cream|double cream
+butter,زبدة,DAIRY,GRAM,,,,unsalted butter
+ghee,سمن,DAIRY,GRAM,,,سمنة|سمنة بلدي,clarified butter|butter ghee
+cheddar cheese,جبنة شيدر,DAIRY,GRAM,,,جبنة شيدر صفراء,cheddar
+mozzarella cheese,جبنة موزاريلا,DAIRY,GRAM,,,موتزاريلا|جبنة موتزاريلا,mozzarella
+feta cheese,جبنة فيتا,DAIRY,GRAM,,,فيتا,feta
+cottage cheese,جبنة قريش,DAIRY,GRAM,,,,cottage
+condensed milk,حليب مكثف,DAIRY,GRAM,,,لبن مكثف|لبن محلى,sweetened condensed milk
+milk powder,حليب مجفف,DAIRY,GRAM,,,لبن بودرة|لبن مجفف,whole milk powder|powdered milk
+chicken egg,بيض,EGGS,PIECE,50.0,,بيضة|بيض فراخ,egg|eggs|hen egg
+egg white,بياض البيض,EGGS,PIECE,33.0,,بياض بيض,egg whites|albumen
+egg yolk,صفار البيض,EGGS,PIECE,17.0,,صفار بيض|مح,egg yolks
+duck egg,بيض بط,EGGS,PIECE,70.0,,بيضة بط,
+quail egg,بيض سمان,EGGS,PIECE,9.0,,بيض سمان صغير,quail eggs
+olive oil,زيت زيتون,OILS,MILLILITER,,0.913,زيت الزيتون,
+sunflower oil,زيت عباد الشمس,OILS,MILLILITER,,0.921,زيت عباد,sunflowerseed oil
+corn oil,زيت ذرة,OILS,MILLILITER,,0.921,زيت درة,maize oil
+cottonseed oil,زيت بذرة القطن,OILS,MILLILITER,,0.921,زيت بذرة|زيت قطن,cotton seed oil
+white sugar,سكر أبيض,SWEETS,GRAM,,,سكر|سكر ناعم,sugar|granulated sugar
+honey,عسل,SWEETS,GRAM,,,عسل نحل,bee honey
+molasses,دبس,SWEETS,GRAM,,,عسل أسود,black honey|sugarcane molasses
+cocoa powder,كاكاو,SWEETS,GRAM,,,كاكاو خام|بودرة كاكاو,unsweetened cocoa
+tahini,طحينة,SWEETS,GRAM,,,طحينه|طحينة خام,tahina|sesame paste
+jam,مربى,SWEETS,GRAM,,,مربة,jelly|preserves
+peanut butter,زبدة فول سوداني,SWEETS,GRAM,,,زبدة الفول السوداني,
+water,ماء,BEVERAGES,MILLILITER,,1.0,مية|مياه,drinking water|tap water
+orange juice,عصير برتقال,BEVERAGES,MILLILITER,,1.048,عصير برتقان,fresh orange juice
+lemon juice,عصير ليمون,BEVERAGES,MILLILITER,,1.031,ليمون معصور,
+almonds,لوز,TREE_NUTS,GRAM,,,لوز ني|لوز مقشر,almond
+walnuts,جوز,TREE_NUTS,GRAM,,,عين جمل|عين الجمل,walnut|english walnut
+pistachios,فستق,TREE_NUTS,GRAM,,,فستق حلبي|فزدق,pistachio
+peanuts,فول سوداني,PEANUTS,GRAM,,,سوداني,groundnuts|peanut
+baladi bread,عيش بلدي,GRAINS,GRAM,,,عيش|رغيف بلدي,egyptian flatbread|aish baladi
+taameya,طعمية,LEGUMES,GRAM,,,طعميه,egyptian falafel|ta'ameya
+domiati cheese,جبنة دمياطي,DAIRY,GRAM,,,جبنة بيضاء|جبنة بيضا,white brined cheese|gebna domiati
+roumi cheese,جبنة رومي,DAIRY,GRAM,,,رومي قديم,ras cheese|gebna roumi
+labneh,لبنة,DAIRY,GRAM,,,لبنه,strained yogurt cheese|labne
+freekeh,فريكة,GRAINS,GRAM,,,فريك,green wheat|frikeh
+vermicelli,شعرية,GRAINS,GRAM,,,شعرية مكرونة,vermicelli pasta|sheriya
+dried molokhia,ملوخية ناشفة,VEGETABLES,GRAM,,,ملوخية مجففة,dried jute mallow
+date,بلح,FRUITS,GRAM,,,بلح أحمر|بلح زغلول,fresh dates
+sesame seeds,سمسم,SEEDS,GRAM,,,سمسم أبيض,sesame
+pumpkin seeds,بذور القرع,SEEDS,GRAM,,,لب أبيض,pepitas|squash seeds
+salt,ملح,SPICES,GRAM,,,ملح طعام|ملح ناعم,table salt
+cumin,كمون,SPICES,GRAM,,,كمون مطحون,ground cumin|cumin seed
+coriander seed,كزبرة ناشفة,SPICES,GRAM,,,كزبرة|كسبرة ناشفة,ground coriander|dried coriander
+black pepper,فلفل أسود,SPICES,GRAM,,,فلفل اسود مطحون,ground black pepper
+cinnamon,قرفة,SPICES,GRAM,,,قرفة مطحونة|قرفة عيدان,ground cinnamon
+turmeric,كركم,SPICES,GRAM,,,كركم مطحون,ground turmeric
+cardamom,حبهان,SPICES,GRAM,,,هيل|حب هان,cardamon
+cloves,قرنفل,SPICES,GRAM,,,مسمار قرنفل,clove
+paprika,بابريكا,SPICES,GRAM,,,فلفل أحمر حلو مطحون,sweet paprika
+cayenne pepper,شطة,SPICES,GRAM,,,شطة مطحونة|فلفل أحمر حار مطحون,red pepper flakes
+bay leaf,ورق لورا,SPICES,GRAM,,,ورق غار|ورقة لورا,bay leaves|laurel leaf
+dried mint,نعناع ناشف,SPICES,GRAM,,,نعناع مجفف,dried spearmint
+fenugreek seed,حلبة,SPICES,GRAM,,,حلبة ناشفة,fenugreek
+vinegar,خل,CONDIMENTS,MILLILITER,,1.006,خل أبيض,white vinegar|distilled vinegar
+baking soda,بيكربونات الصوديوم,CONDIMENTS,GRAM,,,بيكنج صودا|كربونة,bicarbonate of soda|sodium bicarbonate
+dry yeast,خميرة جافة,CONDIMENTS,GRAM,,,خميرة فورية|خميرة,active dry yeast|instant yeast
+black seed,حبة البركة,SPICES,GRAM,,,حبة سوداء|كمون أسود,nigella seeds|black cumin
+fennel,شمر,VEGETABLES,GRAM,,,,fennel bulb
+chard,سلق,VEGETABLES,GRAM,,,سلق بلدي,swiss chard
+watercress,جرجير مائي,VEGETABLES,GRAM,,,,
+cherry,كرز,FRUITS,GRAM,,,,cherries|sweet cherries
+pineapple,أناناس,FRUITS,GRAM,,,,
+kiwi,كيوي,FRUITS,PIECE,69.0,,كيوى,kiwifruit
+persimmon,كاكي,FRUITS,PIECE,168.0,,كاكا,japanese persimmon
+papaya,بابايا,FRUITS,GRAM,,,,
+quince,سفرجل,FRUITS,PIECE,92.0,,سفرجلة,quinces
+grapefruit,جريب فروت,FRUITS,GRAM,,,ليمون هندي,
+goat meat,لحم ماعز,MEAT,GRAM,,,لحمة معزة,goat
+beef tongue,لسان بقري,MEAT,GRAM,,,لسان,ox tongue
+goose,إوز,POULTRY,GRAM,,,وز|وزة,
+turkey,ديك رومي,POULTRY,GRAM,,,رومي,turkey meat
+cod,قد,FISH,GRAM,,,سمك القد,atlantic cod
+catfish,قرموط,FISH,GRAM,,,سمك قراميط,
+grouper,هامور,FISH,GRAM,,,وقار,groupers
+trout,تروتة,FISH,GRAM,,,سلمون مرقط,rainbow trout
+anchovy,أنشوجة,FISH,GRAM,,,انشوفة,anchovies
+mussel,بلح البحر,FISH,GRAM,,,,mussels|blue mussel
+octopus,أخطبوط,FISH,GRAM,,,,
+cornmeal,دقيق ذرة,GRAINS,GRAM,,,دقيق درة,
+quinoa,كينوا,GRAINS,GRAM,,,كينوا بيضاء,
+rice flour,دقيق أرز,GRAINS,GRAM,,,دقيق رز,
+kidney beans,فاصوليا حمراء,LEGUMES,GRAM,,,فاصوليا حمرا,red kidney beans
+pinto beans,فاصوليا بينتو,LEGUMES,GRAM,,,,
+sour cream,كريمة حامضة,DAIRY,GRAM,,,ساور كريم,
+cream cheese,جبنة كريمية,DAIRY,GRAM,,,جبنة كريمي|كريم تشيز,
+parmesan cheese,جبنة بارميزان,DAIRY,GRAM,,,بارميزان,parmesan|parmigiano
+canola oil,زيت الكانولا,OILS,MILLILITER,,0.921,زيت كانولا,rapeseed oil
+sesame oil,زيت السمسم,OILS,MILLILITER,,0.921,زيت سيرج,gingelly oil
+coconut oil,زيت جوز الهند,OILS,GRAM,,,,
+soybean oil,زيت صويا,OILS,MILLILITER,,0.921,زيت فول الصويا,soya oil
+brown sugar,سكر بني,SWEETS,GRAM,,,سكر أسمر,
+dark chocolate,شوكولاتة داكنة,SWEETS,GRAM,,,شوكولاتة دارك|شيكولاتة سادة,bittersweet chocolate
+milk chocolate,شوكولاتة بالحليب,SWEETS,GRAM,,,شيكولاتة بالبن,milk choc
+maple syrup,شراب القيقب,SWEETS,GRAM,,,,
+apple juice,عصير تفاح,BEVERAGES,MILLILITER,,1.048,,
+coconut water,ماء جوز الهند,BEVERAGES,MILLILITER,,1.014,مية جوز الهند,
+soy milk,حليب صويا,BEVERAGES,MILLILITER,,1.027,لبن صويا,soymilk
+almond milk,حليب لوز,BEVERAGES,MILLILITER,,1.107,لبن لوز,
+cashews,كاجو,TREE_NUTS,GRAM,,,كاشو,cashew|cashew nuts
+hazelnuts,بندق,TREE_NUTS,GRAM,,,,hazelnut|filberts
+pine nuts,صنوبر,TREE_NUTS,GRAM,,,حب الصنوبر,pignoli
+kale,كيل,VEGETABLES,GRAM,,,كرنب أجعد,curly kale
+butternut squash,قرع عسلي,VEGETABLES,GRAM,,,قرع جوزي,
+asparagus,هليون,VEGETABLES,GRAM,,,اسبراجس,
+yam,يام,VEGETABLES,GRAM,,,,
+bean sprouts,براعم الفاصوليا,VEGETABLES,GRAM,,,نبت فول الصويا|براعم المونج,mung bean sprouts
+caper,كبر,VEGETABLES,GRAM,,,قبار,capers
+palm heart,قلب النخيل,VEGETABLES,GRAM,,,جمار,hearts of palm
+green pepper,فلفل أخضر,VEGETABLES,GRAM,,,فلفل أخضر حار|فلفل اخضر رفيع,long green pepper
+pomelo,بوملي,FRUITS,GRAM,,,بوميلو,shaddock
+blueberry,توت أزرق,FRUITS,GRAM,,,بلوبيري,blueberries
+raspberry,توت العليق,FRUITS,GRAM,,,راسبيري,raspberries
+blackberry,توت أسود,FRUITS,GRAM,,,بلاك بيري,blackberries
+cranberry,توت بري,FRUITS,GRAM,,,كرانبري,cranberries
+nectarine,نكتارين,FRUITS,PIECE,142.0,,,
+honeydew melon,شمام أخضر,FRUITS,GRAM,,,كانتلوب أخضر,honeydew
+dragon fruit,فاكهة التنين,FRUITS,GRAM,,,دراجون فروت,pitaya
+passion fruit,فاكهة العاطفة,FRUITS,GRAM,,,باشن فروت,granadilla
+lychee,ليتشي,FRUITS,GRAM,,,ليتشى,litchi
+jackfruit,جاك فروت,FRUITS,GRAM,,,الكاكايا,jack fruit
+star fruit,فاكهة النجمة,FRUITS,GRAM,,,كارامبولا,carambola
+soursop,جوانابانا,FRUITS,GRAM,,,قشطة شائكة,graviola
+longan,لونجان,FRUITS,GRAM,,,,
+breadfruit,فاكهة الخبز,FRUITS,GRAM,,,,
+beef heart,قلب بقري,MEAT,GRAM,,,قلوب بقري,ox heart
+beef brisket,صدر بقري,MEAT,GRAM,,,صدر بقرى,brisket
+beef chuck,كتف بقري,MEAT,GRAM,,,,chuck
+beef sirloin,سيرلوين,MEAT,GRAM,,,,sirloin
+beef tenderloin,فيليه بقري,MEAT,GRAM,,,فلتو,tenderloin|fillet steak
+beef short ribs,ريش بقري,MEAT,GRAM,,,ضلوع قصيرة,short ribs
+beef oxtail,ذيل بقري,MEAT,GRAM,,,ديل عجل,oxtail
+lamb chops,ريش ضأن,MEAT,GRAM,,,ريش ضاني|كستليتة,lamb rib chops
+lamb shoulder,كتف ضأن,MEAT,GRAM,,,كتف ضاني,
+lamb shank,موزة ضأن,MEAT,GRAM,,,موزة ضاني,lamb foreshank
+lamb mince,لحم ضأن مفروم,MEAT,GRAM,,,ضاني مفروم,ground lamb|minced lamb
+veal liver,كبدة بتلو,MEAT,GRAM,,,كبدة عجل,calf liver
+corned beef,لحم بقري معلب,MEAT,GRAM,,,بولوبيف|بلوبيف,canned corned beef|bully beef
+beef frankfurter,سجق هوت دوج بقري,MEAT,GRAM,,,هوت دوج,beef hot dog
+turkey breast,صدر ديك رومي,POULTRY,GRAM,,,صدر رومي,
+duck breast,صدر بط,POULTRY,GRAM,,,,duck meat only
+chicken mince,دجاج مفروم,POULTRY,GRAM,,,فراخ مفرومة,ground chicken|minced chicken
+turkey mince,ديك رومي مفروم,POULTRY,GRAM,,,رومي مفروم,ground turkey
+chicken heart,قلب دجاج,POULTRY,GRAM,,,قلوب فراخ,chicken hearts
+roasted chicken breast,صدر دجاج مشوي,POULTRY,GRAM,,,صدور فراخ مشوية,cooked chicken breast|grilled chicken breast
+haddock,حدوق,FISH,GRAM,,,سمك حدوق,
+lobster,كركند,FISH,GRAM,,,استاكوزا|جراد البحر,spiny lobster
+oyster,محار,FISH,GRAM,,,استريديا,oysters
+clam,صدف,FISH,GRAM,,,أم الخلول,clams
+swordfish,سمك أبو سيف,FISH,GRAM,,,أبو سيف,
+smoked salmon,سلمون مدخن,FISH,GRAM,,,سالمون مدخن,lox
+fish roe,بيض السمك,FISH,GRAM,,,,roe
+canned tuna in water,تونة معلبة بالماء,FISH,GRAM,,,تونة مية,tuna in water
+cooked shrimp,جمبري مسلوق,FISH,GRAM,,,جمبري مطبوخ,boiled shrimp
+noodles,نودلز,GRAINS,GRAM,,,شعرية بيض,egg noodles
+rice noodles,نودلز أرز,GRAINS,GRAM,,,نودلز رز,
+corn tortilla,تورتيلا ذرة,GRAINS,GRAM,,,,
+flour tortilla,تورتيلا دقيق,GRAINS,GRAM,,,تورتيلا قمح,wheat tortilla
+crackers,كراكرز,GRAINS,GRAM,,,بسكويت مالح,saltine crackers
+rye bread,خبز الجاودار,GRAINS,GRAM,,,عيش شيلم,
+millet,دخن,GRAINS,GRAM,,,,proso millet
+sorghum,ذرة رفيعة,GRAINS,GRAM,,,درة عويجة,jowar
+buckwheat,حنطة سوداء,GRAINS,GRAM,,,,
+puffed rice,أرز منفوخ,GRAINS,GRAM,,,رز منفوخ,rice puffs
+oat bran,نخالة الشوفان,GRAINS,GRAM,,,ردة شوفان,
+wheat germ,جنين القمح,GRAINS,GRAM,,,رشيم القمح,
+whole wheat grain,قمح,GRAINS,GRAM,,,قمح بلدي|حب القمح,wheat berries|wheat grain
+dried corn kernels,ذرة ناشفة,GRAINS,GRAM,,,درة ناشفة|درة شامي,dried maize|field corn
+popcorn,فشار,GRAINS,GRAM,,,بوب كورن,air-popped popcorn
+croissant,كرواسون,GRAINS,GRAM,28.0,,كرواسان,
+hamburger bun,عيش برجر,GRAINS,GRAM,44.0,,خبز برجر,burger bun|hot dog bun
+puff pastry,عجينة الميل فاي,GRAINS,GRAM,,,بف باستري,puff pastry dough
+phyllo dough,عجينة الجلاش,GRAINS,GRAM,,,جلاش,filo pastry|fillo
+cooked brown rice,أرز بني مطبوخ,GRAINS,GRAM,,,رز بني مسلوق,
+cooked bulgur,برغل مطبوخ,GRAINS,GRAM,,,برغل مسلوق,
+cooked couscous,كسكسي مطبوخ,GRAINS,GRAM,,,كسكس مطبوخ,
+cooked oatmeal,شوفان مطبوخ,GRAINS,GRAM,,,عصيدة شوفان,porridge
+cooked quinoa,كينوا مطبوخة,GRAINS,GRAM,,,,
+black beans,فاصوليا سوداء,LEGUMES,GRAM,,,,
+mung beans,فول المونج,LEGUMES,GRAM,,,ماش,green gram
+lima beans,فاصوليا ليما,LEGUMES,GRAM,,,فاصوليا عريضة,
+navy beans,فاصوليا نيفي,LEGUMES,GRAM,,,فاصوليا بيضاء صغيرة,haricot
+urad dal,عدس أسود,LEGUMES,GRAM,,,أورد دال,black gram
+adzuki beans,فاصوليا أدزوكي,LEGUMES,GRAM,,,فاصوليا حمراء صغيرة,
+chickpea flour,دقيق حمص,LEGUMES,GRAM,,,دقيق الحمص,gram flour|besan
+baked beans,فاصوليا مطبوخة معلبة,LEGUMES,GRAM,,,بيكد بينز,canned baked beans
+edamame,إدامامي,LEGUMES,GRAM,,,فول صويا أخضر,green soybeans
+tofu,توفو,LEGUMES,GRAM,,,جبن الصويا,bean curd
+cooked fava beans,فول مسلوق,LEGUMES,GRAM,,,فول بلدي مسلوق,boiled fava beans
+cooked white beans,فاصوليا بيضاء مسلوقة,LEGUMES,GRAM,,,,
+cooked kidney beans,فاصوليا حمراء مسلوقة,LEGUMES,GRAM,,,,
+cooked black eyed peas,لوبيا مسلوقة,LEGUMES,GRAM,,,لوبيا مطبوخة,
+cooked split peas,بسلة مجروشة مسلوقة,LEGUMES,GRAM,,,,
+cooked lupini beans,ترمس مسلوق,LEGUMES,GRAM,,,ترمس جاهز,boiled lupini
+kefir,كفير,DAIRY,GRAM,,,لبن كفير,
+ricotta cheese,جبنة ريكوتا,DAIRY,GRAM,,,ريكوتا,ricotta
+ice cream,آيس كريم,DAIRY,GRAM,,,جيلاتي,vanilla ice cream
+whey powder,مصل اللبن المجفف,DAIRY,GRAM,,,شرش لبن بودرة,dried sweet whey
+edam cheese,جبنة إيدام,DAIRY,GRAM,,,جبنة ادام,edam
+gouda cheese,جبنة جودة,DAIRY,GRAM,,,جبنة جودا,gouda
+swiss cheese,جبنة سويسري,DAIRY,GRAM,,,جبنة إيمنتال,emmental
+low fat yogurt,زبادي قليل الدسم,DAIRY,GRAM,,,زبادي لايت,low-fat yogurt
+skim yogurt,زبادي خالي الدسم,DAIRY,GRAM,,,زبادي منزوع الدسم,nonfat yogurt|fat-free yogurt
+evaporated milk,حليب مبخر,DAIRY,MILLILITER,,1.065,لبن مبخر|لبن إيفابوريتد,unsweetened condensed milk
+buffalo milk,لبن جاموسي,DAIRY,MILLILITER,,1.031,حليب جاموس|لبن جاموس,water buffalo milk
+goat milk,لبن ماعز,DAIRY,MILLILITER,,1.031,حليب ماعز,goat's milk
+sheep milk,لبن غنم,DAIRY,MILLILITER,,1.036,حليب غنم,ewe's milk
+chocolate milk,لبن بالشوكولاتة,DAIRY,MILLILITER,,1.057,حليب بالشوكولاتة,chocolate flavoured milk
+low moisture mozzarella,موزاريلا قليلة الرطوبة,DAIRY,GRAM,,,موتزاريلا بيتزا,pizza mozzarella
+hard boiled egg,بيض مسلوق,EGGS,PIECE,50.0,,بيضة مسلوقة,boiled egg
+fried egg,بيض مقلي,EGGS,PIECE,46.0,,بيض عيون|بيضة مقلية,sunny side up egg
+dried egg powder,بيض بودرة,EGGS,GRAM,,,مسحوق البيض,egg powder|dried whole egg
+peanut oil,زيت فول سوداني,OILS,MILLILITER,,0.913,زيت سوداني,groundnut oil
+flaxseed oil,زيت بذور الكتان,OILS,MILLILITER,,0.921,زيت حار|زيت كتان,linseed oil
+avocado oil,زيت أفوكادو,OILS,MILLILITER,,0.921,,
+grapeseed oil,زيت بذور العنب,OILS,MILLILITER,,0.921,,
+palm oil,زيت نخيل,OILS,GRAM,,,زيت النخيل,
+margarine,سمن نباتي,OILS,GRAM,,,زبدة نباتية|مارجرين,vegetable margarine
+vegetable shortening,سمنة صناعي,OILS,GRAM,,,سمن صناعي|شورتنج,shortening
+marmalade,مربى برتقال,SWEETS,GRAM,,,مرملاد,orange marmalade
+halva,حلاوة طحينية,SWEETS,GRAM,,,حلاوة|حلاوه,halawa
+powdered sugar,سكر بودرة,SWEETS,GRAM,,,سكر ناعم جدا,icing sugar|confectioners sugar
+corn syrup,شراب الذرة,SWEETS,GRAM,,,جلوكوز سائل,glucose syrup
+vanilla extract,خلاصة الفانيليا,SWEETS,MILLILITER,,0.879,فانيليا سائلة,vanilla essence
+gelatin powder,جيلاتين,SWEETS,GRAM,,,جيلاتين بودرة,unflavoured gelatin
+chocolate hazelnut spread,شوكولاتة بالبندق للدهن,SWEETS,GRAM,,,شيكولاتة دهن,hazelnut spread
+rice pudding,أرز باللبن,SWEETS,GRAM,,,رز بلبن|رز باللبن,
+butter cookies,بسكويت زبدة,SWEETS,GRAM,,,بسكوت زبدة,shortbread cookies
+sparkling water,ماء فوار,BEVERAGES,MILLILITER,,1.001,مياه فوارة,club soda|soda water
+brewed black tea,شاي مغلي,BEVERAGES,MILLILITER,,1.002,كوباية شاي|شاي سادة,
+brewed green tea,شاي أخضر مغلي,BEVERAGES,MILLILITER,,1.036,شاي اخضر سادة,
+brewed coffee,قهوة مغلية,BEVERAGES,MILLILITER,,1.002,قهوة سادة,black coffee|filter coffee
+espresso,إسبريسو,BEVERAGES,MILLILITER,,1.001,,
+instant coffee,قهوة سريعة التحضير,BEVERAGES,GRAM,,,,instant coffee powder
+mango juice,عصير مانجو,BEVERAGES,MILLILITER,,1.061,عصير مانجة,mango nectar
+guava juice,عصير جوافة,BEVERAGES,MILLILITER,,1.061,نكتار جوافة,guava nectar
+apricot juice,عصير مشمش,BEVERAGES,MILLILITER,,1.124,نكتار مشمش,apricot nectar
+pomegranate juice,عصير رمان,BEVERAGES,MILLILITER,,1.052,,
+tomato juice,عصير طماطم,BEVERAGES,MILLILITER,,1.027,,
+tamarind drink,تمر هندي,BEVERAGES,MILLILITER,,1.061,عصير تمر هندي,tamarind nectar
+cola,مشروب كولا,BEVERAGES,MILLILITER,,1.038,كولا,cola soft drink
+oat milk,حليب شوفان,BEVERAGES,GRAM,,,لبن شوفان,
+lemonade,ليموناضة,BEVERAGES,MILLILITER,,1.044,عصير ليمون بالسكر,lemon drink
+red bell pepper,فلفل رومي أحمر,VEGETABLES,PIECE,119.0,,فلفل ألوان أحمر,red capsicum
+yellow bell pepper,فلفل رومي أصفر,VEGETABLES,PIECE,186.0,,فلفل ألوان أصفر,yellow capsicum
+red cabbage,كرنب أحمر,VEGETABLES,GRAM,,,ملفوف أحمر,purple cabbage
+chinese cabbage,كرنب صيني,VEGETABLES,GRAM,,,ملفوف صيني,napa cabbage
+kohlrabi,كرنب أبو ركبة,VEGETABLES,GRAM,,,كرنب ساقي,german turnip
+jerusalem artichoke,طرطوفة,VEGETABLES,GRAM,,,خرشوف القدس,sunchoke
+fresh basil,ريحان,VEGETABLES,GRAM,,,ريحان أخضر,sweet basil
+fresh rosemary,حصا لبان أخضر,VEGETABLES,GRAM,,,إكليل الجبل,rosemary
+fresh thyme,زعتر أخضر,VEGETABLES,GRAM,,,زعتر فريش,
+mustard greens,أوراق الخردل,VEGETABLES,GRAM,,,خردل أخضر,
+endive,هندباء,VEGETABLES,GRAM,,,شيكوريا,chicory greens
+jalapeno pepper,فلفل هالابينو,VEGETABLES,GRAM,14.0,,هالبينو,jalapeno
+pickled cucumber,خيار مخلل,VEGETABLES,GRAM,,,مخلل خيار|طرشي خيار,dill pickles|gherkins
+sauerkraut,كرنب مخلل,VEGETABLES,GRAM,,,مخلل كرنب,
+canned tomatoes,طماطم معلبة,VEGETABLES,GRAM,,,طماطم مقشرة معلبة,canned peeled tomatoes
+tomato sauce,صلصة طماطم سائلة,VEGETABLES,GRAM,,,صوص طماطم,canned tomato sauce
+sun dried tomatoes,طماطم مجففة,VEGETABLES,GRAM,,,طماطم ناشفة,dried tomatoes
+frozen peas,بسلة مجمدة,LEGUMES,GRAM,,,بازلاء مجمدة,frozen green peas
+frozen okra,بامية مجمدة,VEGETABLES,GRAM,,,بامية فريزر,
+frozen mixed vegetables,خضار مشكل مجمد,VEGETABLES,GRAM,,,خضروات مشكلة مجمدة,mixed vegetables
+frozen spinach,سبانخ مجمدة,VEGETABLES,GRAM,,,سبانخ فريزر,
+boiled potatoes,بطاطس مسلوقة,VEGETABLES,GRAM,,,بطاطس مسلوقه,boiled potato
+frozen french fries,بطاطس محمرة مجمدة,VEGETABLES,GRAM,,,بطاطس فريز,frozen fries
+baked sweet potato,بطاطا مشوية,VEGETABLES,GRAM,,,بطاطا في الفرن,roasted sweet potato
+cooked molokhia,ملوخية مسلوقة,VEGETABLES,GRAM,,,ملوخية مطبوخة بدون تقلية,boiled jute leaves
+cooked spinach,سبانخ مسلوقة,VEGETABLES,GRAM,,,,
+cooked okra,بامية مسلوقة,VEGETABLES,GRAM,,,,
+cooked taro,قلقاس مسلوق,VEGETABLES,GRAM,,,,
+cooked artichoke,خرشوف مسلوق,VEGETABLES,GRAM,,,,
+cooked green beans,فاصوليا خضراء مسلوقة,VEGETABLES,GRAM,,,,
+cooked cauliflower,قرنبيط مسلوق,VEGETABLES,GRAM,,,زهرة مسلوقة,
+cooked carrots,جزر مسلوق,VEGETABLES,GRAM,,,,
+cooked zucchini,كوسة مسلوقة,VEGETABLES,GRAM,,,,
+cooked eggplant,باذنجان مسلوق,VEGETABLES,GRAM,,,,
+cooked beetroot,بنجر مسلوق,VEGETABLES,GRAM,,,,
+cooked pumpkin,قرع مسلوق,VEGETABLES,GRAM,,,,
+black olives,زيتون أسود,VEGETABLES,GRAM,,,,
+medjool dates,تمر مجدول,FRUITS,GRAM,24.0,,مجدول,medjool
+dried figs,تين مجفف,FRUITS,GRAM,,,تين ناشف|تين مجفف تركي,dried fig
+dried apricots,مشمش مجفف,FRUITS,GRAM,,,مشمش ناشف,
+prunes,برقوق مجفف,FRUITS,GRAM,,,قراصيا,dried plums
+tamarind,تمر هندي حب,FRUITS,GRAM,,,تمر هندي خام,tamarind pulp
+jujube,نبق,FRUITS,GRAM,,,عناب,chinese date|ber
+sugar apple,فاكهة القشطة,FRUITS,GRAM,,,,sweetsop|custard apple
+desiccated coconut,جوز هند مبشور,FRUITS,GRAM,,,جوز الهند المجفف,dried shredded coconut
+apple sauce,صوص تفاح,FRUITS,GRAM,,,بيوريه تفاح,applesauce
+canned peaches,خوخ معلب,FRUITS,GRAM,,,خوخ شراب,peaches in syrup
+canned pineapple,أناناس معلب,FRUITS,GRAM,,,اناناس شراب,pineapple in syrup
+chestnuts,أبو فروة,TREE_NUTS,GRAM,,,كستناء,roasted chestnuts
+macadamia nuts,مكاديميا,TREE_NUTS,GRAM,,,بندق مكاديميا,macadamia
+pecans,بيكان,TREE_NUTS,GRAM,,,جوز بيكان,pecan
+roasted almonds,لوز محمص,TREE_NUTS,GRAM,,,لوز مقلي,dry roasted almonds
+roasted peanuts,فول سوداني محمص,PEANUTS,GRAM,,,سوداني مملح|فول سوداني مملح,salted peanuts
+date syrup,دبس تمر,SWEETS,GRAM,,,عسل تمر,
+mish,مش,DAIRY,GRAM,,,مش صعيدي,egyptian aged cheese
+basterma,بسطرمة,MEAT,GRAM,,,بسطرمه,pastirma|basturma
+feseekh,فسيخ,FISH,GRAM,,,,fesikh|salted fermented mullet
+kishk,كشك,DAIRY,GRAM,,,كشك صعيدي,kashk|fermented wheat-yogurt
+kunafa dough,عجينة كنافة,GRAINS,GRAM,,,كنافة شعر|كنافة خام,kataifi dough
+feteer meshaltet,فطير مشلتت,GRAINS,GRAM,,,فطير,egyptian layered pastry
+egyptian rusk,بقسماط بالسمسم,GRAINS,GRAM,,,بقسماط عيش,rusks
+sahlab powder,سحلب,SWEETS,GRAM,,,سحلب بودرة,salep
+hibiscus flowers,كركديه ناشف,BEVERAGES,GRAM,,,,dried hibiscus|roselle
+fenugreek drink,حلبة مشروب,BEVERAGES,GRAM,,,حلبة حصى,
+sugarcane juice,عصير قصب,BEVERAGES,GRAM,,,قصب,cane juice
+doum palm fruit,دوم,FRUITS,GRAM,,,ثمر الدوم,doum
+sycamore fig,جميز,FRUITS,GRAM,,,تين جميز,sycomore fig
+egyptian leek,كرات أبو شوشة,VEGETABLES,GRAM,,,كرات بلدي,kurrat
+boiled sweet corn,ذرة مسلوقة,VEGETABLES,GRAM,,,درة مسلوقة,boiled corn on the cob
+iceberg lettuce,خس آيسبرج,VEGETABLES,GRAM,,,خس كابوتشي,crisphead lettuce
+baked potato,بطاطس في الفرن,VEGETABLES,GRAM,,,بطاطس مشوية,jacket potato
+grilled tilapia,بلطي مشوي,FISH,GRAM,,,سمك بلطي مشوي,cooked tilapia
+grilled sea bass,قاروص مشوي,FISH,GRAM,,,سمك قاروص مشوي,cooked sea bass
+sunflower seeds,بذور عباد الشمس,SEEDS,GRAM,,,لب سوري,sunflower kernels
+flaxseed,بذر الكتان,SEEDS,GRAM,,,بذور كتان|بزر كتان,linseed|flax seeds
+nutmeg,جوزة الطيب,SPICES,GRAM,,,جوزة طيب,
+dried thyme,زعتر ناشف,SPICES,GRAM,,,زعتر مجفف,thyme
+ground ginger,زنجبيل مطحون,SPICES,GRAM,,,جنزبيل ناشف,dried ginger
+garlic powder,ثوم بودرة,SPICES,GRAM,,,ثوم مجفف|بودرة ثوم,
+anise seed,ينسون,SPICES,GRAM,,,يانسون,aniseed|anise
+dried oregano,أوريجانو,SPICES,GRAM,,,,oregano
+ketchup,كاتشب,CONDIMENTS,GRAM,,,كتشب,catsup|tomato ketchup
+mayonnaise,مايونيز,CONDIMENTS,GRAM,,,مايونيز عادي,mayo
+mustard,مستردة,CONDIMENTS,GRAM,,,مسطردة|مستاردة,yellow mustard
+soy sauce,صويا صوص,CONDIMENTS,MILLILITER,,1.078,صلصة صويا,shoyu
+baking powder,بيكنج بودر,CONDIMENTS,GRAM,,,باكينج باودر,
+watermelon seeds,لب بطيخ,SEEDS,GRAM,,,لب أسمر,watermelon seed kernels
+chia seeds,بذور الشيا,SEEDS,GRAM,,,شيا,chia
+roasted pumpkin seeds,لب قرع محمص,SEEDS,GRAM,,,لب أبيض محمص,salted pumpkin seeds
+roasted sunflower seeds,لب سوري محمص,SEEDS,GRAM,,,لب عباد الشمس,salted sunflower seeds
+allspice,بهار حلو,SPICES,GRAM,,,فلفل إفرنجي,pimento|jamaica pepper
+caraway seed,كراوية,SPICES,GRAM,,,كراويا,caraway
+fennel seed,شمر حب,SPICES,GRAM,,,حبة حلوة|شمار,fennel seeds
+mustard seed,بذور الخردل,SPICES,GRAM,,,حب خردل,mustard seeds
+saffron,زعفران,SPICES,GRAM,,,,
+dried rosemary,حصا لبان,SPICES,GRAM,,,إكليل جبل مجفف,
+dried basil,ريحان مجفف,SPICES,GRAM,,,ريحان ناشف,
+dried marjoram,بردقوش,SPICES,GRAM,,,مردقوش,marjoram
+celery seed,بذر كرفس,SPICES,GRAM,,,بذور الكرفس,
+curry powder,كاري,SPICES,GRAM,,,بودرة كاري,curry
+chili powder blend,بودرة تشيلي,SPICES,GRAM,,,خلطة الشطة,chili seasoning
+onion powder,بصل بودرة,SPICES,GRAM,,,بودرة بصل,
+white pepper,فلفل أبيض,SPICES,GRAM,,,فلفل أبيض مطحون,
+dried dill,شبت مجفف,SPICES,GRAM,,,شبت ناشف,
+dried parsley,بقدونس مجفف,SPICES,GRAM,,,بقدونس ناشف,
+cider vinegar,خل تفاح,CONDIMENTS,MILLILITER,,1.01,خل التفاح,apple cider vinegar
+hot sauce,صوص حار,CONDIMENTS,GRAM,,,شطة سائلة,chili sauce|pepper sauce
+worcestershire sauce,صوص ورشستر,CONDIMENTS,MILLILITER,,1.162,ورشيسترشير,
+barbecue sauce,صوص باربكيو,CONDIMENTS,GRAM,,,صوص شواء,bbq sauce
+chicken stock cube,مكعب مرقة دجاج,CONDIMENTS,GRAM,4.8,,مرقة فراخ|مكعبات مرق,bouillon cube|stock cube
+beef stock cube,مكعب مرقة لحم,CONDIMENTS,GRAM,,,مرقة لحمة,
+rose water,ماء ورد,CONDIMENTS,GRAM,,,مية ورد,
+orange blossom water,ماء زهر,CONDIMENTS,GRAM,,,مية زهر,orange flower water
+pomegranate molasses,دبس رمان,CONDIMENTS,GRAM,,,عسل رمان,
+dukkah,دقة,SPICES,GRAM,,,دقة مصرية,egyptian dukkah
+roasted chicken thigh,ورك دجاج مشوي,POULTRY,GRAM,,,أوراك فراخ مشوية,cooked chicken thigh
+roasted chicken drumstick,دبوس دجاج مشوي,POULTRY,GRAM,,,دبابيس فراخ مشوية,cooked drumstick
+roasted chicken wing,جناح دجاج مشوي,POULTRY,GRAM,,,أجنحة فراخ مشوية,cooked chicken wings
+roasted chicken,دجاج مشوي,POULTRY,GRAM,,,فراخ مشوية,rotisserie-style chicken
+fried chicken,دجاج مقلي,POULTRY,GRAM,,,فراخ مقلية,flour-fried chicken
+boiled chicken,دجاج مسلوق,POULTRY,GRAM,,,فراخ مسلوقة,stewed chicken
+cooked chicken liver,كبدة دجاج مطبوخة,POULTRY,GRAM,,,كبدة فراخ مسلوقة,
+roasted duck,بط مشوي,POULTRY,GRAM,,,بط محمر,roast duck
+roasted turkey breast,صدر ديك رومي مشوي,POULTRY,GRAM,,,,cooked turkey breast
+roasted quail,سمان مشوي,POULTRY,GRAM,,,,cooked quail
+cooked ground beef,لحم مفروم مطبوخ,MEAT,GRAM,,,مفروم مسوي,browned ground beef
+lean ground beef,لحم مفروم قليل الدهن,MEAT,GRAM,,,مفروم صافي,90% lean ground beef
+extra lean ground beef,لحم مفروم خالي الدهن,MEAT,GRAM,,,,95% lean ground beef
+grilled beef steak,ستيك لحم مشوي,MEAT,GRAM,,,ستيك مشوي,broiled sirloin steak
+braised beef,لحم بقري مطهو,MEAT,GRAM,,,لحمة مسلوقة,stewed beef
+roasted lamb,لحم ضأن مشوي,MEAT,GRAM,,,ضاني مشوي,cooked lamb
+grilled lamb chops,ريش ضأن مشوية,MEAT,GRAM,,,ريش ضاني مشوية,
+lamb leg,فخذ ضأن,MEAT,GRAM,,,فخدة ضاني,leg of lamb
+fried beef liver,كبدة بقري مقلية,MEAT,GRAM,,,كبدة إسكندراني مسوية,pan-fried liver
+cooked veal,لحم بتلو مطبوخ,MEAT,GRAM,,,بتلو مسوي,
+roasted rabbit,أرنب مشوي,MEAT,GRAM,,,أرانب مطبوخة,cooked rabbit
+beef luncheon,لانشون لحم,MEAT,GRAM,,,لانشون بقري,beef bologna
+beef salami,سلامي لحم,MEAT,GRAM,,,سلامي بقري,
+beef pastrami,بسطرمة مدخنة,MEAT,GRAM,,,باسترامي,pastrami
+beef jerky,لحم مجفف,MEAT,GRAM,,,جيركي,dried beef
+smoked beef,لحم بقري مدخن,MEAT,GRAM,,,,cured dried beef
+baked salmon,سلمون مشوي,FISH,GRAM,,,سالمون في الفرن,cooked salmon
+grilled mackerel,ماكريل مشوي,FISH,GRAM,,,,
+grilled mullet,بوري مشوي,FISH,GRAM,,,سمك بوري مشوي,
+baked cod,سمك قد مطبوخ,FISH,GRAM,,,,
+fried squid,كاليماري مقلي,FISH,GRAM,,,سبيط مقلي,fried calamari
+steamed crab,كابوريا مسلوقة,FISH,GRAM,,,سلطعون مسلوق,cooked crab
+sole,سمك موسى,FISH,GRAM,,,موسى,flounder|flatfish
+canned sardines in tomato,سردين بالصلصة,FISH,GRAM,,,سردين بالطماطم,sardines in tomato sauce
+canned anchovies,أنشوجة معلبة,FISH,GRAM,,,أنشوفة معلبة,anchovies in oil
+canned salmon,سلمون معلب,FISH,GRAM,,,,
+fish fingers,أصابع سمك,FISH,GRAM,,,فيش فينجر,fish sticks
+scallops,اسكالوب,FISH,GRAM,,,محار الإسكالوب,
+scrambled eggs,بيض مخفوق مطبوخ,EGGS,GRAM,,,بيض أومليت مقلب,scrambled egg
+poached egg,بيض مسلوق بدون قشر,EGGS,PIECE,50.0,,بيض بوشيه,
+omelette,أومليت,EGGS,GRAM,,,عجة بيض سادة,omelet
+egg substitute,بديل البيض,EGGS,GRAM,,,,
+cooked short grain rice,أرز مصري مطبوخ,GRAINS,GRAM,,,رز مسلوق قصير الحبة,
+cooked barley,شعير مطبوخ,GRAINS,GRAM,,,شعير مسلوق,
+cooked millet,دخن مطبوخ,GRAINS,GRAM,,,,
+cooked buckwheat,حنطة سوداء مطبوخة,GRAINS,GRAM,,,,kasha
+oatmeal cooked with water,شوفان مطبوخ بالماء,GRAINS,GRAM,,,عصيدة شوفان بالماء,
+whole wheat pita,خبز عربي أسمر,GRAINS,GRAM,64.0,,عيش شامي أسمر,wholemeal pita
+french bread,خبز فرنسي,GRAINS,GRAM,,,عيش فينو كبير,baguette
+multigrain bread,خبز حبوب متعددة,GRAINS,GRAM,,,عيش حبوب,multi-grain bread
+dinner rolls,عيش صمون,GRAINS,GRAM,25.0,,خبز رول,bread rolls
+bagel,بيجل,GRAINS,GRAM,99.0,,خبز بيجل,plain bagel
+raisin bread,خبز بالزبيب,GRAINS,GRAM,,,,
+croutons,خبز محمص مكعبات,GRAINS,GRAM,,,كروتون,
+granola,جرانولا,GRAINS,GRAM,,,,
+tapioca pearls,تابيوكا,GRAINS,GRAM,,,لؤلؤ التابيوكا,
+potato starch,نشا البطاطس,GRAINS,GRAM,,,,
+arrowroot,نشا الأروروت,GRAINS,GRAM,,,أراروت,arrowroot flour
+cooked egg noodles,نودلز بيض مسلوقة,GRAINS,GRAM,,,,
+cooked rice noodles,نودلز أرز مسلوقة,GRAINS,GRAM,,,,
+instant noodles,نودلز سريعة التحضير,GRAINS,GRAM,,,إندومي,
+pancake mix,خليط البان كيك,GRAINS,GRAM,,,,pancake dry mix
+cooked pinto beans,فاصوليا بينتو مسلوقة,LEGUMES,GRAM,,,,
+cooked black beans,فاصوليا سوداء مسلوقة,LEGUMES,GRAM,,,,
+cooked navy beans,فاصوليا نيفي مسلوقة,LEGUMES,GRAM,,,,
+cooked lima beans,فاصوليا ليما مسلوقة,LEGUMES,GRAM,,,,
+cooked mung beans,ماش مسلوق,LEGUMES,GRAM,,,,
+cooked soybeans,فول صويا مسلوق,LEGUMES,GRAM,,,,
+toor dal,عدس الحمام,LEGUMES,GRAM,,,توور دال,pigeon peas|red gram
+chickpea falafel,فلافل حمص,LEGUMES,GRAM,,,فلافل شامي,levantine falafel
+homemade hummus,حمص بيتي,LEGUMES,GRAM,,,,
+canned kidney beans,فاصوليا حمراء معلبة,LEGUMES,GRAM,,,,
+canned green peas,بسلة معلبة,LEGUMES,GRAM,,,بازلاء معلبة,
+peanuts roasted in oil,فول سوداني مقلي,PEANUTS,GRAM,,,سوداني محمص بالزيت,oil-roasted peanuts
+miso,ميسو,SOY,GRAM,,,معجون الصويا المخمر,miso paste
+tempeh,تمبيه,SOY,GRAM,,,,
+brussels sprouts,كرنب بروكسل,VEGETABLES,GRAM,,,كرنب صغير,
+parsnip,جزر أبيض,VEGETABLES,GRAM,,,,
+rutabaga,لفت سويدي,VEGETABLES,GRAM,,,,
+collard greens,كولارد,VEGETABLES,GRAM,,,أوراق الكرنب الأخضر,
+green leaf lettuce,خس ورق أخضر,VEGETABLES,GRAM,,,,
+radicchio,راديكيو,VEGETABLES,GRAM,,,,
+shallot,بصل شالوت,VEGETABLES,GRAM,,,شالوت,shallots
+green tomato,طماطم خضراء,VEGETABLES,GRAM,,,قوطة خضرا,
+cooked tomatoes,طماطم مطبوخة,VEGETABLES,GRAM,,,,
+boiled onions,بصل مسلوق,VEGETABLES,GRAM,,,,
+dried onion flakes,بصل مجفف,VEGETABLES,GRAM,,,رقائق بصل,
+shiitake mushroom,مشروم شيتاكي,VEGETABLES,GRAM,,,,
+oyster mushroom,مشروم محاري,VEGETABLES,GRAM,,,,
+portabella mushroom,مشروم بورتوبيلو,VEGETABLES,GRAM,,,,
+cooked mushrooms,مشروم مطبوخ,VEGETABLES,GRAM,,,,
+mashed potatoes,بطاطس بوريه,VEGETABLES,GRAM,,,بيوريه بطاطس,mash
+potato chips,شيبسي,VEGETABLES,GRAM,,,رقائق البطاطس|بطاطس شيبس,crisps
+tortilla chips,رقائق التورتيلا,GRAINS,GRAM,,,,nachos chips
+snow peas,بسلة سكرية,VEGETABLES,GRAM,,,بسلة بقشرها,mangetout
+yellow wax beans,فاصوليا صفراء,VEGETABLES,GRAM,,,,
+alfalfa sprouts,براعم البرسيم,VEGETABLES,GRAM,,,,
+bamboo shoots,براعم الخيزران,VEGETABLES,GRAM,,,,
+canned mixed vegetables,خضار مشكل معلب,VEGETABLES,GRAM,,,,
+cooked bell pepper,فلفل رومي مطبوخ,VEGETABLES,GRAM,,,,
+cooked broccoli,بروكلي مسلوق,VEGETABLES,GRAM,,,,
+cooked cabbage,كرنب مسلوق,VEGETABLES,GRAM,,,,
+cooked sweet corn,ذرة حلوة مطبوخة,VEGETABLES,GRAM,,,,
+cooked leek,كرات مسلوق,VEGETABLES,GRAM,,,,
+cooked turnip,لفت مسلوق,VEGETABLES,GRAM,,,,
+cooked sweet potato,بطاطا مسلوقة,VEGETABLES,GRAM,,,,
+cooked chard,سلق مسلوق,VEGETABLES,GRAM,,,,
+nori seaweed,طحالب نوري,VEGETABLES,GRAM,,,أعشاب بحرية مجففة,laver
+kelp,عشب البحر,VEGETABLES,GRAM,,,كلب,
+pickled jalapenos,هالبينو مخلل,VEGETABLES,GRAM,,,,
+canned pimento,فلفل بيمينتو,VEGETABLES,GRAM,,,,
+dried apple,تفاح مجفف,FRUITS,GRAM,,,,
+golden raisins,زبيب ذهبي,FRUITS,GRAM,,,زبيب أصفر,
+dried cranberries,توت بري مجفف,FRUITS,GRAM,,,,
+dried mango,مانجو مجففة,FRUITS,GRAM,,,,
+plantain,موز الجنة,FRUITS,GRAM,,,موز طهي,
+clementine,كلمنتينا,FRUITS,PIECE,74.0,,يوسفي كلمنتين,
+currant,كشمش,FRUITS,GRAM,,,زبيب الكورنث,redcurrants
+elderberry,البيلسان,FRUITS,GRAM,,,,
+gooseberry,عنب الثعلب,FRUITS,GRAM,,,,
+cherimoya,قشطة شيريمويا,FRUITS,GRAM,,,,
+coconut milk,حليب جوز الهند,FRUITS,MILLILITER,,0.955,لبن جوز الهند,canned coconut milk
+coconut cream,كريمة جوز الهند,FRUITS,GRAM,,,,
+lime juice,عصير ليمون أخضر,BEVERAGES,MILLILITER,,1.023,,
+grapefruit juice,عصير جريب فروت,BEVERAGES,MILLILITER,,1.044,,
+pineapple juice,عصير أناناس,BEVERAGES,MILLILITER,,1.057,,
+cranberry juice,عصير توت بري,BEVERAGES,MILLILITER,,1.069,,
+carrot juice,عصير جزر,BEVERAGES,MILLILITER,,0.998,,
+grape juice,عصير عنب,BEVERAGES,MILLILITER,,1.069,,
+orange peel,قشر برتقال,FRUITS,GRAM,,,,
+lemon peel,قشر ليمون,FRUITS,GRAM,,,,
+blue cheese,جبنة زرقاء,DAIRY,GRAM,,,جبنة روكفور,
+brie cheese,جبنة بري,DAIRY,GRAM,,,,
+camembert cheese,جبنة كممبير,DAIRY,GRAM,,,,
+provolone cheese,جبنة بروفولون,DAIRY,GRAM,,,,
+romano cheese,جبنة رومانو,DAIRY,GRAM,,,,
+processed cheese,جبنة مطبوخة,DAIRY,GRAM,,,جبنة شرائح,american cheese slices
+cheese spread,جبنة مثلثات,DAIRY,GRAM,,,جبنة نستو|جبنة سايحة,processed cheese spread|triangle cheese
+low fat cottage cheese,جبنة كوتاج قليلة الدسم,DAIRY,GRAM,,,جبنة كوتاج لايت,1% cottage cheese
+part skim ricotta,ريكوتا قليلة الدسم,DAIRY,GRAM,,,,
+low fat cream cheese,جبنة كريمي لايت,DAIRY,GRAM,,,,
+reduced fat milk,لبن نصف دسم,DAIRY,MILLILITER,,1.031,حليب 2%,2% milk
+half and half,نصف كريمة,DAIRY,MILLILITER,,1.023,,
+light cream,كريمة خفيفة,DAIRY,MILLILITER,,1.014,كريمة طبخ,coffee cream
+whipped cream,كريمة مخفوقة,DAIRY,GRAM,,,شانتيه,
+salted butter,زبدة مملحة,DAIRY,GRAM,,,,
+nonfat milk powder,لبن بودرة خالي الدسم,DAIRY,GRAM,,,حليب مجفف منزوع الدسم,skim milk powder
+vanilla yogurt,زبادي بالفانيليا,DAIRY,GRAM,,,,
+fruit yogurt,زبادي بالفواكه,DAIRY,GRAM,,,زبادي فواكه,
+chocolate ice cream,آيس كريم شوكولاتة,DAIRY,GRAM,,,,
+frozen yogurt,فروزن زبادي,DAIRY,GRAM,,,,
+dulce de leche,دولسي دي ليتشي,DAIRY,GRAM,,,كراميل بالحليب,
+liquid whey,شرش اللبن,DAIRY,MILLILITER,,1.04,مصل اللبن,
+mixed nuts,مكسرات مشكلة,TREE_NUTS,GRAM,,,مكسرات مملحة,salted mixed nuts
+roasted cashews,كاجو محمص,TREE_NUTS,GRAM,,,,
+roasted pistachios,فستق محمص,TREE_NUTS,GRAM,,,فستق مملح,
+brazil nuts,جوز برازيلي,TREE_NUTS,GRAM,,,,
+almond butter,زبدة لوز,TREE_NUTS,GRAM,,,,
+ground almonds,دقيق اللوز,TREE_NUTS,GRAM,,,لوز مطحون,almond flour
+roasted hazelnuts,بندق محمص,TREE_NUTS,GRAM,,,,
+sponge cake,كيكة إسفنجية,SWEETS,GRAM,,,كيك سادة,plain cake
+chocolate cake,كيكة شوكولاتة,SWEETS,GRAM,,,,
+doughnut,دونات,SWEETS,GRAM,52.0,,,
+chocolate chip cookies,كوكيز بالشوكولاتة,SWEETS,GRAM,,,,
+oatmeal cookies,بسكويت شوفان,SWEETS,GRAM,,,,
+vanilla wafers,ويفر فانيليا,SWEETS,GRAM,,,بسكويت ويفر,
+sandwich cookies,بسكويت محشو بالكريمة,SWEETS,GRAM,,,,cream-filled chocolate cookies
+apple pie,فطيرة تفاح,SWEETS,GRAM,,,,
+chocolate pudding,بودينج شوكولاتة,SWEETS,GRAM,,,,
+jelly dessert,جيلي,SWEETS,GRAM,,,جيلاتين حلو,gelatin dessert
+hard candy,حلوى صلبة,SWEETS,GRAM,,,ملبس,boiled sweets
+caramels,كراميل,SWEETS,GRAM,,,توفي,
+marshmallows,مارشميلو,SWEETS,GRAM,,,خطمي,
+sesame candy,سمسمية,SWEETS,GRAM,,,حلوى سمسم,sesame crunch
+peanut brittle,فولية,SWEETS,GRAM,,,حلوى فول سوداني,peanut candy
+chocolate syrup,صوص شوكولاتة,SWEETS,GRAM,,,,
+agave syrup,شراب الأغاف,SWEETS,GRAM,,,,
+white chocolate,شوكولاتة بيضاء,SWEETS,GRAM,,,,
+popsicle,آيس كريم مصاص,SWEETS,GRAM,,,مصاصة ثلج,ice pop
+pretzels,بريتزل,GRAINS,GRAM,,,,
+rice cakes,كعك الأرز,GRAINS,GRAM,,,رقائق أرز منفوخ,puffed rice cakes
+microwave popcorn,فشار ميكروويف,GRAINS,GRAM,,,,
+lemon-lime soda,مشروب غازي ليمون,BEVERAGES,MILLILITER,,1.041,,lemon-lime soft drink
+orange soda,مشروب غازي برتقال,BEVERAGES,MILLILITER,,1.048,,orange soft drink
+chamomile tea,شاي بابونج,BEVERAGES,MILLILITER,,1.002,بابونج,
+herbal tea,شاي أعشاب,BEVERAGES,MILLILITER,,1.002,,
+cocoa drink mix,مسحوق الشوكولاتة الساخنة,BEVERAGES,GRAM,,,كاكاو باللبن بودرة,hot chocolate mix
+iced tea,شاي مثلج,BEVERAGES,MILLILITER,,1.145,,
+tonic water,مياه تونيك,BEVERAGES,MILLILITER,,1.031,,
+ginger ale,جنجر إيل,BEVERAGES,MILLILITER,,1.031,,
+soy milk chocolate,حليب صويا بالشوكولاتة,BEVERAGES,MILLILITER,,1.027,,
+fresh chives,ثوم معمر,VEGETABLES,GRAM,,,,
+coconut flour,دقيق جوز الهند,GRAINS,GRAM,,,,
+fresh fava beans,فول أخضر,LEGUMES,GRAM,,,فول حراتي,green broad beans
+cooked fresh fava beans,فول أخضر مسلوق,LEGUMES,GRAM,,,,
+canned chickpeas,حمص معلب,LEGUMES,GRAM,,,,
+great northern beans,فاصوليا بيضاء كبيرة,LEGUMES,GRAM,,,,
+refried beans,فاصوليا مهروسة,LEGUMES,GRAM,,,,
+soft tofu,توفو طري,LEGUMES,GRAM,,,,
+soy flour,دقيق الصويا,LEGUMES,GRAM,,,,
+beef brain,مخ بقري,MEAT,GRAM,,,مخ عجالي,calf brain
+lamb brain,مخ ضأن,MEAT,GRAM,,,مخ ضاني,
+beef sweetbreads,حلويات,MEAT,GRAM,,,غدد بقري,thymus
+lamb kidney,كلاوي ضأن,MEAT,GRAM,,,كلى ضاني,
+beef flank steak,لحم خاصرة,MEAT,GRAM,,,فلانك ستيك,
+beef rib eye,ريب آي,MEAT,GRAM,,,انتركوت,ribeye
+chicken leg quarter,وراك دجاج كاملة,POULTRY,GRAM,,,ورك فراخ بالجلد,chicken leg
+chicken neck,رقاب دجاج,POULTRY,GRAM,,,رقبة فراخ,
+chicken breast with skin,صدر دجاج بالجلد,POULTRY,GRAM,,,,
+chicken giblets,حوايج فراخ,POULTRY,GRAM,,,قلب وكبدة وقوانص,giblets
+nile crayfish,جمبري نهري,FISH,GRAM,,,استاكوزا نيلي,crayfish
+eel,ثعبان البحر,FISH,GRAM,,,حنكليس,
+sockeye salmon,سلمون أحمر,FISH,GRAM,,,,
+caviar,كافيار,FISH,GRAM,,,,
+white tuna canned,تونة بيضاء معلبة,FISH,GRAM,,,,
+brined grape leaves,ورق عنب مخلل,VEGETABLES,GRAM,,,ورق عنب برطمان,jarred vine leaves
+beet greens,ورق البنجر,VEGETABLES,GRAM,,,,
+dandelion greens,هندباء برية,VEGETABLES,GRAM,,,سريس,
+savoy cabbage,كرنب سافوي,VEGETABLES,GRAM,,,,
+acorn squash,قرع بلوطي,VEGETABLES,GRAM,,,,
+white sweet corn,ذرة بيضاء حلوة,VEGETABLES,GRAM,,,,
+red potato,بطاطس حمراء,VEGETABLES,GRAM,,,,
+russet potato,بطاطس روسيت,VEGETABLES,GRAM,,,,
+peeled cucumber,خيار مقشر,VEGETABLES,GRAM,,,,
+sweet onion,بصل حلو,VEGETABLES,GRAM,,,,
+butterhead lettuce,خس بلدي ناعم,VEGETABLES,GRAM,,,خس بوسطن,
+navel orange,برتقال أبو سرة,FRUITS,PIECE,140.0,,برتقال بسرة,
+sour cherries,كرز حامض,FRUITS,GRAM,,,,
+fruit cocktail,كوكتيل فواكه معلب,FRUITS,GRAM,,,,
+canned mandarins,يوسفي معلب,FRUITS,GRAM,,,,
+frozen strawberries,فراولة مجمدة,FRUITS,GRAM,,,,
+frozen blueberries,توت أزرق مجمد,FRUITS,GRAM,,,,
+casaba melon,شمام كاسابا,FRUITS,GRAM,,,,
+american grapes,عنب أمريكي,FRUITS,GRAM,,,,
+bread flour,دقيق خبز,GRAINS,GRAM,,,دقيق فاخر,strong flour
+cake flour,دقيق كيك,GRAINS,GRAM,,,,
+self-rising flour,دقيق ذاتي التخمير,GRAINS,GRAM,,,دقيق بالبيكنج,self-raising flour
+long grain rice,أرز طويل الحبة,GRAINS,GRAM,,,,long-grain rice
+cooked long grain rice,أرز طويل الحبة مطبوخ,GRAINS,GRAM,,,,
+sticky rice,أرز لزج,GRAINS,GRAM,,,رز جلوتيني,glutinous rice
+wild rice,أرز بري,GRAINS,GRAM,,,,
+spelt,حنطة سبلت,GRAINS,GRAM,,,,
+amaranth,أمارانث,GRAINS,GRAM,,,حبوب القطيفة,
+whole wheat pasta,مكرونة قمح كامل,GRAINS,GRAM,,,مكرونة سمراء,
+cooked whole wheat pasta,مكرونة قمح كامل مسلوقة,GRAINS,GRAM,,,,
+fresh pasta,مكرونة طازجة,GRAINS,GRAM,,,,
+oatmeal bread,خبز شوفان,GRAINS,GRAM,,,,
+english muffin,إنجليش مافن,GRAINS,GRAM,57.0,,,
+blueberry muffin,مافن توت,SWEETS,GRAM,31.0,,,
+brownies,براونيز جاهزة,SWEETS,GRAM,,,,
+cheesecake,تشيز كيك,SWEETS,GRAM,,,,
+chocolate frosting,كريمة تزيين شوكولاتة,SWEETS,GRAM,,,,
+fruit jelly,جيلي فواكه للدهن,SWEETS,GRAM,,,,
+goat cheese,جبنة ماعز,DAIRY,GRAM,,,,
+part skim mozzarella,موزاريلا قليلة الدسم,DAIRY,GRAM,,,,
+gruyere cheese,جبنة جرويير,DAIRY,GRAM,,,,
+monterey jack cheese,جبنة مونتيري جاك,DAIRY,GRAM,,,,
+evaporated skim milk,لبن مبخر خالي الدسم,DAIRY,MILLILITER,,1.082,,
+light whipping cream,كريمة خفق خفيفة,DAIRY,GRAM,,,,
+safflower oil,زيت القرطم,OILS,MILLILITER,,0.921,زيت عصفر,
+walnut oil,زيت الجوز,OILS,MILLILITER,,0.921,زيت عين الجمل,
+rice bran oil,زيت نخالة الأرز,OILS,MILLILITER,,0.921,,
+beef tallow,دهن بقري,OILS,GRAM,,,شحم بقري,suet fat
+chicken fat,دهن فراخ,OILS,GRAM,,,,
+rice milk,حليب أرز,BEVERAGES,GRAM,,,,
+orange drink powder,مشروب برتقال بودرة,BEVERAGES,GRAM,,,,breakfast orange drink powder
+lemonade powder,ليمونادة بودرة,BEVERAGES,GRAM,,,,
+decaf instant coffee,قهوة سريعة منزوعة الكافيين,BEVERAGES,GRAM,,,,
+instant tea,شاي سريع التحضير,BEVERAGES,GRAM,,,,
+roasted sesame seeds,سمسم محمص,SEEDS,GRAM,,,,
+poppy seeds,بذور الخشخاش,SPICES,GRAM,,,,
+balsamic vinegar,خل بلسمي,CONDIMENTS,MILLILITER,,1.078,,
+red wine vinegar,خل عنب أحمر,CONDIMENTS,MILLILITER,,1.01,,
+pickle relish,مخلل مفروم,CONDIMENTS,GRAM,,,,
+horseradish,فجل حار مبشور,CONDIMENTS,GRAM,,,,prepared horseradish
+ranch dressing,صوص رانش,CONDIMENTS,GRAM,,,,
+italian dressing,صوص سلطة إيطالي,CONDIMENTS,GRAM,,,,
+thousand island dressing,صوص ثاوزند آيلاند,CONDIMENTS,GRAM,,,صوص ألف جزيرة,
+caesar dressing,صوص سيزر,CONDIMENTS,GRAM,,,,
+teriyaki sauce,صوص ترياكي,CONDIMENTS,MILLILITER,,1.217,,
+fish sauce,صوص السمك,CONDIMENTS,GRAM,,,,
+oyster sauce,صوص المحار,CONDIMENTS,GRAM,,,,
+hoisin sauce,صوص هويسين,CONDIMENTS,GRAM,,,,
+sweet and sour sauce,صوص حلو وحامض,CONDIMENTS,GRAM,,,,
+pesto sauce,صوص بيستو,CONDIMENTS,GRAM,,,,
+salsa,صلصة مكسيكية,CONDIMENTS,GRAM,,,سالسا,
+gravy,صوص جريفي,CONDIMENTS,GRAM,,,مرق مكثف,
+tahini sauce ready,طحينة جاهزة,CONDIMENTS,GRAM,,,صوص طحينة,tahini dressing
+dried sage,ميرمية,SPICES,GRAM,,,مريمية,sage
+dried tarragon,طرخون,SPICES,GRAM,,,,
+dill seed,بذور الشبت,SPICES,GRAM,,,,
+dried chervil,كرفيل مجفف,SPICES,GRAM,,,,
+poultry seasoning,بهارات فراخ,SPICES,GRAM,,,توابل الدواجن,
+pumpkin pie spice,بهارات كيك القرع,SPICES,GRAM,,,,
+ground mace,بسباسة,SPICES,GRAM,,,,
+dried chives,ثوم معمر مجفف,SPICES,GRAM,,,,
+yeast extract,خلاصة الخميرة,CONDIMENTS,GRAM,,,,yeast extract spread
+fresh yeast,خميرة طازجة,CONDIMENTS,GRAM,,,,compressed yeast
+cream of tartar,كريمة الطرطير,CONDIMENTS,GRAM,,,,
+light mayonnaise,مايونيز لايت,CONDIMENTS,GRAM,,,,

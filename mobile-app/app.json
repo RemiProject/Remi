@@ -27,7 +27,10 @@
       "expo-router",
       [
         "expo-secure-store",
-        { "configureAndroidBackup": true, "faceIDPermission": false }
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": false
+        }
       ],
       [
         "expo-splash-screen",
@@ -44,7 +47,11 @@
           "photosPermission": "Allow Remy to select an optional food photo.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

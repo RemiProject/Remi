@@ -1,6 +1,4 @@
-# Extra safety categories per food (FoodCategoryMembership). A food's safety categories = its primary
-# category + every row here. Additive: removing a line does not delete the row (see data/README.md).
-# Baseline below covers the catalog foods made from wheat/barley/rye and obvious allergens. Review with a nutrition specialist.
+﻿# Remi AI development dataset. Existing backend rows kept first, Remi additions after. Additive file.
 food,category_code
 wheat flour,GLUTEN
 whole wheat flour,GLUTEN
@@ -39,3 +37,95 @@ peanut butter,PEANUTS
 soybeans,SOY
 edamame,SOY
 soy milk,SOY
+baladi bread,GLUTEN
+cooked pasta,GLUTEN
+vermicelli,GLUTEN
+tahini,SESAME
+sesame seeds,SESAME
+hummus,SESAME
+noodles,EGGS
+croissant,GLUTEN
+croissant,DAIRY
+croissant,EGGS
+hamburger bun,GLUTEN
+puff pastry,GLUTEN
+phyllo dough,GLUTEN
+cooked couscous,GLUTEN
+cooked bulgur,GLUTEN
+wheat germ,GLUTEN
+whole wheat grain,GLUTEN
+butter cookies,GLUTEN
+butter cookies,DAIRY
+kunafa dough,GLUTEN
+feteer meshaltet,GLUTEN
+egyptian rusk,GLUTEN
+kishk,GLUTEN
+rice pudding,DAIRY
+chocolate hazelnut spread,TREE_NUTS
+chocolate hazelnut spread,DAIRY
+tofu,SOY
+dark chocolate,DAIRY
+egyptian rusk,SESAME
+mayonnaise,EGGS
+soy sauce,SOY
+soy sauce,GLUTEN
+whole wheat pita,GLUTEN
+french bread,GLUTEN
+multigrain bread,GLUTEN
+dinner rolls,GLUTEN
+bagel,GLUTEN
+raisin bread,GLUTEN
+croutons,GLUTEN
+pancake mix,GLUTEN
+cooked egg noodles,GLUTEN
+instant noodles,GLUTEN
+pretzels,GLUTEN
+sponge cake,GLUTEN
+chocolate cake,GLUTEN
+doughnut,GLUTEN
+chocolate chip cookies,GLUTEN
+oatmeal cookies,GLUTEN
+vanilla wafers,GLUTEN
+sandwich cookies,GLUTEN
+apple pie,GLUTEN
+bread flour,GLUTEN
+cake flour,GLUTEN
+self-rising flour,GLUTEN
+spelt,GLUTEN
+whole wheat pasta,GLUTEN
+cooked whole wheat pasta,GLUTEN
+fresh pasta,GLUTEN
+oatmeal bread,GLUTEN
+english muffin,GLUTEN
+blueberry muffin,GLUTEN
+brownies,GLUTEN
+cheesecake,GLUTEN
+fish fingers,GLUTEN
+fried chicken,GLUTEN
+cooked egg noodles,EGGS
+fresh pasta,EGGS
+sponge cake,EGGS
+chocolate cake,EGGS
+blueberry muffin,EGGS
+brownies,EGGS
+cheesecake,EGGS
+chocolate cake,DAIRY
+cheesecake,DAIRY
+white chocolate,DAIRY
+caramels,DAIRY
+mashed potatoes,DAIRY
+chocolate chip cookies,DAIRY
+mixed nuts,PEANUTS
+peanut brittle,PEANUTS
+granola,TREE_NUTS
+soft tofu,SOY
+soy flour,SOY
+soy milk chocolate,SOY
+light mayonnaise,EGGS
+pesto sauce,DAIRY
+pesto sauce,TREE_NUTS
+sesame candy,SESAME
+roasted sesame seeds,SESAME
+homemade hummus,SESAME
+oyster sauce,FISH
+fish sauce,FISH

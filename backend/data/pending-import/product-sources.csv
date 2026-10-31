@@ -1,0 +1,4 @@
+﻿# Proposed format; the backend has no ProductSource importer. Prices are stale observations from Open Prices.
+barcode,source_name,price,currency,available,lead_time_days,source_url,price_observed_at
+6223000663660,Wekalet El-Mansoura,10.5,EGP,False,,https://prices.openfoodfacts.org/prices/60918,2024-12-24
+6223001366256,st. market,30.0,EGP,False,,https://prices.openfoodfacts.org/prices/305211,2026-08-09

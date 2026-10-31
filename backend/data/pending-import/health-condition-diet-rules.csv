@@ -1,0 +1,9 @@
+﻿# Proposed, inactive. PENDING_CLINICAL_REVIEW.
+health_condition,rule_type,target_type,food,category_code,nutrient,max_per_100g,max_per_day,is_active
+CELIAC_DISEASE,AVOID,CATEGORY,,GLUTEN,,,,false
+G6PD_DEFICIENCY,AVOID,FOOD,fava beans,,,,,false
+G6PD_DEFICIENCY,AVOID,FOOD,ful medames,,,,,false
+G6PD_DEFICIENCY,AVOID,FOOD,cooked fava beans,,,,,false
+G6PD_DEFICIENCY,AVOID,FOOD,taameya,,,,,false
+HYPERTENSION,LIMIT,NUTRIENT,,,SODIUM,600,2000,false
+CHRONIC_KIDNEY_DISEASE,LIMIT,NUTRIENT,,,SODIUM,600,2000,false
