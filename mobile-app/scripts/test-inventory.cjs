@@ -78,7 +78,7 @@ test('chooser, create/edit, details and deletion UI react to the shared language
     react: { ...require('react'), useState: (value) => [typeof value === 'function' ? value() : value, () => {}], useEffect: () => {}, useRef: (current) => ({ current }) },
     'react-native': native,
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
-    'expo-router': { router: {}, Stack: { Screen: 'StackScreen' }, useLocalSearchParams: () => ({ id: item.id }), useNavigation: () => ({}) },
+    'expo-router': { router: {}, Stack: { Screen: 'StackScreen' }, useLocalSearchParams: () => ({ id: item.id }), useNavigation: () => ({}), usePreventRemove: () => () => {} },
     '@/providers/language-provider': { useLanguage: () => ({ language }) },
     '@/providers/inventory-provider': { useInventory: () => ({ items: [item], status: 'ready', createItem: () => {}, updateItem: () => {} }) },
     '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) },
