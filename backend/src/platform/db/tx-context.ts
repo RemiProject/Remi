@@ -6,4 +6,6 @@ export type Tx = Prisma.TransactionClient;
 export interface TxScope {
   userId?: string;
   householdId?: string;
+  /** Consistent multi-query snapshots, with database-enforced protection against writes. */
+  readOnly?: boolean;
 }

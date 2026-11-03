@@ -24,9 +24,10 @@ export class TransactionRunner {
     for (let attempt = 0; ; attempt++) {
       try {
         return await this.prisma.$transaction(async (tx) => {
+          if (scope.readOnly) await tx.$executeRaw`SET TRANSACTION READ ONLY`;
           await tx.$executeRaw`SELECT set_config('app.user_id', ${scope.userId ?? ''}, true), set_config('app.household_id', ${scope.householdId ?? ''}, true)`;
           return fn(tx);
-        });
+        }, scope.readOnly ? { isolationLevel: 'RepeatableRead' } : undefined);
       } catch (err) {
         if (attempt < MAX_RETRIES && isRetryable(err)) {
           await new Promise((resolve) => setTimeout(resolve, 20 + Math.floor(Math.random() * 80) * (attempt + 1)));
