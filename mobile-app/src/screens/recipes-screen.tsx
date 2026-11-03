@@ -10,8 +10,13 @@ import { useRemyTheme } from '@/theme/provider';
 import { recipeMessages } from '@/i18n/recipes';
 import { discoverRecipes } from '@/utils/recipe-view';
 import { radii, spacing } from '@/theme/tokens';
+import { isBackendInventoryEnabled } from '@/services/inventory-feature';
+import { BackendRecipesScreen } from '@/screens/backend-recipes-screen';
 
 export default function RecipesScreen() {
+  return isBackendInventoryEnabled() ? <BackendRecipesScreen /> : <SampleRecipesScreen />;
+}
+function SampleRecipesScreen() {
   const { language } = useLanguage();
   const { colors } = useRemyTheme();
   const t = recipeMessages[language];
