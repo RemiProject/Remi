@@ -820,6 +820,7 @@ type Query {
   productSafetyCheck(barcode: String!): ProductSafetyCheckType
   purchaseOrders(after: String, first: Int! = 20): PurchaseOrderConnectionType!
   recipe(id: ID!): RecipeType!
+  recipeSuggestions(after: String, first: Int! = 20): RecipeSuggestionsConnectionType!
   recipes(after: String, first: Int! = 20): RecipeConnectionType!
   recommendations(after: String, first: Int! = 20, type: RecommendationType!): RecommendationConnectionType!
   search(first: Int! = 10, query: String!, types: [SearchDocumentType!]): [SearchResult!]!
@@ -853,6 +854,14 @@ input RecipeIngredientInputType {
   unit: Unit!
 }
 
+enum RecipeIngredientMatchStatus {
+  ASSUMED
+  ENOUGH
+  MISSING
+  SHORT
+  UNKNOWN
+}
+
 type RecipeIngredientType {
   foodId: ID!
   foodName: String!
@@ -872,6 +881,47 @@ type RecipeStepType {
   id: ID!
   instruction: String!
   stepNumber: Int!
+}
+
+type RecipeSuggestionExpiringFoodType {
+  aliases: [FoodAlias!]!
+  expiryDay: LocalDate!
+  foodId: ID!
+  foodName: String!
+}
+
+type RecipeSuggestionIngredientType {
+  aliases: [FoodAlias!]!
+  availableAmount: Decimal
+  foodId: ID!
+  foodName: String!
+  knownAvailableAmount: Decimal
+  missingAmount: Decimal
+  requiredAmount: Decimal!
+  status: RecipeIngredientMatchStatus!
+  unit: Unit!
+}
+
+type RecipeSuggestionType {
+  assumedStaples: [RecipeSuggestionIngredientType!]!
+  coverageRatio: Float!
+  expiringSoon: [RecipeSuggestionExpiringFoodType!]!
+  haveCount: Int!
+  missing: [RecipeSuggestionIngredientType!]!
+  optional: [RecipeSuggestionIngredientType!]!
+  recipe: RecipeSummaryType!
+  requiredCount: Int!
+  safetyWarnings: [String!]!
+  short: [RecipeSuggestionIngredientType!]!
+  unknown: [RecipeSuggestionIngredientType!]!
+}
+
+type RecipeSuggestionsConnectionType {
+  endCursor: String
+  hasNextPage: Boolean!
+  missingStapleNames: [String!]!
+  nodes: [RecipeSuggestionType!]!
+  totalCount: Int!
 }
 
 type RecipeSummaryType {
