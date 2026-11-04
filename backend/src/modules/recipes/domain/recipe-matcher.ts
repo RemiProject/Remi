@@ -33,7 +33,7 @@ type IngredientAmount = { foodId: string; requiredAmount: string; unit: Unit };
 export type IngredientMatch = IngredientAmount & (
   | { status: 'ENOUGH'; availableAmount: string }
   | { status: 'SHORT'; availableAmount: string; missingAmount: string }
-  | { status: 'MISSING'; availableAmount: '0.000' }
+  | { status: 'MISSING' | 'EXPIRED'; availableAmount: '0.000' }
   | { status: 'UNKNOWN'; knownAvailableAmount: string; unconvertibleBatchIds: string[] }
   | { status: 'ASSUMED' }
 );
@@ -78,11 +78,12 @@ export function matchAndRankRecipes(input: RecipeMatchingInput): RecipeMatch[] {
   const today = calendarDay(input.now, dayFormatter);
   const soonThrough = new Date(Date.parse(`${today}T00:00:00Z`) + 3 * 86_400_000).toISOString().slice(0, 10);
   const byFood = new Map<string, AvailableBatch[]>();
+  const expiredFoods = new Set<string>();
   for (const batch of input.batches) {
     if (milli(batch.quantity) <= 0n) continue;
     const expiryDay = batch.estimatedExpiryAt === null ? null : calendarDay(batch.estimatedExpiryAt, dayFormatter);
     // A timestamp earlier today is still available for the entire household calendar day.
-    if (expiryDay !== null && expiryDay < today) continue;
+    if (expiryDay !== null && expiryDay < today) { expiredFoods.add(batch.foodId); continue; }
     const group = byFood.get(batch.foodId) ?? [];
     group.push({ ...batch, expiryDay });
     byFood.set(batch.foodId, group);
@@ -94,7 +95,7 @@ export function matchAndRankRecipes(input: RecipeMatchingInput): RecipeMatch[] {
     const assumedStaples: RecipeMatch['assumedStaples'] = [];
     const soon = new Map<string, string>();
     for (const ingredient of recipe.ingredients) {
-      const match = matchIngredient(ingredient, byFood.get(ingredient.foodId) ?? [], input.staples);
+      const match = matchIngredient(ingredient, byFood.get(ingredient.foodId) ?? [], input.staples, expiredFoods.has(ingredient.foodId));
       if (ingredient.optional) optionalIngredients.push(match);
       else requiredIngredients.push(match);
       if (match.status === 'ASSUMED') assumedStaples.push(match);
@@ -137,12 +138,12 @@ export function compareRecipeMatches(a: RecipeMatch, b: RecipeMatch): number {
     || compareText(a.name, b.name) || compareText(a.recipeId, b.recipeId);
 }
 
-function matchIngredient(ingredient: MatchingIngredient, batches: AvailableBatch[], staples: ReadonlySet<string>): IngredientMatch {
+function matchIngredient(ingredient: MatchingIngredient, batches: AvailableBatch[], staples: ReadonlySet<string>, hasExpired: boolean): IngredientMatch {
   const required = milli(ingredient.quantity);
   if (required <= 0n) throw new DomainError('INVALID_QUANTITY', 'Recipe quantities must be positive.');
   const base: IngredientAmount = { foodId: ingredient.foodId, requiredAmount: formatMilli(required), unit: ingredient.unit };
   if (staples.has(ingredient.foodId)) return { ...base, status: 'ASSUMED' };
-  if (!batches.length) return { ...base, status: 'MISSING', availableAmount: '0.000' };
+  if (!batches.length) return { ...base, status: hasExpired ? 'EXPIRED' : 'MISSING', availableAmount: '0.000' };
 
   // Sum identical source units before conversion so splitting stock into batches cannot change rounding.
   const byUnit = new Map<Unit, { amount: bigint; batchIds: string[] }>();

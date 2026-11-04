@@ -21,6 +21,7 @@ export interface RecipeSuggestion {
   haveCount: number;
   requiredCount: number;
   missing: SuggestionIngredient[];
+  expired: SuggestionIngredient[];
   short: SuggestionIngredient[];
   unknown: SuggestionIngredient[];
   assumedStaples: SuggestionIngredient[];
@@ -107,6 +108,7 @@ export class RecipeSuggestionsService {
         recipe: byId.get(match.recipeId)!, coverageRatio: match.requiredCount ? match.haveCount / match.requiredCount : 0,
         haveCount: match.haveCount, requiredCount: match.requiredCount,
         missing: match.requiredIngredients.filter(i => i.status === 'MISSING').map(enrich),
+        expired: match.requiredIngredients.filter(i => i.status === 'EXPIRED').map(enrich),
         short: match.shortItems.map(enrich), unknown: match.unknownItems.map(enrich),
         assumedStaples: match.assumedStaples.map(enrich), optional: match.optionalIngredients.map(enrich),
         expiringSoon: match.expiringSoonFoods.map(item => ({ ...item, ...byFood.get(item.foodId)! })),

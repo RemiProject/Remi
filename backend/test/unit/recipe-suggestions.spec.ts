@@ -67,9 +67,12 @@ describe('RecipeSuggestionsService', () => {
     expect(h.queries.filter(q => q.sql.includes('FROM "Food"'))).toHaveLength(1);
   });
 
-  it('reports expired-only foods as missing using household calendar days and the server clock', async () => {
+  it('reports expired-only foods separately from missing using household calendar days and the server clock', async () => {
     const h = harness(); h.data.batches[0].estimatedExpiryAt = new Date('2026-06-01T20:59:59Z');
-    expect((await h.service.list('h', 'u')).nodes.find(n => n.recipe.id === 'owned')!.missing[0].foodId).toBe('tomato');
+    h.data.ingredients.push(item('missing', 'tomato', { optional: true }));
+    const page = await h.service.list('h', 'u');
+    expect(page.nodes.find(n => n.recipe.id === 'owned')).toMatchObject({ haveCount: 0, coverageRatio: 0, missing: [], expired: [{ foodId: 'tomato', foodName: 'tomato', status: 'EXPIRED', availableAmount: '0.000' }] });
+    expect(page.nodes.find(n => n.recipe.id === 'missing')).toMatchObject({ missing: [{ foodId: 'carrot' }], expired: [], optional: [{ foodId: 'tomato', status: 'EXPIRED' }] });
     h.data.timezone = 'America/Los_Angeles';
     expect((await h.service.list('h', 'u')).nodes[0].haveCount).toBe(1);
   });

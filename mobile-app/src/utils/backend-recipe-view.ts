@@ -30,10 +30,16 @@ export function recipeCoverage(suggestion: RecipeSuggestion, language: Language)
   return recipeText(backendRecipeMessages[language].have, { have: recipeNumber(suggestion.haveCount, language), required: recipeNumber(suggestion.requiredCount, language) });
 }
 export function recipeMissing(suggestion: RecipeSuggestion, language: Language) {
-  if (!suggestion.missing.length) return null;
-  const foods = suggestion.missing.slice(0, 3).map(f => recipeFoodName(f, language)).join(language === 'ar' ? '، ' : ', ');
-  const remaining = suggestion.missing.length - 3;
-  return recipeText(backendRecipeMessages[language].missing, { foods: `${foods}${remaining > 0 ? ` · ${inventoryNumberLabel(`+${remaining}`, language)}` : ''}` });
+  return recipeFoodList(suggestion.missing, 'missing', language);
+}
+export function recipeExpired(suggestion: RecipeSuggestion, language: Language) {
+  return recipeFoodList(suggestion.expired, 'expired', language);
+}
+function recipeFoodList(items: RecipeFood[], label: 'missing' | 'expired', language: Language) {
+  if (!items.length) return null;
+  const foods = items.slice(0, 3).map(f => recipeFoodName(f, language)).join(language === 'ar' ? '، ' : ', ');
+  const remaining = items.length - 3;
+  return recipeText(backendRecipeMessages[language][label], { foods: `${foods}${remaining > 0 ? ` · ${inventoryNumberLabel(`+${remaining}`, language)}` : ''}` });
 }
 export function recipeExpiry(suggestion: RecipeSuggestion, today: string, language: Language) {
   const food = [...suggestion.expiringSoon].sort((a, b) => a.expiryDay.localeCompare(b.expiryDay) || a.foodId.localeCompare(b.foodId))[0];
@@ -46,6 +52,7 @@ export function recipeExpiry(suggestion: RecipeSuggestion, today: string, langua
 export function recipeIngredientStatus(ingredient: BackendRecipe['ingredients'][number], suggestion: RecipeSuggestion | undefined, language: Language) {
   if (!suggestion) return null;
   const t = backendRecipeMessages[language], id = ingredient.foodId;
+  if (suggestion.expired.some(i => i.foodId === id) || suggestion.optional.some(i => i.foodId === id && i.status === 'EXPIRED')) return t.EXPIRED;
   if (ingredient.optional) return t.optional;
   if (suggestion.assumedStaples.some(i => i.foodId === id)) return t.ASSUMED;
   const short = suggestion.short.find(i => i.foodId === id);

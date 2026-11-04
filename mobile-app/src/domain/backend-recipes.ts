@@ -8,9 +8,9 @@ export interface RecipeSummary {
 }
 export interface RecipeSuggestion {
   recipe: RecipeSummary; coverageRatio: number; haveCount: number; requiredCount: number; safetyWarnings: string[];
-  missing: RecipeFood[];
+  missing: RecipeFood[]; expired: RecipeFood[];
   short: (RecipeFood & { missingAmount: Decimal; unit: BackendUnit })[];
-  unknown: RecipeFood[]; assumedStaples: RecipeFood[]; optional: RecipeFood[];
+  unknown: Pick<RecipeFood, 'foodId'>[]; assumedStaples: Pick<RecipeFood, 'foodId'>[]; optional: (Pick<RecipeFood, 'foodId'> & { status: 'ENOUGH' | 'SHORT' | 'MISSING' | 'EXPIRED' | 'UNKNOWN' | 'ASSUMED' })[];
   expiringSoon: (RecipeFood & { expiryDay: string })[];
 }
 export interface BackendRecipe extends RecipeSummary {

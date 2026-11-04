@@ -857,6 +857,7 @@ input RecipeIngredientInputType {
 enum RecipeIngredientMatchStatus {
   ASSUMED
   ENOUGH
+  EXPIRED
   MISSING
   SHORT
   UNKNOWN
@@ -905,6 +906,7 @@ type RecipeSuggestionIngredientType {
 type RecipeSuggestionType {
   assumedStaples: [RecipeSuggestionIngredientType!]!
   coverageRatio: Float!
+  expired: [RecipeSuggestionIngredientType!]!
   expiringSoon: [RecipeSuggestionExpiringFoodType!]!
   haveCount: Int!
   missing: [RecipeSuggestionIngredientType!]!
