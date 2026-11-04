@@ -13,6 +13,7 @@ import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
 import { backendExpiryDays, backendFoodName, backendKitchenView, backendQuantityLabel, backendRowSubtitle, backendStorageLabel, inventoryNumberLabel } from '@/utils/backend-kitchen-view';
 import { useRemyTheme } from '@/theme/provider';
 import HomeScreen from './home-screen';
+import { BackendHomeRecipeIdeas } from './backend-home-recipe-ideas';
 
 function useLabels() {
   const { language } = useLanguage();
@@ -91,6 +92,7 @@ export function BackendHomeScreen() {
   const { language, t } = useLabels();
   return <HomeScreen backend={{
     ...state,
+    recipeIdeas: <BackendHomeRecipeIdeas kitchenStatus={state.status} />,
     notice: <BackendKitchenState />, deviceNotice: <DeviceInventoryNotice />,
     saved: t.saved, empty: t.empty, emptyBody: t.emptyBody, writesSoon: t.writesSoon, readOnly: t.readOnly,
     quantityLabel: item => backendQuantityLabel(item, language),

@@ -40,6 +40,10 @@ export class BackendRecipesStore {
     if (isSignedOutError(error)) this.publish({ ...emptyRecipes });
     else if ((error as { code?: string })?.code === 'STALE_CONTEXT') this.publish({ ...emptyRecipes, owner: this.snapshot.owner, status: 'error' });
   }
+  ensureLoaded = async () => {
+    this.listActive = true;
+    if (this.snapshot.owner && this.snapshot.status === 'idle') await this.refresh();
+  };
   refresh = async () => {
     this.listActive = true;
     if (!this.snapshot.owner) return;
