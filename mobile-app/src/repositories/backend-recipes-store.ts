@@ -1,4 +1,5 @@
 import type { BackendRecipe, RecipePage, RecipeRepository, RecipeSuggestion } from '../domain/backend-recipes';
+import { initialCookingSession, type CookingSession } from '../utils/cooking-session';
 import { isSignedOutError } from '../services/auth-validation';
 
 type Status = 'signed-out' | 'idle' | 'loading' | 'ready' | 'error';
@@ -17,6 +18,19 @@ export class BackendRecipesStore {
   private listActive = false;
   private inventoryKey = '';
   private seen = new Set<string>();
+  private cookingIdentity: string | null = null;
+  private cooking = new Map<string, CookingSession>();
+  setCookingIdentity = (identity: string | null) => {
+    if (identity === this.cookingIdentity) return;
+    this.cookingIdentity = identity; this.cooking.clear(); this.publish({});
+  };
+  getCookingSession = (identity: string | null, id: string): CookingSession =>
+    identity && identity === this.cookingIdentity ? this.cooking.get(id) ?? initialCookingSession : initialCookingSession;
+  updateCookingSession = (identity: string | null, id: string, update: (session: CookingSession) => CookingSession) => {
+    if (!identity || identity !== this.cookingIdentity) return;
+    const current = this.getCookingSession(identity, id), next = update(current);
+    if (next !== current) { this.cooking.set(id, next); this.publish({}); }
+  };
   constructor(private readonly repository: () => RecipeRepository) {}
   getSnapshot = () => this.snapshot;
   getServerSnapshot = () => emptyRecipes;
@@ -75,6 +89,11 @@ export class BackendRecipesStore {
     } catch (error) {
       if (generation === this.generation && request === this.listRequest) { this.publish({ loadingMore: false, moreError: true }); this.failure(error); }
     }
+  };
+  ensureDetail = async (id: string) => {
+    const detail = this.snapshot.detail;
+    if (detail?.id === id && (detail.status === 'ready' || detail.status === 'loading')) return;
+    await this.loadDetail(id);
   };
   loadDetail = async (id: string) => {
     if (!this.snapshot.owner) return;

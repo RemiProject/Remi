@@ -92,8 +92,11 @@ export function BackendHomeScreen() {
   const { language, t } = useLabels();
   return <HomeScreen backend={{
     ...state,
-    recipeIdeas: <BackendHomeRecipeIdeas kitchenStatus={state.status} />,
-    notice: <BackendKitchenState />, deviceNotice: <DeviceInventoryNotice />,
+    recipeIdeas: state.status === 'signed-out' ? null : <BackendHomeRecipeIdeas kitchenStatus={state.status} />,
+    notice: state.status === 'signed-out'
+      ? <EmptyState title={t.homeSignInTitle} description={t.signInBody} action={t.signIn} onPress={() => router.push('/login')} />
+      : <BackendKitchenState />,
+    deviceNotice: <DeviceInventoryNotice />,
     saved: t.saved, empty: t.empty, emptyBody: t.emptyBody, writesSoon: t.writesSoon, readOnly: t.readOnly,
     quantityLabel: item => backendQuantityLabel(item, language),
     foodName: item => backendFoodName(item, language),

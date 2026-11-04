@@ -1,5 +1,6 @@
 export const backendKitchenMessages = {
   en: {
+    homeSignInTitle: 'Sign in to see your kitchen and recipe ideas from your food',
     title: 'Kitchen', signInTitle: 'Sign in to see your kitchen', signInBody: 'Your kitchen is saved securely with your account.', signIn: 'Sign in',
     loading: 'Loading your kitchen…', empty: 'Your kitchen is empty', emptyBody: 'Your household’s food will appear here.',
     error: 'Could not load your kitchen. Check your connection and try again.', retry: 'Retry',
@@ -13,6 +14,7 @@ export const backendKitchenMessages = {
     TABLESPOON: 'tbsp', TEASPOON: 'tsp', COUNTER: 'Counter', OTHER: 'Other',
   },
   ar: {
+    homeSignInTitle: 'سجّل الدخول لترى مطبخك وأفكار وصفات من طعامك',
     title: 'المطبخ', signInTitle: 'سجّل الدخول لعرض مطبخك', signInBody: 'يُحفظ مطبخك بأمان مع حسابك.', signIn: 'تسجيل الدخول',
     loading: 'جارٍ تحميل مطبخك…', empty: 'مطبخك فارغ', emptyBody: 'سيظهر طعام منزلك هنا.',
     error: 'تعذّر تحميل مطبخك. تحقّق من الاتصال وحاول مرة أخرى.', retry: 'أعد المحاولة',
