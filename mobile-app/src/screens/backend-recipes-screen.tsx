@@ -7,6 +7,7 @@ import { RecipePlaceholder } from '@/components/recipe-placeholder';
 import { useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
+import { cookingMessages } from '@/i18n/cooking';
 import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { recipeCoverage, recipeExpired, recipeExpiry, recipeFoodName, recipeIngredientStatus, recipeMetadata, recipeMissing, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
 import { radii, spacing } from '@/theme/tokens';
@@ -67,10 +68,10 @@ export function BackendRecipesScreen() {
 
 export function BackendRecipeDetailScreen({ id }: { id: string }) {
   const state = useBackendRecipes();
-  const { owner, loadDetail } = state;
+  const { owner, ensureDetail } = state;
   const { t, rtl, language } = useLabels();
   const { colors } = useRemyTheme();
-  useFocusEffect(useCallback(() => { if (owner) void loadDetail(id); }, [owner, loadDetail, id]));
+  useFocusEffect(useCallback(() => { if (owner) void ensureDetail(id); }, [owner, ensureDetail, id]));
   const detail = state.detail?.id === id ? state.detail : null;
   const status = state.status === 'signed-out' ? 'signed-out' : detail?.status ?? (state.status === 'error' ? 'error' : 'loading');
   const recipe = status === 'ready' ? detail?.recipe : undefined;
@@ -95,6 +96,7 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
           {status && <AppText dir={rtl ? 'rtl' : 'ltr'}>{status}</AppText>}
         </Card>;
       })}
+      {recipe.steps.length > 0 && <Button label={cookingMessages[language].start} onPress={() => router.push({ pathname: '/cooking/[id]', params: { id } })} />}
       <SectionHeader title={t.steps} />
       {!recipe.steps.length && <AppText muted>{t.noSteps}</AppText>}
       {recipe.steps.map(step => <Card key={step.id}>

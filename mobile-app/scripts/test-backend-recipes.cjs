@@ -9,6 +9,8 @@ const { createGraphqlRecipeRepository, recipeReadOperations } = require('../src/
 const { resolveActiveHousehold } = require('../src/services/active-household-service.ts');
 const { BackendRecipesStore, visibleRecipes, emptyRecipes } = require('../src/repositories/backend-recipes-store.ts');
 const view = require('../src/utils/backend-recipe-view.ts');
+const { cookingMessages } = require('../src/i18n/cooking.ts');
+const cookingUtils = require('../src/utils/cooking-session.ts');
 const { backendRecipeMessages: messages } = require('../src/i18n/backend-recipes.ts');
 const { loadCachedCatalogArabicNames, catalogArabicNamesOperation } = require('../src/services/inventory-catalog-names.ts');
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -168,6 +170,33 @@ test('recipe documents validate against the real backend schema and normal compl
   assert.deepEqual(validate(schema, parse(recipeReadOperations.list), [complexityLimit(2000)]), []);
 });
 
+test('Cooking reuses loaded or in-flight recipe detail; no stock operation is called', async () => {
+  let reads = 0; const pending = deferred();
+  const repository = { get: async () => { reads++; return pending.promise; }, findSuggestion: async () => suggestion() };
+  const store = new BackendRecipesStore(() => new Proxy(repository, { get: (target, key) => { assert(key in target, `Unexpected operation ${String(key)}`); return target[key]; } }));
+  store.setOwner('a'); const fromDetail = store.loadDetail('one'); await store.ensureDetail('one');
+  assert.equal(reads, 1); pending.resolve(detail()); await fromDetail;
+  await store.ensureDetail('one'); assert.equal(reads, 1);
+  assert.equal(store.getSnapshot().detail.suggestion.recipe.id, 'one');
+});
+
+test('backend Cooking progress is memory-only, isolated by recipe and identity, and cleared on sign-out/account switch', () => {
+  const store = new BackendRecipesStore(() => assert.fail('Progress never accesses the backend'));
+  store.setCookingIdentity('user-a:1');
+  store.updateCookingSession('user-a:1', 'one', s => cookingUtils.advanceCooking(s, 3));
+  assert.equal(store.getCookingSession('user-a:1', 'one').current, 1);
+  assert.equal(store.getCookingSession('user-a:1', 'two'), cookingUtils.initialCookingSession);
+  store.setCookingIdentity('user-a:1'); assert.equal(store.getCookingSession('user-a:1', 'one').current, 1);
+  store.setCookingIdentity('user-b:2');
+  assert.equal(store.getCookingSession('user-a:1', 'one'), cookingUtils.initialCookingSession);
+  store.updateCookingSession('user-a:1', 'one', () => assert.fail('Late previous-user update'));
+  assert.equal(store.getCookingSession('user-b:2', 'one'), cookingUtils.initialCookingSession);
+  store.updateCookingSession('user-b:2', 'one', s => cookingUtils.advanceCooking(s, 1));
+  store.setCookingIdentity(null); store.setCookingIdentity('user-b:2');
+  assert.equal(store.getCookingSession('user-b:2', 'one'), cookingUtils.initialCookingSession);
+  store.setCookingIdentity('user-a:3'); assert.equal(store.getCookingSession('user-a:3', 'one'), cookingUtils.initialCookingSession);
+});
+
 test('Home and Recipes share one initial list and loaded pages; inventory writes refresh the shared list', async () => {
   let calls = 0; const response = deferred();
   const store = new BackendRecipesStore(() => ({ list: async () => { calls++; return calls === 1 ? response.promise : readPage([suggestion('updated')]); } }));
@@ -317,10 +346,10 @@ function ui() {
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
     '@/components/ui/core': { ...Object.fromEntries(['AppText', 'Badge', 'Button', 'Card', 'EmptyState', 'PageHeader', 'Screen', 'SectionHeader'].map(key => [key, key])), uiStyles: {} },
     '@/components/ui/icon': { Icon: 'Icon' },
-    '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, ensureLoaded: () => { refresh++; }, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; } }) },
+    '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, ensureLoaded: () => { refresh++; }, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; }, ensureDetail: () => { get++; } }) },
     '@/providers/language-provider': { useLanguage: () => ({ language }) },
     '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { radii: {}, spacing: {} },
-    '@/i18n/backend-recipes': { backendRecipeMessages: messages }, '@/utils/backend-recipe-view': view,
+    '@/i18n/backend-recipes': { backendRecipeMessages: messages }, '@/i18n/cooking': { cookingMessages }, '@/utils/backend-recipe-view': view,
   };
   mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
@@ -362,7 +391,7 @@ test('empty Kitchen hides unmatched server cards; load-more errors retain cards 
   assert.equal(nodes(tree, 'Pressable').length, 1); assert(nodes(tree, 'AppText').some(n => n.props.children === messages.en.moreError));
   h.set({ loadingMore: true }); tree = h.render(); assert(nodes(tree, 'Button').some(n => n.props.disabled === true));
 });
-test('backend detail shows every ingredient status, tbsp/tsp, ordered English content and safety warnings; no Cooking button', () => {
+test('backend detail shows every ingredient status, tbsp/tsp, ordered English content, safety warnings and Start cooking', () => {
   const h = ui();
   const recipe = { ...detail(), ingredients: [ingredient('have', 'TABLESPOON'), ingredient('short', 'KILOGRAM'), ingredient('missing'), ingredient('unknown'), ingredient('salt'), ingredient('optional', 'TEASPOON', true)] };
   const node = suggestion('one', { missing: [food('missing')], short: [{ ...food('short'), missingAmount: '0.750', unit: 'KILOGRAM' }], unknown: [food('unknown')], assumedStaples: [food('salt')], safetyWarnings: ['DISLIKE_FOOD'] });
@@ -374,7 +403,8 @@ test('backend detail shows every ingredient status, tbsp/tsp, ordered English co
     assert(text.includes(language === 'en' ? '2 tbsp' : 'م.ك')); assert(text.includes(language === 'en' ? '2 tsp' : 'م.ص'));
     assert(nodes(tree, 'AppText').some(n => n.props.children === 'English instruction.' && n.props.dir === 'ltr'));
     assert(nodes(tree, 'AppText').some(n => n.props.children === 'English description.' && n.props.dir === 'ltr'));
-    assert(!nodes(tree, 'Button').some(n => /cooking|ابدأ الطهي/i.test(n.props.label)));
+    nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].start).props.onPress();
+    assert.deepEqual(h.pushed.at(-1), { pathname: '/cooking/[id]', params: { id: 'one' } });
     assert(nodes(tree, 'Badge').some(n => n.props.label === messages[language].warnings));
   }
 });
@@ -385,6 +415,76 @@ test('backend detail without a suggestion shows no inferred statuses; lookup fai
   nodes(tree, 'Button').find(n => n.props.label === messages.en.retry).props.onPress(); assert.equal(h.counts().get, 1);
   h.set({ status: 'error' }); assert(JSON.stringify(h.render(true)).includes('English description.'));
 });
+function cookingUi() {
+  const h = ui(), effects = []; let progress = cookingUtils.initialCookingSession;
+  h.mocks.react.useEffect = effect => effects.push(effect);
+  h.mocks['@/components/ui/core'].Chip = 'Chip';
+  h.mocks['expo-router'].useLocalSearchParams = () => ({ id: 'one' });
+  h.mocks['@/utils/cooking-session'] = cookingUtils;
+  h.mocks['@/providers/backend-recipes-provider'].useBackendCookingSession = () => ({ session: progress, update: change => { progress = change(progress); } });
+  const { BackendCookingScreen } = loadTsx('src/screens/backend-cooking-screen.tsx', h.mocks);
+  return { ...h, renderDetail: h.render, render: () => expand(BackendCookingScreen()), start: () => effects.at(-1)(), progress: () => progress };
+}
+
+test('backend Cooking orders English steps and durations, shows every read-only checklist status, and completes without stock writes', () => {
+  for (const language of ['en', 'ar']) {
+    const h = cookingUi(); h.language(language);
+    const recipe = { ...detail(), ingredients: [ingredient('have'), ingredient('short'), ingredient('missing'), ingredient('expired'), ingredient('unknown'), ingredient('salt'), ingredient('optional', 'TEASPOON', true)],
+      steps: [{ id: 'second', stepNumber: 2, instruction: 'Second English step.', durationMin: null }, { id: 'first', stepNumber: 1, instruction: 'First English step.', durationMin: 5 }] };
+    const node = suggestion('one', { missing: [food('missing')], expired: [food('expired')], short: [{ ...food('short'), missingAmount: '1.000', unit: 'GRAM' }], unknown: [food('unknown')], assumedStaples: [food('salt')] });
+    h.set({ detail: { id: 'one', status: 'ready', recipe, suggestion: node } });
+    let tree = h.render(); h.start(); assert.equal(h.counts().get, 1);
+    assert.equal(nodes(tree, 'Screen')[0].props.rtl, language === 'ar');
+    for (const key of ['ENOUGH', 'MISSING', 'EXPIRED', 'UNKNOWN', 'ASSUMED', 'optional']) assert(JSON.stringify(tree).includes(messages[language][key]));
+    assert(JSON.stringify(tree).includes(language === 'en' ? 'Short by 1 g' : 'ينقصك'));
+    assert(nodes(tree, 'AppText').some(n => n.props.children === 'First English step.' && n.props.accessibilityLiveRegion === 'polite' && n.props.dir === 'ltr'));
+    assert(nodes(tree, 'AppText').some(n => n.props.children === (language === 'en' ? '5 min' : '\u20665\u2069 دقيقة')));
+    assert.equal(nodes(tree, 'Chip')[0].props.selected, true);
+    assert.equal(nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].previous).props.disabled, true);
+    nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].next).props.onPress(); tree = h.render();
+    assert(nodes(tree, 'AppText').some(n => n.props.children === 'Second English step.' && n.props.accessibilityLiveRegion === 'polite'));
+    assert(!nodes(tree, 'SectionHeader').some(n => n.props.title === messages[language].ingredients));
+    nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].previous).props.onPress();
+    assert.equal(h.progress().current, 0); tree = h.render();
+    nodes(tree, 'Chip')[1].props.onPress(); tree = h.render();
+    nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].finish).props.onPress(); tree = h.render();
+    assert.equal(h.progress().finished, true);
+    nodes(tree, 'Button').find(n => n.props.label === messages[language].cookingDone).props.onPress();
+    assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'one' } });
+    assert.equal(h.counts().get, 1, 'completing and Done do not request any inventory mutation');
+  }
+  assert.doesNotMatch(fs.readFileSync('src/screens/backend-cooking-screen.tsx', 'utf8'), /consumeStock|adjustStock|discardStock|addStock|setInterval|setTimeout/);
+});
+
+test('backend Cooking handles signed-out/loading/error/retry and missing steps without a sample fallback', () => {
+  const h = cookingUi();
+  for (const language of ['en', 'ar']) {
+    h.language(language); h.set({ status: 'signed-out', owner: null, detail: null });
+    let tree = h.render(); assert.equal(nodes(tree, 'EmptyState')[0].props.title, messages[language].cookingSignIn);
+    nodes(tree, 'EmptyState')[0].props.onPress(); assert.equal(h.pushed.at(-1), '/login');
+    const before = h.counts().get; h.start(); assert.equal(h.counts().get, before);
+    h.set({ status: 'loading', owner: 'a' }); assert(JSON.stringify(h.render()).includes(messages[language].loading));
+    h.set({ status: 'error' }); tree = h.render(); nodes(tree, 'Button').find(n => n.props.label === messages[language].retry).props.onPress();
+    h.set({ status: 'ready', detail: { id: 'one', status: 'ready', recipe: { ...detail(), steps: [] } } });
+    assert.equal(nodes(h.render(), 'EmptyState')[0].props.title, cookingMessages[language].missing);
+  }
+  assert.equal(h.counts().get, 2);
+  h.set({ detail: { id: 'one', status: 'ready', recipe: { ...detail(), steps: [] } } });
+  assert(!nodes(h.renderDetail(true), 'Button').some(n => n.props.label === cookingMessages.en.start));
+});
+
+test('Cooking route uses backend for every id when enabled, including old sample ids; false uses only the original screen', () => {
+  const h = ui(); let enabled = true;
+  const route = loadTsx('src/screens/cooking-screen.tsx', { ...h.mocks,
+    '@/services/inventory-feature': { isBackendInventoryEnabled: () => enabled },
+    '@/screens/backend-cooking-screen': { BackendCookingScreen: 'BackendCookingScreen' },
+    '@/data/kitchen-demo': {}, '@/data/home-content': {}, '@/i18n/recipes': {},
+    '@/services/cooking-sessions': {}, '@/utils/cooking-session': cookingUtils,
+  });
+  assert.equal(route.default().type, 'BackendCookingScreen');
+  enabled = false; assert.equal(typeof route.default().type, 'function');
+});
+
 test('Home recipe ideas show four ranked backend cards, metadata, coverage, expiry and detail/View all routes in EN/AR', () => {
   const h = ui(); const effects = [];
   h.mocks.react.useEffect = effect => effects.push(effect);
@@ -467,6 +567,33 @@ test('Home sample detail routes stay explicit with the flag on; backend and unkn
   id = 'unknown'; assert.equal(route.default().type, 'BackendRecipeDetailScreen');
 });
 
+test('Cooking hook masks a changed identity immediately and provider clears progress on switch and logout', () => {
+  let user = { id: 'a' }, revision = 1; const effects = [];
+  const store = new BackendRecipesStore(() => assert.fail('No network needed for Cooking progress'));
+  const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
+    react: { createContext: () => ({ Provider: 'Context' }), useContext: () => store, useState: () => [store],
+      useEffect: effect => effects.push(effect), useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
+    '@react-native-async-storage/async-storage': {}, '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes },
+    '@/repositories/graphql-recipe-repository': {}, '@/services/inventory-feature': { isBackendInventoryEnabled: () => true },
+    '@/services/active-household-service': { getActiveHouseholdRevision: () => 1 },
+    '@/services/auth': { getAuth: () => ({ getIdentityRevision: () => revision }) }, '@/utils/cooking-session': cookingUtils,
+    './auth-provider': { useAuth: () => ({ user, ready: true, busy: false }) },
+    './backend-kitchen-provider': { useBackendKitchen: () => ({ status: 'loading', items: [] }) },
+  });
+  const provider = () => { effects.length = 0; expand(hooks.BackendRecipesProvider({ children: null })); effects.forEach(effect => effect()); };
+  provider(); const original = hooks.useBackendCookingSession('one'); original.update(s => cookingUtils.advanceCooking(s, 3));
+  assert.equal(hooks.useBackendCookingSession('one').session.current, 1);
+  provider(); assert.equal(hooks.useBackendCookingSession('one').session.current, 1);
+  user = { id: 'b' }; revision++;
+  assert.equal(hooks.useBackendCookingSession('one').session, cookingUtils.initialCookingSession);
+  original.update(() => assert.fail('Stale user callback must not update progress')); provider();
+  hooks.useBackendCookingSession('one').update(s => cookingUtils.advanceCooking(s, 3));
+  user = null; revision++; provider();
+  assert.equal(hooks.useBackendCookingSession('one').session, cookingUtils.initialCookingSession);
+  user = { id: 'b' }; revision++; provider();
+  assert.equal(hooks.useBackendCookingSession('one').session, cookingUtils.initialCookingSession);
+});
+
 test('Home initial ensure and provider inventory effects share one request, then Recipes reuses loaded data', async () => {
   let calls = 0; const effects = [];
   const store = new BackendRecipesStore(() => ({ list: async () => { calls++; return readPage(); } }));
@@ -478,6 +605,7 @@ test('Home initial ensure and provider inventory effects share one request, then
     '@/services/inventory-feature': { isBackendInventoryEnabled: () => true },
     '@/services/active-household-service': { getActiveHouseholdRevision: () => 1 },
     '@/services/auth': { getAuth: () => ({ getIdentityRevision: () => 1 }) },
+    '@/utils/cooking-session': cookingUtils,
     './auth-provider': { useAuth: () => ({ user: { id: 'user' }, ready: true, busy: false }) },
     './backend-kitchen-provider': { useBackendKitchen: () => ({ status: 'ready', today: '2026-06-02', items: [{ id: 'batch', quantity: '1', version: 1 }] }) },
   });
@@ -498,6 +626,7 @@ test('recipes provider masks account/household changes before effects and flag o
     '@/services/inventory-feature': { isBackendInventoryEnabled: () => enabled },
     '@/services/active-household-service': { getActiveHouseholdRevision: () => householdRevision },
     '@/services/auth': { getAuth: () => ({ getIdentityRevision: () => revision }) },
+    '@/utils/cooking-session': cookingUtils,
     './auth-provider': { useAuth: () => auth }, './backend-kitchen-provider': { useBackendKitchen: () => ({ status: 'ready', items: [{}] }) },
   });
   assert.equal(hooks.useBackendRecipes().nodes.length, 1);

@@ -323,6 +323,26 @@ function homeLayoutHarness(backend, source = fs.readFileSync('src/screens/home-s
   return { render: () => { cursor = 0; return expand(exported.default({ backend })); }, nodes, routes };
 }
 
+test('signed-out backend Home has one combined sign-in action and no Recipe inspiration section in EN/AR', () => {
+  for (const language of ['en', 'ar']) {
+    const h = uiHarness(); h.language(language); h.set({ status: 'signed-out', items: [] });
+    const backend = h.render('BackendHomeScreen').props.backend;
+    assert.equal(backend.recipeIdeas, null);
+    assert.equal(backend.notice.type, 'EmptyState');
+    assert.equal(backend.notice.props.title, language === 'en'
+      ? 'Sign in to see your kitchen and recipe ideas from your food'
+      : 'سجّل الدخول لترى مطبخك وأفكار وصفات من طعامك');
+    const layout = homeLayoutHarness(backend, undefined, language), tree = layout.render();
+    const prompts = layout.nodes(tree, 'EmptyState').filter(n => n.props.action === backendKitchenMessages[language].signIn);
+    assert.equal(prompts.length, 1);
+    assert(!layout.nodes(tree, 'AppText').some(n => n.props.children === homeMessages[language].ideas));
+    prompts[0].props.onPress(); assert.equal(h.navigated.at(-1), '/login');
+    assert.equal(h.render('BackendKitchenState').props.title, backendKitchenMessages[language].signInTitle, 'Kitchen screen keeps its own prompt');
+    h.set({ status: 'ready', items: [item] });
+    assert.equal(h.render('BackendHomeScreen').props.backend.recipeIdeas.type, 'BackendRecipeIdeas');
+  }
+});
+
 test('backend Home keeps the original hero, storage counts and Use First tiles, with a backend-only recipe section', () => {
   const backend = {
     items: [item, { ...item, id: 'frozen', storageId: 'freezer' }, { ...item, id: 'dry', storageId: 'pantry' }],

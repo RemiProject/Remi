@@ -1,3 +1,5 @@
+import { isBackendInventoryEnabled } from '@/services/inventory-feature';
+import { BackendCookingScreen } from '@/screens/backend-cooking-screen';
 import { useSyncExternalStore } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
@@ -14,6 +16,9 @@ import { advanceCooking, cookingInstructions, initialCookingSession, selectCooki
 import { radii, spacing } from '@/theme/tokens';
 
 export default function CookingScreen() {
+  return isBackendInventoryEnabled() ? <BackendCookingScreen /> : <SampleCookingScreen />;
+}
+function SampleCookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { language } = useLanguage(); const t = cookingMessages[language]; const rtl = language === 'ar';
   const { colors } = useRemyTheme();
