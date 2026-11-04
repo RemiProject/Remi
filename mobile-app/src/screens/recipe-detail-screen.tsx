@@ -15,10 +15,15 @@ import { ingredientMatches } from '@/utils/recipe-view';
 import { spacing } from '@/theme/tokens';
 import { cookingMessages } from '@/i18n/cooking';
 import { cookingInstructions } from '@/utils/cooking-session';
+import { isBackendInventoryEnabled } from '@/services/inventory-feature';
+import { BackendRecipeDetailScreen } from '@/screens/backend-recipes-screen';
 
 export default function RecipeDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  return <RecipeDetail key={id} id={id} />;
+  // Home still links these explicit sample IDs until its backend integration (step 6).
+  // Unknown/backend IDs never fall back to samples after a failed request.
+  const sample = demoRecipes.some(recipe => recipe.id === id);
+  return isBackendInventoryEnabled() && !sample ? <BackendRecipeDetailScreen key={id} id={id} /> : <RecipeDetail key={id} id={id} />;
 }
 function RecipeDetail({ id }: { id: string }) {
   const { language } = useLanguage();

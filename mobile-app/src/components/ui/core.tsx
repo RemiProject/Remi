@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, type PropsWithChildren, type Ref } from 'react';
-import { I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance, type TextProps, type ViewProps, type TextInputProps } from 'react-native';
+import { createContext, useContext, useState, type PropsWithChildren, type Ref, type ReactElement } from 'react';
+import { I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance, type RefreshControlProps, type TextProps, type ViewProps, type TextInputProps } from 'react-native';
 import { useRemyTheme } from '@/theme/provider';
 import { useRemyFonts } from '@/theme/fonts';
 import { layout, radii, spacing, typography } from '@/theme/tokens';
@@ -20,9 +20,9 @@ export function PageHeader({ title, subtitle, subtitleDirection, action }: { tit
     <AppText variant="title" accessibilityRole="header" style={uiStyles.grow}>{title}</AppText>{action}
   </View>{subtitle && <AppText muted dir={subtitleDirection}>{subtitle}</AppText>}</View>;
 }
-export function Screen({ children, rtl, scrollRef, contentGap = spacing.xl }: PropsWithChildren<{ rtl?: boolean; scrollRef?: Ref<ScrollViewInstance>; contentGap?: number }>) {
+export function Screen({ children, rtl, scrollRef, contentGap = spacing.xl, refreshControl }: PropsWithChildren<{ rtl?: boolean; scrollRef?: Ref<ScrollViewInstance>; contentGap?: number; refreshControl?: ReactElement<RefreshControlProps> }>) {
   const { colors } = useRemyTheme();
-  return <ScreenDirectionProvider value={rtl}><ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: colors.background }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
+  return <ScreenDirectionProvider value={rtl}><ScrollView ref={scrollRef} {...(refreshControl ? { refreshControl } : {})} style={{ flex: 1, backgroundColor: colors.background }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
     contentContainerStyle={[styles.screen, { gap: contentGap }, rtl !== undefined && { direction: rtl ? 'rtl' : 'ltr' }]}>{children}</ScrollView></ScreenDirectionProvider>;
 }
 export function Card({ style, ...props }: ViewProps) {

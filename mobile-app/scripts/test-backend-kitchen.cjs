@@ -8,7 +8,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 const { BackendKitchenStore, visibleBackendKitchen, emptyBackendKitchen } = require('../src/repositories/backend-kitchen-store.ts');
 const { backendKitchenView, displayInventoryQuantity } = require('../src/utils/backend-kitchen-view.ts');
 const backendView = require('../src/utils/backend-kitchen-view.ts');
-const { loadInventoryArabicNames, inventoryFoodNamesOperation } = require('../src/services/inventory-catalog-names.ts');
+const { loadInventoryArabicNames, catalogArabicNamesOperation } = require('../src/services/inventory-catalog-names.ts');
 const { backendKitchenMessages } = require('../src/i18n/backend-kitchen.ts');
 const { homeUnitLabels, homeMessages } = require('../src/i18n/home.ts');
 const { inventoryMessages } = require('../src/i18n/inventory.ts');
@@ -113,36 +113,35 @@ test('unsupported labels are translated in rows, details and storage filters wit
   }
 });
 
-test('catalog alias reads deduplicate and batch food IDs, prefer primary Arabic, and do no inventory writes', async () => {
+test('Kitchen aliases use the shared paged catalog, prefer primary Arabic and reuse metadata on refresh', async () => {
   let calls = 0;
-  const auth = { authenticatedGraphql: async (query, variables) => {
-    calls++;
-    assert(query.startsWith('query InventoryFoodNames'));
-    assert(Object.keys(variables).length <= 20);
-    return Object.fromEntries(Object.entries(variables).map(([key, id]) => [key.replace('id', 'f'), {
-      id, aliases: [{ languageCode: 'en', alias: 'carrot', isPrimary: true }, { languageCode: 'ar', alias: 'بديل', isPrimary: false }, { languageCode: 'ar', alias: `عربي ${id}`, isPrimary: true }],
-    }]));
+  const ids = Array.from({ length: 121 }, (_, i) => `food-${i}`);
+  const auth = { getIdentityRevision: () => 1, authenticatedGraphql: async (query, variables) => {
+    calls++; assert.equal(query, catalogArabicNamesOperation);
+    const start = Number(variables.after ?? 0);
+    return { foods: { nodes: ids.slice(start, start + 50).map(id => ({ id, aliases: [
+      { languageCode: 'en', alias: 'carrot', isPrimary: true }, { languageCode: 'ar', alias: 'بديل', isPrimary: false },
+      { languageCode: 'ar', alias: `عربي ${id}`, isPrimary: true },
+    ] })), hasNextPage: start + 50 < ids.length, endCursor: String(start + 50) } };
   } };
-  assert.equal((await loadInventoryArabicNames(auth, [])).size, 0);
-  assert.equal(calls, 0);
-  const ids = Array.from({ length: 21 }, (_, i) => `food-${i}`);
+  assert.equal((await loadInventoryArabicNames(auth, [])).size, 0); assert.equal(calls, 0);
   const result = await loadInventoryArabicNames(auth, [...ids, ids[0]]);
-  assert.equal(calls, 2); assert.equal(result.size, 21);
-  assert.equal(result.get(ids[0]), 'عربي food-0');
+  assert.equal(calls, 3); assert.equal(result.size, 121); assert.equal(result.get(ids[0]), 'عربي food-0');
+  await loadInventoryArabicNames(auth, ids); assert.equal(calls, 3);
 });
 
 test('missing Arabic/catalog entries allow canonical fallback; catalog failures surface', async () => {
-  const names = await loadInventoryArabicNames({ authenticatedGraphql: async () => ({
-    f0: { id: 'a', aliases: [{ languageCode: 'en', alias: 'carrot', isPrimary: true }] }, f1: null,
+  const names = await loadInventoryArabicNames({ getIdentityRevision: () => 1, authenticatedGraphql: async () => ({
+    foods: { nodes: [{ id: 'a', aliases: [{ languageCode: 'en', alias: 'carrot', isPrimary: true }] }], hasNextPage: false, endCursor: null },
   }) }, ['a', 'b']);
   assert.equal(names.size, 0);
-  await assert.rejects(loadInventoryArabicNames({ authenticatedGraphql: async () => { throw new Error('Offline'); } }, ['a']), /Offline/);
+  await assert.rejects(loadInventoryArabicNames({ getIdentityRevision: () => 1, authenticatedGraphql: async () => { throw new Error('Offline'); } }, ['a']), /Offline/);
 });
 
 test('catalog alias operation validates against the backend schema', () => {
   const { buildSchema, parse, validate } = require('../../backend/node_modules/graphql');
   const schema = buildSchema(fs.readFileSync('../backend/schema.graphql', 'utf8'));
-  assert.deepEqual(validate(schema, parse(inventoryFoodNamesOperation(20))), []);
+  assert.deepEqual(validate(schema, parse(catalogArabicNamesOperation)), []);
 });
 
 function uiHarness() {
