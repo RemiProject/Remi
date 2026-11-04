@@ -177,6 +177,7 @@ function uiHarness() {
     if (id === '@/i18n/inventory') return { inventoryMessages };
     if (id === '@/data/home-content') return { recipeTitle: () => '', searchHome: () => ({ recipes: [] }) };
     if (id === '@/utils/backend-kitchen-view') return backendView;
+    if (id === './backend-home-recipe-ideas') return { BackendHomeRecipeIdeas: 'BackendRecipeIdeas' };
     if (id === './home-screen') return { __esModule: true, default: 'OriginalHome' };
     if (id === '@/theme/tokens') return { spacing: {} };
     return require(id);
@@ -280,7 +281,7 @@ test('backend Home reuses the original screen, supplies display-only names, and 
   assert(tree.props.backend.deviceNotice);
 });
 
-function homeLayoutHarness(backend, source = fs.readFileSync('src/screens/home-screen.tsx', 'utf8')) {
+function homeLayoutHarness(backend, source = fs.readFileSync('src/screens/home-screen.tsx', 'utf8'), language = 'en') {
   const slots = [], routes = [];
   let cursor = 0;
   const content = require('../src/data/home-content.ts');
@@ -299,7 +300,7 @@ function homeLayoutHarness(backend, source = fs.readFileSync('src/screens/home-s
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
     if (id === '@/components/food-image') return { FoodImage: 'FoodImage' };
     if (id === '@/providers/inventory-provider') return { useInventory: () => ({ items: [{ ...item, name: 'Local food', quantity: 2, unitId: 'kg' }], status: 'ready', error: null, retryRead: () => {} }), useToday: () => '2026-06-02' };
-    if (id === '@/providers/language-provider') return { useLanguage: () => ({ language: 'en' }) };
+    if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
     if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {} }) };
     if (id === '@/theme/tokens') return { radii: {}, spacing: {} };
     if (id === '@/data/home-content') return content;
@@ -322,11 +323,11 @@ function homeLayoutHarness(backend, source = fs.readFileSync('src/screens/home-s
   return { render: () => { cursor = 0; return expand(exported.default({ backend })); }, nodes, routes };
 }
 
-test('backend Home keeps the original hero, storage counts, Use First tiles and recipe preview layout', () => {
+test('backend Home keeps the original hero, storage counts and Use First tiles, with a backend-only recipe section', () => {
   const backend = {
     items: [item, { ...item, id: 'frozen', storageId: 'freezer' }, { ...item, id: 'dry', storageId: 'pantry' }],
     status: 'ready', today: '2026-06-02', retry: async () => {},
-    notice: 'backend-status', deviceNotice: 'device-notice', saved: 'foods in your household',
+    notice: 'backend-status', deviceNotice: 'device-notice', recipeIdeas: 'backend-recipe-ideas', saved: 'foods in your household',
     empty: 'Your kitchen is empty', emptyBody: '', writesSoon: 'Writes coming soon', readOnly: 'Read-only',
     quantityLabel: value => backendView.backendQuantityLabel(value, 'en'),
     foodName: value => backendView.backendFoodName(value, 'en'),
@@ -334,20 +335,52 @@ test('backend Home keeps the original hero, storage counts, Use First tiles and 
   const h = homeLayoutHarness(backend), tree = h.render();
   const content = require('../src/data/home-content.ts');
   assert(h.nodes(tree, 'FoodImage').some(node => node.props.uri === content.kitchenPhoto && node.props.height === 110));
-  for (const label of [homeMessages.en.overview, homeMessages.en.refrigerator, homeMessages.en.freezer, homeMessages.en.pantry, homeMessages.en.useFirst, homeMessages.en.ideas]) {
+  for (const label of [homeMessages.en.overview, homeMessages.en.refrigerator, homeMessages.en.freezer, homeMessages.en.pantry, homeMessages.en.useFirst]) {
     assert(h.nodes(tree, 'AppText').some(node => node.props.children === label), label);
   }
   assert(h.nodes(tree, 'AppText').filter(node => node.props.variant === 'heading' && node.props.children === '1').length >= 3);
-  assert.equal(h.nodes(tree, 'FoodImage').filter(node => Object.values(content.recipePhotos).includes(node.props.uri)).length, 2);
-  const preview = h.nodes(tree, 'Pressable').find(node => node.props.accessibilityLabel?.includes(homeMessages.en.preview));
-  preview.props.onPress();
-  assert.equal(h.nodes(h.render(), 'Modal').length, 1);
+  assert.equal(h.nodes(tree, 'FoodImage').filter(node => Object.values(content.recipePhotos).includes(node.props.uri)).length, 0);
+  assert(JSON.stringify(tree).includes('backend-recipe-ideas'));
+  assert.equal(h.nodes(tree, 'Chip').some(node => node.props.label === homeMessages.en.recipes), false);
+  assert.equal(h.nodes(tree, 'SearchField')[0].props.placeholder, 'Search your food');
+  assert.equal(h.nodes(tree, 'Pressable').some(node => node.props.accessibilityLabel?.includes(homeMessages.en.preview)), false);
   const add = h.nodes(tree, 'Button').find(node => node.props.label === homeMessages.en.add);
   assert.notEqual(add.props.disabled, true);
   add.props.onPress();
   assert.deepEqual(h.routes, ['/food/manual']);
   h.nodes(tree, 'Button').find(node => node.props.label === homeMessages.en.openKitchen).props.onPress();
   assert.deepEqual(h.routes, ['/food/manual', '/kitchen']);
+});
+
+test('backend Home search is food-only in EN/AR, and recipe failures do not hide the Kitchen summary', () => {
+  const content = require('../src/data/home-content.ts');
+  for (const language of ['en', 'ar']) {
+    const backend = { items: [item], status: 'ready', today: '2026-06-02',
+      foodName: () => language === 'ar' ? 'طماطم' : 'Tomato', quantityLabel: () => '1.25 kg',
+      recipeIdeas: 'quiet-recipe-error', deviceNotice: null, saved: 'saved', empty: 'empty' };
+    const h = homeLayoutHarness(backend, undefined, language); let tree = h.render();
+    assert(JSON.stringify(tree).includes('quiet-recipe-error'));
+    assert(h.nodes(tree, 'AppText').some(n => n.props.children === homeMessages[language].overview));
+    assert.equal(h.nodes(tree, 'SearchField')[0].props.placeholder, language === 'ar' ? 'ابحث عن طعامك' : 'Search your food');
+    assert(!h.nodes(tree, 'Chip').some(n => n.props.label === homeMessages[language].recipes));
+    h.nodes(tree, 'SearchField')[0].props.onChangeText(language === 'ar' ? 'طماطم' : 'tomato'); tree = h.render();
+    assert.equal(h.nodes(tree, 'Pressable').filter(n => n.props.accessibilityLabel?.startsWith(language === 'ar' ? 'طماطم.' : 'Tomato.')).length, 1);
+    h.nodes(tree, 'SearchField')[0].props.onChangeText('spinach'); tree = h.render();
+    assert.equal(h.nodes(tree, 'FoodImage').filter(n => Object.values(content.recipePhotos).includes(n.props.uri)).length, 0);
+    assert(!h.nodes(tree, 'Pressable').some(n => n.props.accessibilityLabel?.includes(homeMessages[language].preview)));
+  }
+});
+
+test('switch-off Home retains sample photos, Recipes filter, search and preview/detail links', () => {
+  const h = homeLayoutHarness(undefined), tree = h.render(), content = require('../src/data/home-content.ts');
+  assert.equal(h.nodes(tree, 'SearchField')[0].props.placeholder, homeMessages.en.search);
+  assert(h.nodes(tree, 'Chip').some(n => n.props.label === homeMessages.en.recipes));
+  assert.equal(h.nodes(tree, 'FoodImage').filter(n => Object.values(content.recipePhotos).includes(n.props.uri)).length, 2);
+  h.nodes(tree, 'Pressable').find(n => n.props.accessibilityLabel?.includes(homeMessages.en.preview)).props.onPress();
+  const preview = h.render(); assert.equal(h.nodes(preview, 'Modal').length, 1);
+  const { recipeMessages } = require('../src/i18n/recipes.ts');
+  h.nodes(preview, 'Button').find(n => n.props.label === recipeMessages.en.open).props.onPress();
+  assert.deepEqual(h.routes.at(-1), { pathname: '/recipes/[id]', params: { id: 'bowl' } });
 });
 
 test('signed-out/loading/empty/error/retry states are clear in English and Arabic', () => {

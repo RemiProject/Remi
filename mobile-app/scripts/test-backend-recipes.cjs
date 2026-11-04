@@ -168,6 +168,20 @@ test('recipe documents validate against the real backend schema and normal compl
   assert.deepEqual(validate(schema, parse(recipeReadOperations.list), [complexityLimit(2000)]), []);
 });
 
+test('Home and Recipes share one initial list and loaded pages; inventory writes refresh the shared list', async () => {
+  let calls = 0; const response = deferred();
+  const store = new BackendRecipesStore(() => ({ list: async () => { calls++; return calls === 1 ? response.promise : readPage([suggestion('updated')]); } }));
+  store.setOwner('user'); store.inventoryChanged('initial');
+  const home = store.ensureLoaded(); await store.ensureLoaded();
+  assert.equal(calls, 1); response.resolve(readPage()); await home;
+  await store.ensureLoaded(); await store.ensureLoaded(); assert.equal(calls, 1);
+  for (const action of ['add', 'used', 'discard', 'fix', 'mistake']) {
+    store.inventoryChanged(action); await tick(); assert.equal(store.getSnapshot().nodes[0].recipe.id, 'updated');
+  }
+  assert.equal(calls, 6);
+  store.setOwner(null); await store.ensureLoaded(); assert.equal(calls, 6); assert.deepEqual(store.getSnapshot().nodes, []);
+});
+
 test('recipe store handles loading, empty, errors, retry, append and stale restart replacement', async () => {
   let response = deferred(); const calls = [];
   const store = new BackendRecipesStore(() => ({ list: after => { calls.push(after); return response.promise; } }));
@@ -303,11 +317,12 @@ function ui() {
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
     '@/components/ui/core': { ...Object.fromEntries(['AppText', 'Badge', 'Button', 'Card', 'EmptyState', 'PageHeader', 'Screen', 'SectionHeader'].map(key => [key, key])), uiStyles: {} },
     '@/components/ui/icon': { Icon: 'Icon' },
-    '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; } }) },
+    '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, ensureLoaded: () => { refresh++; }, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; } }) },
     '@/providers/language-provider': { useLanguage: () => ({ language }) },
     '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { radii: {}, spacing: {} },
     '@/i18n/backend-recipes': { backendRecipeMessages: messages }, '@/utils/backend-recipe-view': view,
   };
+  mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
   return { pushed, set: update => { state = { ...state, ...update }; }, language: value => { language = value; },
     render: (detail = false) => expand(detail ? exported.BackendRecipeDetailScreen({ id: 'one' }) : exported.BackendRecipesScreen()),
@@ -370,6 +385,55 @@ test('backend detail without a suggestion shows no inferred statuses; lookup fai
   nodes(tree, 'Button').find(n => n.props.label === messages.en.retry).props.onPress(); assert.equal(h.counts().get, 1);
   h.set({ status: 'error' }); assert(JSON.stringify(h.render(true)).includes('English description.'));
 });
+test('Home recipe ideas show four ranked backend cards, metadata, coverage, expiry and detail/View all routes in EN/AR', () => {
+  const h = ui(); const effects = [];
+  h.mocks.react.useEffect = effect => effects.push(effect);
+  h.mocks['react-native'].ScrollView = 'ScrollView';
+  h.mocks['@/i18n/home'] = require('../src/i18n/home.ts');
+  h.mocks['@/i18n/recipes'] = require('../src/i18n/recipes.ts');
+  const { BackendHomeRecipeIdeas } = loadTsx('src/screens/backend-home-recipe-ideas.tsx', h.mocks);
+  h.set({ nodes: Array.from({ length: 6 }, (_, i) => suggestion(`backend-${i}`, { expiringSoon: [{ ...food(), arabicName: 'طماطم', expiryDay: '2026-06-03' }] })) });
+  for (const language of ['en', 'ar']) {
+    h.language(language); const tree = expand(BackendHomeRecipeIdeas({ kitchenStatus: 'ready' }));
+    assert.equal(nodes(tree, 'Pressable').length, 4);
+    assert.equal(nodes(tree, 'View').filter(n => n.props.accessibilityRole === 'image').length, 4);
+    assert(JSON.stringify(tree).includes(language === 'en' ? 'You have 1 of 2' : 'لديك'));
+    assert(JSON.stringify(tree).includes(language === 'en' ? '15 min' : 'دقيقة'));
+    assert(JSON.stringify(tree).includes(language === 'en' ? 'Uses your Tomato, expires tomorrow' : 'طماطم'));
+    assert(!JSON.stringify(tree).includes('unsplash')); assert(!JSON.stringify(tree).includes('bowl'));
+    assert(nodes(tree, 'AppText').filter(n => n.props.children === 'Recipe backend-0').every(n => n.props.dir === 'ltr'));
+    nodes(tree, 'Pressable')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'backend-0' } });
+    nodes(tree, 'Button')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/feature', params: { feature: 'recipes' } });
+    effects.at(-1)();
+  }
+  assert.equal(h.counts().refresh, 2);
+});
+
+test('Home recipe ideas signed-out, empty, quiet loading/error/retry states never fall back to samples', () => {
+  const h = ui(), effects = [];
+  h.mocks.react.useEffect = effect => effects.push(effect);
+  h.mocks['react-native'].ScrollView = 'ScrollView';
+  h.mocks['@/i18n/home'] = require('../src/i18n/home.ts'); h.mocks['@/i18n/recipes'] = require('../src/i18n/recipes.ts');
+  const { BackendHomeRecipeIdeas } = loadTsx('src/screens/backend-home-recipe-ideas.tsx', h.mocks);
+  for (const language of ['en', 'ar']) {
+    h.language(language); const t = messages[language];
+    h.set({ status: 'signed-out', owner: null }); let tree = expand(BackendHomeRecipeIdeas({ kitchenStatus: 'signed-out' }));
+    assert(JSON.stringify(tree).includes(t.homeSignIn)); nodes(tree, 'Button')[0].props.onPress(); assert.equal(h.pushed.at(-1), '/login');
+    effects.at(-1)();
+    h.set({ owner: 'a', status: 'ready', kitchenEmpty: true }); tree = expand(BackendHomeRecipeIdeas({ kitchenStatus: 'ready' }));
+    assert(JSON.stringify(tree).includes(t.homeEmpty)); nodes(tree, 'Button').find(n => n.props.label === t.add).props.onPress(); assert.equal(h.pushed.at(-1), '/food-entry');
+    effects.at(-1)();
+    h.set({ kitchenEmpty: false, nodes: [], status: 'ready' }); assert(JSON.stringify(expand(BackendHomeRecipeIdeas({ kitchenStatus: 'ready' }))).includes(t.homeEmpty));
+    for (const status of ['idle', 'loading', 'error']) {
+      h.set({ status }); tree = expand(BackendHomeRecipeIdeas({ kitchenStatus: 'ready' }));
+      assert.equal(nodes(tree, 'Pressable').length, 0); assert.equal(nodes(tree, 'EmptyState').length, 0);
+      assert(JSON.stringify(tree).includes(status === 'error' ? t.error : t.loading));
+      if (status === 'error') nodes(tree, 'Button').find(n => n.props.label === t.retry).props.onPress();
+    }
+  }
+  assert.equal(h.counts().refresh, 2, 'only the explicit error Retry fetched');
+});
+
 test('existing recipe routes select backend only with the switch on; false keeps original sample list', () => {
   const h = ui(); let enabled = true;
   const mocks = { ...h.mocks,
@@ -401,6 +465,27 @@ test('Home sample detail routes stay explicit with the flag on; backend and unkn
   assert.equal(typeof route.default().type, 'function');
   id = 'backend-id'; assert.equal(route.default().type, 'BackendRecipeDetailScreen');
   id = 'unknown'; assert.equal(route.default().type, 'BackendRecipeDetailScreen');
+});
+
+test('Home initial ensure and provider inventory effects share one request, then Recipes reuses loaded data', async () => {
+  let calls = 0; const effects = [];
+  const store = new BackendRecipesStore(() => ({ list: async () => { calls++; return readPage(); } }));
+  const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
+    react: { createContext: () => ({ Provider: 'RecipesContext' }), useContext: () => store,
+      useState: () => [store], useEffect: effect => effects.push(effect), useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
+    '@react-native-async-storage/async-storage': {},
+    '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes }, '@/repositories/graphql-recipe-repository': {},
+    '@/services/inventory-feature': { isBackendInventoryEnabled: () => true },
+    '@/services/active-household-service': { getActiveHouseholdRevision: () => 1 },
+    '@/services/auth': { getAuth: () => ({ getIdentityRevision: () => 1 }) },
+    './auth-provider': { useAuth: () => ({ user: { id: 'user' }, ready: true, busy: false }) },
+    './backend-kitchen-provider': { useBackendKitchen: () => ({ status: 'ready', today: '2026-06-02', items: [{ id: 'batch', quantity: '1', version: 1 }] }) },
+  });
+  expand(hooks.BackendRecipesProvider({ children: null }));
+  const home = hooks.useBackendRecipes().ensureLoaded();
+  effects.forEach(effect => effect()); await home;
+  await hooks.useBackendRecipes().ensureLoaded();
+  assert.equal(calls, 1); assert.equal(hooks.useBackendRecipes().nodes.length, 1);
 });
 
 test('recipes provider masks account/household changes before effects and flag off mounts no backend hooks', async () => {

@@ -11,6 +11,7 @@ export const recipeCountUnitLabels = {
 
 export const backendRecipeMessages = {
   en: {
+    homeSignIn: 'Sign in for recipe ideas from your kitchen', homeEmpty: 'Add food to get recipe ideas', foodSearch: 'Search your food', foodNone: 'No food found. Try another name.',
     title: 'Recipes', intro: 'Ideas from the food in your kitchen.', back: 'Back', signIn: 'Sign in',
     signInTitle: 'Sign in to see recipes from your kitchen', signInBody: 'Suggestions use your household’s kitchen and your safety preferences.',
     loading: 'Loading recipes…', empty: 'Add food to your kitchen to get suggestions', emptyBody: 'Your household’s ingredients help us find recipes for you.', add: 'Add food',
@@ -28,6 +29,7 @@ export const backendRecipeMessages = {
     DISLIKE_CATEGORY: 'Contains an ingredient category you dislike', DIETARY: 'Dietary preference warning', otherWarning: 'Review recipe suitability',
   },
   ar: {
+    homeSignIn: 'سجّل الدخول للحصول على أفكار وصفات من مطبخك', homeEmpty: 'أضف طعاماً للحصول على أفكار وصفات', foodSearch: 'ابحث عن طعامك', foodNone: 'لم نجد طعاماً. جرّب اسماً آخر.',
     title: 'الوصفات', intro: 'أفكار من الطعام الموجود في مطبخك.', back: 'رجوع', signIn: 'تسجيل الدخول',
     signInTitle: 'سجّل الدخول لعرض وصفات من مطبخك', signInBody: 'تستند الاقتراحات إلى مطبخ منزلك وتفضيلات السلامة لديك.',
     loading: 'جارٍ تحميل الوصفات…', empty: 'أضف طعاماً إلى مطبخك للحصول على اقتراحات', emptyBody: 'تساعدنا مكونات مطبخك على اقتراح وصفات لك.', add: 'إضافة طعام',

@@ -3,7 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Badge, Button, Card, EmptyState, PageHeader, Screen, SectionHeader, uiStyles } from '@/components/ui/core';
-import { Icon } from '@/components/ui/icon';
+import { RecipePlaceholder } from '@/components/recipe-placeholder';
 import { useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
@@ -14,13 +14,6 @@ import { radii, spacing } from '@/theme/tokens';
 function useLabels() {
   const { language } = useLanguage();
   return { language, rtl: language === 'ar', t: backendRecipeMessages[language] };
-}
-function RecipePlaceholder() {
-  const { t } = useLabels();
-  const { colors } = useRemyTheme();
-  return <View accessibilityRole="image" accessibilityLabel={t.placeholder} style={{ height: 120, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }}>
-    <Icon name="recipe" size={40} color={colors.textSubtle} />
-  </View>;
 }
 function RecipeState({ status, retry }: { status: string; retry: () => void }) {
   const { t } = useLabels();
@@ -40,10 +33,10 @@ function SafetyWarnings({ warnings, detail = false }: { warnings: string[]; deta
 
 export function BackendRecipesScreen() {
   const state = useBackendRecipes();
-  const { owner, refresh } = state;
+  const { owner, ensureLoaded } = state;
   const { t, language, rtl } = useLabels();
   const { colors } = useRemyTheme();
-  useFocusEffect(useCallback(() => { if (owner) void refresh(); }, [owner, refresh]));
+  useFocusEffect(useCallback(() => { if (owner) void ensureLoaded(); }, [owner, ensureLoaded]));
   const empty = state.status === 'ready' && (state.kitchenEmpty || !state.nodes.length);
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}
     refreshControl={<RefreshControl refreshing={state.status === 'loading'} onRefresh={state.refresh} />}>
@@ -56,7 +49,7 @@ export function BackendRecipesScreen() {
       return <Pressable key={node.recipe.id} accessibilityRole="button" accessibilityLabel={node.recipe.name}
         onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: node.recipe.id } })}
         style={({ pressed }) => ({ borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
-        <RecipePlaceholder /><View style={{ padding: spacing.lg, gap: spacing.sm }}>
+        <RecipePlaceholder label={t.placeholder} /><View style={{ padding: spacing.lg, gap: spacing.sm }}>
           <AppText variant="heading" dir="ltr">{node.recipe.name}</AppText>
           <AppText variant="caption" dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(node.recipe, language)}</AppText>
           <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeCoverage(node, language)}</AppText>
@@ -87,7 +80,7 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
     <RecipeState status={status} retry={state.status === 'error' && !state.owner ? state.refresh : retry} />
     {recipe && <>
       <SafetyWarnings detail warnings={detail?.suggestion?.safetyWarnings ?? []} />
-      <RecipePlaceholder /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
+      <RecipePlaceholder label={t.placeholder} /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
       <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(recipe, language)}</AppText>
       {recipe.description && <><SectionHeader title={t.description} /><AppText dir="ltr">{recipe.description}</AppText></>}
       <SectionHeader title={t.ingredients} />

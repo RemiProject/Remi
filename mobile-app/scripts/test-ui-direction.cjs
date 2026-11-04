@@ -31,6 +31,7 @@ function fixture(language = 'ar') {
       if (id === '@/components/backend-stock-actions') return { BackendStockActions: () => null };
       if (id === '@/components/appearance-controls') return { AppearanceControls: () => null };
       if (id === './home-screen') return { __esModule: true, default: () => null };
+      if (id === './backend-home-recipe-ideas') return { BackendHomeRecipeIdeas: () => null };
       // Symbol graphics are stubbed; the real Icon and ActionRow transforms are retained.
       if (id === 'expo-symbols') return { SymbolView: ({ name }) => React.createElement(native.View, { testID: `symbol-${name.web}`, style: { width: 8, height: 8, borderRightWidth: 2, borderTopWidth: 2, transform: [{ rotate: '45deg' }] } }) };
       if (id.startsWith('@/')) {

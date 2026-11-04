@@ -1,4 +1,5 @@
 import { recipeMessages } from '@/i18n/recipes';
+import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { router } from 'expo-router';
 import { Modal, Pressable, ScrollView, View, type TextProps } from 'react-native';
@@ -23,6 +24,7 @@ export interface BackendHomeData {
   retry: () => Promise<void>;
   notice: ReactNode;
   deviceNotice: ReactNode;
+  recipeIdeas: ReactNode;
   saved: string;
   empty: string;
   emptyBody: string;
@@ -51,11 +53,11 @@ export default function HomeScreen({ backend }: { backend?: BackendHomeData } = 
   const [scope, setScope] = useState<'all' | 'foods' | 'recipes'>('all');
   const [previewId, setPreviewId] = useState<string | null>(null);
   const rtl = language === 'ar';
-  const t = backend ? { ...homeMessages[language], saved: backend.saved, empty: backend.empty, emptyBody: backend.emptyBody } : homeMessages[language];
+  const t = backend ? { ...homeMessages[language], search: backendRecipeMessages[language].foodSearch, none: backendRecipeMessages[language].foodNone, saved: backend.saved, empty: backend.empty, emptyBody: backend.emptyBody } : homeMessages[language];
   const row = { flexDirection: 'row' as const, direction: rtl ? 'rtl' as const : 'ltr' as const, alignItems: 'center' as const, gap: spacing.md };
   const number = (value: number) => value.toLocaleString(language);
   const heading = (title: string, action?: ReactNode) => <View style={[row, { flexWrap: 'wrap' }]}><H variant="heading" style={{ flex: 1 }}>{title}</H>{action}</View>;
-  const matches = searchHome(status === 'ready' ? items : [], query, language, scope);
+  const matches = backend ? { foods: [] as HomeFood[], recipes: [] as ReturnType<typeof searchHome>['recipes'] } : searchHome(status === 'ready' ? items : [], query, language, scope);
   if (backend && status === 'ready' && scope !== 'recipes') {
     const term = query.trim().toLocaleLowerCase(language);
     matches.foods = backend.items.filter(item => [item.name, backend.foodName(item)].some(name => name.toLocaleLowerCase(language).includes(term)));
@@ -89,7 +91,7 @@ export default function HomeScreen({ backend }: { backend?: BackendHomeData } = 
         style={({ pressed }) => ({ width: 48, height: 48, borderRadius: radii.md, backgroundColor: pressed ? colors.pressedSurface : colors.surface, alignItems: 'center', justifyContent: 'center' })}><Icon name="bell" /></Pressable></View>
     <View style={{ gap: spacing.sm }}><SearchField value={query} onChangeText={setQuery} placeholder={t.search} accessibilityLabel={t.search} autoCorrect={false}
       style={{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }} />
-      <View style={[row, { flexWrap: 'wrap' }]}>{(['all', 'foods', 'recipes'] as const).map((value) => <Chip key={value} label={t[value]} selected={scope === value} onPress={() => setScope(value)} />)}</View>
+      <View style={[row, { flexWrap: 'wrap' }]}>{(backend ? ['all', 'foods'] as const : ['all', 'foods', 'recipes'] as const).map((value) => <Chip key={value} label={t[value]} selected={scope === value} onPress={() => setScope(value)} />)}</View>
     </View>
     {backend ? <>{backend.notice}<H variant="caption" muted>{backend.writesSoon}</H></> : status !== 'ready' && <Card><H muted>{status === 'error' ? t.readError : t.loading}</H>{status === 'error' && <Button label={t.retry} onPress={() => { void retryRead(); }} />}</Card>}
     {status === 'ready' && error && <H accessibilityRole="alert" style={{ color: colors.errorText }}>{t.writeError}</H>}
@@ -113,9 +115,9 @@ export default function HomeScreen({ backend }: { backend?: BackendHomeData } = 
           <View style={{ gap: spacing.sm }}><H variant="label">{items.length ? t.noPriority : t.empty}</H><H variant="caption" muted>{items.length ? t.dateNote : t.emptyBody}</H></View>}
         {priority.length > 0 && <H variant="caption" muted>{t.dateNote}</H>}
       </View>}
-      <View style={{ gap: spacing.md }}>{heading(t.ideas, <Button label={recipeMessages[language].viewAll} variant="text" onPress={() => router.push({ pathname: '/feature', params: { feature: 'recipes' } })} />)}<H variant="caption" muted>{t.sample}</H>
+      {backend ? backend.recipeIdeas : <View style={{ gap: spacing.md }}>{heading(t.ideas, <Button label={recipeMessages[language].viewAll} variant="text" onPress={() => router.push({ pathname: '/feature', params: { feature: 'recipes' } })} />)}<H variant="caption" muted>{t.sample}</H>
         <ScrollView horizontal style={{ direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ gap: spacing.md }}>{matches.recipes.map(recipeTile)}</ScrollView>
-      </View>
+      </View>}
       <Card>{heading(t.nutrition)}<H variant="caption" muted>{t.lunch}</H>
         <View style={[row, { flexWrap: 'wrap' }]}>{[[demoNutrition.calories, t.kcal], [demoNutrition.proteinGrams, t.protein], [demoNutrition.fiberGrams, t.fiber]].map(([value, label]) =>
           <View key={label} style={{ flex: 1, minWidth: 75 }}><H variant="heading">{number(value as number)}</H><H variant="caption" muted>{label}</H></View>)}</View><H variant="caption" muted>{t.nutritionNote}</H>
