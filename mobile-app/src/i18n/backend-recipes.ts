@@ -1,3 +1,14 @@
+export const recipeCountUnitLabels = {
+  en: {
+    PIECE: { one: 'piece', other: 'pieces' },
+    CUP: { one: 'cup', other: 'cups' },
+  },
+  ar: {
+    PIECE: { zero: 'قطع', one: 'قطعة', two: 'قطعتان', few: 'قطع', many: 'قطعة', other: 'قطعة' },
+    CUP: { zero: 'أكواب', one: 'كوب', two: 'كوبان', few: 'أكواب', many: 'كوب', other: 'كوب' },
+  },
+} as const;
+
 export const backendRecipeMessages = {
   en: {
     title: 'Recipes', intro: 'Ideas from the food in your kitchen.', back: 'Back', signIn: 'Sign in',

@@ -3,7 +3,7 @@ import type { BackendUnit } from '../domain/backend-inventory';
 import { toMobileUnit } from '../domain/inventory-enum-adapters';
 import { homeUnitLabels } from '../i18n/home';
 import { backendKitchenMessages } from '../i18n/backend-kitchen';
-import { backendRecipeMessages, recipeText } from '../i18n/backend-recipes';
+import { backendRecipeMessages, recipeCountUnitLabels, recipeText } from '../i18n/backend-recipes';
 import { displayInventoryQuantity, inventoryNumberLabel } from './backend-kitchen-view';
 
 type Language = 'en' | 'ar';
@@ -13,7 +13,12 @@ export const recipeNumber = (value: number, language: Language) => inventoryNumb
 export function recipeQuantity(value: string, unit: BackendUnit, language: Language) {
   const mapped = toMobileUnit(unit);
   const labels: Partial<Record<BackendUnit, string>> = backendKitchenMessages[language];
-  const label = mapped.supported ? homeUnitLabels[language][mapped.value] : labels[unit] ?? unit;
+  let label = mapped.supported ? homeUnitLabels[language][mapped.value] : labels[unit] ?? unit;
+  if (unit === 'PIECE' || unit === 'CUP') {
+    const forms: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string } = recipeCountUnitLabels[language][unit];
+    // Numeric conversion selects grammar only; the displayed decimal stays exact.
+    label = forms[new Intl.PluralRules(language).select(Number(value))] ?? forms.other;
+  }
   return `${inventoryNumberLabel(displayInventoryQuantity(value), language)} ${label}`;
 }
 export function recipeMetadata(recipe: RecipeSummary, language: Language) {

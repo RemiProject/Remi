@@ -35,7 +35,7 @@ function harness({ pages = [page()], recipe = detail(), catalog, transport } = {
     authenticatedGraphql: async (query, variables, household) => {
       calls.push({ query, variables, household });
       if (query.includes('query MyHouseholds')) return { myHouseholds: ['home-a', 'home-b'].map(id => ({ household: { id, name: id, timezone: 'Africa/Cairo' } })) };
-      if (query.includes('RecipeFoodNames')) {
+      if (query.includes('CatalogArabicNames')) {
         if (catalog) return catalog(variables);
         return { foods: { nodes: [{ id: 'tomato', aliases: [{ alias: 'عربي tomato', languageCode: 'ar', isPrimary: true }] }], hasNextPage: false, endCursor: null } };
       }
@@ -81,6 +81,32 @@ test('catalog names load every page once, share concurrent reads and isolate ide
   await loadCachedCatalogArabicNames(auth, ['a', 'b']); assert.equal(calls, 2);
   revision++; await loadCachedCatalogArabicNames(auth, ['a']); assert.equal(calls, 4);
 });
+test('many ingredients across recipe pages share the complete paged catalog with Kitchen', async () => {
+  const { loadInventoryArabicNames } = require('../src/services/inventory-catalog-names.ts');
+  const ids = Array.from({ length: 230 }, (_, i) => `food-${i}`);
+  const catalogPages = [];
+  const pages = Array.from({ length: 6 }, (_, i) => page([suggestion(`recipe-${i}`, {
+    missing: ids.slice(i * 40, (i + 1) * 40).map(food), expiringSoon: [],
+  })], i < 5, i < 5 ? `recipe-page-${i + 1}` : null));
+  const h = harness({ pages, catalog: ({ after }) => {
+    const start = after ? Number(after) : 0; catalogPages.push(start);
+    return { foods: { nodes: ids.slice(start, start + 50).map(id => ({ id, aliases: [{ alias: `عربي ${id}`, languageCode: 'ar', isPrimary: true }] })),
+      hasNextPage: start + 50 < ids.length, endCursor: start + 50 < ids.length ? String(start + 50) : null } };
+  } });
+  const store = new BackendRecipesStore(() => h.repository); store.setOwner('user');
+  await Promise.all([store.refresh(), loadInventoryArabicNames(h.auth, ids)]);
+  for (let i = 1; i < pages.length; i++) await store.loadMore();
+  const state = store.getSnapshot();
+  assert.equal(state.moreError, false); assert.equal(state.nodes.length, 6);
+  const ingredients = state.nodes.flatMap(node => node.missing);
+  assert.equal(ingredients.length, 230);
+  assert(ingredients.every(item => item.arabicName === `عربي ${item.foodId}`));
+  assert.deepEqual(catalogPages, [0, 50, 100, 150, 200]);
+  await loadInventoryArabicNames(h.auth, ids); await h.repository.get('one');
+  assert.equal(catalogPages.length, 5, 'Kitchen refresh and recipe detail reuse all five catalog pages');
+  assert(h.calls.every(call => !/\bfood\(id:/.test(call.query)), 'never query per-food resolvers');
+});
+
 test('catalog name cache failures are retryable and never leave a poisoned cache', async () => {
   let calls = 0;
   const auth = { getIdentityRevision: () => 1, authenticatedGraphql: async () => {
@@ -204,6 +230,21 @@ test('recipe display covers every ingredient status and all backend units withou
   assert.equal(view.recipeQuantity('2.000', 'TABLESPOON', 'ar'), '\u20662\u2069 م.ك');
   assert.equal(view.recipeQuantity('0.750', 'TEASPOON', 'ar'), '\u20660.75\u2069 م.ص');
 });
+test('recipe count units use English singular/plural and Arabic plural categories, including short amounts', () => {
+  for (const [unit, singular, plural] of [['PIECE', 'piece', 'pieces'], ['CUP', 'cup', 'cups']]) {
+    for (const [amount, label] of [['1.000', singular], ['2.000', plural], ['0.500', plural], ['0', plural]]) {
+      assert.equal(view.recipeQuantity(amount, unit, 'en'), `${amount === '1.000' ? '1' : amount === '2.000' ? '2' : amount === '0.500' ? '0.5' : '0'} ${label}`);
+    }
+  }
+  for (const [amount, pieces, cups] of [['0', 'قطع', 'أكواب'], ['1', 'قطعة', 'كوب'], ['2', 'قطعتان', 'كوبان'], ['3', 'قطع', 'أكواب'], ['11', 'قطعة', 'كوب'], ['100', 'قطعة', 'كوب'], ['0.5', 'قطعة', 'كوب']]) {
+    assert.equal(view.recipeQuantity(amount, 'PIECE', 'ar'), `\u2066${amount}\u2069 ${pieces}`);
+    assert.equal(view.recipeQuantity(amount, 'CUP', 'ar'), `\u2066${amount}\u2069 ${cups}`);
+  }
+  const node = suggestion('one', { short: [{ ...food(), missingAmount: '1.000', unit: 'PIECE' }] });
+  assert.equal(view.recipeIngredientStatus(ingredient(), node, 'en'), 'Short by 1 piece');
+  assert.equal(view.recipeIngredientStatus(ingredient(), node, 'ar'), 'ينقصك \u20661\u2069 قطعة');
+});
+
 test('card explanations use Arabic ingredient names, only three missing names, calendar expiry and unchanged English recipe text', () => {
   const node = suggestion('one', { missing: ['a', 'b', 'c', 'd', 'e'].map(id => ({ ...food(id), arabicName: `عربي ${id}` })) });
   assert.equal(view.recipeMissing(node, 'en'), 'Missing: A, B, C · +2');
