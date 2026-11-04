@@ -8,7 +8,7 @@ import { useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { backendRecipeMessages } from '@/i18n/backend-recipes';
-import { recipeCoverage, recipeExpiry, recipeFoodName, recipeIngredientStatus, recipeMetadata, recipeMissing, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
+import { recipeCoverage, recipeExpired, recipeExpiry, recipeFoodName, recipeIngredientStatus, recipeMetadata, recipeMissing, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
 import { radii, spacing } from '@/theme/tokens';
 
 function useLabels() {
@@ -52,7 +52,7 @@ export function BackendRecipesScreen() {
     {state.status === 'ready' && <Button label={t.refresh} variant="text" onPress={state.refresh} />}
     {empty && <EmptyState title={t.empty} description={t.emptyBody} action={t.add} onPress={() => router.push('/food-entry')} />}
     {state.status === 'ready' && !empty && state.nodes.map(node => {
-      const missing = recipeMissing(node, language), expiry = recipeExpiry(node, state.today, language);
+      const missing = recipeMissing(node, language), expired = recipeExpired(node, language), expiry = recipeExpiry(node, state.today, language);
       return <Pressable key={node.recipe.id} accessibilityRole="button" accessibilityLabel={node.recipe.name}
         onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: node.recipe.id } })}
         style={({ pressed }) => ({ borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
@@ -61,6 +61,7 @@ export function BackendRecipesScreen() {
           <AppText variant="caption" dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(node.recipe, language)}</AppText>
           <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeCoverage(node, language)}</AppText>
           {missing && <AppText muted dir={rtl ? 'rtl' : 'ltr'}>{missing}</AppText>}
+          {expired && <AppText muted dir={rtl ? 'rtl' : 'ltr'}>{expired}</AppText>}
           {expiry && <AppText dir={rtl ? 'rtl' : 'ltr'}>{expiry}</AppText>}
           <SafetyWarnings warnings={node.safetyWarnings} />
         </View>

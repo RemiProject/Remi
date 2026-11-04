@@ -147,7 +147,31 @@ describe('household calendar expiry', () => {
     ])[0];
     expect(result.shortItems[0]).toMatchObject({ availableAmount: '2.000', missingAmount: '1.000' });
     expect(result.expiringSoonFoods).toEqual([{ foodId: 'food', expiryDay: '2026-06-02' }]);
-    expect(run([recipe('expired-only', [ingredient('food')])], [batch('food', '1', Unit.GRAM, { estimatedExpiryAt: expiry('2026-06-01') })])[0].missingFoodIds).toEqual(['food']);
+    expect(run([recipe('expired-only', [ingredient('food')])], [batch('food', '1', Unit.GRAM, { estimatedExpiryAt: expiry('2026-06-01') })])[0].requiredIngredients[0].status).toBe('EXPIRED');
+  });
+
+  it('distinguishes expired required/optional foods from absent/zero stock without changing coverage or ranking', () => {
+    const recipes = [recipe('a', [ingredient('food'), ingredient('optional', '1', Unit.GRAM, { optional: true }), ingredient('absent'), ingredient('zero')]), recipe('b', [ingredient('other')])];
+    const absent = run(recipes);
+    const result = run(recipes, [batch('food', '1', Unit.GRAM, { estimatedExpiryAt: expiry('2026-06-01') }),
+      batch('food', '0'), batch('optional', '1', Unit.GRAM, { estimatedExpiryAt: expiry('2026-06-01') }),
+      batch('zero', '0', Unit.GRAM, { estimatedExpiryAt: expiry('2026-06-01') })]);
+    expect(result.map(r => [r.recipeId, r.haveCount, r.requiredCount])).toEqual(absent.map(r => [r.recipeId, r.haveCount, r.requiredCount]));
+    expect(result[0].requiredIngredients.map(i => i.status)).toEqual(['EXPIRED', 'MISSING', 'MISSING']);
+    expect(result[0].optionalIngredients[0].status).toBe('EXPIRED');
+    expect(result[0].missingFoodIds).toEqual(['absent', 'zero']);
+    expect(result[0].expiringSoonFoods).toEqual([]);
+  });
+
+  it.each([
+    { quantity: '2', unit: Unit.GRAM, status: 'ENOUGH' },
+    { quantity: '0.5', unit: Unit.GRAM, status: 'SHORT' },
+    { quantity: '1', unit: Unit.PIECE, status: 'UNKNOWN' },
+  ])('uses valid stock alongside expired batches: $status', ({ quantity, unit, status }) => {
+    const result = run([recipe('mixed', [ingredient('food')])], [
+      batch('food', '100', Unit.GRAM, { estimatedExpiryAt: expiry('2026-06-01') }), batch('food', quantity, unit, { id: 'valid' }),
+    ])[0];
+    expect(result.requiredIngredients[0].status).toBe(status);
   });
 
   it('includes today and +3 days, excludes +4 days, and counts each food once across batches', () => {
@@ -164,7 +188,7 @@ describe('household calendar expiry', () => {
   it('uses the household timezone rather than UTC or the host timezone', () => {
     const recipes = [recipe('zone', [ingredient('food')])];
     const batches = [batch('food', '1', Unit.GRAM, { estimatedExpiryAt: new Date('2026-06-01T20:59:59Z') })];
-    expect(run(recipes, batches)[0].missingFoodIds).toEqual(['food']);
+    expect(run(recipes, batches)[0].requiredIngredients[0].status).toBe('EXPIRED');
     expect(run(recipes, batches, { householdTimezone: 'America/Los_Angeles' })[0].haveCount).toBe(1);
   });
 

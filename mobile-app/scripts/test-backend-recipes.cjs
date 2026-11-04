@@ -16,7 +16,7 @@ const deferred = () => { let resolve, reject; const promise = new Promise((a, b)
 const summary = id => ({ id, name: `Recipe ${id}`, description: 'English description.', servings: 4, prepTimeMin: 5, cookTimeMin: 10, difficulty: 'EASY', cuisineId: null, cuisineName: null });
 const food = (foodId = 'tomato') => ({ foodId, foodName: foodId });
 const suggestion = (id = 'one', extra = {}) => ({ recipe: summary(id), coverageRatio: 0.5, haveCount: 1, requiredCount: 2, safetyWarnings: [],
-  missing: [food()], short: [], unknown: [], assumedStaples: [], optional: [], expiringSoon: [{ ...food(), expiryDay: '2026-06-03' }], ...extra });
+  missing: [food()], expired: [], short: [], unknown: [], assumedStaples: [], optional: [], expiringSoon: [{ ...food(), expiryDay: '2026-06-03' }], ...extra });
 const page = (nodes = [suggestion()], hasNextPage = false, endCursor = null) => ({ nodes, hasNextPage, endCursor, totalCount: 2 });
 const readPage = (nodes = [suggestion()], extra = {}) => ({ ...page(nodes), today: '2026-06-02', restarted: false, ...extra });
 const ingredient = (foodId = 'tomato', unit = 'GRAM', optional = false) => ({ ...food(foodId), id: foodId, quantity: '2.000', unit, optional });
@@ -243,6 +243,26 @@ test('recipe count units use English singular/plural and Arabic plural categorie
   const node = suggestion('one', { short: [{ ...food(), missingAmount: '1.000', unit: 'PIECE' }] });
   assert.equal(view.recipeIngredientStatus(ingredient(), node, 'en'), 'Short by 1 piece');
   assert.equal(view.recipeIngredientStatus(ingredient(), node, 'ar'), 'ينقصك \u20661\u2069 قطعة');
+});
+
+test('expired foods stay separate from missing on cards and required/optional detail rows in both languages', async () => {
+  const expired = { ...food('expired'), arabicName: 'طماطم' };
+  const h = harness({ pages: [page([suggestion('one', { missing: [], expired: [food()], expiringSoon: [] })])] });
+  assert.equal((await h.repository.list()).nodes[0].expired[0].arabicName, 'عربي tomato');
+  const node = suggestion('one', { missing: [food('absent')], expired: [expired], optional: [{ ...food('optional'), status: 'EXPIRED' }] });
+  for (const language of ['en', 'ar']) {
+    const text = language === 'en' ? 'Expired: Expired' : 'منتهي الصلاحية: طماطم';
+    assert.equal(view.recipeExpired(node, language), text);
+    assert.equal(view.recipeIngredientStatus(ingredient('expired'), node, language), messages[language].EXPIRED);
+    assert.equal(view.recipeIngredientStatus(ingredient('optional', 'GRAM', true), node, language), messages[language].EXPIRED);
+    assert.equal(view.recipeIngredientStatus(ingredient('absent'), node, language), messages[language].MISSING);
+    const screen = ui(); screen.language(language); screen.set({ nodes: [node] });
+    const texts = nodes(screen.render(), 'AppText').map(n => n.props.children);
+    assert(texts.indexOf(view.recipeMissing(node, language)) < texts.indexOf(text));
+    screen.set({ detail: { id: 'one', status: 'ready', recipe: { ...detail(), ingredients: [{ ...ingredient('expired'), foodName: 'tomato' }, ingredient('optional', 'GRAM', true)] }, suggestion: node } });
+    assert.equal(nodes(screen.render(true), 'AppText').filter(n => n.props.children === messages[language].EXPIRED).length, 2);
+  }
+  assert.equal(view.recipeExpired(suggestion(), 'en'), null);
 });
 
 test('card explanations use Arabic ingredient names, only three missing names, calendar expiry and unchanged English recipe text', () => {

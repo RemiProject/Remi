@@ -12,9 +12,10 @@ export const SUGGESTIONS_QUERY = `query Suggestions($first:Int!, $after:String) 
     nodes {
       recipe { id name description servings prepTimeMin cookTimeMin difficulty cuisineId cuisineName householdId }
       coverageRatio haveCount requiredCount safetyWarnings
-      missing { foodId foodName status }
+      missing { foodId status }
+      expired { foodId status }
       short { foodId missingAmount unit }
-      unknown { foodId knownAvailableAmount status }
+      unknown { foodId status }
       assumedStaples { foodId status }
       optional { foodId status }
       expiringSoon { foodId expiryDay }
@@ -149,16 +150,18 @@ export async function verifyRecipeSuggestions({ endpoint = process.env.API_URL ?
     after = page.endCursor;
     if (!page.hasNextPage) break;
   } while (details.size < 5);
-  await check('expired stock is MISSING; tomorrow is reported as expiring soon', () => {
-    assert.ok(details.get(expired).missing.some(i => i.foodId === foods.carrot.id && i.status === 'MISSING'));
+  await check('expired stock is EXPIRED, not missing; tomorrow is reported as expiring soon', () => {
+    assert.ok(details.get(expired).expired.some(i => i.foodId === foods.carrot.id && i.status === 'EXPIRED'));
+    assert.equal(details.get(expired).missing.length, 0);
+    assert.equal(details.get(expired).haveCount, 0);
     const soon = details.get(owned).expiringSoon.find(i => i.foodId === foods.tomato.id);
     assert.equal(soon.expiryDay, day(1).slice(0, 10));
-    return `expected=carrot missing, tomato expiry ${day(1).slice(0, 10)}; actual=matched`;
+    return `expected=carrot expired (not available), tomato expiry ${day(1).slice(0, 10)}; actual=matched`;
   });
   await check('SHORT, UNKNOWN, optional and ASSUMED explanations preserve engine semantics', () => {
     assert.deepEqual(details.get(short).short, [{ foodId: foods.tomato.id, missingAmount: '1000.000', unit: 'GRAM' }]);
     assert.equal(details.get(unknown).unknown[0].status, 'UNKNOWN'); assert.equal(details.get(unknown).haveCount, 1);
-    assert.ok(details.get(owned).optional.some(i => i.foodId === foods.carrot.id && i.status === 'MISSING'));
+    assert.ok(details.get(owned).optional.some(i => i.foodId === foods.carrot.id && i.status === 'EXPIRED'));
     assert.equal(details.get(owned).assumedStaples[0].foodId, foods.salt.id);
     assert.equal(details.get(assumed).requiredCount, 0); assert.equal(details.get(assumed).coverageRatio, 0);
   });

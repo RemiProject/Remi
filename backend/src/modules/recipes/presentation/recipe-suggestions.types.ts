@@ -4,7 +4,7 @@ import { DecimalScalar, LocalDateScalar } from '@/platform/graphql/scalars.js';
 import { Unit } from '@/shared/food-unit.js';
 import { RecipeSummaryType } from '@/modules/recipes/presentation/recipe.types.js';
 
-export enum RecipeIngredientMatchStatus { ENOUGH = 'ENOUGH', SHORT = 'SHORT', MISSING = 'MISSING', UNKNOWN = 'UNKNOWN', ASSUMED = 'ASSUMED' }
+export enum RecipeIngredientMatchStatus { ENOUGH = 'ENOUGH', SHORT = 'SHORT', MISSING = 'MISSING', EXPIRED = 'EXPIRED', UNKNOWN = 'UNKNOWN', ASSUMED = 'ASSUMED' }
 registerEnumType(RecipeIngredientMatchStatus, { name: 'RecipeIngredientMatchStatus' });
 
 @ObjectType({ isAbstract: true })
@@ -35,6 +35,7 @@ export class RecipeSuggestionType {
   @Field(() => Float) coverageRatio!: number;
   @Field(() => Int) haveCount!: number;
   @Field(() => Int) requiredCount!: number;
+  @Field(() => [RecipeSuggestionIngredientType]) expired!: RecipeSuggestionIngredientType[];
   @Field(() => [RecipeSuggestionIngredientType]) missing!: RecipeSuggestionIngredientType[];
   @Field(() => [RecipeSuggestionIngredientType]) short!: RecipeSuggestionIngredientType[];
   @Field(() => [RecipeSuggestionIngredientType]) unknown!: RecipeSuggestionIngredientType[];

@@ -14,8 +14,8 @@ const summary = 'id name description servings prepTimeMin cookTimeMin difficulty
 export const recipeReadOperations = {
   list: `query RecipeSuggestions($first:Int!, $after:String) { recipeSuggestions(first:$first, after:$after) {
     nodes { recipe { ${summary} } coverageRatio haveCount requiredCount safetyWarnings
-      missing { foodId foodName } short { foodId foodName missingAmount unit }
-      unknown { foodId foodName } assumedStaples { foodId foodName } optional { foodId foodName }
+      missing { foodId foodName } expired { foodId foodName } short { foodId foodName missingAmount unit }
+      unknown { foodId } assumedStaples { foodId } optional { foodId status }
       expiringSoon { foodId foodName expiryDay } }
     hasNextPage endCursor totalCount } }`,
   get: `query Recipe($id:ID!) { recipe(id:$id) { ${summary}
@@ -63,7 +63,7 @@ export function createGraphqlRecipeRepository(auth: Auth, storage: ActiveHouseho
       || (result.hasNextPage && (!result.endCursor || result.endCursor === after))) throw invalid();
     for (const node of result.nodes) {
       if (!node.recipe?.id || !node.recipe.name || !Number.isInteger(node.haveCount) || !Number.isInteger(node.requiredCount)
-        || !['missing', 'short', 'unknown', 'assumedStaples', 'optional', 'expiringSoon', 'safetyWarnings'].every(key => Array.isArray(node[key as keyof RecipeSuggestion]))) throw invalid();
+        || !['missing', 'expired', 'short', 'unknown', 'assumedStaples', 'optional', 'expiringSoon', 'safetyWarnings'].every(key => Array.isArray(node[key as keyof RecipeSuggestion]))) throw invalid();
       for (const item of node.short) {
         if (!Object.values(BackendUnit).includes(item.unit) || parseDecimal(item.missingAmount) < 0n) throw invalid();
       }
@@ -79,9 +79,10 @@ export function createGraphqlRecipeRepository(auth: Auth, storage: ActiveHouseho
     } catch (error) { assertContext(current); throw error; }
   }
   async function enrich(current: Context, nodes: RecipeSuggestion[]) {
-    const refs = nodes.flatMap(n => [...n.missing, ...n.expiringSoon]);
+    const refs = nodes.flatMap(n => [...n.missing, ...n.expired, ...n.expiringSoon]);
     const names = await namesFor(current, refs.map(i => i.foodId));
     return nodes.map(node => ({ ...node,
+      expired: node.expired.map(item => ({ ...item, arabicName: names.get(item.foodId) })),
       missing: node.missing.map(item => ({ ...item, arabicName: names.get(item.foodId) })),
       expiringSoon: node.expiringSoon.map(item => ({ ...item, arabicName: names.get(item.foodId) })),
     }));
