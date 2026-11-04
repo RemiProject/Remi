@@ -36,6 +36,8 @@ export class InventoryMutationSuccessType {
 
 @ObjectType()
 export class InsufficientStockType {
+  @Field(() => ID, { nullable: true }) foodId!: string | null;
+  @Field(() => DecimalScalar, { nullable: true }) requested!: string | null;
   @Field(() => DecimalScalar) available!: string;
   @Field(() => Unit) unit!: Unit;
 }
