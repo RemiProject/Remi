@@ -27,7 +27,7 @@ export function resolveBackendUrl(options: {
 }
 
 export class BackendError extends Error {
-  constructor(message: string, readonly status?: number, readonly codes: string[] = []) {
+  constructor(message: string, readonly status?: number, readonly codes: string[] = [], readonly foodId?: string) {
     super(message);
     this.name = 'BackendError';
   }
@@ -49,14 +49,15 @@ export function createBackendClient(baseUrl: string, transport: typeof fetch = f
     }
   }
   async function graphql<T>(query: string, variables: Record<string, unknown> = {}, session?: { accessToken: string; householdId?: string }) {
-    const result = await request<{ data?: T; errors?: { message: string; extensions?: { code?: string } }[] }>('/graphql', {
+    const result = await request<{ data?: T; errors?: { message: string; extensions?: { code?: string; foodId?: string } }[] }>('/graphql', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(session ? { Authorization: `Bearer ${session.accessToken}` } : {}),
         ...(session?.householdId ? { 'x-household-id': session.householdId } : {}) },
       body: JSON.stringify({ query, variables }),
     });
     if (result.errors?.length) throw new BackendError(result.errors.map((e) => e.message).join('; '), undefined,
-      result.errors.flatMap((e) => e.extensions?.code ? [e.extensions.code] : []));
+      result.errors.flatMap((e) => e.extensions?.code ? [e.extensions.code] : []),
+      result.errors.length === 1 ? result.errors[0].extensions?.foodId : undefined);
     if (result.data === undefined || result.data === null) throw new BackendError('Backend returned no GraphQL data.');
     return result.data;
   }

@@ -68,6 +68,11 @@ export class BackendKitchenStore {
       throw error;
     }
   };
+  refreshAfterMeal = async () => {
+    await this.reload();
+    if (this.snapshot.status !== 'ready') throw new Error('Kitchen refresh failed.');
+    return this.snapshot;
+  };
   reload = async () => {
     if (!this.snapshot.owner) return;
     const generation = this.generation, request = ++this.listRequest;
