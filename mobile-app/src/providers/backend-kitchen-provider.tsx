@@ -70,6 +70,6 @@ export function useBackendKitchen() {
     ...(restoreFailed ? { status: 'error' as const } : {}),
     retry: restoreFailed ? auth.restore : store.reload, loadDetail: store.loadDetail,
     showAdded: store.showAdded, dismissAdded: store.dismissAdded,
-    refreshStock: store.refreshStock, showUpdated: store.showUpdated,
+    refreshAfterMeal: store.refreshAfterMeal, refreshStock: store.refreshStock, showUpdated: store.showUpdated,
   };
 }

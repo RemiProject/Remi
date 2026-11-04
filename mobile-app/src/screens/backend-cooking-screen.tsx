@@ -6,6 +6,7 @@ import { AppText, Button, Card, Chip, EmptyState, PageHeader, Screen, SectionHea
 import { useBackendCookingSession, useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
+import { cookedItMessages } from '@/i18n/cooked-it';
 import { cookingMessages } from '@/i18n/cooking';
 import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { recipeFoodName, recipeIngredientStatus, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
@@ -39,7 +40,9 @@ export function BackendCookingScreen() {
         <AppText variant="heading" dir="ltr">{recipe.name}</AppText>
         {session.finished ? <>
           <PageHeader title={r.cookingDone} subtitle={t.summary} />
-          <Button label={r.cookingDone} onPress={review} />
+          <AppText dir={dir}>{cookedItMessages[language].prompt}</AppText>
+          <Button label={cookedItMessages[language].yes} onPress={() => router.push({ pathname: '/cooked-it', params: { id } })} />
+          <Button label={cookedItMessages[language].notNow} variant="text" onPress={review} />
         </> : <>
           {current === 0 && <Card>
             <SectionHeader title={r.ingredients} />

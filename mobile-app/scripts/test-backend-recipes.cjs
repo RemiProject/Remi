@@ -9,6 +9,7 @@ const { createGraphqlRecipeRepository, recipeReadOperations } = require('../src/
 const { resolveActiveHousehold } = require('../src/services/active-household-service.ts');
 const { BackendRecipesStore, visibleRecipes, emptyRecipes } = require('../src/repositories/backend-recipes-store.ts');
 const view = require('../src/utils/backend-recipe-view.ts');
+const { cookedItMessages } = require('../src/i18n/cooked-it.ts');
 const { cookingMessages } = require('../src/i18n/cooking.ts');
 const cookingUtils = require('../src/utils/cooking-session.ts');
 const { backendRecipeMessages: messages } = require('../src/i18n/backend-recipes.ts');
@@ -349,7 +350,7 @@ function ui() {
     '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, ensureLoaded: () => { refresh++; }, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; }, ensureDetail: () => { get++; } }) },
     '@/providers/language-provider': { useLanguage: () => ({ language }) },
     '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { radii: {}, spacing: {} },
-    '@/i18n/backend-recipes': { backendRecipeMessages: messages }, '@/i18n/cooking': { cookingMessages }, '@/utils/backend-recipe-view': view,
+    '@/i18n/backend-recipes': { backendRecipeMessages: messages }, '@/i18n/cooking': { cookingMessages }, '@/i18n/cooked-it': { cookedItMessages }, '@/utils/backend-recipe-view': view,
   };
   mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
@@ -449,7 +450,9 @@ test('backend Cooking orders English steps and durations, shows every read-only 
     nodes(tree, 'Chip')[1].props.onPress(); tree = h.render();
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].finish).props.onPress(); tree = h.render();
     assert.equal(h.progress().finished, true);
-    nodes(tree, 'Button').find(n => n.props.label === messages[language].cookingDone).props.onPress();
+    nodes(tree, 'Button').find(n => n.props.label === cookedItMessages[language].yes).props.onPress();
+    assert.deepEqual(h.pushed.at(-1), { pathname: '/cooked-it', params: { id: 'one' } });
+    nodes(tree, 'Button').find(n => n.props.label === cookedItMessages[language].notNow).props.onPress();
     assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'one' } });
     assert.equal(h.counts().get, 1, 'completing and Done do not request any inventory mutation');
   }
@@ -483,6 +486,16 @@ test('Cooking route uses backend for every id when enabled, including old sample
   });
   assert.equal(route.default().type, 'BackendCookingScreen');
   enabled = false; assert.equal(typeof route.default().type, 'function');
+});
+
+test('I cooked this opens confirmation without a mutation, and Removed banner appears on the returned recipe in EN/AR', () => {
+  for (const language of ['en', 'ar']) {
+    const h = ui(); h.language(language); h.set({ detail: { id: 'one', status: 'ready', recipe: detail(), suggestion: suggestion() }, removedNotice: { id: 1, recipeId: 'one' } });
+    const tree = h.render(true);
+    nodes(tree, 'Button').find(n => n.props.label === cookedItMessages[language].cooked).props.onPress();
+    assert.deepEqual(h.pushed.at(-1), { pathname: '/cooked-it', params: { id: 'one' } });
+    assert(nodes(tree, 'AppText').some(n => n.props.children === cookedItMessages[language].removed && n.props.accessibilityLiveRegion === 'polite'));
+  }
 });
 
 test('Home recipe ideas show four ranked backend cards, metadata, coverage, expiry and detail/View all routes in EN/AR', () => {

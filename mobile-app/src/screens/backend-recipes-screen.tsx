@@ -7,6 +7,7 @@ import { RecipePlaceholder } from '@/components/recipe-placeholder';
 import { useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
+import { cookedItMessages } from '@/i18n/cooked-it';
 import { cookingMessages } from '@/i18n/cooking';
 import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { recipeCoverage, recipeExpired, recipeExpiry, recipeFoodName, recipeIngredientStatus, recipeMetadata, recipeMissing, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
@@ -68,10 +69,16 @@ export function BackendRecipesScreen() {
 
 export function BackendRecipeDetailScreen({ id }: { id: string }) {
   const state = useBackendRecipes();
-  const { owner, ensureDetail } = state;
+  const { owner, ensureDetail, dismissMealRemoved } = state;
   const { t, rtl, language } = useLabels();
   const { colors } = useRemyTheme();
   useFocusEffect(useCallback(() => { if (owner) void ensureDetail(id); }, [owner, ensureDetail, id]));
+  const notice = state.removedNotice?.recipeId === id ? state.removedNotice : null;
+  useFocusEffect(useCallback(() => {
+    if (!owner || !notice) return;
+    const timer = setTimeout(() => dismissMealRemoved(notice.id), 3500);
+    return () => clearTimeout(timer);
+  }, [owner, notice, dismissMealRemoved]));
   const detail = state.detail?.id === id ? state.detail : null;
   const status = state.status === 'signed-out' ? 'signed-out' : detail?.status ?? (state.status === 'error' ? 'error' : 'loading');
   const recipe = status === 'ready' ? detail?.recipe : undefined;
@@ -79,11 +86,13 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}>
     <Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace({ pathname: '/feature', params: { feature: 'recipes' } })} />
     <RecipeState status={status} retry={state.status === 'error' && !state.owner ? state.refresh : retry} />
+    {owner && notice && <Card><AppText accessibilityLiveRegion="polite" dir={rtl ? 'rtl' : 'ltr'}>{cookedItMessages[language].removed}</AppText></Card>}
     {recipe && <>
       <SafetyWarnings detail warnings={detail?.suggestion?.safetyWarnings ?? []} />
       <RecipePlaceholder label={t.placeholder} /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
       <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(recipe, language)}</AppText>
       {recipe.description && <><SectionHeader title={t.description} /><AppText dir="ltr">{recipe.description}</AppText></>}
+      <Button label={cookedItMessages[language].cooked} onPress={() => router.push({ pathname: '/cooked-it', params: { id } })} />
       <SectionHeader title={t.ingredients} />
       {detail?.matchingLoading && <AppText accessibilityLiveRegion="polite">{t.matchingLoading}</AppText>}
       {detail?.matchingError && <Card><AppText accessibilityRole="alert">{t.matchingError}</AppText><Button label={t.retry} onPress={retry} /></Card>}

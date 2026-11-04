@@ -6,9 +6,10 @@ type Status = 'signed-out' | 'idle' | 'loading' | 'ready' | 'error';
 export interface RecipesSnapshot {
   owner: string | null; status: Status; nodes: RecipeSuggestion[]; today: string;
   hasNextPage: boolean; endCursor: string | null; loadingMore: boolean; moreError: boolean;
+  removedNotice: { id: number; recipeId: string } | null;
   detail: { id: string; status: Status; recipe?: BackendRecipe; suggestion?: RecipeSuggestion; matchingError?: boolean; matchingLoading?: boolean } | null;
 }
-export const emptyRecipes: RecipesSnapshot = { owner: null, status: 'signed-out', nodes: [], today: '', hasNextPage: false, endCursor: null, loadingMore: false, moreError: false, detail: null };
+export const emptyRecipes: RecipesSnapshot = { owner: null, status: 'signed-out', nodes: [], today: '', hasNextPage: false, endCursor: null, loadingMore: false, moreError: false, detail: null, removedNotice: null };
 export class BackendRecipesStore {
   private snapshot = emptyRecipes;
   private listeners = new Set<() => void>();
@@ -18,6 +19,16 @@ export class BackendRecipesStore {
   private listActive = false;
   private inventoryKey = '';
   private seen = new Set<string>();
+  private removedSequence = 0;
+  showMealRemoved = (recipeId: string) => { if (this.snapshot.owner) this.publish({ removedNotice: { id: ++this.removedSequence, recipeId } }); };
+  dismissMealRemoved = (id: number) => { if (this.snapshot.removedNotice?.id === id) this.publish({ removedNotice: null }); };
+  refreshAfterMeal = async (id: string, inventoryKey: string) => {
+    this.inventoryChanged(inventoryKey, false);
+    await this.refresh();
+    if (this.snapshot.status !== 'ready') throw new Error('Recipe refresh failed.');
+    await this.loadDetail(id);
+    if (this.snapshot.detail?.id !== id || this.snapshot.detail.status !== 'ready') throw new Error('Recipe detail refresh failed.');
+  };
   private cookingIdentity: string | null = null;
   private cooking = new Map<string, CookingSession>();
   setCookingIdentity = (identity: string | null) => {
@@ -41,14 +52,14 @@ export class BackendRecipesStore {
     this.generation++; this.seen.clear(); this.inventoryKey = '';
     this.publish({ ...emptyRecipes, owner, status: owner ? 'idle' : 'signed-out' });
   };
-  inventoryChanged = (key: string) => {
+  inventoryChanged = (key: string, reload = true) => {
     if (!this.snapshot.owner || key === this.inventoryKey) return;
     this.inventoryKey = key;
     const detail = this.snapshot.detail?.id;
     this.generation++; this.seen.clear();
     this.publish({ nodes: [], endCursor: null, hasNextPage: false, moreError: false, loadingMore: false, status: 'idle', detail: null });
-    if (this.listActive) void this.refresh();
-    if (detail) void this.loadDetail(detail);
+    if (reload && this.listActive) void this.refresh();
+    if (reload && detail) void this.loadDetail(detail);
   };
   private failure(error: unknown) {
     if (isSignedOutError(error)) this.publish({ ...emptyRecipes });

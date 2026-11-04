@@ -18,7 +18,7 @@ function ownerKey(auth: ReturnType<typeof useAuth>) {
 function cookingIdentity(auth: ReturnType<typeof useAuth>) {
   return auth.ready && auth.user ? `${auth.user.id}:${getAuth().getIdentityRevision()}` : null;
 }
-function inventorySignature(owner: string | null, kitchen: ReturnType<typeof useBackendKitchen>) {
+function inventorySignature(owner: string | null, kitchen: Pick<ReturnType<typeof useBackendKitchen>, 'items' | 'today' | 'status'>) {
   return kitchen.status === 'ready' ? JSON.stringify([owner, kitchen.today, kitchen.items.map(i => [i.id, i.quantity, i.version, i.expirationDate])]) : null;
 }
 export function BackendRecipesProvider({ children }: PropsWithChildren) {
@@ -46,13 +46,16 @@ export function useBackendRecipes() {
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
   const ensureLoaded = useCallback(() => { store.setOwner(owner); if (inventoryKey) store.inventoryChanged(inventoryKey); return store.ensureLoaded(); }, [store, owner, inventoryKey]);
   const refresh = useCallback(() => { store.setOwner(owner); return store.refresh(); }, [store, owner]);
+  const refreshAfterMeal = useCallback((id: string, inventory: Pick<ReturnType<typeof useBackendKitchen>, 'items' | 'today' | 'status'>) => {
+    store.setOwner(owner); return store.refreshAfterMeal(id, inventorySignature(owner, inventory)!);
+  }, [store, owner]);
   const loadMore = useCallback(() => { store.setOwner(owner); return store.loadMore(); }, [store, owner]);
   const ensureDetail = useCallback((id: string) => { store.setOwner(owner); return store.ensureDetail(id); }, [store, owner]);
   const loadDetail = useCallback((id: string) => { store.setOwner(owner); return store.loadDetail(id); }, [store, owner]);
   const restoreFailed = auth.ready && !auth.busy && !auth.user && (auth.error === 'connectionError' || auth.error === 'storageError');
   return { ...visibleRecipes(snapshot, owner, auth.busy || !auth.ready), ...(restoreFailed ? { status: 'error' as const } : {}),
     owner, ensureLoaded, kitchenEmpty: kitchen.status === 'ready' && kitchen.items.length === 0,
-    refresh: restoreFailed ? auth.restore : refresh, loadMore, loadDetail, ensureDetail };
+    refresh: restoreFailed ? auth.restore : refresh, loadMore, loadDetail, ensureDetail, refreshAfterMeal, showMealRemoved: store.showMealRemoved, dismissMealRemoved: store.dismissMealRemoved };
 }
 
 export function useBackendCookingSession(id: string) {

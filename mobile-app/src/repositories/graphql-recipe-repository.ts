@@ -14,8 +14,8 @@ const summary = 'id name description servings prepTimeMin cookTimeMin difficulty
 export const recipeReadOperations = {
   list: `query RecipeSuggestions($first:Int!, $after:String) { recipeSuggestions(first:$first, after:$after) {
     nodes { recipe { ${summary} } coverageRatio haveCount requiredCount safetyWarnings
-      missing { foodId foodName } expired { foodId foodName } short { foodId foodName missingAmount unit }
-      unknown { foodId } assumedStaples { foodId } optional { foodId status }
+      missing { foodId foodName } expired { foodId foodName } short { foodId missingAmount unit }
+      unknown { foodId } assumedStaples { foodId } optional { foodId status availableAmount }
       expiringSoon { foodId foodName expiryDay } }
     hasNextPage endCursor totalCount } }`,
   get: `query Recipe($id:ID!) { recipe(id:$id) { ${summary}
