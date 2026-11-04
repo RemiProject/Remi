@@ -5,6 +5,7 @@ import { Unit } from '@/shared/food-unit.js';
 import { UnitConverter } from '@/modules/units/units.public.js';
 import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 import type { Tx } from '@/platform/db/tx-context.js';
+import { eligibleMealBatches, type MealExpiryPolicy } from '@/modules/inventory/domain/eligible-meal-batches.js';
 import { allocateFefo } from '@/modules/inventory/domain/fefo-allocator.js';
 
 type FoodRow = { id: string; densityGPerMl: string | null; gramsPerPiece: string | null };
@@ -39,8 +40,8 @@ export interface AdjustmentInput {
 }
 
 export class InsufficientStockError extends DomainError {
-  constructor(available: string, unit: Unit) {
-    super('INSUFFICIENT_STOCK', 'There is not enough stock for this request.', 409, { available, unit });
+  constructor(available: string, unit: Unit, foodId: string | null = null, requested: string | null = null) {
+    super('INSUFFICIENT_STOCK', 'There is not enough stock for this request.', 409, { available, unit, foodId, requested });
   }
 }
 
@@ -107,8 +108,8 @@ export class InventoryLedgerService {
   }
 
   /** Lets a higher-level use case consume inventory inside its own atomic transaction. */
-  consumeWithinTransaction(tx: Tx, householdId: string, actorUserId: string, input: StockInput): Promise<StockResult> {
-    return this.consumeInTransaction(tx, householdId, actorUserId, input, 'EATEN', 'CONSUMPTION');
+  consumeWithinTransaction(tx: Tx, householdId: string, actorUserId: string, input: StockInput, expiryPolicy?: MealExpiryPolicy): Promise<StockResult> {
+    return this.consumeInTransaction(tx, householdId, actorUserId, input, 'EATEN', 'CONSUMPTION', expiryPolicy);
   }
 
   discardStock(householdId: string, actorUserId: string, input: StockInput): Promise<StockResult> {
@@ -178,7 +179,7 @@ export class InventoryLedgerService {
     return { eventId, replayed: false, foodId: food.id, quantity: input.amount, unit: input.unit, balances: [{ inventoryItemId: itemId, quantityDelta: input.amount, balanceAfter: updated[0].quantity }] };
   }
 
-  private async consumeInTransaction(tx: Tx, householdId: string, actorUserId: string, input: StockInput, eventType: 'EATEN' | 'WASTED', movementType: 'CONSUMPTION' | 'DAMAGE_WASTE'): Promise<StockResult> {
+  private async consumeInTransaction(tx: Tx, householdId: string, actorUserId: string, input: StockInput, eventType: 'EATEN' | 'WASTED', movementType: 'CONSUMPTION' | 'DAMAGE_WASTE', expiryPolicy?: MealExpiryPolicy): Promise<StockResult> {
     validateInput(input);
     const food = await this.food(tx, input.foodId);
     const eventId = newId();
@@ -194,11 +195,11 @@ export class InventoryLedgerService {
       SELECT "id", "quantity"::text AS "quantity", "unit"::text AS "unit", "version", "estimatedExpiryAt"
       FROM "InventoryItem" WHERE "householdId" = ${householdId}::uuid AND "foodId" = ${food.id}::uuid AND "archivedAt" IS NULL AND "quantity" > 0
       ORDER BY "id" FOR UPDATE`;
-    const normalized = batches.map((batch) => ({ ...batch, available: this.converter.convert(batch.quantity, batch.unit, input.unit, food) }));
+    const normalized = eligibleMealBatches(batches, expiryPolicy).map((batch) => ({ ...batch, available: this.converter.convert(batch.quantity, batch.unit, input.unit, food) }));
     const allocations = allocateFefo(input.amount, normalized.map((b) => ({ id: b.id, quantity: b.available, estimatedExpiryAt: b.estimatedExpiryAt })));
     if (!allocations) {
       const available = formatMilli(normalized.reduce((sum, b) => sum + milli(b.available), 0n));
-      throw new InsufficientStockError(available, input.unit);
+      throw new InsufficientStockError(available, input.unit, input.foodId, input.amount);
     }
 
     await tx.$executeRaw`SELECT set_config('app.inventory_ledger_write', 'true', true)`;
@@ -250,7 +251,7 @@ export class InventoryLedgerService {
       WHERE "id" = ${input.inventoryItemId}::uuid AND "householdId" = ${householdId}::uuid AND "version" = ${batches[0].version}
         AND "quantity" + ${input.delta}::numeric >= 0
       RETURNING "quantity"::text AS "quantity", "version"`;
-    if (!updated.length) throw new InsufficientStockError(batches[0].quantity, initial[0].unit);
+    if (!updated.length) throw new InsufficientStockError(batches[0].quantity, initial[0].unit, food.id, amount);
     await insertTransaction(tx, householdId, input.inventoryItemId, eventId, 'STOCK_AUDIT_ADJUSTMENT', input.delta, updated[0].quantity, `ledger:${eventId}:${input.inventoryItemId}`);
     return { eventId, replayed: false, foodId: food.id, quantity: amount, unit: initial[0].unit, balances: [{ inventoryItemId: input.inventoryItemId, quantityDelta: input.delta, balanceAfter: updated[0].quantity }] };
   }

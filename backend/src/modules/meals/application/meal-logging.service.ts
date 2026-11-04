@@ -16,7 +16,7 @@ export interface MealFoodInput { foodId: string; amount: string; unit: Unit }
 export interface MealShareInput { userId: string; servings: string }
 export interface MealLogInput {
   mealType: MealTypeValue; eatenAt: Date; origin?: MealOrigin; name?: string;
-  idempotencyKey: string; items: MealFoodInput[];
+  idempotencyKey: string; items: MealFoodInput[]; skipExpiredBatches?: boolean;
 }
 export interface FamilyMealLogInput extends MealLogInput { totalServings: string; shares: MealShareInput[]; guestServings?: string }
 
@@ -53,7 +53,7 @@ export class MealLoggingService {
     if (new Set(users).size !== users.length || users.length === 0) throw new DomainError('INVALID_SHARES', 'Each active household member can appear only once in the meal shares.');
     const requestHash = hashMealRequest(input, family);
 
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${householdId}:${input.idempotencyKey}`}, 0))`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${householdId}:${input.idempotencyKey}`}, 0))`;
     const prior = await tx.$queryRaw<Array<MealRow & { requestHash: string }>>`SELECT "id", "userId", "mealType"::text AS "mealType", "eatenAt", "origin"::text AS "origin", "name", "requestHash" FROM "Meal" WHERE "householdId" = ${householdId}::uuid AND "idempotencyKey" = ${input.idempotencyKey} ORDER BY "userId"`;
     if (prior.length) {
       if (prior.some((meal) => meal.requestHash.trim() !== requestHash) || !sameStrings(prior.map((meal) => meal.userId).sort(), sortedUsers)) {
@@ -79,9 +79,15 @@ export class MealLoggingService {
     const foodFacts = new Map(factsRows.map((food) => [food.id, food]));
 
     if (origin === 'HOME') {
+      let expiryPolicy;
+      if (input.skipExpiredBatches) {
+        const households = await tx.$queryRaw<Array<{ timezone: string }>>`SELECT timezone FROM "Household" WHERE id = ${householdId}::uuid AND "deletedAt" IS NULL`;
+        if (!households.length) throw new DomainError('HOUSEHOLD_NOT_FOUND', 'The household no longer exists.', 404);
+        expiryPolicy = { householdTimezone: households[0].timezone, now: new Date() };
+      }
       for (const item of items) {
         const ledgerInput: StockInput = { foodId: item.foodId, amount: item.amount, unit: item.unit, idempotencyKey: ledgerKey(householdId, input.idempotencyKey, item.foodId) };
-        await this.inventory.consumeWithinTransaction(tx, householdId, actorUserId, ledgerInput);
+        await this.inventory.consumeWithinTransaction(tx, householdId, actorUserId, ledgerInput, expiryPolicy);
       }
     }
 
@@ -150,6 +156,8 @@ function validateFamilyShares(input: FamilyMealLogInput): void {
 function hashMealRequest(input: MealLogInput, family: FamilyMealLogInput | null): string {
   const payload = {
     mealType: input.mealType, eatenAt: input.eatenAt.toISOString(), origin: input.origin ?? 'HOME', name: input.name?.trim() ?? null,
+    // Omitted/false must retain the historical hash so old requests can still replay.
+    ...(input.skipExpiredBatches ? { skipExpiredBatches: true } : {}),
     items: [...input.items].sort((a, b) => a.foodId.localeCompare(b.foodId)).map((item) => ({ ...item })),
     shares: family ? [...family.shares].sort((a, b) => a.userId.localeCompare(b.userId)) : null,
     guestServings: family?.guestServings ?? '0.000',

@@ -271,6 +271,8 @@ type ImageUploadTicketType {
 
 type InsufficientStockType {
   available: Decimal!
+  foodId: ID
+  requested: Decimal
   unit: Unit!
 }
 
@@ -399,6 +401,7 @@ input LogMealInputType {
   mealType: MealType!
   name: String
   origin: MealOrigin = HOME
+  skipExpiredBatches: Boolean = false
 }
 
 input LoginInput {

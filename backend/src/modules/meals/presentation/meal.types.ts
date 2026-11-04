@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int, ObjectType, createUnionType, registerEnumType } from '@nestjs/graphql';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsDate, IsEnum, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDate, IsEnum, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Unit } from '@/shared/food-unit.js';
 import { DecimalScalar, LocalDateScalar } from '@/platform/graphql/scalars.js';
@@ -28,7 +28,9 @@ abstract class MealLogBaseInputType {
 }
 
 @InputType()
-export class LogMealInputType extends MealLogBaseInputType {}
+export class LogMealInputType extends MealLogBaseInputType {
+  @Field(() => Boolean, { nullable: true, defaultValue: false }) @IsOptional() @IsBoolean() skipExpiredBatches?: boolean;
+}
 
 @InputType()
 export class MealMemberShareInputType {
