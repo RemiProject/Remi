@@ -27,9 +27,11 @@ export function RecipeArt({ id, name, width, height, radius = radii.lg }: { id: 
   </View>;
 }
 
-export function RecipeCard({ id, name, time, caption, note, width, onPress }: { id: string; name: string; time: string | null; caption?: string; note?: string | null; width: number; onPress: () => void }) {
+export function RecipeCard({ id, name, time, caption, note, details = [], extra, textDir, width, onPress }: {
+  id: string; name: string; time: string | null; caption?: string; note?: string | null; details?: (string | null | undefined)[]; extra?: React.ReactNode; textDir?: 'rtl' | 'ltr'; width: number; onPress: () => void;
+}) {
   const { colors } = useRemyTheme();
-  return <Pressable accessibilityRole="button" accessibilityLabel={[name, time, caption, note].filter(Boolean).join('. ')} onPress={onPress}
+  return <Pressable accessibilityRole="button" accessibilityLabel={[name, time, caption, ...details, note].filter(Boolean).join('. ')} onPress={onPress}
     style={({ pressed }) => ({ width, gap: 8, transform: [{ scale: pressed ? 0.98 : 1 }] })}>
     <View>
       <RecipeArt id={id} name={name} width={width} height={Math.round(width * 0.8)} />
@@ -39,8 +41,10 @@ export function RecipeCard({ id, name, time, caption, note, width, onPress }: { 
     </View>
     <View style={{ gap: 2 }}>
       <AppText variant="label" numberOfLines={2} dir="ltr">{name}</AppText>
-      {caption && <AppText variant="caption" muted numberOfLines={1}>{caption}</AppText>}
-      {note && <AppText variant="caption" numberOfLines={2} style={{ color: colors.accentText }}>{note}</AppText>}
+      {caption && <AppText variant="caption" muted numberOfLines={1} dir={textDir}>{caption}</AppText>}
+      {details.filter(Boolean).map(line => <AppText key={line} variant="caption" muted numberOfLines={2} dir={textDir}>{line}</AppText>)}
+      {note && <AppText variant="caption" numberOfLines={2} dir={textDir} style={{ color: colors.accentText }}>{note}</AppText>}
+      {extra}
     </View>
   </Pressable>;
 }

@@ -207,7 +207,11 @@ Studied: two food-app concept shots the user shared, plus Mob's shipped widget i
   - On the iPhone 18 Pro Simulator in light, dark and Arabic: Home on For you and All, the cookbook on the Egyptian tab (190 recipes), and the recipe page at the top and scrolled.
   - `tsc`, `eslint` and 433 tests pass.
   - Screenshots: `light-09`…`light-12`, `dark-03`, `ar-03` in `Design/version-3-sip-happy/screenshots`.
-- **Not done:** the From my kitchen suggestions screen (`backend-recipes-screen.tsx`) is still a one-column list with the old fork placeholder. It is the next screen to move to the grid.
+- **From my kitchen** (`backend-recipes-screen.tsx`, reached from For you → See all) now uses the same grid.
+  - Each card keeps what the list showed: the Kitchen coverage, missing and expired ingredients (two lines each), the pink "uses your …" expiry note, and a warning badge when the recipe trips a dietary safety rule. Arabic captions stay right-to-left.
+  - The only change to what the card shows is the "15 min · Easy · Servings: 4" metadata line. Time moved to the badge on the picture, and difficulty and servings are on the recipe page.
+  - The recipe detail screen in the same file keeps its placeholder.
+  - Checked on the simulator (`light-13-from-my-kitchen-grid.png`); tests updated, and all 433 pass.
 
 ## Design archive
 

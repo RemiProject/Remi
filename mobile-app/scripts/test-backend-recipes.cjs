@@ -360,6 +360,7 @@ function ui() {
   mocks['@/domain/cooked-it'] = require('../src/domain/cooked-it.ts');
   mocks['@/data/cookbook-content'] = { getCookbookContent: () => undefined };
   mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
+  mocks['@/components/recipe-card'] = recipeCardModule(mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
   return { pushed, set: update => { state = { ...state, ...update }; }, language: value => { language = value; },
     render: (detail = false) => expand(detail ? exported.BackendRecipeDetailScreen({ id: 'one' }) : exported.BackendRecipesScreen()),
@@ -378,12 +379,12 @@ test('backend recipe list signed-out/loading/empty/error/retry states work in En
   }
   assert.equal(h.counts().refresh, 2);
 });
-test('backend recipe cards show server names, coverage, missing/expiry explanations, metadata and neutral images', () => {
+test('backend recipe cards show server names, time, coverage, missing/expiry explanations and letter-tile art', () => {
   const h = ui(), node = suggestion('one', { safetyWarnings: ['DISLIKE_FOOD'], missing: [{ ...food(), arabicName: 'طماطم' }], expiringSoon: [{ ...food(), arabicName: 'طماطم', expiryDay: '2026-06-03' }] });
   h.set({ nodes: [node], hasNextPage: true }); let tree = h.render();
   const text = JSON.stringify(tree); assert(text.includes('You have 1 of 2')); assert(text.includes('Missing: Tomato')); assert(text.includes('Uses your Tomato, expires tomorrow'));
-  assert(text.includes('15 min · Easy · Servings: 4')); assert.equal(nodes(tree, 'Badge')[0].props.label, messages.en.warnings);
-  assert.equal(nodes(tree, 'View').find(n => n.props.accessibilityRole === 'image').props.accessibilityLabel, messages.en.placeholder);
+  assert(text.includes('15 min')); assert.equal(nodes(tree, 'Badge')[0].props.label, messages.en.warnings);
+  assert.equal(nodes(tree, 'View').find(n => n.props.accessibilityRole === 'image').props.accessibilityLabel, node.recipe.name, 'the art tile names the recipe; no stock photo');
   assert(!text.includes('unsplash')); assert(!text.includes('sample recipes'));
   nodes(tree, 'Pressable')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'one' } });
   nodes(tree, 'Button').find(n => n.props.label === messages.en.more).props.onPress();
