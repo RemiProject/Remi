@@ -8,15 +8,29 @@ import { useCallback, useRef, useState } from 'react';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { Linking, Pressable, View } from 'react-native';
+import { Icon, type IconName } from '@/components/ui/icon';
+import { useRemyTheme } from '@/theme/provider';
+import { radii } from '@/theme/tokens';
 import { AppText, Button, Card, Chip, EmptyState, SearchField, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
 import { getCookbookContent } from '@/data/cookbook-content';
-import { kitchenRequest, loadRecipe, loadRecipes, loadShopping, operationKey, recipeDetailFields, scaleQuantity, todayKey, unitLabel, type ShoppingList } from '@/services/kitchen-api';
+import { kitchenRequest, loadRecipe, loadRecipes, loadShopping, operationKey, recipeDetailFields, scaleQuantity, formatAmount, todayKey, unitLabel, type ShoppingList } from '@/services/kitchen-api';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
 
-function RecipePicture({ name, id, height = 180 }: { name: string; id: string; height?: number }) {
-  const content = getCookbookContent(name, id);
-  return content ? <Image source={content.image} accessibilityLabel={name} contentFit="cover" style={{ width: '100%', height, borderRadius: 16 }} /> : null;
+function RecipePicture({ name, id, height = 180, placeholder = false }: { name: string; id: string; height?: number; placeholder?: boolean }) {
+  const { colors } = useRemyTheme(); const content = getCookbookContent(name, id);
+  if (content) return <Image source={content.image} accessibilityLabel={name} contentFit="cover" style={{ width: '100%', height, borderRadius: radii.lg }} />;
+  return placeholder ? <View accessible={false} style={{ height: height * 0.6, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }}><Icon name="recipe" size={48} color={colors.textSubtle} /></View> : null;
+}
+function Pill({ icon, label }: { icon?: IconName; label: string }) {
+  const { colors } = useRemyTheme();
+  return <View style={[uiStyles.row, { gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: radii.pill, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>{icon && <Icon name={icon} size={16} color={colors.textSecondary} />}<AppText variant="caption" style={{ color: colors.text }}>{label}</AppText></View>;
+}
+function RoundButton({ label, accessibilityLabel, disabled, onPress }: { label: string; accessibilityLabel: string; disabled: boolean; onPress: () => void }) {
+  const { colors } = useRemyTheme();
+  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} hitSlop={4}
+    style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: disabled ? colors.disabledSurface : pressed ? colors.primaryPressed : colors.primary })}>
+    <AppText variant="heading" style={{ color: disabled ? colors.disabledText : colors.onPrimary, lineHeight: 24 }}>{label}</AppText></Pressable>;
 }
 export function ConnectedRecipesScreen() {
   const [catalogue, setCatalogue] = useState(false);
@@ -37,7 +51,7 @@ export function ConnectedRecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>(); const identity = useKitchenIdentity(); return <RecipeContent key={`${identity}:${id}`}  id={id} />;
 }
 function RecipeContent({ id }: { id: string }) {
-  const copy = useCopy(); const state = useKitchenData(() => loadRecipe(id)); const recipe = state.data; const [servings, setServings] = useState<number | null>(null); const [tab, setTab] = useState<'ingredients' | 'steps'>('ingredients');
+  const copy = useCopy(); const { colors } = useRemyTheme(); const state = useKitchenData(() => loadRecipe(id)); const recipe = state.data; const [servings, setServings] = useState<number | null>(null); const [tab, setTab] = useState<'ingredients' | 'steps'>('ingredients');
   const matches = useBackendRecipes(); const { owner, ensureDetail } = matches; const { language } = useLanguage();
   useFocusEffect(useCallback(() => { if (owner) void ensureDetail(id); }, [owner, ensureDetail, id]));
   const detail = matches.detail?.id === id ? matches.detail : null;
@@ -57,17 +71,36 @@ function RecipeContent({ id }: { id: string }) {
   };
   return <ConnectedScreen title={recipe?.name ?? copy('Recipe', 'الوصفة')} footer={recipe ? <Button label={copy('Start cooking', 'ابدأ الطبخ')} onPress={() => router.push({ pathname: '/cooking/[id]', params: { id, servings: String(count) } })} /> : undefined}><DataNotice {...state} />{recipe && <>
     {matches.removedNotice?.recipeId === id && <AppText accessibilityLiveRegion="polite">{cookedItMessages[language].removed}</AppText>}
-    <RecipePicture name={recipe.name} id={recipe.id} height={250} />
+    <RecipePicture name={recipe.name} id={recipe.id} height={280} placeholder />
+    <View style={uiStyles.wrap}><Pill icon="clock" label={`${(recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)} ${copy('min', 'دقيقة')}`} /><Pill icon="food" label={`${recipe.ingredients.length} ${copy('ingredients', 'مكونات')}`} /><Pill label={({ EASY: copy('Easy', 'سهلة'), MEDIUM: copy('Medium', 'متوسطة'), HARD: copy('Hard', 'صعبة') } as Record<string, string>)[recipe.difficulty] ?? recipe.difficulty.toLowerCase()} /></View>
     {detail?.matchingError && <Card><AppText accessibilityRole="alert">{labels.matchingError}</AppText><Button label={labels.retry} onPress={() => { void matches.loadDetail(id); }} /></Card>}
-    {!!detail?.suggestion?.safetyWarnings.length && <Card><AppText variant="label">{labels.warnings}</AppText><AppText>{labels.warningBody}</AppText>{detail.suggestion.safetyWarnings.map(code => <AppText key={code}>{(labels as Record<string, string>)[code] ?? labels.otherWarning}</AppText>)}</Card>}
-    <Button label={cookedItMessages[language].cooked} variant="secondary" onPress={() => router.push({ pathname: '/cooked-it', params: { id, servings: String(count) } })} /><AppText>{getCookbookContent(recipe.name, recipe.id) ? recipe.description?.split('\n\n')[0] : recipe.description}</AppText><AppText muted>{(recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)} {copy('minutes', 'دقيقة')} · {recipe.difficulty.toLowerCase()}</AppText>
+    {!!detail?.suggestion?.safetyWarnings.length && <Card style={{ backgroundColor: colors.warningSurface }}><AppText variant="label" style={{ color: colors.warningText }}>{labels.warnings}</AppText><AppText>{labels.warningBody}</AppText>{detail.suggestion.safetyWarnings.map(code => <AppText key={code}>{(labels as Record<string, string>)[code] ?? labels.otherWarning}</AppText>)}</Card>}
+    <AppText>{getCookbookContent(recipe.name, recipe.id) ? recipe.description?.split('\n\n')[0] : recipe.description}</AppText>
 
-    <View style={uiStyles.row}><Button label="−" variant="secondary" disabled={count <= 1} onPress={() => setServings(count - 1)} /><AppText>{count} {copy('servings', 'حصص')}</AppText><Button label="+" variant="secondary" disabled={count >= 20} onPress={() => setServings(count + 1)} /></View>
-    <View style={uiStyles.wrap}><Chip label={copy('Ingredients', 'المكونات')} selected={tab === 'ingredients'} onPress={() => setTab('ingredients')} /><Chip label={copy('Steps', 'الخطوات')} selected={tab === 'steps'} onPress={() => setTab('steps')} /></View>
-    {tab === 'ingredients' ? recipe.ingredients.map(ingredient => <Card key={ingredient.id}><AppText variant="label">{recipeFoodName(ingredient, language)}{ingredient.optional ? copy(' · optional', ' · اختياري') : ''}</AppText><AppText>{scaleQuantity(ingredient.quantity, count, recipe.servings)} {unitLabel(ingredient.unit)}</AppText>{detail?.suggestion && <AppText variant="caption" muted>{recipeIngredientStatus(ingredient, detail.suggestion, language)}</AppText>}</Card>) : recipe.steps.map(step => <Card key={step.id}><AppText variant="heading">{step.stepNumber}</AppText><AppText>{step.instruction}</AppText>{step.durationMin !== null && <AppText muted>{step.durationMin} {copy('minutes', 'دقيقة')}</AppText>}</Card>)}
-    <Button label={copy('Add ingredients to shopping', 'إضافة المكونات للمشتريات')} variant="secondary" disabled={action.busy} onPress={() => { void action.run(addToList, copy('Ingredients added. Find them in Shopping.', 'أُضيفت المكونات إلى المشتريات.')); }} />
-    <Button label={copy('Add to meal plan', 'إضافة إلى خطة الوجبات')} variant="secondary" onPress={() => setPlanning(!planning)} />
+    <View style={[uiStyles.row, { padding: 12, paddingHorizontal: 16, borderRadius: radii.lg, backgroundColor: colors.surfaceMuted }]}>
+      <AppText variant="label" style={uiStyles.grow}>{copy('Servings', 'الحصص')}</AppText>
+      <RoundButton label="−" accessibilityLabel={copy('Fewer servings', 'حصص أقل')} disabled={count <= 1} onPress={() => setServings(count - 1)} />
+      <AppText variant="heading" accessibilityLiveRegion="polite" style={{ minWidth: 32, textAlign: 'center' }}>{count}</AppText>
+      <RoundButton label="+" accessibilityLabel={copy('More servings', 'حصص أكثر')} disabled={count >= 20} onPress={() => setServings(count + 1)} />
+    </View>
+    <View accessibilityRole="tablist" style={{ flexDirection: 'row', padding: 4, borderRadius: radii.pill, backgroundColor: colors.surfaceMuted }}>
+      {(['ingredients', 'steps'] as const).map(key => <Pressable key={key} accessibilityRole="tab" accessibilityState={{ selected: tab === key }} onPress={() => setTab(key)}
+        style={{ flex: 1, minHeight: 44, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: tab === key ? colors.surface : 'transparent', boxShadow: tab === key ? `0 2px 8px ${colors.shadow}` : undefined }}>
+        <AppText variant="label" style={{ color: tab === key ? colors.text : colors.textSecondary }}>{key === 'ingredients' ? copy('Ingredients', 'المكونات') : copy('Method', 'الطريقة')}</AppText></Pressable>)}
+    </View>
+    <Card style={{ gap: 0, paddingVertical: 4 }}>
+      {tab === 'ingredients' ? recipe.ingredients.map((ingredient, index) => <View key={ingredient.id} style={{ paddingVertical: 12, gap: 2, borderTopWidth: index ? 1 : 0, borderColor: colors.divider }}>
+        <View style={uiStyles.row}><AppText variant="label" style={uiStyles.grow}>{recipeFoodName(ingredient, language)}{ingredient.optional && !detail?.suggestion ? copy(' · optional', ' · اختياري') : ''}</AppText><AppText style={{ color: colors.textSecondary }}>{formatAmount(scaleQuantity(ingredient.quantity, count, recipe.servings))} {unitLabel(ingredient.unit)}</AppText></View>
+        {detail?.suggestion && <AppText variant="caption" muted>{recipeIngredientStatus(ingredient, detail.suggestion, language)}</AppText>}
+      </View>) : recipe.steps.map((step, index) => <View key={step.id} style={[uiStyles.row, { alignItems: 'flex-start', paddingVertical: 14, borderTopWidth: index ? 1 : 0, borderColor: colors.divider }]}>
+        <View style={{ width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.selectedSurface }}><AppText variant="label" style={{ color: colors.selectedText }}>{step.stepNumber}</AppText></View>
+        <View style={[uiStyles.grow, { gap: 4 }]}><AppText>{step.instruction}</AppText>{step.durationMin !== null && <View style={[uiStyles.row, { gap: 6 }]}><Icon name="clock" size={14} color={colors.textSecondary} /><AppText variant="caption" muted>{step.durationMin} {copy('min', 'دقيقة')}</AppText></View>}</View>
+      </View>)}
+    </Card>
+    <Button label={copy('Add ingredients to shopping', 'إضافة المكونات للمشتريات')} icon="shopping" variant="secondary" disabled={action.busy} onPress={() => { void action.run(addToList, copy('Ingredients added. Find them in Shopping.', 'أُضيفت المكونات إلى المشتريات.')); }} />
+    <Button label={copy('Add to meal plan', 'إضافة إلى خطة الوجبات')} icon="calendar" variant="secondary" onPress={() => setPlanning(!planning)} />
     {planning && <Card><FormField label={copy('Date (YYYY-MM-DD)', 'التاريخ (YYYY-MM-DD)')} value={date} onChangeText={setDate} autoCorrect={false} /><Button label={copy('Choose meal and save', 'اختر الوجبة واحفظ')} disabled={action.busy} onPress={() => router.push({ pathname: '/feature', params: { feature: 'planner', recipeId: id, date, servings: String(count) } })} /></Card>}
+    <Button label={cookedItMessages[language].cooked} variant="text" onPress={() => router.push({ pathname: '/cooked-it', params: { id, servings: String(count) } })} />
     {metadata && <Button label={copy('Recipe sources & image credits', 'مصادر الوصفة والصورة')} variant="text" onPress={() => setSourcesOpen(!sourcesOpen)} />}
     {metadata && sourcesOpen && <><AppText variant="caption">{metadata.adaptationNote}</AppText><Button label={`${copy('Recipe source', 'مصدر الوصفة')}: ${metadata.sourceLabel}`} variant="text" onPress={() => { void Linking.openURL(metadata.sourceUrl); }} /><AppText variant="caption" muted>{metadata.imageCredit}</AppText>{metadata.allergens.length > 0 && <AppText>{copy('Contains', 'تحتوي على')}: {metadata.allergens.join(', ')}</AppText>}</>}
     <Feedback message={action.message} />

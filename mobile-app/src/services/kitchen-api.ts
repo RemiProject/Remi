@@ -48,6 +48,8 @@ export async function loadRecipe(id: string): Promise<Recipe> { return (await ki
 export async function searchFoods(search: string): Promise<CatalogFood[]> { return (await kitchenRequest<{ foods: { nodes: CatalogFood[] } }>('query FoodChoices($search: String!) { foods(first: 20, search: $search) { nodes { id name defaultUnit } } }', { search }, false)).foods.nodes; }
 export function todayKey(date = new Date()): string { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
 export function shiftDay(date: string, amount: number): string { const value = new Date(`${date}T12:00:00`); value.setDate(value.getDate() + amount); return todayKey(value); }
+/** Backend decimals for display: "50.000" → "50", "37.500" → "37.5". Non-decimal text passes through. */
+export function formatAmount(value: string): string { return /^\d+\.\d+$/.test(value) ? value.replace(/\.?0+$/, '') : value; }
 export function unitLabel(unit: Unit): string { return ({ GRAM: 'g', KILOGRAM: 'kg', MILLILITER: 'ml', LITER: 'l', PIECE: 'pcs', CUP: 'cups', TABLESPOON: 'tbsp', TEASPOON: 'tsp' })[unit]; }
 let keySequence = 0;
 export function operationKey(): string { return globalThis.crypto?.randomUUID?.() ?? `cookbook-${Date.now().toString(36)}-${++keySequence}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`; }
