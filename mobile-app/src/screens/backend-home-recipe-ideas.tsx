@@ -34,13 +34,13 @@ export function BackendHomeRecipeIdeas({ kitchenStatus, title }: { kitchenStatus
       : empty ? <><AppText muted dir={dir}>{t.homeEmpty}</AppText><Button label={t.add} onPress={() => router.push('/food-entry')} /></>
       : state.status === 'error' || kitchenStatus === 'error' ? <><AppText muted dir={dir}>{t.error}</AppText><Button label={t.retry} variant="text" onPress={state.refresh} /></>
       : state.status !== 'ready' ? <AppText muted dir={dir} accessibilityLiveRegion="polite">{t.loading}</AppText>
-      : <ScrollView horizontal style={{ direction: dir }} contentContainerStyle={{ gap: spacing.md }}>
+      : <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ direction: dir, marginHorizontal: -20, overflow: 'visible' }} contentContainerStyle={{ gap: spacing.md, paddingHorizontal: 20, paddingVertical: spacing.sm }}>
         {state.nodes.slice(0, 4).map(node => {
           const recipe = node.recipe, expiry = recipeExpiry(node, state.today, language);
           const time = recipe.prepTimeMin === null || recipe.cookTimeMin === null ? t.timeUnknown : `${recipeNumber(recipe.prepTimeMin + recipe.cookTimeMin, language)} ${t.minutes}`;
           return <Pressable key={recipe.id} accessibilityRole="button" accessibilityLabel={recipe.name}
             onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })}
-            style={({ pressed }) => ({ width: 258, borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
+            style={({ pressed }) => ({ width: 258, borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface, boxShadow: `0 4px 18px ${colors.shadow}` })}>
             <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} />
             <View style={{ padding: spacing.lg, gap: spacing.sm }}>
               <AppText variant="heading" dir="ltr">{recipe.name}</AppText>

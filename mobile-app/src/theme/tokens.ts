@@ -18,7 +18,7 @@ export const themes = {
     pressedSurface: '#F1F2FA', focusBorder: palette['Cobalt Blue'],
     inputSurface: '#FFFFFF', inputBorder: '#8E92B0', placeholder: '#5E6383',
     disabledSurface: '#ECECF4', disabledText: '#5E6383',
-    navSurface: '#FFFFFF', navSelected: palette['Lemon Yellow'], modalSurface: '#FFFFFF', overlay: 'rgba(14, 20, 64, 0.45)',
+    navSurface: palette.Paper, navSelected: palette['Lemon Yellow'], modalSurface: '#FFFFFF', overlay: 'rgba(14, 20, 64, 0.45)',
     accent: palette['Hot Pink'], accentText: '#C2146C', onAccent: '#FFFFFF', accentSoft: '#FDE7F1',
     hero: palette['Lemon Yellow'], onHero: palette.Ink, onHeroMuted: '#3D3A12', shadow: 'rgba(14, 20, 64, 0.10)',
     warningSurface: '#FFF6CC', warningText: '#6B5300', successSurface: '#E3F4EA', successText: '#1F5A3A',

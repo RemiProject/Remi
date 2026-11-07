@@ -22,8 +22,8 @@ export function AppSkeleton({ navigation = true }: { navigation?: boolean }) {
         </Pulse>
       </View>
       <Pulse style={[{ gap: 24 }, !reduced && { animationName: { from: { opacity: 0.5 }, to: { opacity: 0.9 } }, animationDuration: 900, animationDirection: 'alternate', animationIterationCount: 'infinite', animationTimingFunction: 'ease-in-out' }]}>
-        <View style={{ backgroundColor: colors.selectedSurface, borderRadius: 18, padding: 20, gap: 18 }}>{block('45%', 26, colors.selectedBorder)}{block('75%', 16, colors.selectedBorder)}
-          {[0, 1].map(row => <View key={row} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>{block(48, 48, colors.selectedBorder)}<View style={{ flex: 1, gap: 10 }}>{block('80%', 16, colors.selectedBorder)}{block('45%', 12, colors.selectedBorder)}</View></View>)}
+        <View style={{ backgroundColor: colors.accentSoft, borderRadius: 22, padding: 20, gap: 18 }}>{block('45%', 26, colors.border)}{block('75%', 16, colors.border)}
+          {[0, 1].map(row => <View key={row} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>{block(48, 48, colors.border)}<View style={{ flex: 1, gap: 10 }}>{block('80%', 16, colors.border)}{block('45%', 12, colors.border)}</View></View>)}
         </View>
         {block('65%', 26)}
         <View style={{ backgroundColor: colors.surface, borderRadius: 18, overflow: 'hidden' }}>{block('100%', 160)}<View style={{ padding: 20, gap: 12 }}>{block('85%', 22)}{block('50%', 14)}</View></View>
