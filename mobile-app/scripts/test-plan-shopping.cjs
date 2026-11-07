@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const ts = require('typescript');
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, filename);
-const { planShoppingLines, toMilli, fromMilli } = require('../src/domain/plan-shopping.ts');
+const { planShoppingLines, toMilli, fromMilli, formatAmount } = require('../src/domain/plan-shopping.ts');
 
 const ing = (foodId, foodName, quantity, unit = 'GRAM', optional = false) => ({ foodId, foodName, quantity, unit, optional });
 const recipes = new Map([
@@ -46,4 +46,9 @@ test('Home: upcoming meals sort by date then period from today; recipes on list 
   assert.deepEqual(upcomingMeals([meal('old', '2026-11-06', 'DINNER'), meal('c', '2026-11-08', 'BREAKFAST'), meal('b', '2026-11-07', 'DINNER'), meal('a', '2026-11-07', 'LUNCH'), meal('d', '2026-11-09', 'LUNCH')], '2026-11-07').map((m) => m.id), ['a', 'b', 'c']);
   const recipes = [{ id: 'stew', name: 'Stew', ingredients: [{ foodId: 'chickpea', foodName: 'Chickpeas', optional: false }, { foodId: 'onion', foodName: 'Onion', optional: false }, { foodId: 'chili', foodName: 'Chili', optional: true }, { foodId: 'water', foodName: 'water', optional: false }] }, { id: 'toast', name: 'Toast', ingredients: [{ foodId: 'bread', foodName: 'Bread', optional: false }] }];
   assert.deepEqual(recipesOnList(recipes, [{ foodId: 'chickpea', status: 'NEEDED' }, { foodId: 'chili', status: 'NEEDED' }, { foodId: 'bread', status: 'PURCHASED' }]), [{ id: 'stew', name: 'Stew', total: 2, onList: 1 }]);
+});
+
+test('formatAmount drops backend trailing zeros for display and passes other text through', () => {
+  assert.equal(formatAmount('50.000'), '50'); assert.equal(formatAmount('37.500'), '37.5'); assert.equal(formatAmount('0.125'), '0.125');
+  assert.equal(formatAmount('4.00'), '4'); assert.equal(formatAmount('12'), '12'); assert.equal(formatAmount('about 2'), 'about 2');
 });

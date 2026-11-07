@@ -21,6 +21,9 @@ export function fromMilli(value: bigint): string {
   return text.replace(/\.?0+$/, '') || '0';
 }
 
+/** Backend decimals for display: "50.000" → "50", "37.500" → "37.5". Anything else passes through unchanged. */
+export const formatAmount = (value: string) => DECIMAL.test(value) ? fromMilli(toMilli(value)) : value;
+
 export function planShoppingLines({ meals, recipes, stock, list }: { meals: readonly PlanMeal[]; recipes: ReadonlyMap<string, PlanRecipe>; stock: readonly StockLine[]; list: readonly ListLine[] }): ShoppingLine[] {
   const lines = new Map<string, { foodId: string; foodName: string; unit: string; milli: bigint; recipeNames: string[] }>();
   for (const meal of meals) {

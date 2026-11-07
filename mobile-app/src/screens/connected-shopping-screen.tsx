@@ -1,6 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
+import { Icon } from '@/components/ui/icon';
+import { useRemyTheme } from '@/theme/provider';
+import { formatAmount } from '@/domain/plan-shopping';
 import { AppText, Button, Card, Chip, EmptyState, SectionHeader, SearchField, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
 import { addFoodQuantity } from '@/services/backend-add-food';
@@ -12,7 +15,7 @@ import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenDa
 export function ConnectedShoppingScreen() { const identity = useKitchenIdentity(); return <ShoppingContent key={identity} />; }
 function ShoppingContent() {
   const { add } = useLocalSearchParams<{ add?: string }>();
-  const copy = useCopy(); const state = useKitchenData(loadShopping); const action = useAction(state.reload); const [filter, setFilter] = useState<'NEEDED' | 'ALL'>('NEEDED'); const [query, setQuery] = useState(''); const [editing, setEditing] = useState(add === '1'); const [search, setSearch] = useState(''); const [foods, setFoods] = useState<CatalogFood[]>([]); const [food, setFood] = useState<CatalogFood | null>(null); const [quantity, setQuantity] = useState('1'); const [listName, setListName] = useState('Kitchen shopping'); const pending = useRef<{ signature: string; key: string } | null>(null); const listCreation = useRef<{ name: string; key: string } | null>(null);
+  const copy = useCopy(); const { colors } = useRemyTheme(); const state = useKitchenData(loadShopping); const action = useAction(state.reload); const [filter, setFilter] = useState<'NEEDED' | 'ALL'>('NEEDED'); const [query, setQuery] = useState(''); const [editing, setEditing] = useState(add === '1'); const [search, setSearch] = useState(''); const [foods, setFoods] = useState<CatalogFood[]>([]); const [food, setFood] = useState<CatalogFood | null>(null); const [quantity, setQuantity] = useState('1'); const [listName, setListName] = useState('Kitchen shopping'); const pending = useRef<{ signature: string; key: string } | null>(null); const listCreation = useRef<{ name: string; key: string } | null>(null);
   const active = (state.data ?? []).filter(list => list.status === 'ACTIVE');
   const kitchen = useBackendKitchen(); const [view, setView] = useState<'list' | 'aisle'>('list'); const [aisles, setAisles] = useState<Map<string, string>>(new Map()); const [weekNote, setWeekNote] = useState<string | null>(null);
   const foodIds = active.flatMap(list => list.items.map(item => item.foodId)).join(',');
@@ -30,7 +33,20 @@ function ShoppingContent() {
       : copy('Everything for your planned meals is already in Kitchen or on this list.', 'كل ما تحتاجه وجباتك المخططة موجود في المطبخ أو في القائمة.'));
   });
   const other = copy('Other', 'أخرى');
-  const itemCard = (item: ShoppingItem) => <Card key={item.id}><AppText variant="label">{item.foodName}</AppText><AppText muted>{item.quantity} {unitLabel(item.unit)} · {item.status.toLowerCase()}</AppText><View style={uiStyles.wrap}><Button label={item.status === 'PURCHASED' ? copy('Mark to buy', 'للشراء مجددًا') : copy('Mark purchased', 'تم الشراء')} variant="secondary" disabled={action.busy} onPress={() => { void action.run(() => kitchenRequest('mutation CheckShopping($input: UpdateShoppingItemInputType!) { updateShoppingListItem(input: $input) { id status } }', { input: { id: item.id, status: item.status === 'PURCHASED' ? 'NEEDED' : 'PURCHASED' } })); }} /><Button label={copy('Remove', 'إزالة')} variant="dangerText" disabled={action.busy} onPress={() => { void action.run(() => kitchenRequest('mutation RemoveShopping($id: ID!) { removeShoppingItem(id: $id) }', { id: item.id })); }} /></View></Card>;
+  // Compact Mob-style rows: tap the row to tick it off, one card per list or aisle.
+  const toggle = (item: ShoppingItem) => { void action.run(() => kitchenRequest('mutation CheckShopping($input: UpdateShoppingItemInputType!) { updateShoppingListItem(input: $input) { id status } }', { input: { id: item.id, status: item.status === 'PURCHASED' ? 'NEEDED' : 'PURCHASED' } })); };
+  const itemRow = (item: ShoppingItem, index: number) => { const done = item.status === 'PURCHASED'; const amount = `${formatAmount(item.quantity)} ${unitLabel(item.unit)}`;
+    return <View key={item.id} style={[uiStyles.row, { minHeight: 56, borderTopWidth: index ? 1 : 0, borderColor: colors.divider }]}>
+      <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: done, disabled: action.busy }} accessibilityLabel={`${item.foodName}, ${amount}`} disabled={action.busy} onPress={() => toggle(item)}
+        style={({ pressed }) => [uiStyles.row, uiStyles.grow, { paddingVertical: 10, opacity: pressed ? 0.7 : 1 }]}>
+        <View style={{ width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center', borderColor: done ? colors.primary : colors.inputBorder, backgroundColor: done ? colors.primary : 'transparent' }}>{done && <Icon name="check" size={16} color={colors.onPrimary} />}</View>
+        <AppText variant="label" style={[uiStyles.grow, done && { color: colors.textSecondary, textDecorationLine: 'line-through' }]}>{item.foodName}</AppText>
+        <AppText style={{ color: colors.textSecondary }}>{amount}</AppText>
+      </Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={`${copy('Remove', 'إزالة')} ${item.foodName}`} disabled={action.busy} hitSlop={8} onPress={() => { void action.run(() => kitchenRequest('mutation RemoveShopping($id: ID!) { removeShoppingItem(id: $id) }', { id: item.id })); }}
+        style={({ pressed }) => ({ paddingVertical: 10, paddingHorizontal: 4, opacity: pressed ? 0.6 : 1 })}><AppText variant="caption" style={{ color: colors.destructive }}>{copy('Remove', 'إزالة')}</AppText></Pressable>
+    </View>; };
+  const rows = (items: ShoppingItem[]) => items.length ? <Card style={{ gap: 0, paddingVertical: 4 }}>{items.map(itemRow)}</Card> : null;
   const byAisle = (items: ShoppingItem[]) => [...items.reduce((groups, item) => { const aisle = aisles.get(item.foodId) ?? other; groups.set(aisle, [...(groups.get(aisle) ?? []), item]); return groups; }, new Map<string, ShoppingItem[]>())]
     .sort(([a], [b]) => a === other ? 1 : b === other ? -1 : a.localeCompare(b));
   const save = async () => {
@@ -51,7 +67,7 @@ function ShoppingContent() {
     <SearchField value={query} onChangeText={setQuery} placeholder={copy('Search your list', 'ابحث في قائمتك')} /><View style={uiStyles.wrap}><Chip label={copy('To buy', 'للشراء')} selected={filter === 'NEEDED'} onPress={() => setFilter('NEEDED')} /><Chip label={copy('All items', 'كل العناصر')} selected={filter === 'ALL'} onPress={() => setFilter('ALL')} /></View>
     <View style={uiStyles.wrap}><Chip label={copy('List', 'قائمة')} selected={view === 'list'} onPress={() => setView('list')} /><Chip label={copy('By aisle', 'حسب القسم')} selected={view === 'aisle'} onPress={() => setView('aisle')} /></View>
     {state.data && !active.length && <EmptyState title={copy('Ready for your next shop.', 'جاهز للتسوق القادم.')} description={copy('Add food here or send ingredients from a recipe.', 'أضف طعامًا هنا أو مكونات من وصفة.')} />}
-    {active.map(list => <View key={list.id} style={{ gap: 12 }}><SectionHeader title={list.name} />{(() => { const items = list.items.filter(item => (filter === 'ALL' || item.status === 'NEEDED') && item.foodName.toLowerCase().includes(query.toLowerCase())); return view === 'list' ? items.map(itemCard) : byAisle(items).map(([aisle, entries]) => <View key={aisle} style={{ gap: 8 }}><AppText variant="label" muted>{aisle}</AppText>{entries.map(itemCard)}</View>); })()}<Button label={copy('Finish this list', 'إنهاء هذه القائمة')} variant="text" disabled={action.busy} onPress={() => Alert.alert(copy('Finish shopping?', 'إنهاء التسوق؟'), copy('This archives the list. Purchased items are not automatically added to kitchen stock.', 'تؤرشف القائمة. لا تُضاف المشتريات تلقائيًا إلى مخزون المطبخ.'), [{ text: copy('Cancel', 'إلغاء'), style: 'cancel' }, { text: copy('Finish list', 'إنهاء القائمة'), onPress: () => { void action.run(() => kitchenRequest('mutation FinishList($input: UpdateShoppingListInputType!) { updateShoppingList(input: $input) { id status } }', { input: { id: list.id, status: 'COMPLETED' } })); } }])} /></View>)}
+    {active.map(list => <View key={list.id} style={{ gap: 12 }}><SectionHeader title={list.name} />{(() => { const items = list.items.filter(item => (filter === 'ALL' || item.status === 'NEEDED') && item.foodName.toLowerCase().includes(query.toLowerCase())); return view === 'list' ? rows(items) : byAisle(items).map(([aisle, entries]) => <View key={aisle} style={{ gap: 8 }}><AppText variant="label" muted>{aisle}</AppText>{rows(entries)}</View>); })()}<Button label={copy('Finish this list', 'إنهاء هذه القائمة')} variant="text" disabled={action.busy} onPress={() => Alert.alert(copy('Finish shopping?', 'إنهاء التسوق؟'), copy('This archives the list. Purchased items are not automatically added to kitchen stock.', 'تؤرشف القائمة. لا تُضاف المشتريات تلقائيًا إلى مخزون المطبخ.'), [{ text: copy('Cancel', 'إلغاء'), style: 'cancel' }, { text: copy('Finish list', 'إنهاء القائمة'), onPress: () => { void action.run(() => kitchenRequest('mutation FinishList($input: UpdateShoppingListInputType!) { updateShoppingList(input: $input) { id status } }', { input: { id: list.id, status: 'COMPLETED' } })); } }])} /></View>)}
     <AppText variant="caption" muted>{copy('Checking an item marks your shopping progress. Add purchased food to Kitchen to track its quantity and expiry.', 'تحديد العنصر يتابع مشترياتك. أضف الطعام للمطبخ لتتبع الكمية والصلاحية.')}</AppText>
   </ConnectedScreen>;
 }

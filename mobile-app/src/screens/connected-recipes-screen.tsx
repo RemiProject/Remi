@@ -10,11 +10,12 @@ import { Image } from 'expo-image';
 import { Linking, Pressable, View } from 'react-native';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { useRemyTheme } from '@/theme/provider';
+import { formatAmount } from '@/domain/plan-shopping';
 import { radii } from '@/theme/tokens';
 import { AppText, Button, Card, Chip, EmptyState, SearchField, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
 import { getCookbookContent } from '@/data/cookbook-content';
-import { kitchenRequest, loadRecipe, loadRecipes, loadShopping, operationKey, recipeDetailFields, scaleQuantity, formatAmount, todayKey, unitLabel, type ShoppingList } from '@/services/kitchen-api';
+import { kitchenRequest, loadRecipe, loadRecipes, loadShopping, operationKey, recipeDetailFields, scaleQuantity, todayKey, unitLabel, type ShoppingList } from '@/services/kitchen-api';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
 
 function RecipePicture({ name, id, height = 180, placeholder = false }: { name: string; id: string; height?: number; placeholder?: boolean }) {
