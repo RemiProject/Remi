@@ -12,7 +12,7 @@ import { useLanguage } from '@/providers/language-provider';
 function TabButton({ children, isFocused, icon, ref, ...props }: TabTriggerSlotProps & { icon: IconName }) {
   const { colors } = useRemyTheme();
   return <Pressable {...props} ref={ref as Ref<ComponentRef<typeof Pressable>>} accessibilityRole="tab" accessibilityState={{ selected: !!isFocused }} style={({ pressed }) => ({ flex: 1, minHeight: 56, padding: 4, gap: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? colors.pressedSurface : 'transparent', borderRadius: 12 })}>
-    <View style={{ width: 52, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: isFocused ? colors.navSelected : 'transparent' }}><Icon name={icon} size={22} color={isFocused ? colors.selectedText : colors.textSecondary} /></View>
+    <View style={{ width: 52, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: isFocused ? colors.navSelected : 'transparent' }}><Icon name={icon} size={22} color={isFocused ? colors.text : colors.textSecondary} /></View>
     <AppText variant={isFocused ? 'label' : 'caption'} style={{ fontSize: 12, lineHeight: 16, color: isFocused ? colors.text : colors.textSecondary }}>{children}</AppText>
   </Pressable>;
 }
