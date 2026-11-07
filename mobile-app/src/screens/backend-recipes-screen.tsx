@@ -33,7 +33,7 @@ function SafetyWarnings({ warnings, detail = false }: { warnings: string[]; deta
   </>}</Card>;
 }
 
-export function BackendRecipesScreen() {
+export function BackendRecipesScreen({ onBrowseAll }: { onBrowseAll?: () => void } = {}) {
   const state = useBackendRecipes();
   const { owner, ensureLoaded } = state;
   const { t, language, rtl } = useLabels();
@@ -42,7 +42,8 @@ export function BackendRecipesScreen() {
   const empty = state.status === 'ready' && (state.kitchenEmpty || !state.nodes.length);
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}
     refreshControl={<RefreshControl refreshing={state.status === 'loading'} onRefresh={state.refresh} />}>
-    <PageHeader title={t.title} subtitle={t.intro} action={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={onBrowseAll ? (language === 'ar' ? 'كتاب الطبخ' : 'The cookbook') : t.title} subtitle={t.intro} back={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    {onBrowseAll && <Button label={language === 'ar' ? 'تصفح كل الوصفات' : 'Browse all recipes'} variant="secondary" onPress={onBrowseAll} />}
     <RecipeState status={state.status} retry={state.refresh} />
     {state.status === 'ready' && <Button label={t.refresh} variant="text" onPress={state.refresh} />}
     {empty && <EmptyState title={t.empty} description={t.emptyBody} action={t.add} onPress={() => router.push('/food-entry')} />}
@@ -51,7 +52,7 @@ export function BackendRecipesScreen() {
       return <Pressable key={node.recipe.id} accessibilityRole="button" accessibilityLabel={node.recipe.name}
         onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: node.recipe.id } })}
         style={({ pressed }) => ({ borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
-        <RecipePlaceholder label={t.placeholder} /><View style={{ padding: spacing.lg, gap: spacing.sm }}>
+        <RecipePlaceholder label={t.placeholder} name={node.recipe.name} id={node.recipe.id} /><View style={{ padding: spacing.lg, gap: spacing.sm }}>
           <AppText variant="heading" dir="ltr">{node.recipe.name}</AppText>
           <AppText variant="caption" dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(node.recipe, language)}</AppText>
           <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeCoverage(node, language)}</AppText>
@@ -89,7 +90,7 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
     {owner && notice && <Card><AppText accessibilityLiveRegion="polite" dir={rtl ? 'rtl' : 'ltr'}>{cookedItMessages[language].removed}</AppText></Card>}
     {recipe && <>
       <SafetyWarnings detail warnings={detail?.suggestion?.safetyWarnings ?? []} />
-      <RecipePlaceholder label={t.placeholder} /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
+      <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
       <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(recipe, language)}</AppText>
       {recipe.description && <><SectionHeader title={t.description} /><AppText dir="ltr">{recipe.description}</AppText></>}
       <Button label={cookedItMessages[language].cooked} onPress={() => router.push({ pathname: '/cooked-it', params: { id } })} />

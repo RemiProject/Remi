@@ -1,29 +1,36 @@
+import { Image } from 'expo-image';
 import { createContext, useContext, useState, type PropsWithChildren, type Ref, type ReactElement } from 'react';
 import { I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance, type RefreshControlProps, type TextProps, type ViewProps, type TextInputProps } from 'react-native';
 import { useRemyTheme } from '@/theme/provider';
 import { useRemyFonts } from '@/theme/fonts';
 import { layout, radii, spacing, typography } from '@/theme/tokens';
+import Animated, { useAnimatedStyle, useSharedValue, useReducedMotion, withTiming, Easing } from 'react-native-reanimated';
+import { useLanguage } from '@/providers/language-provider';
 import { Icon, type IconName } from './icon';
 
 type TextVariant = 'title' | 'heading' | 'body' | 'caption' | 'label' | 'brand';
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const ScreenDirection = createContext<boolean | undefined>(undefined);
 export const ScreenDirectionProvider = ScreenDirection.Provider;
 export function AppText({ variant = 'body', muted = false, style, dir, ...props }: TextProps & { variant?: TextVariant; muted?: boolean; dir?: 'rtl' | 'ltr' }) {
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const rtl = useContext(ScreenDirection);
-  const family = variant === 'brand' ? fonts.brand : variant === 'title' || variant === 'heading' || variant === 'label' ? fonts.heading : fonts.body;
-  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, style]} />;
+  const { language } = useLanguage();
+  const display = variant === 'brand' || variant === 'title' || variant === 'heading';
+  const family = language === 'ar' ? typography.family : display ? fonts.heading : fonts.body;
+  // Native RTL layouts mirror physical alignment; keep layout physical and paragraph direction explicit.
+  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, ...(display && language !== 'ar' ? { fontWeight: '400' as const } : {}), color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, Platform.OS !== 'web' && { direction: 'ltr' }, style]} />;
 }
-export function PageHeader({ title, subtitle, subtitleDirection, action }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode }) {
-  return <View style={{ gap: spacing.xs }}><View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
+export function PageHeader({ title, subtitle, subtitleDirection, action, back }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode; back?: React.ReactNode }) {
+  return <View style={{ gap: spacing.xs }}>{back && <View testID="page-header-back" style={{ alignItems: 'flex-start', marginBottom: spacing.sm }}>{back}</View>}<View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
     <AppText variant="title" accessibilityRole="header" style={uiStyles.grow}>{title}</AppText>{action}
   </View>{subtitle && <AppText muted dir={subtitleDirection}>{subtitle}</AppText>}</View>;
 }
-export function Screen({ children, rtl, scrollRef, contentGap = spacing.xl, refreshControl }: PropsWithChildren<{ rtl?: boolean; scrollRef?: Ref<ScrollViewInstance>; contentGap?: number; refreshControl?: ReactElement<RefreshControlProps> }>) {
+export function Screen({ children, rtl, scrollRef, footer, refreshControl, contentGap = spacing.xl }: PropsWithChildren<{ rtl?: boolean; scrollRef?: Ref<ScrollViewInstance>; footer?: React.ReactNode; refreshControl?: ReactElement<RefreshControlProps>; contentGap?: number }>) {
   const { colors } = useRemyTheme();
-  return <ScreenDirectionProvider value={rtl}><ScrollView ref={scrollRef} {...(refreshControl ? { refreshControl } : {})} style={{ flex: 1, backgroundColor: colors.background }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
-    contentContainerStyle={[styles.screen, { gap: contentGap }, rtl !== undefined && { direction: rtl ? 'rtl' : 'ltr' }]}>{children}</ScrollView></ScreenDirectionProvider>;
+  return <ScreenDirectionProvider value={rtl}><View style={{ flex: 1, backgroundColor: colors.background }}><Image source={require('../../../assets/cookbook-paper.png')} contentFit="cover" accessible={false} style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.12 }} /><ScrollView ref={scrollRef} refreshControl={refreshControl} style={{ flex: 1 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
+    contentContainerStyle={[styles.screen, { gap: contentGap }, rtl !== undefined && { direction: rtl ? 'rtl' : 'ltr' }]}>{children}</ScrollView>{footer && <View style={{ padding: 16, backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.divider }}>{footer}</View>}</View></ScreenDirectionProvider>;
 }
 export function Card({ style, ...props }: ViewProps) {
   const { colors } = useRemyTheme();
@@ -38,18 +45,22 @@ export function Button({ label, onPress, variant = 'primary', icon, disabled = f
 }) {
   const { colors } = useRemyTheme();
   const [focused, setFocused] = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const reduced = useReducedMotion();
+  const scale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
+  const feedback = (down: boolean) => { setPressed(down); scale.set(withTiming(down && !reduced ? 0.98 : 1, { duration: 120, easing: Easing.bezier(0.23, 1, 0.32, 1) })); };
   const color = disabled ? colors.disabledText : variant === 'primary' ? colors.onPrimary : variant === 'destructive' ? colors.onDestructive : variant === 'dangerText' ? colors.destructive : colors.primary;
-  return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
+  return <AnimatedPressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} onPressIn={() => feedback(true)} onPressOut={() => feedback(false)}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-    style={({ pressed }) => [styles.button, {
+    style={[styles.button, pressStyle, icon === 'back' && { alignSelf: 'flex-start' }, {
       backgroundColor: disabled ? colors.disabledSurface : variant === 'primary' ? (pressed ? colors.primaryPressed : colors.primary) : variant === 'destructive' ? colors.destructive : pressed ? colors.pressedSurface : variant === 'secondary' ? colors.surfaceMuted : 'transparent',
       borderColor: focused ? colors.focusBorder : 'transparent',
       borderWidth: focused ? 3 : 2,
-      ...(pressed && !disabled ? { transform: [{ scale: 0.98 }] } : {}),
     }]}>
     {icon && <Icon name={icon} color={color} size={18} rtl={rtl} />}
     <AppText variant="label" style={{ color, flexShrink: 1, textAlign: 'center', textDecorationLine: focused ? 'underline' : 'none' }}>{label}</AppText>
-  </Pressable>;
+  </AnimatedPressable>;
 }
 export function Badge({ label, tone = 'info' }: { label: string; tone?: 'info' | 'warning' | 'success' | 'unavailable' | 'error' }) {
   const { colors } = useRemyTheme();
@@ -110,13 +121,13 @@ export const uiStyles = StyleSheet.create({
   stack: { gap: spacing.lg }, grow: { flex: 1, minWidth: 0 },
 });
 const textStyles = StyleSheet.create({
-  title: { fontSize: 26, lineHeight: 34, fontWeight: '700' },
-  heading: { fontSize: 18, lineHeight: 26, fontWeight: '700' },
+  title: { fontSize: 34, lineHeight: 40, fontWeight: '700' },
+  heading: { fontSize: 23, lineHeight: 29, fontWeight: '700' },
   body: { ...typography.body }, caption: { fontSize: 13, lineHeight: 20 },
   label: { fontSize: 15, lineHeight: 22, fontWeight: '600' }, brand: { ...typography.brand },
 });
 const styles = StyleSheet.create({
-  screen: { padding: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.xl, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center' },
+  screen: { padding: 20, paddingBottom: spacing.xxl, gap: spacing.xl, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center' },
   card: { padding: spacing.lg, borderRadius: radii.lg, gap: spacing.md },
   button: { minHeight: layout.minTouchTarget, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radii.md, borderWidth: 2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.sm },
   badge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radii.sm, alignSelf: 'flex-start' },

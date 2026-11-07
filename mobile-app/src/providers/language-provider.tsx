@@ -3,7 +3,7 @@ import { I18nManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { HomeLanguage } from '@/i18n/home';
 
-export const LANGUAGE_KEY = 'remy.preferences.language';
+export const LANGUAGE_KEY = 'remi.cookbook.preferences.language';
 const LanguageContext = createContext<{
   language: HomeLanguage; ready: boolean; saving: boolean; error: boolean;
   setLanguage: (language: HomeLanguage) => Promise<void>; retry: () => Promise<void>;

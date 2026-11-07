@@ -57,6 +57,24 @@ input ConfirmImageUploadInput {
   type: ImageType!
 }
 
+type CookbookFeedback {
+  createdAt: DateTime!
+  id: ID!
+  message: String!
+  subject: String!
+}
+
+type CookbookLeftover {
+  cookedOn: String!
+  id: ID!
+  name: String!
+  notes: String!
+  portions: Int!
+  status: String!
+  storage: String!
+  useBy: String
+}
+
 type Country {
   code: String!
   id: ID!
@@ -311,6 +329,13 @@ type InventoryItemType {
   version: Int!
 }
 
+input InventoryMetadataInput {
+  estimatedExpiryAt: DateTime
+  expectedVersion: Int!
+  inventoryItemId: ID!
+  storageLocation: StorageLocation!
+}
+
 type InventoryMovementType {
   balanceAfter: Decimal!
   inventoryItemId: ID!
@@ -546,6 +571,8 @@ type Mutation {
   registerDevice(appVersion: String, platform: UserDevicePlatform!, pushToken: String!): UserDeviceType!
   removeAllergy(input: RemoveAllergyInputType!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
+  removePlannedMeal(id: ID!): Boolean!
+  removeShoppingItem(id: ID!): Boolean!
 
   """
   Re-sends the verification email to the logged-in user. No-op when already verified.
@@ -560,15 +587,19 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
   revokeDevice(id: String!): Boolean!
   revokeInvitation(input: RevokeInvitationInput!): Boolean!
+  saveCookbookLeftover(input: SaveCookbookLeftoverInput!): CookbookLeftover!
+  setCookbookLeftoverStatus(id: ID!, status: String!): CookbookLeftover!
   setDietaryPreferences(input: SetDietaryPreferencesInputType!): MyProfileType!
   setGoal(input: SetGoalInputType!): UserGoalType!
   setHealthConditions(input: SetHealthConditionsInputType!): MyProfileType!
+  submitCookbookFeedback(input: SubmitCookbookFeedbackInput!): CookbookFeedback!
 
   """
   OWNER only. The current owner becomes a MEMBER; the target member becomes the OWNER.
   """
   transferOwnership(input: TransferOwnershipInput!): Boolean!
   transitionPurchaseOrder(input: TransitionPurchaseOrderInputType!): PurchaseOrderType!
+  updateInventoryMetadata(input: InventoryMetadataInput!): InventoryItemType!
   updateNotificationPreference(channel: NotificationChannel!, isEnabled: Boolean!, quietHoursEnd: String, quietHoursStart: String, type: NotificationType!): NotificationPreferenceType!
   updateProfile(input: UpdateProfileInputType!): UserProfileDataType!
   updateShoppingList(input: UpdateShoppingListInputType!): ShoppingListType!
@@ -789,6 +820,8 @@ type PurchaseReceiptType {
 }
 
 type Query {
+  cookbookImages: [Image!]!
+  cookbookLeftovers: [CookbookLeftover!]!
   countries: [Country!]!
   cuisines: [Cuisine!]!
   currencies: [Currency!]!
@@ -808,6 +841,7 @@ type Query {
   locales: [Locale!]!
   me: Me!
   mealPlans(from: String!, to: String!): [MealPlanTypeObject!]!
+  myCookbookFeedback: [CookbookFeedback!]!
   myDevices: [UserDeviceType!]!
   myHouseholds: [MyHousehold!]!
   myProfile: MyProfileType!
@@ -1061,6 +1095,16 @@ type SafetyHistoryEventType {
   occurredAt: DateTime!
 }
 
+input SaveCookbookLeftoverInput {
+  cookedOn: String!
+  id: ID!
+  name: String!
+  notes: String!
+  portions: Int!
+  storage: String!
+  useBy: String
+}
+
 enum SearchDocumentType {
   FOOD
   MEAL
@@ -1154,6 +1198,12 @@ enum StorageLocation {
   FRIDGE
   OTHER
   PANTRY
+}
+
+input SubmitCookbookFeedbackInput {
+  id: ID!
+  message: String!
+  subject: String!
 }
 
 type Subscription {

@@ -20,15 +20,29 @@ export class MealPlanService {
   }
 
   async planMeal(householdId: string, input: PlanMealInput) {
+    validateDateRange(input.mealDate, input.mealDate);
+    if (!/^\d+(?:\.\d{1,3})?$/.test(input.servings) || Number(input.servings) <= 0) throw new DomainError('INVALID_SHARES', 'Servings must be positive.');
     const id = newId();
-    await this.transactions.run(async (tx) => {
-      const plan = await tx.$queryRaw<Array<{ id: string }>>`SELECT "id" FROM "MealPlan" WHERE "id" = ${input.mealPlanId}::uuid AND "householdId" = ${householdId}::uuid`;
+    const savedId = await this.transactions.run(async (tx) => {
+      const plan = await tx.$queryRaw<Array<{ id: string; startDate: string; endDate: string }>>`SELECT "id", "startDate"::text AS "startDate", "endDate"::text AS "endDate" FROM "MealPlan" WHERE "id" = ${input.mealPlanId}::uuid AND "householdId" = ${householdId}::uuid`;
       if (!plan.length) throw new DomainError('MEAL_PLAN_NOT_FOUND', 'The selected meal plan does not exist.', 404);
+      if (input.mealDate < plan[0].startDate || input.mealDate > plan[0].endDate) throw new DomainError('INVALID_DATE_RANGE', 'The meal must fall inside the selected plan.');
       const recipe = await tx.$queryRaw<Array<{ id: string }>>`SELECT "id" FROM "Recipe" WHERE "id" = ${input.recipeId}::uuid AND "archivedAt" IS NULL AND ("householdId" IS NULL OR "householdId" = ${householdId}::uuid)`;
       if (!recipe.length) throw new DomainError('RECIPE_NOT_FOUND', 'The selected recipe does not exist in this household.', 404);
+      const fingerprint = JSON.stringify([input.mealPlanId, input.recipeId, input.mealDate, input.mealType, input.servings]);
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${householdId}), hashtext(${fingerprint}))`;
+      const prior = await tx.$queryRaw<Array<{ id: string }>>`SELECT "id" FROM "PlannedMeal" WHERE "householdId" = ${householdId}::uuid AND "mealPlanId" = ${input.mealPlanId}::uuid AND "recipeId" = ${input.recipeId}::uuid AND "mealDate" = ${input.mealDate}::date AND "mealType" = ${input.mealType}::"MealType" AND "servings" = ${input.servings}::numeric LIMIT 1`;
+      if (prior.length) return prior[0].id;
       await tx.$executeRaw`INSERT INTO "PlannedMeal" ("id", "mealPlanId", "householdId", "recipeId", "mealDate", "mealType", "servings") VALUES (${id}::uuid, ${input.mealPlanId}::uuid, ${householdId}::uuid, ${input.recipeId}::uuid, ${input.mealDate}::date, ${input.mealType}::"MealType", ${input.servings}::numeric)`;
     }, { householdId });
-    return this.getPlannedMeal(householdId, id);
+    return this.getPlannedMeal(householdId, savedId ?? id);
+  }
+
+  async removePlannedMeal(householdId: string, id: string) {
+    return this.transactions.run(async (tx) => {
+      await tx.$executeRaw`DELETE FROM "PlannedMeal" WHERE "id" = ${id}::uuid AND "householdId" = ${householdId}::uuid`;
+      return true;
+    }, { householdId });
   }
 
   async listPlans(householdId: string, from: string, to: string) {

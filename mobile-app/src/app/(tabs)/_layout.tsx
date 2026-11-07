@@ -1,57 +1,30 @@
-import { useLanguage } from '@/providers/language-provider';
-import { appMessages } from '@/i18n/app';
-import { Tabs, TabList, TabTrigger, TabSlot, type TabTriggerSlotProps } from 'expo-router/ui';
 import { router } from 'expo-router';
-import { useState, type ComponentRef, type Ref } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Tabs, TabList, TabTrigger, TabSlot, type TabTriggerSlotProps } from 'expo-router/ui';
+import { Pressable, View } from 'react-native';
+import type { Ref, ComponentRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRemyTheme } from '@/theme/provider';
-import { radii, spacing, layout } from '@/theme/tokens';
 import { AppText } from '@/components/ui/core';
 import { Icon, type IconName } from '@/components/ui/icon';
-
-function TabButton({ children, isFocused, emphasized, icon, onPress, onLongPress, onFocus, onBlur, ref, ...props }: TabTriggerSlotProps & { emphasized?: boolean; icon: IconName }) {
+import { useRemyTheme } from '@/theme/provider';
+import { useLanguage } from '@/providers/language-provider';
+function TabButton({ children, isFocused, icon, ref, ...props }: TabTriggerSlotProps & { icon: IconName }) {
   const { colors } = useRemyTheme();
-  const { language } = useLanguage();
-  const t = appMessages[language];
-  const [focused, setFocused] = useState(false);
-  return (
-    <Pressable {...props} ref={ref as unknown as Ref<ComponentRef<typeof Pressable>>} accessibilityRole={emphasized ? 'button' : 'tab'} accessibilityLabel={emphasized ? t.addAction : undefined}
-      accessibilityState={emphasized ? {} : { selected: !!isFocused }}
-      onPress={emphasized ? () => router.push('/food-entry') : onPress}
-      onLongPress={emphasized ? undefined : onLongPress}
-      onFocus={(event) => { setFocused(true); onFocus?.(event); }} onBlur={(event) => { setFocused(false); onBlur?.(event); }}
-      style={({ pressed }) => [styles.button, { backgroundColor: pressed ? colors.pressedSurface : 'transparent', borderWidth: focused ? 3 : 2, borderColor: focused ? colors.focusBorder : 'transparent' }]}>
-      <View style={[styles.symbol, { backgroundColor: emphasized ? colors.primary : isFocused ? colors.navSelected : 'transparent' }]}>
-        <Icon name={icon} size={emphasized ? 28 : 22} color={emphasized ? colors.onPrimary : isFocused ? colors.primary : colors.textSecondary} />
-      </View>
-      <AppText variant="caption" style={{ color: isFocused ? colors.text : colors.textSecondary, fontWeight: isFocused ? '700' : '400', textDecorationLine: isFocused && !emphasized ? 'underline' : 'none', textAlign: 'center', width: '100%' }}>{children}</AppText>
-    </Pressable>
-  );
+  return <Pressable {...props} ref={ref as Ref<ComponentRef<typeof Pressable>>} accessibilityRole="tab" accessibilityState={{ selected: !!isFocused }} style={({ pressed }) => ({ flex: 1, minHeight: 52, padding: 6, gap: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? colors.pressedSurface : 'transparent', borderRadius: 12 })}>
+    <Icon name={icon} size={22} color={isFocused ? colors.primary : colors.textSecondary} /><AppText variant="caption" style={{ color: isFocused ? colors.primary : colors.textSecondary, fontWeight: isFocused ? '700' : '400' }}>{children}</AppText>
+  </Pressable>;
 }
-
 export default function TabLayout() {
-  const { colors } = useRemyTheme();
-  const { language } = useLanguage();
-  const t = appMessages[language];
-  return (
-    <SafeAreaView edges={['top', 'bottom', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.navSurface }}>
-      <Tabs style={{ flex: 1 }}>
-        <TabSlot style={{ flex: 1 }} />
-        <TabList style={[styles.list, { backgroundColor: colors.navSurface, borderColor: colors.divider, direction: 'ltr' }]}>
-          <TabTrigger name="home" href="/" asChild><TabButton icon="home">{t.home}</TabButton></TabTrigger>
-          <TabTrigger name="kitchen" href="/kitchen" asChild><TabButton icon="kitchen">{t.kitchen}</TabButton></TabTrigger>
-          <TabTrigger name="add" href="/add" asChild><TabButton icon="add" emphasized>{t.add}</TabButton></TabTrigger>
-          <TabTrigger name="health" href="/health" asChild><TabButton icon="health">{t.health}</TabButton></TabTrigger>
-          <TabTrigger name="more" href="/more" asChild><TabButton icon="more">{t.more}</TabButton></TabTrigger>
-        </TabList>
-      </Tabs>
-    </SafeAreaView>
-  );
+  const { colors } = useRemyTheme(); const { language } = useLanguage(); const ar = language === 'ar';
+  return <SafeAreaView edges={['top','bottom','left','right']} style={{ flex: 1, backgroundColor: colors.background }}><Tabs style={{ flex: 1 }}><TabSlot style={{ flex: 1 }} />
+    <TabList style={{ flexDirection: ar ? 'row-reverse' : 'row', paddingHorizontal: 12, paddingTop: 8, borderTopWidth: 1, borderColor: colors.divider, backgroundColor: colors.background }}>
+      <TabTrigger name="home" href="/" asChild><TabButton icon="home">{ar ? 'الرئيسية' : 'Home'}</TabButton></TabTrigger>
+      <TabTrigger name="kitchen" href="/kitchen" asChild><TabButton icon="kitchen">{ar ? 'المطبخ' : 'Kitchen'}</TabButton></TabTrigger>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Pressable accessibilityRole="button" accessibilityLabel={ar ? 'إضافة سريعة' : 'Quick add'} onPress={() => router.push('/quick-add')}
+        style={({ pressed }) => ({ width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? colors.primaryPressed : colors.primary })}>
+        <Icon name="add" size={28} color={colors.onPrimary} />
+      </Pressable></View>
+      <TabTrigger name="plan" href="/plan" asChild><TabButton icon="calendar">{ar ? 'الخطة' : 'Plan'}</TabButton></TabTrigger>
+      <TabTrigger name="more" href="/more" asChild><TabButton icon="more">{ar ? 'المزيد' : 'More'}</TabButton></TabTrigger>
+    </TabList>
+  </Tabs></SafeAreaView>;
 }
-
-const styles = StyleSheet.create({
-  list: { flexDirection: 'row', borderTopWidth: 1, paddingVertical: spacing.sm, paddingHorizontal: spacing.sm },
-  button: { flex: 1, minWidth: 0, minHeight: layout.minTouchTarget, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
-  symbol: { width: 44, height: 44, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center' },
-});

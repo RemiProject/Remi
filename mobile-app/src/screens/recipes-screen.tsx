@@ -25,7 +25,7 @@ function SampleRecipesScreen() {
   const [maxMinutes, setMaxMinutes] = useState<number | null>(null);
   const recipes = discoverRecipes(query, language, maxMinutes);
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}>
-    <PageHeader title={t.title} subtitle={t.intro} action={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={t.title} subtitle={t.intro} back={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
     <AppText variant="caption" muted>{t.sample}</AppText>
     <SearchField value={query} onChangeText={setQuery} placeholder={t.search} accessibilityLabel={t.search} autoCorrect={false} style={{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }} />
     <View style={uiStyles.wrap}>{([null, 10, 20] as const).map((value) => <Chip key={value ?? 'all'} label={value === null ? t.all : value === 10 ? t.quick : t.twenty} selected={maxMinutes === value} onPress={() => setMaxMinutes(value)} />)}</View>

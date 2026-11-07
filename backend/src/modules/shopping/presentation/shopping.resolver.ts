@@ -46,6 +46,11 @@ export class ShoppingResolver {
     return this.shopping.deleteShoppingList(ctx.householdId!, id);
   }
 
+  @Mutation(() => Boolean)
+  removeShoppingItem(@Ctx() ctx: RequestContext, @Args('id', { type: () => ID }) id: string) {
+    return this.shopping.removeShoppingItem(ctx.householdId!, id);
+  }
+
   @Mutation(() => ShoppingListItemType)
   addToShoppingList(@Ctx() ctx: RequestContext, @Args('input') input: AddToShoppingListInputType) {
     return this.shopping.addToList(ctx.householdId!, input);

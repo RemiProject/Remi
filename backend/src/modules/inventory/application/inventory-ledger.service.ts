@@ -49,6 +49,18 @@ export class InsufficientStockError extends DomainError {
 export class InventoryLedgerService {
   constructor(private readonly transactions: TransactionRunner, private readonly converter: UnitConverter) {}
 
+  async updateMetadata(householdId: string, userId: string, input: { inventoryItemId: string; expectedVersion: number; storageLocation: string; estimatedExpiryAt: Date | null }) {
+    return this.transactions.run(async tx => {
+      await tx.$executeRaw`SELECT set_config('app.inventory_ledger_write', 'true', true)`;
+      const changed = await tx.$executeRaw`UPDATE "InventoryItem" SET "storageLocation" = ${input.storageLocation}::"StorageLocation", "estimatedExpiryAt" = ${input.estimatedExpiryAt}::timestamptz, "version" = "version" + 1, "updatedAt" = now() WHERE "id" = ${input.inventoryItemId}::uuid AND "householdId" = ${householdId}::uuid AND "version" = ${input.expectedVersion}`;
+      const rows = await tx.$queryRaw<Array<{ id: string; foodId: string; foodName: string; quantity: string; unit: Unit; storageLocation: string; estimatedExpiryAt: Date | null; version: number }>>`SELECT i."id", i."foodId", f."name" AS "foodName", i."quantity"::text AS "quantity", i."unit"::text AS "unit", i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."version" FROM "InventoryItem" i JOIN "Food" f ON f."id"=i."foodId" WHERE i."id"=${input.inventoryItemId}::uuid AND i."householdId"=${householdId}::uuid`;
+      const row = rows[0];
+      if (!row) throw new DomainError('INVENTORY_ITEM_NOT_FOUND', 'This food is no longer in your kitchen.', 404);
+      if (!changed && (row.storageLocation !== input.storageLocation || (row.estimatedExpiryAt?.getTime() ?? null) !== (input.estimatedExpiryAt?.getTime() ?? null))) throw new DomainError('INVENTORY_CONFLICT', 'This food changed. Reload it before editing.', 409);
+      return row;
+    }, { householdId, userId });
+  }
+
   addStock(householdId: string, actorUserId: string, input: StockInput): Promise<StockResult> {
     return this.transactions.run((tx) => this.addInTransaction(tx, householdId, actorUserId, input, 'ADDED', 'ADD', 'USER'), { householdId, userId: actorUserId });
   }

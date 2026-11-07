@@ -322,7 +322,7 @@ test('card explanations use Arabic ingredient names, only three missing names, c
 function loadTsx(file, mocks) {
   const exports = {};
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText;
-  new Function('require', 'exports', code)(id => id in mocks ? mocks[id] : require(id), exports);
+  new Function('require', 'exports', code)(id => id in mocks ? mocks[id] : require('./native-ui-fixture.cjs').fixtureModule(id, {}) ?? require(id), exports);
   return exports;
 }
 function nodes(tree, type) {
@@ -352,6 +352,8 @@ function ui() {
     '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { radii: {}, spacing: {} },
     '@/i18n/backend-recipes': { backendRecipeMessages: messages }, '@/i18n/cooking': { cookingMessages }, '@/i18n/cooked-it': { cookedItMessages }, '@/utils/backend-recipe-view': view,
   };
+  mocks['@/domain/cooked-it'] = require('../src/domain/cooked-it.ts');
+  mocks['@/data/cookbook-content'] = { getCookbookContent: () => undefined };
   mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
   return { pushed, set: update => { state = { ...state, ...update }; }, language: value => { language = value; },

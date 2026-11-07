@@ -6,7 +6,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 const { ShoppingStore, SHOPPING_KEY } = require('../src/repositories/shopping-store.ts');
 const { validateShopping, shoppingView, validShoppingItem } = require('../src/domain/shopping.ts');
 const { shoppingMessages } = require('../src/i18n/shopping.ts');
-function storage() { const data = new Map([['remy.inventory', 'inventory'], ['remy.meal-planner', 'plans']]); return { data, writes: 0, fail: false, readFail: false, async getItem(key) { if (this.readFail) throw new Error('read'); return data.get(key) ?? null; }, async setItem(key, value) { if (this.fail) throw new Error('write'); this.writes++; data.set(key, value); } }; }
+function storage() { const data = new Map([['remi.cookbook.inventory', 'inventory'], ['remi.cookbook.meal-planner', 'plans']]); return { data, writes: 0, fail: false, readFail: false, async getItem(key) { if (this.readFail) throw new Error('read'); return data.get(key) ?? null; }, async setItem(key, value) { if (this.fail) throw new Error('write'); this.writes++; data.set(key, value); } }; }
 test('shopping create/edit/toggle/reload/delete/clear retain identity and other stores', async () => {
   const memory = storage(), store = new ShoppingStore(memory); await assert.rejects(store.save({ name: 'Milk' })); await store.hydrate(); assert.equal(memory.writes, 0);
   await Promise.all([store.save({ name: 'Milk', quantity: 2, unit: 'L', category: 'dairy' }), store.save({ name: 'Bread' })]);
@@ -14,7 +14,7 @@ test('shopping create/edit/toggle/reload/delete/clear retain identity and other 
   const edited = store.getSnapshot().items[0]; assert.equal(edited.id, item.id); assert.equal(edited.createdAt, item.createdAt); assert.equal(edited.purchased, true); assert.equal(edited.unit, undefined); assert.ok(edited.updatedAt >= item.updatedAt);
   const restarted = new ShoppingStore(memory); await restarted.hydrate(); assert.deepEqual(restarted.getSnapshot().items, store.getSnapshot().items);
   await restarted.toggle(item.id); assert.equal(restarted.getSnapshot().items[0].purchased, false); await restarted.toggle(item.id); await restarted.clearPurchased(); assert.equal(restarted.getSnapshot().items.length, 1); await restarted.remove(restarted.getSnapshot().items[0].id); assert.deepEqual(restarted.getSnapshot().items, []);
-  assert.equal(memory.data.get('remy.inventory'), 'inventory'); assert.equal(memory.data.get('remy.meal-planner'), 'plans');
+  assert.equal(memory.data.get('remi.cookbook.inventory'), 'inventory'); assert.equal(memory.data.get('remi.cookbook.meal-planner'), 'plans');
 });
 test('shopping validates optional quantities/units, catalog parity and search/filter combinations', async () => {
   const draft = { name: ' Milk ', quantity: '', unit: '', category: '' };
@@ -46,4 +46,24 @@ test('shopping UI validates, saves, checks purchase status and requires explicit
  tree.find(node=>node.type==='FormField'&&node.props.label===shoppingMessages.en.name).props.onChangeText('Apples');tree=render();const save=tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.en.save);save.props.onPress();save.props.onPress();await tick();tree=render();assert.equal(store.getSnapshot().items.length,1);assert.equal(tree.find(node=>node.type==='Modal').props.visible,false);
  tree.find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox').props.onPress();await tick();tree=render();assert.equal(tree.find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox').props.accessibilityState.checked,true);
  language='ar';tree=render();assert.equal(tree.find(node=>node.type==='Screen').props.rtl,true);tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.ar.clear).props.onPress();assert.equal(store.getSnapshot().items.length,1);tree=render();assert.equal(tree.find(node=>node.type==='Modal').props.visible,true);memory.fail=true;tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.ar.confirm).props.onPress();await tick();tree=render();assert.equal(store.getSnapshot().items.length,1);assert.ok(tree.some(node=>node.props?.children===shoppingMessages.ar.writeError));assert.equal(tree.find(node=>node.type==='Modal').props.visible,true);memory.fail=false;tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.ar.confirm).props.onPress();await tick();assert.deepEqual(store.getSnapshot().items,[]);assert.equal(render().find(node=>node.type==='Modal').props.visible,false);
+});
+
+test('quick shopping lines save atomically, deduplicate pending items and survive reload', async () => {
+  const memory = storage(), store = new ShoppingStore(memory); await store.hydrate();
+  await store.addLines(' Milk\nEggs\r\n\nحليب\nMilk\nmilk');
+  assert.equal(memory.writes, 1);
+  assert.deepEqual(store.getSnapshot().items.map(item => item.name), ['Milk', 'Eggs', 'حليب']);
+  await store.toggle(store.getSnapshot().items[0].id);
+  await store.addLines('Milk\nEggs');
+  assert.equal(store.getSnapshot().items.filter(item => item.name === 'Milk' && !item.purchased).length, 1);
+  const restarted = new ShoppingStore(memory); await restarted.hydrate();
+  assert.deepEqual(restarted.getSnapshot().items, store.getSnapshot().items);
+  const before = store.getSnapshot().items; memory.fail = true;
+  await assert.rejects(store.addLines('Bread\nRice'));
+  assert.deepEqual(store.getSnapshot().items, before);
+  assert.throws(() => store.addLines('x'.repeat(101)));
+  assert.throws(() => store.addLines(Array(51).fill('Milk').join('\n')));
+  assert.throws(() => store.addLines('\n  '));
+  memory.fail = false; await store.addLines('Bread\nRice');
+  assert.equal(store.getSnapshot().items.filter(item => item.name === 'Bread').length, 1);
 });

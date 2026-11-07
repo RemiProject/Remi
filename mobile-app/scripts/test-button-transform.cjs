@@ -1,3 +1,4 @@
+const { fixtureModule } = require('./native-ui-fixture.cjs');
 const fs = require('node:fs');
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -14,8 +15,10 @@ const core = { exports: {} };
 // Inspect the real Button style callback without needing a native rendering host.
 new Function('require', 'exports', compiled)((id) => {
   if (id === 'react') return { ...require('react'), useState: () => [false, () => {}] };
-  if (id === 'react-native') return { Pressable: 'Pressable', StyleSheet: { create: (value) => value } };
+  if (fixtureModule(id, typeof native === 'undefined' ? {} : native)) return fixtureModule(id, typeof native === 'undefined' ? {} : native);
+      if (id === 'react-native') return { Pressable: 'Pressable', StyleSheet: { create: (value) => value } };
   if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {} }) };
+  if (id === '@/providers/language-provider') return { useLanguage: () => ({ language: 'en' }) };
   if (id === '@/theme/fonts') return { useRemyFonts: () => ({}) };
   if (id === '@/theme/tokens') return { layout: {}, spacing: {}, radii: {}, typography: {} };
   if (id === './icon') return { Icon: () => null };
@@ -43,19 +46,21 @@ const attributes = { style: { transform: { process: processTransform } } };
 test('installed renderer reproduces the pressed-to-undefined transform crash', () => {
   assert.throws(() => payload.diff({ style: { transform: [{ scale: 0.98 }] } }, { style: { transform: undefined } }, attributes), /forEach/);
 });
-test('Button omits transforms when idle/disabled and uses a valid pressed array', () => {
+test('Button press and release keep renderer-safe transform arrays for every variant', () => {
   for (const variant of ['primary', 'secondary', 'text', 'destructive', 'dangerText']) {
     for (const disabled of [false, true]) {
       const button = core.exports.Button({ label: 'Test', variant, disabled });
-      const idle = flatten(button.props.style({ pressed: false }));
-      const pressed = flatten(button.props.style({ pressed: true }));
-      assert.equal(Object.hasOwn(idle, 'transform'), false);
-      if (disabled) assert.equal(Object.hasOwn(pressed, 'transform'), false);
-      else assert.deepEqual(pressed.transform, [{ scale: 0.98 }]);
+      const idle = flatten(button.props.style);
+      assert.deepEqual(idle.transform, [{ scale: 1 }]);
+      button.props.onPressIn();
+      const pressed = flatten(button.props.style);
+      assert.deepEqual(pressed.transform, [{ scale: 0.98 }]);
+      button.props.onPressOut();
+      const released = flatten(button.props.style);
+      assert.deepEqual(released.transform, [{ scale: 1 }]);
       assert.doesNotThrow(() => payload.create({ style: idle }, attributes));
-      assert.doesNotThrow(() => payload.create({ style: pressed }, attributes));
-      assert.doesNotThrow(() => payload.diff({ style: idle }, { style: pressed }, attributes));
-      assert.doesNotThrow(() => payload.diff({ style: pressed }, { style: idle }, attributes));
+      assert.doesNotThrow(() => payload.diff({ style: pressed }, { style: released }, attributes));
+      assert.equal(button.props.disabled, disabled);
     }
   }
 });

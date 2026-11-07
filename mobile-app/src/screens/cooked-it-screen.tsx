@@ -35,14 +35,14 @@ function Off() {
   return null;
 }
 function EnabledCookedItScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, servings } = useLocalSearchParams<{ id: string; servings?: string }>();
   const recipes = useBackendRecipes();
   const { language } = useLanguage();
   if (recipes.status === 'signed-out') return <Screen rtl={language === 'ar'}><EmptyState title={backendRecipeMessages[language].signInTitle}
     description={backendRecipeMessages[language].signInBody} action={backendRecipeMessages[language].signIn} onPress={() => router.push('/login')} /></Screen>;
-  return <ConfirmationSession key={`${recipes.owner}:${id}`} id={id} />;
+  return <ConfirmationSession key={`${recipes.owner}:${id}:${servings}`} id={id} requestedServings={servings} />;
 }
-function ConfirmationSession({ id }: { id: string }) {
+function ConfirmationSession({ id, requestedServings }: { id: string; requestedServings?: string }) {
   const recipes = useBackendRecipes(), kitchen = useBackendKitchen();
   const { owner, ensureDetail } = recipes;
   const { language } = useLanguage(), { colors } = useRemyTheme();
@@ -54,11 +54,13 @@ function ConfirmationSession({ id }: { id: string }) {
   useEffect(() => {
     if (store || initialError || !detail?.recipe || !detail.suggestion || kitchen.status !== 'ready') return;
     const recipe = detail.recipe, suggestion = detail.suggestion;
-    preparation.prepare(() => new CookedMealStore(getAuth(), AsyncStorage, recipe,
+    preparation.prepare(() => { const meal = new CookedMealStore(getAuth(), AsyncStorage, recipe,
         mealRows(recipe, suggestion, kitchen.items, kitchen.today), guessMealType(new Date()),
         async () => { const inventory = await kitchen.refreshAfterMeal(); await recipes.refreshAfterMeal(id, inventory); },
-        () => { recipes.showMealRemoved(id); router.replace({ pathname: '/recipes/[id]', params: { id } }); }));
-  }, [store, initialError, detail, kitchen, recipes, id, preparation]);
+        () => { recipes.showMealRemoved(id); router.replace({ pathname: '/recipes/[id]', params: { id } }); });
+      if (requestedServings && /^\d+$/.test(requestedServings) && Number(requestedServings) >= 1 && Number(requestedServings) <= 20) meal.change('servings', requestedServings);
+      return meal; });
+  }, [store, initialError, detail, kitchen, recipes, id, preparation, requestedServings]);
   const failed = initialError || detail?.status === 'error' || detail?.matchingError || recipes.status === 'error' || kitchen.status === 'error';
   const unavailable = detail?.status === 'ready' && !detail.matchingLoading && !detail.suggestion;
   const retry = () => { preparation.retry(); void kitchen.retry(); void recipes.loadDetail(id); };

@@ -62,7 +62,7 @@ async function harness({ pages = [page()], detail = { ...batch('batch'), transac
   await login(user);
   return {
     auth, storage, calls, login, repo: createGraphqlInventoryRepository(auth, storage),
-    select: id => values.set(`remy.active-household.v1:${JSON.stringify([backendUrl, user])}`, id),
+    select: id => values.set(`remi.cookbook.active-household.v1:${JSON.stringify([backendUrl, user])}`, id),
     inventoryCalls: () => calls.filter(c => Object.values(inventoryReadOperations).includes(c.query)),
   };
 }

@@ -1,0 +1,302 @@
+[
+  {
+    "name": "bell pepper",
+    "name_ar": "فلفل رومي",
+    "category_code": "VEGETABLES",
+    "default_unit": "PIECE",
+    "grams_per_piece": "119.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "فلفل حلو",
+    "aliases_en": "capsicum|sweet pepper"
+  },
+  {
+    "name": "black pepper",
+    "name_ar": "فلفل أسود",
+    "category_code": "SPICES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "فلفل اسود مطحون",
+    "aliases_en": "ground black pepper"
+  },
+  {
+    "name": "blueberry",
+    "name_ar": "توت أزرق",
+    "category_code": "FRUITS",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "بلوبيري",
+    "aliases_en": "blueberries"
+  },
+  {
+    "name": "carrot",
+    "name_ar": "جزر",
+    "category_code": "VEGETABLES",
+    "default_unit": "PIECE",
+    "grams_per_piece": "61.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "",
+    "aliases_en": "carrots"
+  },
+  {
+    "name": "chicken egg",
+    "name_ar": "بيض",
+    "category_code": "EGGS",
+    "default_unit": "PIECE",
+    "grams_per_piece": "50.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "بيضة|بيض فراخ",
+    "aliases_en": "egg|eggs|hen egg"
+  },
+  {
+    "name": "cooked chickpeas",
+    "name_ar": "حمص مسلوق",
+    "category_code": "LEGUMES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "حمص مطبوخ",
+    "aliases_en": "boiled chickpeas"
+  },
+  {
+    "name": "cucumber",
+    "name_ar": "خيار",
+    "category_code": "VEGETABLES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "301.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "",
+    "aliases_en": "cucumbers"
+  },
+  {
+    "name": "cumin",
+    "name_ar": "كمون",
+    "category_code": "SPICES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "كمون مطحون",
+    "aliases_en": "ground cumin|cumin seed"
+  },
+  {
+    "name": "feta cheese",
+    "name_ar": "جبنة فيتا",
+    "category_code": "DAIRY",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "فيتا",
+    "aliases_en": "feta"
+  },
+  {
+    "name": "fresh basil",
+    "name_ar": "ريحان",
+    "category_code": "VEGETABLES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "ريحان أخضر",
+    "aliases_en": "sweet basil"
+  },
+  {
+    "name": "ful medames",
+    "name_ar": "فول مدمس",
+    "category_code": "LEGUMES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "فول مدمس معلب|فول متدمس",
+    "aliases_en": "foul medames|stewed fava beans"
+  },
+  {
+    "name": "garlic",
+    "name_ar": "ثوم",
+    "category_code": "VEGETABLES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "3.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "توم",
+    "aliases_en": "garlic cloves"
+  },
+  {
+    "name": "hummus",
+    "name_ar": "حمص بالطحينة",
+    "category_code": "LEGUMES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "حمص بطحينة",
+    "aliases_en": "hummus dip|houmous"
+  },
+  {
+    "name": "lemon juice",
+    "name_ar": "عصير ليمون",
+    "category_code": "BEVERAGES",
+    "default_unit": "MILLILITER",
+    "grams_per_piece": "",
+    "density_g_per_ml": "1.031",
+    "aliases_ar": "ليمون معصور",
+    "aliases_en": ""
+  },
+  {
+    "name": "lettuce",
+    "name_ar": "خس",
+    "category_code": "VEGETABLES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "خس بلدي",
+    "aliases_en": "romaine lettuce|cos lettuce"
+  },
+  {
+    "name": "low fat milk",
+    "name_ar": "لبن قليل الدسم",
+    "category_code": "DAIRY",
+    "default_unit": "MILLILITER",
+    "grams_per_piece": "",
+    "density_g_per_ml": "1.031",
+    "aliases_ar": "حليب قليل الدسم|لبن لايت",
+    "aliases_en": "1% milk"
+  },
+  {
+    "name": "oats",
+    "name_ar": "شوفان",
+    "category_code": "GRAINS",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "شوفان سريع",
+    "aliases_en": "oatmeal"
+  },
+  {
+    "name": "olive oil",
+    "name_ar": "زيت زيتون",
+    "category_code": "OILS",
+    "default_unit": "MILLILITER",
+    "grams_per_piece": "",
+    "density_g_per_ml": "0.913",
+    "aliases_ar": "زيت الزيتون",
+    "aliases_en": ""
+  },
+  {
+    "name": "onion",
+    "name_ar": "بصل",
+    "category_code": "VEGETABLES",
+    "default_unit": "PIECE",
+    "grams_per_piece": "110.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "بصل أحمر",
+    "aliases_en": "onions|yellow onion"
+  },
+  {
+    "name": "parsley",
+    "name_ar": "بقدونس",
+    "category_code": "VEGETABLES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "بقدونس بلدي",
+    "aliases_en": "flat-leaf parsley"
+  },
+  {
+    "name": "pasta",
+    "name_ar": "باستا",
+    "category_code": "GRAINS",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "",
+    "aliases_en": "dry pasta"
+  },
+  {
+    "name": "potato",
+    "name_ar": "بطاطس",
+    "category_code": "VEGETABLES",
+    "default_unit": "PIECE",
+    "grams_per_piece": "213.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "",
+    "aliases_en": "potatoes"
+  },
+  {
+    "name": "raspberry",
+    "name_ar": "توت العليق",
+    "category_code": "FRUITS",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "راسبيري",
+    "aliases_en": "raspberries"
+  },
+  {
+    "name": "red lentils",
+    "name_ar": "عدس أحمر",
+    "category_code": "LEGUMES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "عدس أصفر|عدس مجروش",
+    "aliases_en": "split red lentils|masoor dal"
+  },
+  {
+    "name": "spinach",
+    "name_ar": "سبانخ",
+    "category_code": "VEGETABLES",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "سبانخ بلدي",
+    "aliases_en": ""
+  },
+  {
+    "name": "tahini",
+    "name_ar": "طحينة",
+    "category_code": "SWEETS",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "طحينه|طحينة خام",
+    "aliases_en": "tahina|sesame paste"
+  },
+  {
+    "name": "tomato",
+    "name_ar": "طماطم",
+    "category_code": "VEGETABLES",
+    "default_unit": "PIECE",
+    "grams_per_piece": "123.0",
+    "density_g_per_ml": "",
+    "aliases_ar": "قوطة|بندورة",
+    "aliases_en": "tomatoes"
+  },
+  {
+    "name": "water",
+    "name_ar": "ماء",
+    "category_code": "BEVERAGES",
+    "default_unit": "MILLILITER",
+    "grams_per_piece": "",
+    "density_g_per_ml": "1.0",
+    "aliases_ar": "مية|مياه",
+    "aliases_en": "drinking water|tap water"
+  },
+  {
+    "name": "whole wheat bread",
+    "name_ar": "خبز قمح كامل",
+    "category_code": "GRAINS",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "عيش أسمر|خبز أسمر",
+    "aliases_en": "brown bread|wholemeal bread"
+  },
+  {
+    "name": "yogurt",
+    "name_ar": "زبادي",
+    "category_code": "DAIRY",
+    "default_unit": "GRAM",
+    "grams_per_piece": "",
+    "density_g_per_ml": "",
+    "aliases_ar": "زبادى|لبن زبادي",
+    "aliases_en": "plain yogurt|yoghurt"
+  }
+]

@@ -1,3 +1,4 @@
+import { StartupGate } from '@/components/startup-gate';
 import { ShoppingProvider } from '@/providers/shopping-provider';
 import { PlannerProvider } from '@/providers/planner-provider';
 import { Stack, ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
@@ -19,6 +20,7 @@ function Navigation() {
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="quick-add" options={{ presentation: 'modal' }} />
         <Stack.Screen name="food-entry" options={{ presentation: 'modal' }} />
         <Stack.Screen name="food/manual" options={{ presentation: 'modal', gestureEnabled: false }} />
         <Stack.Screen name="food/edit/[id]" options={{ presentation: 'modal', gestureEnabled: false }} />
@@ -28,5 +30,5 @@ function Navigation() {
 }
 
 export default function RootLayout() {
-  return <SafeAreaProvider><RemyThemeProvider><RemyFontProvider><LanguageProvider><InventoryProvider><PlannerProvider><ShoppingProvider><AuthProvider><BackendKitchenProvider><BackendRecipesProvider><Navigation /></BackendRecipesProvider></BackendKitchenProvider></AuthProvider></ShoppingProvider></PlannerProvider></InventoryProvider></LanguageProvider></RemyFontProvider></RemyThemeProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><RemyThemeProvider><RemyFontProvider><LanguageProvider><InventoryProvider><PlannerProvider><ShoppingProvider><AuthProvider><BackendKitchenProvider><BackendRecipesProvider><StartupGate><Navigation /></StartupGate></BackendRecipesProvider></BackendKitchenProvider></AuthProvider></ShoppingProvider></PlannerProvider></InventoryProvider></LanguageProvider></RemyFontProvider></RemyThemeProvider></SafeAreaProvider>;
 }

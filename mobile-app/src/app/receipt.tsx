@@ -1,1 +1,1 @@
-export { default } from '@/screens/receipt-screen';
+export { default } from '@/screens/intake-receipt-screen';
