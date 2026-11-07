@@ -13,19 +13,37 @@ import { useAuth } from '@/providers/auth-provider';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
 import { backendExpiryDays, backendFoodName, backendQuantityLabel } from '@/utils/backend-kitchen-view';
 import { getCookbookContent } from '@/data/cookbook-content';
-import { loadRecipes, loadPlans, todayKey } from '@/services/kitchen-api';
-import { DataNotice, useKitchenData } from './connected-ui';
+import { loadRecipe, loadRecipes, loadPlans, loadShopping, shiftDay, todayKey } from '@/services/kitchen-api';
+import { addPlannedMealsToShopping } from '@/services/plan-shopping';
+import { recipesOnList, upcomingMeals } from '@/domain/home-plan';
+import { DataNotice, Feedback, useAction, useKitchenData } from './connected-ui';
 export interface BackendHomeData { recipeIdeas?: ReactNode; items: import('@/domain/backend-inventory-read-model').InventoryReadItem[]; status: string; today: string; retry: () => Promise<void>; notice: ReactNode; deviceNotice: ReactNode; saved: string; empty: string; emptyBody: string; writesSoon: string; readOnly: string; foodName: (item: import('@/domain/backend-inventory-read-model').InventoryReadItem) => string; quantityLabel: (item: import('@/domain/backend-inventory-read-model').InventoryReadItem) => string }
 const feature = (name: string) => router.push({ pathname: '/feature', params: { feature: name } });
 export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   const { colors, mode } = useRemyTheme(); const { language } = useLanguage(); const { user } = useAuth(); const kitchen = useBackendKitchen();
   const rtl = language === 'ar'; const c = (en: string, ar: string) => rtl ? ar : en;
   const [query, setQuery] = useState('');
-  const data = useKitchenData(async () => ({ recipes: await loadRecipes(), plans: await loadPlans(todayKey(), todayKey()) }));
+  const data = useKitchenData(async () => {
+    const today = todayKey();
+    const [recipes, plans, lists] = await Promise.all([loadRecipes(), loadPlans(today, shiftDay(today, 6)), loadShopping()]);
+    const upcoming = upcomingMeals(plans.flatMap(plan => plan.meals), today);
+    // One recipe failing to load only hides it from the list card; Home itself still renders.
+    const details = (await Promise.all([...new Set(upcoming.map(meal => meal.recipeId))].map(id => loadRecipe(id).catch(() => null)))).filter(recipe => recipe !== null);
+    return { recipes, upcoming, onList: recipesOnList(details, lists.filter(list => list.status === 'ACTIVE').flatMap(list => list.items)) };
+  });
+  const shop = useAction(data.reload); const [shopNote, setShopNote] = useState<string | null>(null);
+  const addUpcoming = () => shop.run(async () => {
+    const result = await addPlannedMealsToShopping(kitchen.status === 'ready' ? kitchen.items.map(item => ({ foodId: item.foodId, quantity: item.quantity, unit: item.backendUnit })) : []);
+    setShopNote(result.added.length ? c(`Added ${result.added.length} ingredients to your shopping list.`, `أُضيف ${result.added.length} مكونًا إلى قائمة مشترياتك.`) : c('Everything you need is already in Kitchen or on your list.', 'كل ما تحتاجه موجود في المطبخ أو في قائمتك.'));
+  });
+  const dayLabel = (date: string) => date === todayKey() ? c('Today', 'اليوم') : date === shiftDay(todayKey(), 1) ? c('Tomorrow', 'غدًا') : new Date(`${date}T12:00:00`).toLocaleDateString(language, { weekday: 'long' });
+  const mealLabel = (type: string) => ({ BREAKFAST: c('Breakfast', 'الإفطار'), LUNCH: c('Lunch', 'الغداء'), DINNER: c('Dinner', 'العشاء'), SNACK: c('Snack', 'وجبة خفيفة') } as Record<string, string>)[type] ?? c('Meal', 'وجبة');
+  const row = (key: string, title: string, caption: string, onPress: () => void) => <Pressable key={key} accessibilityRole="button" accessibilityLabel={`${title}. ${caption}`} onPress={onPress} style={({ pressed }) => [uiStyles.row, { paddingVertical: 10, borderRadius: 12, backgroundColor: pressed ? colors.pressedSurface : 'transparent' }]}>
+    <View style={{ flex: 1, gap: 2 }}><AppText variant="label">{title}</AppText><AppText variant="caption" muted>{caption}</AppText></View><Icon name="chevron" size={16} rtl={rtl} /></Pressable>;
   const recipes = (data.data?.recipes ?? []).filter(recipe => recipe.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const foods = kitchen.items.filter(item => backendFoodName(item, language).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const priority = kitchen.items.filter(item => { const days = backendExpiryDays(item, kitchen.today); return days !== null && days >= 0 && days <= 3; }).sort((a,b) => (backendExpiryDays(a,kitchen.today) ?? 99) - (backendExpiryDays(b,kitchen.today) ?? 99));
-  const meals = (data.data?.plans ?? []).flatMap(plan => plan.meals).filter(meal => meal.mealDate === todayKey());
+  const upcoming = data.data?.upcoming ?? []; const onList = data.data?.onList ?? [];
   if (user && (kitchen.status === 'loading' && !kitchen.items.length || data.loading && !data.data)) return <AppSkeleton navigation={false} />;
   return <Screen rtl={rtl} contentGap={24}>
     <View style={{ backgroundColor: '#B92318', marginHorizontal: -20, marginTop: -20, padding: 24, paddingTop: 20, gap: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
@@ -54,7 +72,13 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
         </Pressable>; })}
       </ScrollView>
       {!data.loading && !recipes.length && <AppText muted>{c('No recipes match yet. Try another search.', 'لا توجد وصفات مطابقة. جرّب بحثًا آخر.')}</AppText>}</>}
-      <Card><SectionHeader title={c("Today's plan", 'خطة اليوم')} />{meals.length ? meals.map(meal => <Button key={meal.id} label={meal.recipeName} variant="text" onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: meal.recipeId } })} />) : <AppText muted>{c('A little room for something good.', 'مساحة لوجبة لذيذة.')}</AppText>}<Button label={c('Plan a meal', 'خطط لوجبة')} variant="secondary" onPress={() => router.navigate('/plan')} /></Card>
+      <Card><SectionHeader title={c('Upcoming meals', 'الوجبات القادمة')} />
+        {upcoming.length ? upcoming.map(meal => row(meal.id, meal.recipeName, `${dayLabel(meal.mealDate)} · ${mealLabel(meal.mealType)} · ${Number(meal.servings)} ${c('servings', 'حصص')}`, () => router.push({ pathname: '/recipes/[id]', params: { id: meal.recipeId } }))) : <AppText muted>{c('A little room for something good.', 'مساحة لوجبة لذيذة.')}</AppText>}
+        {upcoming.length > 0 && <Button label={c('Add ingredients to shopping list', 'أضف المكونات إلى قائمة المشتريات')} icon="shopping" disabled={shop.busy} onPress={() => { void addUpcoming(); }} />}
+        <Feedback message={shop.message ?? shopNote} />
+        <Button label={c('Plan a meal', 'خطط لوجبة')} variant="secondary" onPress={() => router.navigate('/plan')} /></Card>
+      {onList.length > 0 && <Card><SectionHeader title={c('In your shopping list', 'في قائمة مشترياتك')} action={c('View list', 'عرض القائمة')} onPress={() => feature('shopping')} />
+        {onList.map(recipe => row(recipe.id, recipe.name, c(`${recipe.onList} of ${recipe.total} ingredients on your list`, `${recipe.onList} من ${recipe.total} مكونات في قائمتك`), () => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })))}</Card>}
       <View style={{ padding: 20, gap: 12, backgroundColor: '#35532B', borderRadius: 16 }}><AppText variant="heading" style={{ color: '#FFF7E8' }}>{c('Make more of what you have.', 'استفد أكثر مما لديك.')}</AppText><Button label={c('Kitchen helper', 'مساعد المطبخ')} variant="secondary" icon="chat" onPress={() => feature('chat')} /><Button label={c('Your shopping list', 'قائمة مشترياتك')} variant="secondary" icon="shopping" onPress={() => feature('shopping')} /></View>
     </>}
   </Screen>;
