@@ -54,7 +54,7 @@ export function Button({ label, onPress, variant = 'primary', icon, disabled = f
   const color = disabled ? colors.disabledText : variant === 'primary' ? colors.onPrimary : variant === 'destructive' ? colors.onDestructive : variant === 'dangerText' ? colors.destructive : colors.primary;
   return <AnimatedPressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} onPressIn={() => feedback(true)} onPressOut={() => feedback(false)}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-    style={[styles.button, pressStyle, icon === 'back' && { alignSelf: 'flex-start' }, {
+    style={[styles.button, pressStyle, (variant === 'text' || variant === 'dangerText') && { paddingHorizontal: spacing.sm }, icon === 'back' && { alignSelf: 'flex-start' }, {
       backgroundColor: disabled ? colors.disabledSurface : variant === 'primary' ? (pressed ? colors.primaryPressed : colors.primary) : variant === 'destructive' ? colors.destructive : pressed ? colors.pressedSurface : variant === 'secondary' ? colors.primarySoft : 'transparent',
       borderColor: focused ? colors.focusBorder : 'transparent',
       borderWidth: focused ? 3 : 2,
