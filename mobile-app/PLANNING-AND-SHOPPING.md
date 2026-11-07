@@ -20,9 +20,10 @@ also runs it when it finishes.
 3. Merges the same food in the same unit across all meals into one line.
 4. Subtracts Kitchen stock of the same food and unit, and drops lines that stock fully
    covers.
-5. Skips foods already **needed** on the active list, so pressing the button again
-   never creates duplicates. A run interrupted by a network error can be repeated
-   safely for the same reason.
+5. Skips foods already on the active list in the same unit, whether still needed,
+   bought or skipped. Pressing the button again never creates duplicates and never
+   brings back an item you ticked off. A run interrupted by a network error can be
+   repeated safely for the same reason.
 6. Adds the remaining lines to the active list, creating "Kitchen shopping" if there is
    none, through the existing `addToShoppingList` mutation.
 

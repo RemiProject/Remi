@@ -26,7 +26,7 @@ function ShoppingContent() {
     // Kitchen stock is subtracted only once it has loaded; otherwise every ingredient is listed.
     const result = await addPlannedMealsToShopping(kitchen.status === 'ready' ? kitchen.items.map(item => ({ foodId: item.foodId, quantity: item.quantity, unit: item.backendUnit })) : []);
     setWeekNote(!result.meals ? copy('No meals planned for the next 7 days. Plan some meals first.', 'لا توجد وجبات مخططة للأيام السبعة القادمة. خطط لبعض الوجبات أولًا.')
-      : result.added.length ? copy(`Added ${result.added.length} ingredients for ${result.meals} planned meals. Food already in Kitchen or on this list was left out.`, `أُضيف ${result.added.length} مكونًا لـ ${result.meals} وجبات مخططة. لم يُضف ما في المطبخ أو في القائمة.`)
+      : result.added.length ? copy(`Added ${result.added.length === 1 ? '1 ingredient' : `${result.added.length} ingredients`} for ${result.meals === 1 ? '1 planned meal' : `${result.meals} planned meals`}. Food already in Kitchen or on this list was left out.`, `المكونات المضافة: ${result.added.length} (الوجبات المخططة: ${result.meals}). لم يُضف ما في المطبخ أو في القائمة.`)
       : copy('Everything for your planned meals is already in Kitchen or on this list.', 'كل ما تحتاجه وجباتك المخططة موجود في المطبخ أو في القائمة.'));
   });
   const other = copy('Other', 'أخرى');

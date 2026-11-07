@@ -38,7 +38,8 @@ export function planShoppingLines({ meals, recipes, stock, list }: { meals: read
       lines.set(key, line);
     }
   }
-  const onList = new Set(list.filter((item) => item.status === 'NEEDED').map((item) => `${item.foodId}|${item.unit}`));
+  // Anything already on the active list — still needed, bought or skipped — is left alone, so ticking an item off never brings it back.
+  const onList = new Set(list.map((item) => `${item.foodId}|${item.unit}`));
   // shortcut: stock in a different unit (e.g. kg vs g) is not converted, so that food is still listed in full; convert via food density/gramsPerPiece if this proves noisy.
   const held = new Map<string, bigint>();
   for (const item of stock) if (DECIMAL.test(item.quantity)) held.set(`${item.foodId}|${item.unit}`, (held.get(`${item.foodId}|${item.unit}`) ?? 0n) + toMilli(item.quantity));

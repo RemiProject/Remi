@@ -34,7 +34,7 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   const shop = useAction(data.reload); const [shopNote, setShopNote] = useState<string | null>(null);
   const addUpcoming = () => shop.run(async () => {
     const result = await addPlannedMealsToShopping(kitchen.status === 'ready' ? kitchen.items.map(item => ({ foodId: item.foodId, quantity: item.quantity, unit: item.backendUnit })) : []);
-    setShopNote(result.added.length ? c(`Added ${result.added.length} ingredients to your shopping list.`, `أُضيف ${result.added.length} مكونًا إلى قائمة مشترياتك.`) : c('Everything you need is already in Kitchen or on your list.', 'كل ما تحتاجه موجود في المطبخ أو في قائمتك.'));
+    setShopNote(result.added.length ? c(`Added ${result.added.length === 1 ? '1 ingredient' : `${result.added.length} ingredients`} to your shopping list.`, `المكونات المضافة إلى قائمة مشترياتك: ${result.added.length}.`) : c('Everything you need is already in Kitchen or on your list.', 'كل ما تحتاجه موجود في المطبخ أو في قائمتك.'));
   });
   const dayLabel = (date: string) => date === todayKey() ? c('Today', 'اليوم') : date === shiftDay(todayKey(), 1) ? c('Tomorrow', 'غدًا') : new Date(`${date}T12:00:00`).toLocaleDateString(language, { weekday: 'long' });
   const mealLabel = (type: string) => ({ BREAKFAST: c('Breakfast', 'الإفطار'), LUNCH: c('Lunch', 'الغداء'), DINNER: c('Dinner', 'العشاء'), SNACK: c('Snack', 'وجبة خفيفة') } as Record<string, string>)[type] ?? c('Meal', 'وجبة');

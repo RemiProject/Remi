@@ -21,11 +21,12 @@ test('scales to planned servings, merges the same food+unit across recipes, skip
   ]);
 });
 
-test('subtracts Kitchen stock of the same unit, drops covered foods, skips foods already needed on the list', () => {
+test('subtracts Kitchen stock of the same unit, drops covered foods, skips foods already on the list (needed or bought)', () => {
   const lines = planShoppingLines({ meals: [{ recipeId: 'stew', servings: '4' }, { recipeId: 'salad', servings: '2' }], recipes,
     stock: [{ foodId: 'chickpea', quantity: '250', unit: 'GRAM' }, { foodId: 'chickpea', quantity: '100', unit: 'GRAM' }, { foodId: 'onion', quantity: '1', unit: 'KILOGRAM' }, { foodId: 'lemon', quantity: '3', unit: 'PIECE' }],
     list: [{ foodId: 'onion', unit: 'PIECE', status: 'NEEDED' }, { foodId: 'onion', unit: 'GRAM', status: 'PURCHASED' }] });
-  assert.deepEqual(lines.map((l) => [l.foodName, l.quantity, l.unit]), [['Chickpeas', '250', 'GRAM'], ['Onion', '50', 'GRAM']]);
+  // Bought this shop (PURCHASED) is not re-added either: found on iOS, where butter came back after being ticked off.
+  assert.deepEqual(lines.map((l) => [l.foodName, l.quantity, l.unit]), [['Chickpeas', '250', 'GRAM']]);
 });
 
 test('exact thousandths with half-up rounding; invalid quantities rejected', () => {
