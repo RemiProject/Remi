@@ -1,3 +1,4 @@
+import { Brand } from '@/components/brand';
 import { scaleMealAmount } from '@/domain/cooked-it';
 import { useEffect, useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -54,7 +55,7 @@ export function BackendCookingScreen() {
 
   if (session.finished) return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><View style={{ flex: 1, padding: 20, gap: spacing.lg, justifyContent: 'center', direction: dir }}>
     <View style={{ padding: spacing.xl, gap: spacing.md, borderRadius: radii.lg, backgroundColor: colors.hero }}>
-      <AppText variant="title" accessibilityRole="header" style={{ color: colors.onHero }}>{r.cookingDone}</AppText>
+      <View style={[uiStyles.row, { alignItems: 'flex-end' }]}><AppText variant="title" accessibilityRole="header" style={[uiStyles.grow, { color: colors.onHero }]}>{r.cookingDone}</AppText><Brand kind="mascot" height={96} /></View>
       <AppText variant="label" dir="ltr" style={{ color: colors.onHero }}>{recipe.name}</AppText>
       <AppText dir={dir} style={{ color: colors.onHero }}>{t.summary}</AppText>
     </View>

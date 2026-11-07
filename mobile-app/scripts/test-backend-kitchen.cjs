@@ -296,6 +296,8 @@ function homeLayoutHarness(backend, language = 'en', homePlan = { upcoming: [], 
     if (id === 'expo-router') return { useFocusEffect: () => {}, router: { navigate: p => routes.push(p), push: p => routes.push(p) } };
     if (id === 'expo-image') return { Image: 'Image' };
     if (id === 'react-native') return { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View' };
+    if (id === '@/components/brand') return { Brand: 'Brand' };
+    if (id === '@/theme/tokens') return { spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } };
     if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText','Button','Card','Screen','SearchField','SectionHeader'].map(n => [n,n])), uiStyles: {} };
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
     if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };

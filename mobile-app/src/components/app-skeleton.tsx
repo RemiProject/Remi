@@ -1,3 +1,4 @@
+import { Brand } from './brand';
 import { ScrollView, View, type ColorValue, type DimensionValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -5,7 +6,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { useRemyTheme } from '@/theme/provider';
 import { useLanguage } from '@/providers/language-provider';
-import { AppText } from './ui/core';
 
 const Pulse = Animated.createAnimatedComponent(View);
 export function AppSkeleton({ navigation = true }: { navigation?: boolean }) {
@@ -16,7 +16,7 @@ export function AppSkeleton({ navigation = true }: { navigation?: boolean }) {
     <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
     <ScrollView scrollEnabled={false} contentContainerStyle={{ padding: 20, gap: 24, direction: rtl ? 'rtl' : 'ltr' }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <View style={{ backgroundColor: colors.hero, marginHorizontal: -20, marginTop: -20, padding: 24, gap: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
-        <AppText variant="brand" style={{ color: colors.onHero }}>Remi</AppText>
+        <Brand kind="wordmark" height={36} />
         <Pulse style={[{ gap: 10 }, !reduced && { animationName: { from: { opacity: 0.5 }, to: { opacity: 0.9 } }, animationDuration: 900, animationDirection: 'alternate', animationIterationCount: 'infinite', animationTimingFunction: 'ease-in-out' }]}>
           {block('75%', 34, colors.onHero)}{block('52%', 34, colors.onHero)}{block('100%', 48, colors.onHero)}
         </Pulse>

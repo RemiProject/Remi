@@ -1,3 +1,5 @@
+import { Brand } from '@/components/brand';
+import { spacing } from '@/theme/tokens';
 import { AppSkeleton } from '@/components/app-skeleton';
 import { BackendHomeRecipeIdeas } from './backend-home-recipe-ideas';
 import { ingredientImage } from '@/data/ingredient-images';
@@ -49,8 +51,8 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   if (user && (kitchen.status === 'loading' && !kitchen.items.length || data.loading && !data.data)) return <AppSkeleton navigation={false} />;
   return <Screen rtl={rtl} contentGap={24}>
     <View style={{ backgroundColor: colors.hero, marginHorizontal: -20, marginTop: -20, padding: 24, paddingTop: 20, gap: 18, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
-      <View style={uiStyles.row}><AppText variant="brand" style={{ color: colors.onHero, flex: 1 }}>Remi</AppText><Button label={c('Your account', 'حسابك')} icon="profile" variant="secondary" onPress={() => feature('profile')} /></View>
-      <AppText variant="title" style={{ fontSize: 40, lineHeight: 44, color: colors.onHero, maxWidth: 320 }}>{c('A good day\nto cook.', 'يوم جميل\nللطبخ.')}</AppText>
+      <View style={uiStyles.row}><View style={{ flex: 1 }}><Brand kind="wordmark" height={36} /></View><Button label={c('Your account', 'حسابك')} icon="profile" variant="secondary" onPress={() => feature('profile')} /></View>
+      <View style={[uiStyles.row, { alignItems: 'flex-end', marginVertical: -spacing.sm }]}><AppText variant="title" style={{ fontSize: 40, lineHeight: 44, color: colors.onHero, flex: 1 }}>{c('A good day\nto cook.', 'يوم جميل\nللطبخ.')}</AppText><Brand kind="mascot" height={118} /></View>
       <SearchField value={query} onChangeText={setQuery} placeholder={c('Search food or recipes', 'ابحث عن طعام أو وصفة')} autoCorrect={false} />
     </View>
     {!user ? <Card><AppText variant="heading">{c('Your kitchen, all together.', 'مطبخك في مكان واحد.')}</AppText><AppText>{c('Keep track of what you have, cook something good, and plan a little ahead.', 'تابع طعامك وحضّر وجباتك وخطط للأيام القادمة.')}</AppText><Button label={c('Sign in to your kitchen', 'تسجيل الدخول إلى مطبخك')} onPress={() => router.push('/login')} /><Button label={c('Create an account', 'إنشاء حساب')} variant="text" onPress={() => router.push('/signup')} /></Card> : <>

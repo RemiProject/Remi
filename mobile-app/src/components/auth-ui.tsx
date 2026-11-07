@@ -1,3 +1,4 @@
+import { Brand } from './brand';
 import { useState, type PropsWithChildren, type Ref } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,10 +18,7 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
         <View style={{ width: '100%', maxWidth: 460, gap: 24, direction: language === 'ar' ? 'rtl' : 'ltr' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Button label={t.back} icon="back" rtl={language === 'ar'} variant="text" onPress={onBack} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={{ width: 32, height: 32, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><AppText style={{ color: colors.onPrimary, fontWeight: '800', fontSize: 20 }}>r</AppText></View>
-              <AppText variant="brand">Remi</AppText>
-            </View>
+            <Brand kind="wordmark" height={30} />
           </View>
           <View style={{ gap: 10, paddingTop: 8 }}>
             <AppText variant="title" accessibilityRole="header" style={{ textAlign: language === 'ar' ? 'right' : 'left' }}>{title}</AppText>

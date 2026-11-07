@@ -9,6 +9,8 @@ reference for patterns is the Mob meal-planner app. Full record: `VERSION-3.md`.
 - **Neutrals:** ink #0E1440, paper #FFFDF4, white cards, pale lemon #FCF4C4, pale pink #FDE7F1.
 - **Dark:** navy #0B1030. Cobalt becomes the hero and lemon the action colour.
 
+**Logo.** The Remi chef mascot and its script wordmark (`assets/brand`, `<Brand>`) are single-colour line art: cobalt in light mode, white in dark mode. The wordmark leads the Home hero and auth headers; the waving mascot appears on Home, the onboarding welcome and the cook-mode done card. Keep the mascot as a friendly accent: one per screen, never as a pattern.
+
 **Type.** Static DM Sans cuts: Remi Display 800 for titles, Remi Heading 700, Remi Label 600, DM Sans regular for body. Arabic uses the system font. No serif and no paper grain.
 
 **Shape and depth.**

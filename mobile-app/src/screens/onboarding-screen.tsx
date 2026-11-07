@@ -1,3 +1,4 @@
+import { Brand } from '@/components/brand';
 import { useRef, useState, type ReactNode } from 'react';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
@@ -63,7 +64,7 @@ export default function OnboardingScreen() {
 
   const steps: { title: string; body: string; content?: ReactNode; cta: string; onNext: () => void; disabled?: boolean }[] = [
     { title: t.welcomeTitle, body: t.welcomeBody, cta: t.start, onNext: () => setStep(1),
-      content: <View style={{ gap: spacing.md }}><Image source={require('../../assets/cookbook/shakshuka.jpg')} contentFit="cover" accessible={false} style={{ width: '100%', height: 240, borderRadius: radii.lg }} /><AppText variant="caption" muted>{t.welcomeTime}</AppText></View> },
+      content: <View style={{ gap: spacing.md }}><View style={{ height: 240, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.hero }}><Brand kind="mascot" height={190} /></View><AppText variant="caption" muted>{t.welcomeTime}</AppText></View> },
     { title: t.householdTitle, body: t.householdBody, cta: t.next, onNext: () => setStep(2),
       content: <View style={uiStyles.wrap}>{Array.from({ length: MAX_HOUSEHOLD }, (_, index) => index + 1).map((size) =>
         <Chip key={size} label={`${size.toLocaleString(language)}${size === MAX_HOUSEHOLD ? '+' : ''} ${size === 1 ? t.person : t.people}`} selected={answers.householdSize === size} onPress={() => set('householdSize', size)} />)}</View> },

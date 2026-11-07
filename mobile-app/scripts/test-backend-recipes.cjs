@@ -345,6 +345,7 @@ function ui() {
     'expo-router': { router: { push: route => pushed.push(route), replace: route => pushed.push(route), canGoBack: () => false }, useFocusEffect: effect => focused.push(effect) },
     'react-native': Object.fromEntries(['View', 'Pressable', 'RefreshControl', 'ActivityIndicator'].map(key => [key, key])),
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
+    '@/components/brand': { Brand: 'Brand' },
     '@/components/ui/core': { ...Object.fromEntries(['AppText', 'Badge', 'Button', 'Card', 'EmptyState', 'PageHeader', 'Screen', 'SectionHeader'].map(key => [key, key])), uiStyles: {} },
     '@/components/ui/icon': { Icon: 'Icon' },
     '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, ensureLoaded: () => { refresh++; }, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; }, ensureDetail: () => { get++; } }) },

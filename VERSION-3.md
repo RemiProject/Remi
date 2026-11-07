@@ -48,6 +48,7 @@ Legend: ✅ done · ⬜ to do
 | 8 | Shopping list | Compact checkbox rows. "50 g", not "50.000 g" | ✅ | `e7bd839` |
 | 9 | Onboarding and planner | Restyled through the new tokens and components. Planner shows "Dinner · 4 servings" | ✅ | `598eadf` |
 | 10 | Design docs | `DESIGN.md` and `PRODUCT.md` describe the new visual world | ✅ | this commit |
+| 12 | Logo | Remi mascot and wordmark on Home, startup, sign-in, the onboarding welcome and the cook-mode done card, recoloured for each theme | ✅ | this commit |
 | 11 | Verification | Typecheck, lint and 430 tests pass. Simulator screenshots in light, dark and Arabic | ✅ | this commit |
 
 ## Log
@@ -117,13 +118,30 @@ The layout follows Mob's `CookModeScreen` (step pager, progress bar, ingredients
 - Onboarding needed no code changes; it picks up the new tokens and components (`docs/version-3`).
 - The planner's meal line now reads "Dinner · 4 servings" instead of "dinner · 4.00 servings".
 
+### 12. Logo (`assets/brand/`, `src/components/brand.tsx`)
+- The logo artwork (`assets/brand/source/remi-logo.webp`) is split into three white-on-transparent PNGs:
+  - `logo.png`: mascot and wordmark, without the tagline;
+  - `wordmark.png`: "Remi";
+  - `mascot.png`: the chef character.
+- `scripts/make-brand-assets.py` regenerates all three from the source art (numpy + Pillow). Run on the committed source, it reproduces the committed files byte for byte.
+- `<Brand kind height />` recolours the art with the new `logo` token: cobalt in light mode, white in dark mode. The wordmark and full logo are announced to screen readers as "Remi"; the mascot is decorative.
+- Placements:
+  - **Home:** the wordmark replaces the "Remi" text in the hero, and the waving mascot sits beside "A good day to cook."
+  - **Startup skeleton:** shows the wordmark.
+  - **Sign-in and sign-up header:** the wordmark replaces the "r" badge and "Remi" text.
+  - **Onboarding welcome:** the mascot on a lemon panel replaces the shakshuka photo.
+  - **Cook-mode done card:** shows the mascot.
+- **Limitation:** the mascot overlaps the tops of the letters in the original art, so those letter edges were reconstructed by hand. The tops of "e" and "m" are slightly flat as a result. A separate wordmark file from the designer would fix this; drop it into `assets/brand/`.
+- **Checked:** on the iOS Simulator (Home, onboarding and done card in light; Home and onboarding in dark) and on web (sign-in, dark). New screenshots: `light-01-home.png`, `dark-01-home.png`, `light-07-onboarding-logo.png`, `light-08-cook-done-logo.png`.
+- **Not done yet:** the app icon and splash screen still use the old artwork. They are native config and need a new native build.
+
 ## Screenshots
 
 `docs/version-3/`, taken on the iPhone 18 Pro simulator against the local API:
 
 | Light | Dark | Arabic |
 |---|---|---|
-| `light-01-home.png`, `light-03-recipe.png`, `light-04-cook-mode.png`, `light-05-shopping.png`, `light-06-planner.png` | `dark-01-home.png`, `dark-02-cook-mode.png` | `ar-01-home.png`, `ar-02-cook-mode.png` |
+| `light-01-home.png`, `light-03-recipe.png`, `light-04-cook-mode.png`, `light-05-shopping.png`, `light-06-planner.png`, `light-07-onboarding-logo.png`, `light-08-cook-done-logo.png` | `dark-01-home.png`, `dark-02-cook-mode.png` | `ar-01-home.png`, `ar-02-cook-mode.png` |
 
 ## Still to do (next iterations)
 
