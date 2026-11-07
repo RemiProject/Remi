@@ -1,6 +1,6 @@
 # Builds the app icons from the logo artwork: the chef's hat and face, cobalt on lemon, rising from the bottom edge.
 # Usage: python3 scripts/make-app-icons.py   (from mobile-app/, needs numpy + Pillow)
-# Writes assets/remi.icon (iOS Icon Composer bundle), assets/images/icon.png, the Android adaptive layers and favicon.png.
+# Writes assets/remi.icon (iOS Icon Composer bundle), assets/images/icon.png, the Android adaptive layers, favicon.png and the splash logos.
 import json, os, numpy as np
 from PIL import Image, ImageFilter
 
@@ -39,3 +39,11 @@ android.save('assets/images/android-icon-foreground.png', optimize=True)
 Image.new('RGB', (1024, 1024), LEMON).save('assets/images/android-icon-background.png', optimize=True)
 mono = Image.new('RGBA', (1024, 1024), (255, 255, 255, 0)); mono.putalpha(android.split()[3]); mono.save('assets/images/android-icon-monochrome.png', optimize=True)
 print('icons written')
+
+# Splash: the full logo (mascot + wordmark) on the app's own background, cobalt in light and white in dark,
+# so the hand-off to the first screen doesn't flash. app.json shows it at imageWidth 180.
+logo = Image.open('assets/brand/logo.png').split()[3]
+for name, color in (('splash-icon.png', COBALT), ('splash-icon-dark.png', (255, 255, 255))):
+    out = Image.new('RGBA', logo.size, color + (0,)); ink = Image.new('RGBA', logo.size, color + (255,)); ink.putalpha(logo)
+    out.alpha_composite(ink); out.save(f'assets/images/{name}', optimize=True)
+print('splash written')
