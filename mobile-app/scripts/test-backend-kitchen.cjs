@@ -164,6 +164,7 @@ function uiHarness() {
     };
     if (id === 'expo-router') return { router: { push: route => navigated.push(route), navigate: route => navigated.push(route), replace: route => navigated.push(route), canGoBack: () => false }, useLocalSearchParams: () => ({ id: item.id }), useFocusEffect: effect => focusEffects.push(effect) };
     if (id === 'expo-image') return { Image: 'Image' };
+    if (id === '@/components/app-skeleton') return { AppSkeleton: 'AppSkeleton' };
     if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
     if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: 'InventoryMetadataEditor' };
@@ -303,6 +304,7 @@ function homeLayoutHarness(backend, language = 'en') {
     if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {}, mode: 'light' }) };
     if (id === './connected-ui') return { DataNotice: 'DataNotice', useKitchenData: () => ({ data: { recipes: [{ id: 'real', name: 'Tomato pasta', servings: 2, prepTimeMin: 5, cookTimeMin: 10 }], plans: [] }, loading: false, reload: async () => {} }) };
     if (id === './backend-home-recipe-ideas') return { BackendHomeRecipeIdeas: 'BackendRecipeIdeas' };
+    if (id === '@/components/app-skeleton') return { AppSkeleton: 'AppSkeleton' };
     if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
     if (id === '@/data/cookbook-content') return { getCookbookContent: () => undefined };
     if (id === '@/services/kitchen-api') return { todayKey: () => '2026-06-02' };

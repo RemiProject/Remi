@@ -35,7 +35,7 @@ test('actual screen navigates steps, switches languages, resumes and handles abs
  assert.equal(render().find(n=>n.props?.accessibilityRole==='progressbar').props.accessibilityValue.now,1);
  press('previous');assert.equal(cookingSessions.get(id).current,0);press('next');
  language='ar';assert.equal(render().find(n=>n.type==='Screen').props.rtl,true);assert.ok(render().some(n=>n.props?.children===sampleSteps.ar.breakfast[1]));
- render().find(n=>n.type==='PageHeader').props.action.props.onPress();assert.deepEqual(routes,['back']);assert.equal(cookingSessions.get(id).current,1);
+ render().find(n=>n.type==='PageHeader').props.back.props.onPress();assert.deepEqual(routes,['back']);assert.equal(cookingSessions.get(id).current,1);
  press('next');press('next');const finish=render().find(n=>n.props?.label===cookingMessages.ar.finish).props.onPress;finish();finish();
  assert.ok(render().some(n=>n.props?.title===cookingMessages.ar.done));
  id='invalid';assert.ok(render().some(n=>n.type==='EmptyState'));

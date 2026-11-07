@@ -22,8 +22,8 @@ export function AppText({ variant = 'body', muted = false, style, dir, ...props 
   // Native RTL layouts mirror physical alignment; keep layout physical and paragraph direction explicit.
   return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, ...(display && language !== 'ar' ? { fontWeight: '400' as const } : {}), color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, Platform.OS !== 'web' && { direction: 'ltr' }, style]} />;
 }
-export function PageHeader({ title, subtitle, subtitleDirection, action }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode }) {
-  return <View style={{ gap: spacing.xs }}><View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
+export function PageHeader({ title, subtitle, subtitleDirection, action, back }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode; back?: React.ReactNode }) {
+  return <View style={{ gap: spacing.xs }}>{back && <View testID="page-header-back" style={{ alignItems: 'flex-start', marginBottom: spacing.sm }}>{back}</View>}<View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
     <AppText variant="title" accessibilityRole="header" style={uiStyles.grow}>{title}</AppText>{action}
   </View>{subtitle && <AppText muted dir={subtitleDirection}>{subtitle}</AppText>}</View>;
 }
@@ -53,7 +53,7 @@ export function Button({ label, onPress, variant = 'primary', icon, disabled = f
   const color = disabled ? colors.disabledText : variant === 'primary' ? colors.onPrimary : variant === 'destructive' ? colors.onDestructive : variant === 'dangerText' ? colors.destructive : colors.primary;
   return <AnimatedPressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} onPressIn={() => feedback(true)} onPressOut={() => feedback(false)}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-    style={[styles.button, pressStyle, {
+    style={[styles.button, pressStyle, icon === 'back' && { alignSelf: 'flex-start' }, {
       backgroundColor: disabled ? colors.disabledSurface : variant === 'primary' ? (pressed ? colors.primaryPressed : colors.primary) : variant === 'destructive' ? colors.destructive : pressed ? colors.pressedSurface : variant === 'secondary' ? colors.surfaceMuted : 'transparent',
       borderColor: focused ? colors.focusBorder : 'transparent',
       borderWidth: focused ? 3 : 2,

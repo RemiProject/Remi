@@ -1,7 +1,8 @@
+import { AppSkeleton } from '@/components/app-skeleton';
 import { BackendHomeRecipeIdeas } from './backend-home-recipe-ideas';
 import { ingredientImage } from '@/data/ingredient-images';
 import { useState, type ReactNode } from 'react';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { Pressable, ScrollView, View } from 'react-native';
 import { AppText, Button, Card, Screen, SearchField, SectionHeader, uiStyles } from '@/components/ui/core';
@@ -14,7 +15,6 @@ import { backendExpiryDays, backendFoodName, backendQuantityLabel } from '@/util
 import { getCookbookContent } from '@/data/cookbook-content';
 import { loadRecipes, loadPlans, todayKey } from '@/services/kitchen-api';
 import { DataNotice, useKitchenData } from './connected-ui';
-import { useCallback } from 'react';
 export interface BackendHomeData { recipeIdeas?: ReactNode; items: import('@/domain/backend-inventory-read-model').InventoryReadItem[]; status: string; today: string; retry: () => Promise<void>; notice: ReactNode; deviceNotice: ReactNode; saved: string; empty: string; emptyBody: string; writesSoon: string; readOnly: string; foodName: (item: import('@/domain/backend-inventory-read-model').InventoryReadItem) => string; quantityLabel: (item: import('@/domain/backend-inventory-read-model').InventoryReadItem) => string }
 const feature = (name: string) => router.push({ pathname: '/feature', params: { feature: name } });
 export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
@@ -22,12 +22,11 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   const rtl = language === 'ar'; const c = (en: string, ar: string) => rtl ? ar : en;
   const [query, setQuery] = useState('');
   const data = useKitchenData(async () => ({ recipes: await loadRecipes(), plans: await loadPlans(todayKey(), todayKey()) }));
-  const reload = data.reload;
-  useFocusEffect(useCallback(() => { void reload(); }, [reload]));
   const recipes = (data.data?.recipes ?? []).filter(recipe => recipe.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const foods = kitchen.items.filter(item => backendFoodName(item, language).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const priority = kitchen.items.filter(item => { const days = backendExpiryDays(item, kitchen.today); return days !== null && days >= 0 && days <= 3; }).sort((a,b) => (backendExpiryDays(a,kitchen.today) ?? 99) - (backendExpiryDays(b,kitchen.today) ?? 99));
   const meals = (data.data?.plans ?? []).flatMap(plan => plan.meals).filter(meal => meal.mealDate === todayKey());
+  if (user && (kitchen.status === 'loading' && !kitchen.items.length || data.loading && !data.data)) return <AppSkeleton navigation={false} />;
   return <Screen rtl={rtl} contentGap={24}>
     <View style={{ backgroundColor: '#B92318', marginHorizontal: -20, marginTop: -20, padding: 24, paddingTop: 20, gap: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
       <View style={uiStyles.row}><AppText variant="brand" style={{ color: '#FFF7E8', flex: 1 }}>Remi</AppText><Button label={c('Your account', 'حسابك')} icon="profile" variant="secondary" onPress={() => feature('profile')} /></View>

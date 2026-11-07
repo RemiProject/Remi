@@ -53,7 +53,7 @@ function ContactBody() {
     finally { setBusy(false); }
   };
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={ar}>
-    <PageHeader title={ar ? 'التواصل والملاحظات' : 'Contact & feedback'} action={<Button label={ar ? 'رجوع' : 'Back'} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={ar ? 'التواصل والملاحظات' : 'Contact & feedback'} back={<Button label={ar ? 'رجوع' : 'Back'} icon="back" rtl={language === 'ar'} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
     <AppText muted>{validAddress ? (ar ? 'افتح تطبيق البريد لمراجعة رسالتك وإرسالها بنفسك.' : 'Open your email app to review and send your message yourself.') : (ar ? 'لم يُضبط عنوان دعم لهذا الإصدار المستقل. اكتب ملاحظتك وصدّرها عبر قائمة المشاركة إلى الجهة التي تختارها.' : 'A support address has not been configured for this independent build. Write your feedback and export it through the share sheet to a recipient you choose.')}</AppText>
     <Card><FormField label={ar ? 'الموضوع' : 'Subject'} value={subject} editable={!busy} onChangeText={value => { setSubject(value); setSaved(false); setId(newIntakeId()); }} maxLength={120} /><FormField label={ar ? 'رسالتك' : 'Message'} value={message} editable={!busy} onChangeText={value => { setMessage(value); setSaved(false); setId(newIntakeId()); }} multiline maxLength={5000} />
       {error !== '' && <AppText accessibilityRole="alert">{error}</AppText>}

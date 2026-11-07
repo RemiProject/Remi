@@ -121,6 +121,29 @@ final class CookbookUITests: XCTestCase {
     tap(app, "Back")
   }
   @MainActor
+  func testBackPlacement() throws {
+    let app = XCUIApplication(bundleIdentifier: "com.remi.cookbook.independent")
+    app.launchArguments = ["-RCT_jsLocation", "localhost:8091"]
+    app.launch()
+    XCTAssertTrue(app.buttons["Quick add"].waitForExistence(timeout: 30))
+    tap(app, "Quick add"); tap(app, "Write a quick list")
+    XCTAssertTrue(app.staticTexts["Quick list"].waitForExistence(timeout: 10))
+    Thread.sleep(forTimeInterval: 1)
+    let back = app.buttons["Back"]
+    XCTAssertLessThan(back.frame.midX, app.frame.midX)
+    XCTAssertLessThan(back.frame.maxY, app.staticTexts["Quick list"].firstMatch.frame.minY)
+    attach(app, "24-back-english")
+    tap(app, "Back"); tap(app, "More", exact: true); tap(app, "Settings"); tap(app, "العربية")
+    tap(app, "العودة إلى المزيد"); tap(app, "إضافة سريعة"); tap(app, "كتابة قائمة سريعة")
+    Thread.sleep(forTimeInterval: 1)
+    let arabicBack = app.buttons["رجوع"]
+    XCTAssertTrue(arabicBack.waitForExistence(timeout: 10))
+    XCTAssertGreaterThan(arabicBack.frame.midX, app.frame.midX)
+    attach(app, "25-back-arabic")
+    tap(app, "رجوع"); tap(app, "المزيد", exact: true); tap(app, "الإعدادات"); tap(app, "English")
+    tap(app, "Back to More"); tap(app, "Home", exact: true)
+  }
+  @MainActor
   func enter(_ text: String, into field: XCUIElement) {
     for character in text { field.typeText(String(character)); Thread.sleep(forTimeInterval: 0.04) }
   }

@@ -1,7 +1,7 @@
 import { useState, type PropsWithChildren, type Ref } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText } from '@/components/ui/core';
+import { AppText, Button } from '@/components/ui/core';
 import { useRemyTheme } from '@/theme/provider';
 import { useRemyFonts } from '@/theme/fonts';
 import { useLanguage } from '@/providers/language-provider';
@@ -16,7 +16,7 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
       <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={{ flexGrow: 1, alignItems: 'center', padding: 20, paddingBottom: 36 }}>
         <View style={{ width: '100%', maxWidth: 460, gap: 24, direction: language === 'ar' ? 'rtl' : 'ltr' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <AuthLink label={`${language === 'ar' ? '→' : '←'}  ${t.back}`} onPress={onBack} />
+            <Button label={t.back} icon="back" rtl={language === 'ar'} variant="text" onPress={onBack} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View style={{ width: 32, height: 32, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><AppText style={{ color: colors.onPrimary, fontWeight: '800', fontSize: 20 }}>r</AppText></View>
               <AppText variant="brand">Remi</AppText>

@@ -11,6 +11,7 @@ const ThemeContext = createContext<{
   mode: 'light' | 'dark';
   appearance: Appearance;
   setAppearance: (value: Appearance) => void;
+  ready: boolean;
   saving: boolean;
   error: 'read' | 'write' | null;
 } | null>(null);
@@ -43,8 +44,7 @@ export function RemyThemeProvider({ children }: PropsWithChildren) {
     }).finally(() => { if (revision.current === selection) setSaving(false); });
   };
   const mode = appearance === 'system' ? (system === 'dark' ? 'dark' : 'light') : appearance;
-  // Mount themed content only after hydration; do not flash the system theme first.
-  return <ThemeContext.Provider value={{ colors: themes[mode], mode, appearance, setAppearance, saving, error }}>{ready ? children : null}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ colors: themes[mode], mode, appearance, setAppearance, ready, saving, error }}>{children}</ThemeContext.Provider>;
 }
 
 export function useRemyTheme() {

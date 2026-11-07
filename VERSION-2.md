@@ -52,3 +52,6 @@ Email delivery, remote object storage, embeddings/LLM providers and device push 
 ## Center quick-add action
 
 The plus button between Kitchen and Plan opens receipt scanning/review, a household needed-item editor, or a freeform quick shopping list. Quick lists accept up to 50 lines, save atomically on this device, retain entries after a failed save, deduplicate unchecked items and allow check-off/removal. They are also accessible from the household Shopping screen; household catalogue items continue to sync through the existing backend. Receipt items still require review before stock is added.
+
+## Navigation and startup
+Back navigation uses a compact leading button above each page title, mirrored for Arabic. Close/Cancel actions retain their separate semantics. Startup displays a themed Home-shaped skeleton while session, language, theme and fonts hydrate; later refreshes preserve navigation. The skeleton pulses with native opacity animation and respects reduced motion. First-load Home requests share the same skeleton, while cached content stays visible during refresh. Future media sourcing is documented in `docs/asset-sourcing.md`; providers are not connected yet.

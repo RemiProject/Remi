@@ -10,7 +10,7 @@ export function IntakeShell({ title, children }: PropsWithChildren<{ title: stri
   const { language } = useLanguage();
   const { colors } = useRemyTheme();
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={language === 'ar'}>
-    <PageHeader title={title} action={<Button label={language === 'ar' ? 'رجوع' : 'Back'} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={title} back={<Button label={language === 'ar' ? 'رجوع' : 'Back'} icon="back" rtl={language === 'ar'} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
     {!ready || busy ? <AppText>{language === 'ar' ? 'جارٍ التحميل…' : 'Loading…'}</AppText> : !user ? <EmptyState title={language === 'ar' ? 'سجّل الدخول إلى مطبخك' : 'Sign in to your kitchen'} description={language === 'ar' ? 'تُحفظ هذه المعلومات في حساب أسرتك.' : 'This information is saved with your household account.'} action={language === 'ar' ? 'تسجيل الدخول' : 'Sign in'} onPress={() => router.push('/login')} /> : children}
   </Screen></SafeAreaView>;
 }

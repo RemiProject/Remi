@@ -4,7 +4,7 @@ Validation uses the isolated local API on port 3100 and a separate PostgreSQL da
 
 ## Automated checks
 
-- Mobile: `pnpm typecheck`, `pnpm lint`, `node --test scripts/test-*.cjs` (418 passed with `REMY_TEST_API_URL=http://localhost:3100`, no skips), including the live API/auth/CORS check.
+- Mobile: `pnpm typecheck`, `pnpm lint`, `node --test scripts/test-*.cjs` (422 passed with `REMY_TEST_API_URL=http://localhost:3100`, no skips), including the live API/auth/CORS check.
 - Expo: `expo export --platform web` passed.
 - Backend: build, lint, typecheck and 145 tests passed; migrations include `0029_cookbook_leftovers.sql`.
 - `verify-recipe-suggestions.mjs`: 12 live checks passed against the current catalogue, including ranking, expired separation, safety, pagination, stale cursors and household isolation.
@@ -30,3 +30,8 @@ No physical iPhone or Android emulator/device run, store submission, production 
 
 ## Center quick-add follow-up
 The native quick-add workflow passed with zero failures: centered plus → receipt review; plus → household needed-item editor; plus → multiline quick list → save Milk/Eggs/Tomatoes → relaunch → list restored. The batch-save regression test also verifies one atomic storage write, duplicate handling, invalid-line rejection and recovery after write failure. The tab tests assert center placement and action routing in English and Arabic. Typecheck, lint, the 418 mobile tests and web export passed.
+
+## Back placement and startup follow-up
+Typecheck, lint, all 422 mobile tests (no skips) and web export passed. Tests cover startup hydration, font readiness, failed language reads, preservation of navigation after startup, reduced-motion placeholders and Back-before-title ordering.
+
+A native iPhone 18 Pro / iOS 27.2 simulator test passed with zero failures: startup skeleton during a nine-second session-response delay → loaded Home → Quick list → Back above the title on the left → Arabic → Quick list → Back on the right → English/Home. The delay came from a disposable local proxy, not app code, and was removed afterward. Native screenshots were visually inspected. `testBackPlacement` in the repeatable XCTest source verifies the English/Arabic positions without requiring slow networking. Release-build native splash timing and physical-device launch remain separate checks.

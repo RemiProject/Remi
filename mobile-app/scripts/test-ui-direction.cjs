@@ -115,3 +115,13 @@ test('ActionRow owns a single chevron direction, independent of missing or misma
     }
   }
 });
+
+test('back navigation precedes the page title and is separate from trailing actions in both languages', () => {
+  for (const language of ['en','ar']) {
+    const { load } = fixture(language), core = load('components/ui/core.tsx');
+    const html = renderToStaticMarkup(React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' },
+      React.createElement(core.PageHeader, { title: 'Recipe details', back: React.createElement(core.Button, { label: 'Back', icon: 'back', rtl: language === 'ar', variant: 'text' }), action: React.createElement(core.Button, { label: 'Save' }) })));
+    assert(html.indexOf('Back') < html.indexOf('Recipe details'));
+    assert(html.indexOf('Recipe details') < html.indexOf('Save'));
+  }
+});

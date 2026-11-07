@@ -42,7 +42,7 @@ export function BackendRecipesScreen({ onBrowseAll }: { onBrowseAll?: () => void
   const empty = state.status === 'ready' && (state.kitchenEmpty || !state.nodes.length);
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}
     refreshControl={<RefreshControl refreshing={state.status === 'loading'} onRefresh={state.refresh} />}>
-    <PageHeader title={onBrowseAll ? (language === 'ar' ? 'كتاب الطبخ' : 'The cookbook') : t.title} subtitle={t.intro} action={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={onBrowseAll ? (language === 'ar' ? 'كتاب الطبخ' : 'The cookbook') : t.title} subtitle={t.intro} back={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
     {onBrowseAll && <Button label={language === 'ar' ? 'تصفح كل الوصفات' : 'Browse all recipes'} variant="secondary" onPress={onBrowseAll} />}
     <RecipeState status={state.status} retry={state.refresh} />
     {state.status === 'ready' && <Button label={t.refresh} variant="text" onPress={state.refresh} />}

@@ -26,7 +26,7 @@ export default function QuickShoppingScreen() {
   };
   const ready = shopping.status === 'ready';
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}><Screen rtl={ar}>
-    <PageHeader title={ar ? 'قائمة سريعة' : 'Quick list'} action={<Button label={ar ? 'رجوع' : 'Back'} icon="back" rtl={ar} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} />} />
+    <PageHeader title={ar ? 'قائمة سريعة' : 'Quick list'} back={<Button label={ar ? 'رجوع' : 'Back'} icon="back" rtl={ar} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} />} />
     <AppText muted>{ar ? 'تُحفظ على هذا الجهاز. استخدم قائمة الأسرة لمشاركة العناصر.' : 'Saved on this device. Use the household list to share items.'}</AppText>
     <FormField label={ar ? 'ما الذي تحتاجه؟' : 'What do you need?'} hint={ar ? 'عنصر في كل سطر، حتى ٥٠ عنصرًا و١٠٠ حرف لكل عنصر.' : 'One item per line, up to 50 items and 100 characters each.'} placeholder={ar ? 'حليب\nبيض\nطماطم' : 'Milk\nEggs\nTomatoes'} multiline value={text} onChangeText={setText} editable={ready && !shopping.pending} maxLength={5100} />
     <Button label={ar ? 'حفظ القائمة' : 'Save list'} icon="check" disabled={!ready || shopping.pending || !text.trim()} onPress={save} />

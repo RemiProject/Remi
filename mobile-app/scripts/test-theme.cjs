@@ -11,7 +11,7 @@ function harness({saved=null,failRead=false,failWrite=false,deferred=false}={}) 
  return{render,mount:()=>effect(),data,release:()=>release(),system:value=>system=value,failWrite:value=>failWrite=value};
 }
 for(const preference of ['light','dark','system'])test(`saves and restores ${preference} using dedicated key`,async()=>{
- const h=harness();assert.equal(h.render().props.children,null);h.mount();await flush();
+ const h=harness();assert.equal(h.render().props.value.ready,false);assert.equal(h.render().props.children,'app');h.mount();await flush();
  h.render().props.value.setAppearance(preference);assert.equal(h.render().props.value.appearance,preference);assert.equal(h.render().props.value.saving,true);
  await flush();assert.equal(h.data.get('remi.cookbook.preferences.appearance'),preference);assert.equal(h.data.get('remi.cookbook.inventory'),'untouched');
  const restart=harness({saved:h.data.get('remi.cookbook.preferences.appearance')});restart.render();restart.mount();await flush();assert.equal(restart.render().props.value.appearance,preference);assert.equal(restart.render().props.children,'app');

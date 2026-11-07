@@ -17,7 +17,7 @@ export function useKitchenIdentity() {
 export function useCopy() { const { language } = useLanguage(); return (english: string, arabic: string) => language === 'ar' ? arabic : english; }
 export function ConnectedScreen({ title, children, footer, back = true }: PropsWithChildren<{ title: string; footer?: React.ReactNode; back?: boolean }>) {
   const { user, ready, busy } = useAuth(); const { language } = useLanguage(); const copy = useCopy();
-  return <SafeAreaView edges={back ? ['top','bottom'] : []} style={{ flex: 1 }}><Screen footer={user ? footer : undefined} rtl={language === 'ar'}><PageHeader title={title} action={back ? <Button label={copy('Back', 'رجوع')} variant="text" icon="back" rtl={language === 'ar'} onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} /> : undefined} />
+  return <SafeAreaView edges={back ? ['top','bottom'] : []} style={{ flex: 1 }}><Screen footer={user ? footer : undefined} rtl={language === 'ar'}><PageHeader title={title} back={back ? <Button label={copy('Back', 'رجوع')} variant="text" icon="back" rtl={language === 'ar'} onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} /> : undefined} />
     {!ready || busy ? <AppText>{copy('Loading your account…', 'جارٍ تحميل حسابك…')}</AppText> : !user ? <EmptyState title={copy('Your kitchen, together', 'مطبخك في مكان واحد')} description={copy('Sign in to sync recipes, plans and shopping with your household.', 'سجّل الدخول لمزامنة الوصفات والخطط والمشتريات مع أسرتك.')} action={copy('Sign in', 'تسجيل الدخول')} onPress={() => router.push('/login')} /> : children}</Screen></SafeAreaView>;
 }
 export function useKitchenData<T>(loader: () => Promise<T>) {

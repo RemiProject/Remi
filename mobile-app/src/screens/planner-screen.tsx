@@ -64,7 +64,7 @@ export default function PlannerScreen() {
   const detail = modal && modal !== 'add' ? modal : null;
   const detailRecipe = detail ? recipeFor(detail) : undefined;
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl} contentGap={spacing.lg}>
-    <PageHeader title={t.title} action={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={t.title} back={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
     <View style={{ gap: spacing.xs, paddingVertical: spacing.sm }}>
       <View style={[uiStyles.row, { gap: spacing.sm }]}>
         <Pressable accessibilityRole="button" accessibilityLabel={t.previousMonth} onPress={() => setMonth(shiftMonth(month, -1))} style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Icon name="back" rtl={rtl} size={20} /></Pressable>

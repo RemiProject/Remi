@@ -33,7 +33,7 @@ export function BackendCookingScreen() {
   const retry = () => { if (!owner) void state.refresh(); else void state.loadDetail(id); };
   const duration = (minutes: number) => `${recipeNumber(minutes, language)} ${r.minutes}`;
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl} contentGap={spacing.lg}>
-    <PageHeader title={t.title} action={<Button label={t.exit} variant="text" icon="back" rtl={rtl} onPress={review} />} />
+    <PageHeader title={t.title} back={<Button label={t.exit} variant="text" icon="back" rtl={rtl} onPress={review} />} />
     {status === 'signed-out' ? <EmptyState title={r.cookingSignIn} description={r.signInBody} action={r.signIn} onPress={() => router.push('/login')} />
       : status === 'error' ? <Card><AppText accessibilityRole="alert" dir={dir}>{r.error}</AppText><Button label={r.retry} onPress={retry} /></Card>
       : !recipe ? <AppText dir={dir} accessibilityLiveRegion="polite">{r.loading}</AppText>
