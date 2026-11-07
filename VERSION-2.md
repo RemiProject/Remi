@@ -55,3 +55,12 @@ The plus button between Kitchen and Plan opens receipt scanning/review, a househ
 
 ## Navigation and startup
 Back navigation uses a compact leading button above each page title, mirrored for Arabic. Close/Cancel actions retain their separate semantics. Startup displays a themed Home-shaped skeleton while session, language, theme and fonts hydrate; later refreshes preserve navigation. The skeleton pulses with native opacity animation and respects reduced motion. First-load Home requests share the same skeleton, while cached content stays visible during refresh. Future media sourcing is documented in `docs/asset-sourcing.md`; providers are not connected yet.
+
+## Planning, onboarding and smart shopping
+
+- **First-run onboarding** (signed-in, once per device): household size, dietary needs (merged into the backend profile), goals, and 1–7 catalogue recipes. It plans one dinner a day from today, then builds the shopping list.
+- **Add this week's meals** on the Shopping list (and **Add ingredients to shopping list** on Home): scales each planned recipe to its servings, merges the same food across meals, subtracts Kitchen stock in the same unit, and skips items already needed. Running it again never duplicates items.
+- **By aisle** view on the Shopping list, grouped by catalogue food category.
+- **Home** shows **Upcoming meals** (next 3, with day, meal and servings) and **In your shopping list** (planned recipes with ingredients still to buy).
+
+Details, rules, limits and verification: `mobile-app/PLANNING-AND-SHOPPING.md`.

@@ -1,4 +1,6 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
+import { useAuth } from '@/providers/auth-provider';
+import { useOnboarding } from '@/providers/onboarding-provider';
 import { Tabs, TabList, TabTrigger, TabSlot, type TabTriggerSlotProps } from 'expo-router/ui';
 import { Pressable, View } from 'react-native';
 import type { Ref, ComponentRef } from 'react';
@@ -15,6 +17,9 @@ function TabButton({ children, isFocused, icon, ref, ...props }: TabTriggerSlotP
 }
 export default function TabLayout() {
   const { colors } = useRemyTheme(); const { language } = useLanguage(); const ar = language === 'ar';
+  const { user } = useAuth(); const onboarding = useOnboarding();
+  // First signed-in run on this device goes to onboarding (plans and lists need an account). A read error just shows the app.
+  if (user && onboarding.status === 'ready' && !onboarding.record) return <Redirect href="/onboarding" />;
   return <SafeAreaView edges={['top','bottom','left','right']} style={{ flex: 1, backgroundColor: colors.background }}><Tabs style={{ flex: 1 }}><TabSlot style={{ flex: 1 }} />
     <TabList style={{ flexDirection: ar ? 'row-reverse' : 'row', paddingHorizontal: 12, paddingTop: 8, borderTopWidth: 1, borderColor: colors.divider, backgroundColor: colors.background }}>
       <TabTrigger name="home" href="/" asChild><TabButton icon="home">{ar ? 'الرئيسية' : 'Home'}</TabButton></TabTrigger>

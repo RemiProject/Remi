@@ -286,7 +286,7 @@ test('backend Home reuses the original screen, supplies display-only names, and 
   assert(tree.props.backend.deviceNotice);
 });
 
-function homeLayoutHarness(backend, language = 'en') {
+function homeLayoutHarness(backend, language = 'en', homePlan = { upcoming: [], onList: [] }) {
   const slots = [], routes = []; let cursor = 0;
   const exported = {};
   const code = ts.transpileModule(fs.readFileSync('src/screens/home-screen.tsx', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -302,12 +302,13 @@ function homeLayoutHarness(backend, language = 'en') {
     if (id === '@/providers/auth-provider') return { useAuth: () => ({ user: kitchen.status === 'signed-out' ? null : { id: 'a' } }) };
     if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => kitchen };
     if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {}, mode: 'light' }) };
-    if (id === './connected-ui') return { DataNotice: 'DataNotice', useKitchenData: () => ({ data: { recipes: [{ id: 'real', name: 'Tomato pasta', servings: 2, prepTimeMin: 5, cookTimeMin: 10 }], plans: [] }, loading: false, reload: async () => {} }) };
+    if (id === './connected-ui') return { DataNotice: 'DataNotice', Feedback: 'Feedback', useAction: () => ({ busy: false, message: null, run: async action => { await action(); return true; } }), useKitchenData: () => ({ data: { recipes: [{ id: 'real', name: 'Tomato pasta', servings: 2, prepTimeMin: 5, cookTimeMin: 10 }], ...homePlan }, loading: false, reload: async () => {} }) };
     if (id === './backend-home-recipe-ideas') return { BackendHomeRecipeIdeas: 'BackendRecipeIdeas' };
     if (id === '@/components/app-skeleton') return { AppSkeleton: 'AppSkeleton' };
     if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
     if (id === '@/data/cookbook-content') return { getCookbookContent: () => undefined };
-    if (id === '@/services/kitchen-api') return { todayKey: () => '2026-06-02' };
+    if (id === '@/services/kitchen-api') return { todayKey: () => '2026-06-02', shiftDay: (date, days) => { const value = new Date(`${date}T12:00:00`); value.setDate(value.getDate() + days); return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`; } };
+    if (id === '@/services/plan-shopping') return { addPlannedMealsToShopping: async stock => { homePlan.stockSeen = stock; return { meals: 1, added: [{}, {}] }; } };
     if (id.startsWith('@/')) return require('../src/' + id.slice(2) + '.ts');
     return require(id);
   }, exported);
@@ -325,9 +326,20 @@ test('cookbook Home presents one sign-in action and no household content when si
 test('cookbook Home preserves pantry priorities, ranked backend ideas, recipes and the meal plan', () => {
   const h = homeLayoutHarness({ items: [item], status: 'ready', today: '2026-06-02' }), tree = h.render();
   assert.equal(h.nodes(tree, 'BackendRecipeIdeas').length, 1);
-  for (const text of ['Use first', "Today's plan"]) assert(h.nodes(tree,'AppText').some(n => n.props.children === text) || h.nodes(tree,'SectionHeader').some(n => n.props.title === text));
+  for (const text of ['Use first', 'Upcoming meals']) assert(h.nodes(tree,'AppText').some(n => n.props.children === text) || h.nodes(tree,'SectionHeader').some(n => n.props.title === text));
   h.nodes(tree,'Button').find(n => n.props.label === 'Plan a meal').props.onPress(); assert.equal(h.routes.at(-1), '/plan');
   assert.equal(h.nodes(tree, 'BackendRecipeIdeas')[0].props.title, 'Tonight, sorted.');
+  assert.ok(!h.nodes(tree, 'SectionHeader').some(n => n.props.title === 'In your shopping list'));
+});
+test('cookbook Home lists upcoming meals with day labels, offers to shop for them and shows recipes already on the list', async () => {
+  const homePlan = { upcoming: [{ id: 'm1', recipeId: 'r1', recipeName: 'Chickpea stew', mealDate: '2026-06-02', mealType: 'DINNER', servings: '2.00' }, { id: 'm2', recipeId: 'r2', recipeName: 'Shakshuka', mealDate: '2026-06-03', mealType: 'BREAKFAST', servings: '4.00' }], onList: [{ id: 'r1', name: 'Chickpea stew', total: 3, onList: 2 }] };
+  const h = homeLayoutHarness({ items: [item], status: 'ready', today: '2026-06-02' }, 'en', homePlan), tree = h.render();
+  const labels = h.nodes(tree, 'Pressable').map(n => n.props.accessibilityLabel);
+  assert.ok(labels.includes('Chickpea stew. Today · Dinner · 2 servings')); assert.ok(labels.includes('Shakshuka. Tomorrow · Breakfast · 4 servings'));
+  assert.ok(labels.includes('Chickpea stew. 2 of 3 ingredients on your list'));
+  await h.nodes(tree, 'Button').find(n => n.props.label === 'Add ingredients to shopping list').props.onPress();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(homePlan.stockSeen.length, 1); assert.equal(homePlan.stockSeen[0].foodId, item.foodId);
 });
 test('cookbook Home searches live food and catalogue recipes without showing unrelated suggestions', () => {
   const h = homeLayoutHarness({ items:[item],status:'ready',today:'2026-06-02' });
