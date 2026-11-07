@@ -4,7 +4,7 @@ Validation uses the isolated local API on port 3100 and a separate PostgreSQL da
 
 ## Automated checks
 
-- Mobile: `pnpm typecheck`, `pnpm lint`, `node --test scripts/test-*.cjs` (417 passed with `REMY_TEST_API_URL=http://localhost:3100`, no skips), including the live API/auth/CORS check.
+- Mobile: `pnpm typecheck`, `pnpm lint`, `node --test scripts/test-*.cjs` (418 passed with `REMY_TEST_API_URL=http://localhost:3100`, no skips), including the live API/auth/CORS check.
 - Expo: `expo export --platform web` passed.
 - Backend: build, lint, typecheck and 145 tests passed; migrations include `0029_cookbook_leftovers.sql`.
 - `verify-recipe-suggestions.mjs`: 12 live checks passed against the current catalogue, including ranking, expired separation, safety, pagination, stale cursors and household isolation.
@@ -27,3 +27,6 @@ A separate native appearance/localization workflow passed with zero failures: En
 ## Coverage limits
 
 No physical iPhone or Android emulator/device run, store submission, production deployment, performance benchmark, remote provider delivery or accessibility screen-reader session is claimed. Camera/OCR hardware capture and external provider setup require device/deployment verification. English/Arabic direction and state logic have automated UI coverage; native visual checks use the iOS simulator.
+
+## Center quick-add follow-up
+The native quick-add workflow passed with zero failures: centered plus → receipt review; plus → household needed-item editor; plus → multiline quick list → save Milk/Eggs/Tomatoes → relaunch → list restored. The batch-save regression test also verifies one atomic storage write, duplicate handling, invalid-line rejection and recovery after write failure. The tab tests assert center placement and action routing in English and Arabic. Typecheck, lint, the 418 mobile tests and web export passed.

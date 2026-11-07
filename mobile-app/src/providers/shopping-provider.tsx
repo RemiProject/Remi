@@ -10,5 +10,5 @@ export function ShoppingProvider({ children }: PropsWithChildren) {
 export function useShopping() {
   const store = useContext(ShoppingContext);
   if (!store) throw new Error('useShopping requires ShoppingProvider');
-  return { ...useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot), retry: store.hydrate, save: store.save, toggle: store.toggle, remove: store.remove, clearPurchased: store.clearPurchased };
+  return { ...useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot), retry: store.hydrate, save: store.save, addLines: store.addLines, toggle: store.toggle, remove: store.remove, clearPurchased: store.clearPurchased };
 }

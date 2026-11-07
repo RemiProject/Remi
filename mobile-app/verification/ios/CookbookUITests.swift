@@ -89,6 +89,38 @@ final class CookbookUITests: XCTestCase {
     attach(app, "15-home-final")
   }
   @MainActor
+  func testQuickAddAndShoppingList() throws {
+    let app = XCUIApplication(bundleIdentifier: "com.remi.cookbook.independent")
+    app.launchArguments = ["-RCT_jsLocation", "localhost:8091"]
+    app.launch()
+    XCTAssertTrue(app.buttons["Quick add"].waitForExistence(timeout: 30))
+    attach(app, "16-center-plus")
+    tap(app, "Quick add")
+    XCTAssertTrue(app.staticTexts["Quick add"].waitForExistence(timeout: 10))
+    attach(app, "17-quick-actions")
+    tap(app, "Scan a receipt")
+    XCTAssertTrue(app.staticTexts["Review a receipt"].waitForExistence(timeout: 10))
+    attach(app, "18-receipt-action")
+    app.terminate(); app.launch()
+    tap(app, "Quick add"); tap(app, "Add a needed item")
+    XCTAssertTrue(app.textFields["Find a food"].waitForExistence(timeout: 10))
+    attach(app, "19-needed-item")
+    app.terminate(); app.launch()
+    tap(app, "Quick add"); tap(app, "Write a quick list")
+    attach(app, "20-quick-list-editor")
+    let entry = app.textViews.firstMatch
+    XCTAssertTrue(entry.waitForExistence(timeout: 10))
+    entry.tap(); enter("Milk\nEggs\nTomatoes", into: entry)
+    tap(app, "Save list")
+    XCTAssertTrue(app.staticTexts["Your list is saved."].waitForExistence(timeout: 10))
+    attach(app, "20-quick-list-saved")
+    app.terminate(); app.launch()
+    tap(app, "Quick add"); tap(app, "Write a quick list")
+    XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Milk")).firstMatch.waitForExistence(timeout: 10))
+    attach(app, "21-quick-list-restored")
+    tap(app, "Back")
+  }
+  @MainActor
   func enter(_ text: String, into field: XCUIElement) {
     for character in text { field.typeText(String(character)); Thread.sleep(forTimeInterval: 0.04) }
   }

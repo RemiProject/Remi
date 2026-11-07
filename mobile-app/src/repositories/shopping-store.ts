@@ -1,4 +1,4 @@
-import { validShoppingItem, type ShoppingItem, type ShoppingInput } from '../domain/shopping';
+import { shoppingLines, validShoppingItem, type ShoppingItem, type ShoppingInput } from '../domain/shopping';
 import type { KeyValueStorage } from './inventory-repository';
 export const SHOPPING_KEY = 'remi.cookbook.shopping-list';
 const initial = { items: [] as readonly ShoppingItem[], status: 'loading' as 'loading' | 'ready' | 'error', pending: false, writeError: false };
@@ -47,6 +47,23 @@ export class ShoppingStore {
     const item: ShoppingItem = { ...input, id: previous?.id ?? nextId, purchased: previous?.purchased ?? false, createdAt: previous?.createdAt ?? timestamp, updatedAt: timestamp };
     return previous ? items.map((entry) => entry.id === id ? item : entry) : [...items, item];
   });
+  addLines = (text: string) => {
+    const inputs = shoppingLines(text);
+    return this.mutate(items => {
+      const timestamp = new Date().toISOString();
+      const pendingNames = new Set(items.filter(item => !item.purchased).map(item => item.name.toLocaleLowerCase()));
+      const added: ShoppingItem[] = [];
+      for (const input of inputs) {
+        const name = input.name.toLocaleLowerCase();
+        if (pendingNames.has(name)) continue;
+        pendingNames.add(name);
+        let id: string;
+        do { id = `shopping_${Date.now().toString(36)}_${(++sequence).toString(36)}`; } while (items.some(item => item.id === id));
+        added.push({ ...input, id, purchased: false, createdAt: timestamp, updatedAt: timestamp });
+      }
+      return [...items, ...added];
+    });
+  };
   toggle = (id: string) => this.mutate((items) => {
     if (!items.some((item) => item.id === id)) throw new Error('Item not found');
     return items.map((item) => item.id === id ? { ...item, purchased: !item.purchased, updatedAt: new Date(Math.max(Date.now(), Date.parse(item.updatedAt))).toISOString() } : item);

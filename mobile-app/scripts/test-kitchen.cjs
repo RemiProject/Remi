@@ -190,6 +190,7 @@ test('Settings selector persists English-Arabic-English and updates More, featur
   assert.equal(Health,'ConnectedHealthScreen');
   feature='cooking';const cookingEntry=nodes(Preview());assert.ok(cookingEntry.some(node=>node.props?.label===mocks['@/i18n/cooking'].cookingMessages[language].choose));assert.ok(!cookingEntry.some(node=>node.type==='Badge'));assert.equal(cookingEntry.find(node=>node.type==='Screen').props.rtl,rtl);
   const tabs=nodes(Tabs());const tabList=tabs.find(node=>node.type==='TabList');assert.equal(tabList.props.style.flexDirection,rtl?'row-reverse':'row');
+  const plus=tabs.find(node=>node.props?.accessibilityLabel===(rtl?'إضافة سريعة':'Quick add'));assert.ok(plus);mocks['expo-router'].router.push=route=>assert.equal(route,'/quick-add');plus.props.onPress();assert.equal(tabList.props.children[2].props.children,plus);
   const triggers=tabs.filter(node=>node.type==='TabTrigger');assert.deepEqual(triggers.map(node=>[node.props.name,node.props.href]),[['home','/'],['kitchen','/kitchen'],['plan','/plan'],['more','/more']]);
   for(const trigger of triggers){let pressed=false;const child=trigger.props.children;const rendered=child.type({...child.props,onPress:()=>pressed=true});if(trigger.props.name==='add'){mocks['expo-router'].router.push=path=>{assert.equal(path,'/food-entry');pressed=true;};}rendered.props.onPress();assert.equal(pressed,true);}
 const tabLabels=tabs.filter(node=>typeof node.type==='function').map(node=>node.props.children);assert.deepEqual(tabLabels,[t.home,t.kitchen,language==='ar'?'الخطة':'Plan',t.more]);

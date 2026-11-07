@@ -47,3 +47,23 @@ test('shopping UI validates, saves, checks purchase status and requires explicit
  tree.find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox').props.onPress();await tick();tree=render();assert.equal(tree.find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox').props.accessibilityState.checked,true);
  language='ar';tree=render();assert.equal(tree.find(node=>node.type==='Screen').props.rtl,true);tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.ar.clear).props.onPress();assert.equal(store.getSnapshot().items.length,1);tree=render();assert.equal(tree.find(node=>node.type==='Modal').props.visible,true);memory.fail=true;tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.ar.confirm).props.onPress();await tick();tree=render();assert.equal(store.getSnapshot().items.length,1);assert.ok(tree.some(node=>node.props?.children===shoppingMessages.ar.writeError));assert.equal(tree.find(node=>node.type==='Modal').props.visible,true);memory.fail=false;tree.find(node=>node.type==='Button'&&node.props.label===shoppingMessages.ar.confirm).props.onPress();await tick();assert.deepEqual(store.getSnapshot().items,[]);assert.equal(render().find(node=>node.type==='Modal').props.visible,false);
 });
+
+test('quick shopping lines save atomically, deduplicate pending items and survive reload', async () => {
+  const memory = storage(), store = new ShoppingStore(memory); await store.hydrate();
+  await store.addLines(' Milk\nEggs\r\n\nحليب\nMilk\nmilk');
+  assert.equal(memory.writes, 1);
+  assert.deepEqual(store.getSnapshot().items.map(item => item.name), ['Milk', 'Eggs', 'حليب']);
+  await store.toggle(store.getSnapshot().items[0].id);
+  await store.addLines('Milk\nEggs');
+  assert.equal(store.getSnapshot().items.filter(item => item.name === 'Milk' && !item.purchased).length, 1);
+  const restarted = new ShoppingStore(memory); await restarted.hydrate();
+  assert.deepEqual(restarted.getSnapshot().items, store.getSnapshot().items);
+  const before = store.getSnapshot().items; memory.fail = true;
+  await assert.rejects(store.addLines('Bread\nRice'));
+  assert.deepEqual(store.getSnapshot().items, before);
+  assert.throws(() => store.addLines('x'.repeat(101)));
+  assert.throws(() => store.addLines(Array(51).fill('Milk').join('\n')));
+  assert.throws(() => store.addLines('\n  '));
+  memory.fail = false; await store.addLines('Bread\nRice');
+  assert.equal(store.getSnapshot().items.filter(item => item.name === 'Bread').length, 1);
+});

@@ -48,3 +48,7 @@ The checked commands and native evidence are recorded in `docs/native-verificati
 ## External setup still required
 
 Email delivery, remote object storage, embeddings/LLM providers and device push delivery depend on deployment credentials and services. The kitchen helper is explicitly rules-powered. Feedback is saved privately; it does not claim an email was sent. Reminder dates are user-entered and do not certify food safety. No public social feed is claimed; that menu entry manages the household. Production rollout, Android/device QA and store submission are separate from this source update.
+
+## Center quick-add action
+
+The plus button between Kitchen and Plan opens receipt scanning/review, a household needed-item editor, or a freeform quick shopping list. Quick lists accept up to 50 lines, save atomically on this device, retain entries after a failed save, deduplicate unchecked items and allow check-off/removal. They are also accessible from the household Shopping screen; household catalogue items continue to sync through the existing backend. Receipt items still require review before stock is added.

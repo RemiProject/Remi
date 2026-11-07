@@ -19,6 +19,7 @@ function Navigation() {
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="quick-add" options={{ presentation: 'modal' }} />
         <Stack.Screen name="food-entry" options={{ presentation: 'modal' }} />
         <Stack.Screen name="food/manual" options={{ presentation: 'modal', gestureEnabled: false }} />
         <Stack.Screen name="food/edit/[id]" options={{ presentation: 'modal', gestureEnabled: false }} />
