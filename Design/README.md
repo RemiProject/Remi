@@ -15,6 +15,8 @@ Each version folder has:
 - `palette.json`: every theme token for light and dark, read from that version's `mobile-app/src/theme/tokens.ts`.
 - Other folders as available: fonts, logo, photography, textures and screenshots.
 
+Shared across versions: [`illustrations/`](illustrations/README.md), three hand-drawn explainer illustrations (SVG and PNG) that the app doesn't use yet.
+
 ## Regenerating the boards
 
 ```bash
