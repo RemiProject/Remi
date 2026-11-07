@@ -25,6 +25,7 @@ The three-colour idea came from a TikTok web-design tip by Marco Pérez.
 | Folder | Contents |
 |---|---|
 | `logo/` | `remi-logo-source.webp` (the original artwork) plus three white-on-transparent cuts the app recolours: `logo.png` (mascot and wordmark), `wordmark.png` and `mascot.png`. Regenerate them with `mobile-app/scripts/make-brand-assets.py` |
+| `app-icon/` | The app icon: flat 1024 px, the iOS Icon Composer layer, the Android adaptive foreground and a preview at real sizes |
 | `fonts/` | Static DM Sans cuts generated from the variable font: `DMSans-Display.ttf` (800, titles), `DMSans-Heading.ttf` (700), `DMSans-SemiBold.ttf` (600, labels), plus `DMSans.ttf` (body) and the OFL licence |
 | `screenshots/` | iOS Simulator captures in light, dark and Arabic: Home, recipe, cook mode, shopping, planner, onboarding and the cook-mode done card |
 

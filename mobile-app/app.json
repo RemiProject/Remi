@@ -8,7 +8,7 @@
     "scheme": "remi-cookbook",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/remi.icon",
       "bundleIdentifier": "com.remi.cookbook.independent",
       "entitlements": {
         "keychain-access-groups": [
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#F8F6E6",
+        "backgroundColor": "#F8E45C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"

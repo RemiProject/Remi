@@ -49,6 +49,7 @@ Legend: ✅ done · ⬜ to do
 | 9 | Onboarding and planner | Restyled through the new tokens and components. Planner shows "Dinner · 4 servings" | ✅ | `598eadf` |
 | 10 | Design docs | `DESIGN.md` and `PRODUCT.md` describe the new visual world | ✅ | this commit |
 | 12 | Logo | Remi mascot and wordmark on Home, startup, sign-in, the onboarding welcome and the cook-mode done card, recoloured for each theme | ✅ | this commit |
+| 13 | App icon | The chef's hat and face, cobalt on lemon, for iOS (Icon Composer, Liquid Glass), Android adaptive (with monochrome) and web favicon. Replaces the Expo placeholder | ✅ | this commit |
 | 11 | Verification | Typecheck, lint and 430 tests pass. Simulator screenshots in light, dark and Arabic | ✅ | this commit |
 
 ## Log
@@ -142,6 +143,16 @@ The layout follows Mob's `CookModeScreen` (step pager, progress bar, ingredients
 | Light | Dark | Arabic |
 |---|---|---|
 | `light-01-home.png`, `light-03-recipe.png`, `light-04-cook-mode.png`, `light-05-shopping.png`, `light-06-planner.png`, `light-07-onboarding-logo.png`, `light-08-cook-done-logo.png` | `dark-01-home.png`, `dark-02-cook-mode.png` | `ar-01-home.png`, `ar-02-cook-mode.png` |
+
+### 13. App icon (`assets/remi.icon`, `assets/images/`, `scripts/make-app-icons.py`)
+- The full mascot was too busy at home-screen size, so the icon uses only the hat and face, rising from the bottom edge. The strokes are thickened so the smile still reads at 60 px.
+- **iOS:** a new Icon Composer bundle, `assets/remi.icon`, with a solid lemon fill and the cobalt chef as its one layer. Translucency is off so the cobalt stays solid. It replaces the Expo template `assets/expo.icon`.
+- **Android:** the adaptive foreground is scaled to the visible two-thirds, on a lemon background, with a matching monochrome layer for themed icons.
+- **Fallback and web:** a flat 1024 px `icon.png` and `favicon.png`.
+- **Design archive:** a preview and the source files are in `Design/version-3-sip-happy/app-icon/`.
+- **Native config:** the icon is native configuration, so the iOS project was regenerated with `expo prebuild` and the app rebuilt.
+- **Checked:** the rebuilt app on the iPhone 18 Pro Simulator (iOS 27) shows the new icon on the home screen (`Design/version-3-sip-happy/app-icon/ios-home-screen.png`). The Android icons were checked only as rendered previews, not on a device.
+- **Still to do:** the launch (splash) screen still shows the Expo placeholder logo.
 
 ## Design archive
 
