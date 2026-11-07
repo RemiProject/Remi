@@ -319,6 +319,10 @@ test('card explanations use Arabic ingredient names, only three missing names, c
   assert.deepEqual(Object.keys(messages.en).sort(), Object.keys(messages.ar).sort());
 });
 
+function recipeCardModule(mocks) {
+  return loadTsx('src/components/recipe-card.tsx', { ...mocks, 'react-native': { ...mocks['react-native'], ScrollView: 'ScrollView', useWindowDimensions: () => ({ width: 400, height: 800 }) },
+    'expo-image': { Image: 'Image' }, '@/theme/tokens': { ...mocks['@/theme/tokens'], layout: { maxWidth: 720 } } });
+}
 function loadTsx(file, mocks) {
   const exports = {};
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -517,6 +521,7 @@ test('Home recipe ideas show four ranked backend cards, metadata, coverage, expi
   h.mocks['react-native'].ScrollView = 'ScrollView';
   h.mocks['@/i18n/home'] = require('../src/i18n/home.ts');
   h.mocks['@/i18n/recipes'] = require('../src/i18n/recipes.ts');
+  h.mocks['@/components/recipe-card'] = recipeCardModule(h.mocks);
   const { BackendHomeRecipeIdeas } = loadTsx('src/screens/backend-home-recipe-ideas.tsx', h.mocks);
   h.set({ nodes: Array.from({ length: 6 }, (_, i) => suggestion(`backend-${i}`, { expiringSoon: [{ ...food(), arabicName: 'طماطم', expiryDay: '2026-06-03' }] })) });
   for (const language of ['en', 'ar']) {
@@ -540,6 +545,7 @@ test('Home recipe ideas signed-out, empty, quiet loading/error/retry states neve
   h.mocks.react.useEffect = effect => effects.push(effect);
   h.mocks['react-native'].ScrollView = 'ScrollView';
   h.mocks['@/i18n/home'] = require('../src/i18n/home.ts'); h.mocks['@/i18n/recipes'] = require('../src/i18n/recipes.ts');
+  h.mocks['@/components/recipe-card'] = recipeCardModule(h.mocks);
   const { BackendHomeRecipeIdeas } = loadTsx('src/screens/backend-home-recipe-ideas.tsx', h.mocks);
   for (const language of ['en', 'ar']) {
     h.language(language); const t = messages[language];

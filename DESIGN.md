@@ -26,6 +26,12 @@ reference for patterns is the Mob meal-planner app. Full record: `VERSION-3.md`.
 - 20pt page gutter, 4pt spacing base, 44pt minimum touch.
 - Four labelled tabs: the active tab sits on a lemon pill, and a centred hot-pink plus between Kitchen and Plan opens the native quick-add modal.
 
+**Recipes.**
+- **Browsing** is a 2-column grid: the picture, with a white time badge on it, then the title (two lines) and a caption.
+- **No photo:** a recipe without one gets a letter tile, its initial in Remi Display on pale lemon, pink or cobalt, the same everywhere for that recipe. Never a stock photo or a fork icon.
+- **Categories** are text tabs with a hot-pink dot on the selected one.
+- **Recipe page:** a full-bleed picture under a sheet with a grabber; the servings stepper beside the title; four lemon stat capsules; pink-bulleted ingredients with bold amounts; numbered directions; Start cooking pinned at the bottom.
+
 **Cooking.** Cook mode is full screen: a segmented progress bar, one step per swipeable page in large type, a Method/Ingredients switch, per-step countdown timers, and the screen kept awake.
 
 **Motion.** Press feedback 100–150ms; native stacks and sheets. Reduced motion is respected; the pager jumps instead of animating.

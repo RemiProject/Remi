@@ -297,6 +297,8 @@ function homeLayoutHarness(backend, language = 'en', homePlan = { upcoming: [], 
     if (id === 'expo-image') return { Image: 'Image' };
     if (id === 'react-native') return { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View' };
     if (id === '@/components/brand') return { Brand: 'Brand' };
+    if (id === '@/components/recipe-card') return { ...Object.fromEntries(['RecipeArt', 'RecipeCard', 'RecipeGrid', 'RecipeTabs'].map(n => [n, n])), useGridCardWidth: () => 180,
+      recipeTabs: () => [{ key: 'all', label: 'All' }], filterRecipes: recipes => [...recipes], recipeMinutes: recipe => (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0) };
     if (id === '@/theme/tokens') return { spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } };
     if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText','Button','Card','Screen','SearchField','SectionHeader'].map(n => [n,n])), uiStyles: {} };
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
@@ -348,7 +350,7 @@ test('cookbook Home searches live food and catalogue recipes without showing unr
   h.nodes(h.render(),'SearchField')[0].props.onChangeText('tomato'); const tree=h.render();
   assert.equal(h.nodes(tree,'BackendRecipeIdeas').length,0);
   assert(h.nodes(tree,'Button').some(n => n.props.label.startsWith('Backend tomato')));
-  assert(h.nodes(tree,'Pressable').some(n => n.props.accessibilityLabel === 'Tomato pasta'));
+  assert(h.nodes(tree,'RecipeCard').some(n => n.props.name === 'Tomato pasta'));
 });
 
 test('signed-out/loading/empty/error/retry states are clear in English and Arabic', () => {
