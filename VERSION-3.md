@@ -115,7 +115,7 @@ The layout follows Mob's `CookModeScreen` (step pager, progress bar, ingredients
 - `formatAmount` displays backend decimals cleanly ("50.000" → "50", "37.500" → "37.5"). It is used on the shopping, recipe and planner screens and has a unit test.
 
 ### 9. Onboarding and planner
-- Onboarding needed no code changes; it picks up the new tokens and components (`docs/version-3`).
+- Onboarding needed no code changes; it picks up the new tokens and components (`Design/version-3-sip-happy/screenshots`).
 - The planner's meal line now reads "Dinner · 4 servings" instead of "dinner · 4.00 servings".
 
 ### 12. Logo (`assets/brand/`, `src/components/brand.tsx`)
@@ -137,11 +137,15 @@ The layout follows Mob's `CookModeScreen` (step pager, progress bar, ingredients
 
 ## Screenshots
 
-`docs/version-3/`, taken on the iPhone 18 Pro simulator against the local API:
+`Design/version-3-sip-happy/screenshots/`, taken on the iPhone 18 Pro simulator against the local API:
 
 | Light | Dark | Arabic |
 |---|---|---|
 | `light-01-home.png`, `light-03-recipe.png`, `light-04-cook-mode.png`, `light-05-shopping.png`, `light-06-planner.png`, `light-07-onboarding-logo.png`, `light-08-cook-done-logo.png` | `dark-01-home.png`, `dark-02-cook-mode.png` | `ar-01-home.png`, `ar-02-cook-mode.png` |
+
+## Design archive
+
+`Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.
 
 ## Still to do (next iterations)
 
