@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { AppText, Button, Card, Chip, EmptyState, SectionHeader, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
 import { kitchenRequest, loadPlans, loadRecipes, shiftDay, todayKey, type MealPeriod } from '@/services/kitchen-api';
+import { planMeal } from '@/services/plan-shopping';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
 
 const periods: readonly MealPeriod[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
@@ -20,9 +21,7 @@ function PlannerContent({ embedded }: { embedded: boolean }) {
   const recipes = state.data?.recipes ?? [];
   const save = async () => {
     if (!recipeId || !/^\d{4}-\d{2}-\d{2}$/.test(selected) || !/^\d+(?:\.\d{1,3})?$/.test(servings) || Number(servings) <= 0) throw new Error(copy('Choose a recipe, valid date and positive servings.', 'اختر وصفة وتاريخًا صالحًا وعدد حصص موجبًا.'));
-    const plans = await loadPlans(selected, selected); let plan = plans.find(entry => entry.startDate <= selected && entry.endDate >= selected);
-    if (!plan) plan = (await kitchenRequest<{ createMealPlan: { id: string; name: string; startDate: string; endDate: string; meals: never[] } }>('mutation NewPlan($input: CreateMealPlanInputType!) { createMealPlan(input: $input) { id name startDate endDate meals { id } } }', { input: { name: 'Weekly kitchen plan', startDate: selected, endDate: shiftDay(selected, 6) } })).createMealPlan;
-    await kitchenRequest('mutation Plan($input: PlanMealInputType!) { planMeal(input: $input) { id } }', { input: { mealPlanId: plan.id, recipeId, mealDate: selected, mealType: period, servings } }); setEditing(false);
+    await planMeal({ recipeId, date: selected, mealType: period, servings }); setEditing(false);
   };
   const meals = (state.data?.plans ?? []).flatMap(plan => plan.meals).filter(meal => meal.mealDate === selected);
   return <ConnectedScreen title={copy('Your meal plan', 'خطة وجباتك')} back={!embedded}>
