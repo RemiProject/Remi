@@ -7,7 +7,7 @@ const { PlannerStore, PLANNER_KEY } = require('../src/repositories/planner-store
 const { weekDates, shiftDate, validMeal } = require('../src/domain/planner.ts');
 const { plannerMessages } = require('../src/i18n/planner.ts');
 function storage() {
-  const data = new Map([['remy.inventory', 'preserved inventory']]);
+  const data = new Map([['remi.cookbook.inventory', 'preserved inventory']]);
   return { data, writes: 0, fail: false, async getItem(key) { return data.get(key) ?? null; }, async setItem(key, value) { if (this.fail) throw new Error('write rejected'); this.writes++; data.set(key, value); } };
 }
 test('planner creation, day/period assignment, restart, removal and subscription preserve inventory', async () => {
@@ -20,7 +20,7 @@ test('planner creation, day/period assignment, restart, removal and subscription
   const restart = new PlannerStore(memory); await restart.hydrate(); assert.deepEqual(restart.getSnapshot().meals, store.getSnapshot().meals);
   assert.equal(restart.getSnapshot().meals[1].date, '2026-10-20'); assert.equal(restart.getSnapshot().meals[1].period, 'snack');
   await restart.remove(restart.getSnapshot().meals[0].id); const again = new PlannerStore(memory); await again.hydrate(); assert.equal(again.getSnapshot().meals.length, 1);
-  assert.equal(memory.data.get('remy.inventory'), 'preserved inventory');
+  assert.equal(memory.data.get('remi.cookbook.inventory'), 'preserved inventory');
 });
 test('planner failures retain plans and corrupt storage blocks writes without a reset', async () => {
   const memory = storage(); const store = new PlannerStore(memory); await store.hydrate(); await store.add('2026-10-14', 'breakfast', 'breakfast');
@@ -53,7 +53,7 @@ test('planner UI adds and removes meals, retains failed drafts and handles missi
  tree.find(node=>node.type==='Pressable'&&node.props.accessibilityLabel===plannerMessages.en.nextMonth).props.onPress();tree=render();assert.equal(store.getSnapshot().meals.length,1);tree.find(node=>node.type==='Pressable'&&node.props.accessibilityLabel===plannerMessages.en.previousMonth).props.onPress();
  await store.add('2026-12-31','dinner','missing_recipe');language='ar';tree=render();assert.equal(tree.find(node=>node.type==='Screen').props.rtl,true);assert.equal(tree.find(node=>node.props?.accessibilityLabel===plannerMessages.ar.calendar).props.style.direction,'rtl');const missing=tree.find(node=>node.type==='Pressable'&&node.props.accessibilityLabel.endsWith(plannerMessages.ar.missing));missing.props.onPress();tree=render();assert.ok(tree.some(node=>node.props?.children===plannerMessages.ar.missingBody));memory.fail=true;tree.find(node=>node.type==='Button'&&node.props.label===plannerMessages.ar.remove).props.onPress();await tick();tree=render();assert.equal(store.getSnapshot().meals.length,2);assert.equal(tree.find(node=>node.type==='Modal').props.visible,true);assert.ok(tree.some(node=>node.props?.children===plannerMessages.ar.writeError));memory.fail=false;tree.find(node=>node.type==='Button'&&node.props.label===plannerMessages.ar.remove).props.onPress();await tick();assert.equal(store.getSnapshot().meals.length,1);assert.ok(render().some(node=>node.props?.children===plannerMessages.ar.removed));
  const beforeSelection=memory.data.get(PLANNER_KEY);tree=render();tree.find(node=>node.type==='View'&&node.key==='2026-11-28').props.children.props.onPress();tree=render();assert.ok(tree.some(node=>node.type==='View'&&node.key==='2026-12-01'));tree.find(node=>node.type==='View'&&node.key==='2026-12-01').props.children.props.onPress();tree=render();assert.equal(memory.data.get(PLANNER_KEY),beforeSelection);assert.equal(tree.filter(node=>node.type==='Pressable'&&node.props.accessibilityState?.selected&&node.props.accessibilityLabel!==content.recipeTitle('bowl','ar')).length,1);
- assert.equal(memory.data.get('remy.inventory'),'preserved inventory');
+ assert.equal(memory.data.get('remi.cookbook.inventory'),'preserved inventory');
 });
 
 

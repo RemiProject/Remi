@@ -12,7 +12,7 @@ import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { recipeCoverage, recipeExpiry, recipeNumber } from '@/utils/backend-recipe-view';
 import { radii, spacing } from '@/theme/tokens';
 
-export function BackendHomeRecipeIdeas({ kitchenStatus }: { kitchenStatus: string }) {
+export function BackendHomeRecipeIdeas({ kitchenStatus, title }: { kitchenStatus: string; title?: string }) {
   const state = useBackendRecipes();
   const { owner, ensureLoaded, kitchenEmpty } = state;
   const { language } = useLanguage();
@@ -26,7 +26,7 @@ export function BackendHomeRecipeIdeas({ kitchenStatus }: { kitchenStatus: strin
   const empty = kitchenEmpty || state.status === 'ready' && !state.nodes.length;
   return <View style={{ gap: spacing.md, direction: dir }}>
     <View style={{ flexDirection: 'row', direction: dir, alignItems: 'center', gap: spacing.md }}>
-      <AppText variant="heading" dir={dir} style={{ flex: 1 }}>{home.ideas}</AppText>
+      <AppText variant="heading" dir={dir} style={{ flex: 1 }}>{title ?? home.ideas}</AppText>
       {!signedOut && <Button label={recipeMessages[language].viewAll} variant="text"
         onPress={() => router.push({ pathname: '/feature', params: { feature: 'recipes' } })} />}
     </View>
@@ -41,7 +41,7 @@ export function BackendHomeRecipeIdeas({ kitchenStatus }: { kitchenStatus: strin
           return <Pressable key={recipe.id} accessibilityRole="button" accessibilityLabel={recipe.name}
             onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })}
             style={({ pressed }) => ({ width: 258, borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
-            <RecipePlaceholder label={t.placeholder} />
+            <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} />
             <View style={{ padding: spacing.lg, gap: spacing.sm }}>
               <AppText variant="heading" dir="ltr">{recipe.name}</AppText>
               <AppText variant="caption" muted dir={dir}>{time}</AppText>

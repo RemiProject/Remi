@@ -1,6 +1,6 @@
 import { validMeal, type PlannedMeal, type MealPeriod } from '../domain/planner';
 import type { KeyValueStorage } from './inventory-repository';
-export const PLANNER_KEY = 'remy.meal-planner';
+export const PLANNER_KEY = 'remi.cookbook.meal-planner';
 const initial = { meals: [] as readonly PlannedMeal[], status: 'loading' as 'loading' | 'ready' | 'error', pending: false, writeError: false };
 let sequence = 0;
 export class PlannerStore {

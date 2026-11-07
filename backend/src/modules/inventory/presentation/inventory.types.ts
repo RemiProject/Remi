@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int, ObjectType, createUnionType, registerEnumType } from '@nestjs/graphql';
-import { IsDate, IsEnum, IsOptional, IsString, IsUUID, MaxLength, Matches } from 'class-validator';
+import { IsDate, IsInt, Min, IsEnum, IsOptional, IsString, IsUUID, MaxLength, Matches } from 'class-validator';
 import { Unit } from '@/shared/food-unit.js';
 import { DecimalScalar, LocalDateScalar } from '@/platform/graphql/scalars.js';
 import { StorageLocation } from '@/modules/inventory/storage-location.js';
@@ -94,4 +94,12 @@ export class InventoryTransactionConnectionType {
 @ObjectType()
 export class InventoryItemDetailType extends InventoryItemType {
   @Field(() => InventoryTransactionConnectionType) transactions!: InventoryTransactionConnectionType;
+}
+
+@InputType()
+export class InventoryMetadataInput {
+  @Field(() => ID) @IsUUID() inventoryItemId!: string;
+  @Field(() => Int) @IsInt() @Min(1) expectedVersion!: number;
+  @Field(() => StorageLocation) @IsEnum(StorageLocation) storageLocation!: StorageLocation;
+  @Field(() => Date, { nullable: true }) @IsOptional() @IsDate() estimatedExpiryAt!: Date | null;
 }

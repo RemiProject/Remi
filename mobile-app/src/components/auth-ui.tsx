@@ -19,12 +19,11 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
             <AuthLink label={`${language === 'ar' ? '→' : '←'}  ${t.back}`} onPress={onBack} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View style={{ width: 32, height: 32, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><AppText style={{ color: colors.onPrimary, fontWeight: '800', fontSize: 20 }}>r</AppText></View>
-              <AppText style={{ fontSize: 22, fontWeight: '800', letterSpacing: -0.8 }}>remy</AppText>
+              <AppText variant="brand">Remi</AppText>
             </View>
           </View>
           <View style={{ gap: 10, paddingTop: 8 }}>
-            <AppText style={{ color: colors.primary, fontSize: 11, fontWeight: '700', letterSpacing: language === 'en' ? 2 : 0 }}>{t.authEyebrow}</AppText>
-            <AppText accessibilityRole="header" style={{ fontSize: 34, lineHeight: 41, fontWeight: '800', letterSpacing: -1, textAlign: language === 'ar' ? 'right' : 'left' }}>{title}</AppText>
+            <AppText variant="title" accessibilityRole="header" style={{ textAlign: language === 'ar' ? 'right' : 'left' }}>{title}</AppText>
             <AppText muted style={{ fontSize: 15, lineHeight: 23, textAlign: language === 'ar' ? 'right' : 'left' }}>{subtitle}</AppText>
           </View>
           <View style={{ padding: 20, borderRadius: 24, gap: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}>{children}</View>

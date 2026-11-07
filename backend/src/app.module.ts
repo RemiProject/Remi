@@ -1,3 +1,4 @@
+import { LeftoversModule } from './modules/leftovers/leftovers.module.js';
 import { Module } from '@nestjs/common';
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { APP_GUARD } from '@nestjs/core';
@@ -82,6 +83,7 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
         context: ({ req, res, extra }: any) => ({ req: req ?? extra?.request, res }),
       }),
     }),
+    LeftoversModule,
     ReferenceModule,
     IdentityModule,
     CatalogModule,

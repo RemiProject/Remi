@@ -1,3 +1,7 @@
+# Remi — Version 2
+
+The native **Living Cookbook** redesign is on the `version-2` branch. See [Version 2](VERSION-2.md) for features, setup, validation and deployment requirements.
+
 # AI Kitchen Intelligence Platform
 
 Monorepo for the AI Kitchen graduation project.
@@ -6,7 +10,7 @@ Monorepo for the AI Kitchen graduation project.
 
 - `backend/` — NestJS GraphQL API, CQRS application modules, Prisma query client, and PostgreSQL migrations.
 - `frontend/` — placeholder for the web application team.
-- `mobile-app/` — placeholder for the mobile application team.
+- `mobile-app/` — Expo / React Native app for iOS, Android and web.
 
 ## Backend status
 

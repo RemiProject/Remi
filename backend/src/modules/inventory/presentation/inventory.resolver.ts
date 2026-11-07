@@ -6,6 +6,8 @@ import { HouseholdGuard } from '@/platform/tenancy/household.guard.js';
 import type { RequestContext } from '@/platform/tenancy/request-context.js';
 import { InsufficientStockError, InventoryLedgerService } from '@/modules/inventory/application/inventory-ledger.service.js';
 import {
+  InventoryMetadataInput,
+  InventoryItemType,
   InsufficientStockType,
   InventoryConnectionType,
   InventoryAdjustmentInput,
@@ -19,6 +21,11 @@ import {
 @UseGuards(GqlAuthGuard, HouseholdGuard)
 export class InventoryResolver {
   constructor(private readonly ledger: InventoryLedgerService) {}
+
+  @Mutation(() => InventoryItemType)
+  updateInventoryMetadata(@Ctx() ctx: RequestContext, @Args('input') input: InventoryMetadataInput) {
+    return this.ledger.updateMetadata(ctx.householdId!, ctx.userId, input);
+  }
 
   @Query(() => InventoryConnectionType)
   inventory(

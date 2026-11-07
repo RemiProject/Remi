@@ -23,7 +23,7 @@ function harness({ mutation, refresh, latest = { ...raw }, item = mapped(raw) } 
   const calls = [], events = [], values = new Map();
   let revision = 1, household = 'home', keys = 0, refreshes = 0;
   const storage = { getItem: async key => values.get(key) ?? null, setItem: async (key, value) => {
-    assert(key.startsWith('remy.active-household.')); values.set(key, value);
+    assert(key.startsWith('remi.cookbook.active-household.')); values.set(key, value);
   }, removeItem: async () => assert.fail('Never touches local inventory') };
   const auth = {
     getIdentityRevision: () => revision,

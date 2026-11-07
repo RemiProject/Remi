@@ -49,7 +49,7 @@ export function recipeExpiry(suggestion: RecipeSuggestion, today: string, langua
   const when = days === 0 ? t.today : days === 1 ? t.tomorrow : recipeText(t.inDays, { days: recipeNumber(days, language) });
   return recipeText(t.uses, { food: recipeFoodName(food, language), when });
 }
-export function recipeIngredientStatus(ingredient: BackendRecipe['ingredients'][number], suggestion: RecipeSuggestion | undefined, language: Language) {
+export function recipeIngredientStatus(ingredient: Pick<BackendRecipe['ingredients'][number], 'foodId' | 'optional'>, suggestion: RecipeSuggestion | undefined, language: Language) {
   if (!suggestion) return null;
   const t = backendRecipeMessages[language], id = ingredient.foodId;
   if (suggestion.expired.some(i => i.foodId === id) || suggestion.optional.some(i => i.foodId === id && i.status === 'EXPIRED')) return t.EXPIRED;

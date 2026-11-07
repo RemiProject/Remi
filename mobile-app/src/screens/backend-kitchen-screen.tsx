@@ -1,3 +1,7 @@
+import { Image } from 'expo-image';
+import { ingredientImage } from '@/data/ingredient-images';
+import { Icon } from '@/components/ui/icon';
+import { InventoryMetadataEditor } from '@/components/inventory-metadata-editor';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View, type ScrollViewInstance } from 'react-native';
@@ -37,6 +41,7 @@ export function BackendKitchenState({ detail = false, retry }: { detail?: boolea
 function DeviceInventoryNotice() {
   const { items, status, retryRead } = useInventory();
   const { language, t } = useLabels();
+  if (status === 'ready' && items.length === 0) return null;
   return <Card><SectionHeader title={`${t.device}${status === 'ready' ? ` · ${items.length.toLocaleString(language)}` : ''}`} />
     <AppText variant="caption" muted>{t.deviceBody}</AppText>
     {status === 'error' ? <><AppText accessibilityRole="alert">{t.deviceError}</AppText><Button label={t.retry} onPress={retryRead} /></> : status !== 'ready' && <AppText muted>{t.deviceLoading}</AppText>}
@@ -44,7 +49,7 @@ function DeviceInventoryNotice() {
 }
 function BackendFoodRow({ item }: { item: InventoryReadItem }) {
   const { language, t, rtl } = useLabels();
-  return <ActionRow title={backendFoodName(item, language)} rtl={rtl} icon="food"
+  return <ActionRow title={backendFoodName(item, language)} rtl={rtl} leading={<View style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>{ingredientImage(item.name) ? <Image source={ingredientImage(item.name)} contentFit="contain" accessibilityLabel={backendFoodName(item, language)} style={{ width: 64, height: 64 }} /> : <Icon name="food" size={30} />}</View>}
     subtitle={backendRowSubtitle(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} subtitleStyle={{ writingDirection: rtl ? 'rtl' : 'ltr' }}
     onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}>
     <Expiry item={item} />{item.readOnly && <AppText variant="caption" muted>{t.readOnly}</AppText>}
@@ -58,7 +63,7 @@ export function BackendKitchenScreen() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [query, setQuery] = useState('');
   const [storage, setStorage] = useState('all');
-  const [sort, setSort] = useState<'name' | 'expiry'>('name');
+  const [sort, setSort] = useState<'name' | 'expiry'>('expiry');
   const [priority, setPriority] = useState(false);
   useFocusEffect(useCallback(() => {
     if (additionNotice == null || !owner) return;
@@ -68,15 +73,14 @@ export function BackendKitchenScreen() {
   }, [additionNotice, dismissAdded, owner]));
   const visible = backendKitchenView(items, query, storage, sort, priority, today, language);
   const storages = [...new Map(items.map(item => [item.storageId ?? item.backendStorageLocation, backendStorageLabel(item, language)])).entries()];
-  return <Screen rtl={rtl} scrollRef={scrollRef}><PageHeader title={t.title} subtitle={status === 'ready' ? `${inventoryNumberLabel(items.length.toLocaleString(language), language)} ${t.saved}` : undefined} subtitleDirection={rtl ? 'rtl' : undefined}
+  return <Screen rtl={rtl} scrollRef={scrollRef}><PageHeader title={language === 'ar' ? 'مطبخي' : 'My kitchen'} subtitle={status === 'ready' ? `${inventoryNumberLabel(items.length.toLocaleString(language), language)} ${t.saved}` : undefined} subtitleDirection={rtl ? 'rtl' : undefined}
     action={<Button label={t.add} icon="add" disabled={status !== 'ready'} onPress={() => router.push('/food/manual')} />} />
     {additionNotice != null && owner && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{additionNoticeKind === 'updated' ? stockActionMessages[language].updated : backendAddFoodMessages[language].added}</AppText></Card>}
-    <AppText variant="caption" muted>{t.writesSoon}</AppText>
     <BackendKitchenState />
     {status === 'ready' && <>
       {items.length === 0 ? <EmptyState title={t.empty} description={t.emptyBody} /> : <>
         <SearchField value={query} onChangeText={setQuery} placeholder={t.search} accessibilityLabel={t.search} style={{ textAlign: rtl ? 'right' : 'left' }} />
-          <SectionHeader title={t.storage} /><View style={uiStyles.wrap}><Chip label={t.all} selected={storage === 'all'} onPress={() => setStorage('all')} />
+          <View style={[uiStyles.wrap, { backgroundColor: colors.selectedSurface, borderRadius: 14, padding: 6 }]}><Chip label={t.all} selected={storage === 'all'} onPress={() => setStorage('all')} />
             {storages.map(([id, label]) => <Chip key={id} label={label} selected={storage === id} onPress={() => setStorage(id)} />)}</View>
           <View style={uiStyles.wrap}><Chip label={t.name} selected={sort === 'name'} onPress={() => setSort('name')} /><Chip label={t.expiry} selected={sort === 'expiry'} onPress={() => setSort('expiry')} />
             <Chip label={t.useFirst} selected={priority} onPress={() => setPriority(!priority)} /></View>
@@ -124,7 +128,7 @@ export function BackendFoodDetailScreen() {
       <Card><AppText>{t.storage}: {backendStorageLabel(item, language)}</AppText><AppText>{t.expiry}: {item.expirationDate ?? t.unknown}</AppText><Expiry item={item} />
         {item.readOnly && <AppText muted>{t.readOnly}</AppText>}</Card>
       <BackendStockActions key={`${owner}:${id}`} item={item} />
-      <AppText variant="caption" muted>{stockActionMessages[language].editSoon}</AppText><Button label={t.edit} disabled />
+      <InventoryMetadataEditor key={`${id}:${item.version}`} item={item} />
     </>}
   </Screen>;
 }

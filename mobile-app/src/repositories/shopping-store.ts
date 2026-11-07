@@ -1,6 +1,6 @@
 import { validShoppingItem, type ShoppingItem, type ShoppingInput } from '../domain/shopping';
 import type { KeyValueStorage } from './inventory-repository';
-export const SHOPPING_KEY = 'remy.shopping-list';
+export const SHOPPING_KEY = 'remi.cookbook.shopping-list';
 const initial = { items: [] as readonly ShoppingItem[], status: 'loading' as 'loading' | 'ready' | 'error', pending: false, writeError: false };
 let sequence = 0;
 export class ShoppingStore {

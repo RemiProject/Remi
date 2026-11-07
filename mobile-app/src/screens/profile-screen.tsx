@@ -29,6 +29,7 @@ export default function ProfileScreen() {
       <Button label={auth.error === 'logoutError' ? t.logout : t.retry} disabled={auth.busy}
         onPress={() => { void (auth.error === 'logoutError' ? auth.logout() : auth.restore()); }} variant="secondary" />
     </Card>}
+    {auth.user && <Card><Button label={rtl ? 'الأسرة والدعوات' : 'Household & invitations'} icon="community" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'community' } })} /><Button label={rtl ? 'التغذية والتفضيلات' : 'Nutrition & preferences'} icon="health" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'health' } })} /></Card>}
     <AppText muted>{isBackendInventoryEnabled() ? t.backendKitchen : t.local}</AppText>
   </Screen></SafeAreaView>;
 }

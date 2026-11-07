@@ -1,1 +1,1 @@
-export { default } from '@/screens/recipe-detail-screen';
+export { ConnectedRecipeScreen as default } from '@/screens/connected-recipes-screen';

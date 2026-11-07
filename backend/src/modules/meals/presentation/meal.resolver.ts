@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MealLoggingService } from '@/modules/meals/application/meal-logging.service.js';
 import { InsufficientStockError } from '@/modules/inventory/application/inventory-ledger.service.js';
 import { MealPlanService } from '@/modules/meals/application/meal-plan.service.js';
@@ -51,6 +51,11 @@ export class MealResolver {
   @Mutation(() => PlannedMealType)
   async planMeal(@Ctx() ctx: RequestContext, @Args('input') input: PlanMealInputType) {
     return this.plans.planMeal(ctx.householdId!, input);
+  }
+
+  @Mutation(() => Boolean)
+  removePlannedMeal(@Ctx() ctx: RequestContext, @Args('id', { type: () => ID }) id: string) {
+    return this.plans.removePlannedMeal(ctx.householdId!, id);
   }
 
   @Query(() => [MealPlanTypeObject])

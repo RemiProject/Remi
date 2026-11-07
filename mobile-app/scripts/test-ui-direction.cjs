@@ -1,3 +1,4 @@
+const { fixtureModule } = require('./native-ui-fixture.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
@@ -21,6 +22,7 @@ function fixture(language = 'ar') {
     const exported = {}; cache.set(filename, exported);
     const output = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
     new Function('require', 'exports', output)(id => {
+      if (fixtureModule(id, typeof native === 'undefined' ? {} : native)) return fixtureModule(id, typeof native === 'undefined' ? {} : native);
       if (id === 'react-native') return native;
       if (id === 'expo-router') return { router: {}, useLocalSearchParams: () => ({ id: details.id }), useFocusEffect: () => {} };
       if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors }) };
@@ -28,6 +30,8 @@ function fixture(language = 'ar') {
       if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
       if (id === '@/providers/inventory-provider') return { useInventory: () => ({ items: [], status: 'ready' }) };
       if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ owner: 'user', status: 'ready', items: [item, spoon, pieces], today: '2026-10-31', detail: { id: details.id, status: 'ready', item: details }, loadDetail: () => {} }) };
+      if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: () => null };
+      if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
       if (id === '@/components/backend-stock-actions') return { BackendStockActions: () => null };
       if (id === '@/components/appearance-controls') return { AppearanceControls: () => null };
       if (id === './home-screen') return { __esModule: true, default: () => null };
@@ -93,8 +97,10 @@ test('ActionRow owns a single chevron direction, independent of missing or misma
       const exported = {};
       new Function('require', 'exports', compiled)(id => {
         if (id === 'react') return { ...React, useState: () => [false, () => {}], useContext: () => !rtl };
-        if (id === 'react-native') return { I18nManager: { isRTL }, Pressable: 'Pressable', View: 'View', StyleSheet: { create: value => value } };
+        if (fixtureModule(id, typeof native === 'undefined' ? {} : native)) return fixtureModule(id, typeof native === 'undefined' ? {} : native);
+      if (id === 'react-native') return { I18nManager: { isRTL }, Pressable: 'Pressable', View: 'View', StyleSheet: { create: value => value } };
         if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {} }) };
+        if (id === '@/providers/language-provider') return { useLanguage: () => ({ language: rtl ? 'ar' : 'en' }) };
         if (id === '@/theme/fonts') return { useRemyFonts: () => ({}) };
         if (id === '@/theme/tokens') return { spacing: {}, layout: {}, radii: {}, typography: {} };
         if (id === './icon') return { Icon: 'Icon' };

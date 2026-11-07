@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BackendKitchenStore, visibleBackendKitchen } from '@/repositories/backend-kitchen-store';
 import { createGraphqlInventoryRepository, InventoryReadError } from '@/repositories/graphql-inventory-repository';
 import { inventoryExpiryDay } from '@/domain/backend-inventory-read-model';
-import { getActiveHouseholdRevision, resolveActiveHousehold } from '@/services/active-household-service';
+import { getActiveHouseholdRevision, resolveActiveHousehold, subscribeHouseholdSelection } from '@/services/active-household-service';
 import { getAuth } from '@/services/auth';
 import { isBackendInventoryEnabled } from '@/services/inventory-feature';
 import { loadInventoryArabicNames } from '@/services/inventory-catalog-names';
@@ -47,6 +47,11 @@ function EnabledBackendKitchenProvider({ children }: PropsWithChildren) {
   }));
   const owner = ready && !busy ? user?.id ?? null : null;
   useEffect(() => { timezone.current = null; store.setUser(owner); }, [store, owner]);
+  useEffect(() => subscribeHouseholdSelection(() => {
+    timezone.current = null;
+    store.setUser(null);
+    store.setUser(owner);
+  }), [store, owner]);
   useEffect(() => {
     const refresh = () => { if (owner) void store.reload(); };
     const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });

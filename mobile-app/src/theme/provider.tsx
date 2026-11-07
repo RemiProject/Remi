@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { themes } from './tokens';
 
 type Appearance = 'light' | 'dark' | 'system';
-export const APPEARANCE_KEY = 'remy.preferences.appearance';
+export const APPEARANCE_KEY = 'remi.cookbook.preferences.appearance';
 const validAppearance = (value: unknown): value is Appearance => value === 'light' || value === 'dark' || value === 'system';
 const ThemeContext = createContext<{
   colors: (typeof themes)[keyof typeof themes];

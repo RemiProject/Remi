@@ -6,3 +6,6 @@
 **/src/generated/
 **/*.tsbuildinfo
 **/*.log
+
+# Also ignore linked dependency directories used for local verification.
+**/node_modules
