@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { createContext, useContext, useState, type PropsWithChildren, type Ref, type ReactElement } from 'react';
 import { I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance, type RefreshControlProps, type TextProps, type ViewProps, type TextInputProps } from 'react-native';
 import { useRemyTheme } from '@/theme/provider';
@@ -17,10 +16,12 @@ export function AppText({ variant = 'body', muted = false, style, dir, ...props 
   const fonts = useRemyFonts();
   const rtl = useContext(ScreenDirection);
   const { language } = useLanguage();
-  const display = variant === 'brand' || variant === 'title' || variant === 'heading';
-  const family = language === 'ar' ? typography.family : display ? fonts.heading : fonts.body;
+  const cut = variant === 'brand' || variant === 'title' ? fonts.brand : variant === 'heading' ? fonts.heading : variant === 'label' ? fonts.label : fonts.body;
+  const family = language === 'ar' ? typography.family : cut;
+  // Static cuts carry their own weight; asking iOS for a heavier weight of a one-face family falls back to the system font.
+  const display = variant !== 'body' && variant !== 'caption' && fonts.ready;
   // Native RTL layouts mirror physical alignment; keep layout physical and paragraph direction explicit.
-  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, ...(display && language !== 'ar' ? { fontWeight: '400' as const } : {}), color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, Platform.OS !== 'web' && { direction: 'ltr' }, style]} />;
+  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, ...(display && language !== 'ar' ? { fontWeight: '400' as const, letterSpacing: 0 } : {}), color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, Platform.OS !== 'web' && { direction: 'ltr' }, style]} />;
 }
 export function PageHeader({ title, subtitle, subtitleDirection, action, back }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode; back?: React.ReactNode }) {
   return <View style={{ gap: spacing.xs }}>{back && <View testID="page-header-back" style={{ alignItems: 'flex-start', marginBottom: spacing.sm }}>{back}</View>}<View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
@@ -29,12 +30,12 @@ export function PageHeader({ title, subtitle, subtitleDirection, action, back }:
 }
 export function Screen({ children, rtl, scrollRef, footer, refreshControl, contentGap = spacing.xl }: PropsWithChildren<{ rtl?: boolean; scrollRef?: Ref<ScrollViewInstance>; footer?: React.ReactNode; refreshControl?: ReactElement<RefreshControlProps>; contentGap?: number }>) {
   const { colors } = useRemyTheme();
-  return <ScreenDirectionProvider value={rtl}><View style={{ flex: 1, backgroundColor: colors.background }}><Image source={require('../../../assets/cookbook-paper.png')} contentFit="cover" accessible={false} style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.12 }} /><ScrollView ref={scrollRef} refreshControl={refreshControl} style={{ flex: 1 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
-    contentContainerStyle={[styles.screen, { gap: contentGap }, rtl !== undefined && { direction: rtl ? 'rtl' : 'ltr' }]}>{children}</ScrollView>{footer && <View style={{ padding: 16, backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.divider }}>{footer}</View>}</View></ScreenDirectionProvider>;
+  return <ScreenDirectionProvider value={rtl}><View style={{ flex: 1, backgroundColor: colors.background }}><ScrollView ref={scrollRef} refreshControl={refreshControl} style={{ flex: 1 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"
+    contentContainerStyle={[styles.screen, { gap: contentGap }, rtl !== undefined && { direction: rtl ? 'rtl' : 'ltr' }]}>{children}</ScrollView>{footer && <View style={{ paddingHorizontal: 20, paddingVertical: spacing.md, backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.divider }}>{footer}</View>}</View></ScreenDirectionProvider>;
 }
 export function Card({ style, ...props }: ViewProps) {
   const { colors } = useRemyTheme();
-  return <View {...props} style={[styles.card, { backgroundColor: colors.surface }, style]} />;
+  return <View {...props} style={[styles.card, { backgroundColor: colors.surface, boxShadow: `0 4px 18px ${colors.shadow}` }, style]} />;
 }
 export function SectionHeader({ title, action, onPress }: { title: string; action?: string; onPress?: () => void }) {
   return <View style={[uiStyles.row, { flexWrap: 'wrap' }]}><AppText variant="heading" accessibilityRole="header" style={uiStyles.grow}>{title}</AppText>
@@ -54,7 +55,7 @@ export function Button({ label, onPress, variant = 'primary', icon, disabled = f
   return <AnimatedPressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} onPressIn={() => feedback(true)} onPressOut={() => feedback(false)}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
     style={[styles.button, pressStyle, icon === 'back' && { alignSelf: 'flex-start' }, {
-      backgroundColor: disabled ? colors.disabledSurface : variant === 'primary' ? (pressed ? colors.primaryPressed : colors.primary) : variant === 'destructive' ? colors.destructive : pressed ? colors.pressedSurface : variant === 'secondary' ? colors.surfaceMuted : 'transparent',
+      backgroundColor: disabled ? colors.disabledSurface : variant === 'primary' ? (pressed ? colors.primaryPressed : colors.primary) : variant === 'destructive' ? colors.destructive : pressed ? colors.pressedSurface : variant === 'secondary' ? colors.primarySoft : 'transparent',
       borderColor: focused ? colors.focusBorder : 'transparent',
       borderWidth: focused ? 3 : 2,
     }]}>
@@ -74,8 +75,7 @@ export function Chip({ label, selected, onPress, disabled = false }: { label: st
   return <Pressable accessibilityRole="button" accessibilityState={{ selected, disabled }} disabled={disabled} onPress={onPress}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
     style={({ pressed }) => [styles.chip, { backgroundColor: disabled ? colors.disabledSurface : pressed ? colors.pressedSurface : selected ? colors.selectedSurface : colors.surface,
-      borderColor: focused ? colors.focusBorder : selected ? colors.selectedBorder : colors.border, borderWidth: focused ? 3 : 2 }]}>
-    {selected && <Icon name="check" size={14} color={disabled ? colors.disabledText : colors.selectedText} />}
+      borderColor: focused ? colors.focusBorder : selected ? colors.selectedBorder : colors.border, borderWidth: focused ? 3 : 1.5 }]}>
     <AppText variant="label" style={{ color: disabled ? colors.disabledText : selected ? colors.selectedText : colors.textSecondary, flexShrink: 1 }}>{label}</AppText>
   </Pressable>;
 }
@@ -83,7 +83,7 @@ export function SearchField({ onFocus, onBlur, style, ...props }: TextInputProps
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const [focused, setFocused] = useState(false);
-  return <View style={[styles.search, { backgroundColor: colors.inputSurface, borderColor: focused ? colors.focusBorder : colors.inputBorder, borderWidth: focused ? 3 : 2 }]}>
+  return <View style={[styles.search, { backgroundColor: colors.inputSurface, borderColor: focused ? colors.focusBorder : colors.inputBorder, borderWidth: focused ? 2 : 1 }]}>
     <Icon name="search" color={colors.textSubtle} size={20} />
     <TextInput {...props} accessibilityLabel={props.accessibilityLabel ?? 'Search kitchen inventory'} placeholderTextColor={colors.placeholder}
       onFocus={(event) => { setFocused(true); onFocus?.(event); }} onBlur={(event) => { setFocused(false); onBlur?.(event); }}
@@ -121,16 +121,16 @@ export const uiStyles = StyleSheet.create({
   stack: { gap: spacing.lg }, grow: { flex: 1, minWidth: 0 },
 });
 const textStyles = StyleSheet.create({
-  title: { fontSize: 34, lineHeight: 40, fontWeight: '700' },
-  heading: { fontSize: 23, lineHeight: 29, fontWeight: '700' },
-  body: { ...typography.body }, caption: { fontSize: 13, lineHeight: 20 },
-  label: { fontSize: 15, lineHeight: 22, fontWeight: '600' }, brand: { ...typography.brand },
+  title: { fontSize: 32, lineHeight: 37, fontWeight: '800' },
+  heading: { fontSize: 21, lineHeight: 27, fontWeight: '700' },
+  body: { ...typography.body }, caption: { fontSize: 13, lineHeight: 19 },
+  label: { fontSize: 15, lineHeight: 21, fontWeight: '600' }, brand: { ...typography.brand },
 });
 const styles = StyleSheet.create({
   screen: { padding: 20, paddingBottom: spacing.xxl, gap: spacing.xl, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center' },
   card: { padding: spacing.lg, borderRadius: radii.lg, gap: spacing.md },
-  button: { minHeight: layout.minTouchTarget, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radii.md, borderWidth: 2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.sm },
-  badge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radii.sm, alignSelf: 'flex-start' },
-  chip: { minHeight: layout.minTouchTarget, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderWidth: 2, borderRadius: radii.md, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  search: { paddingHorizontal: spacing.md, borderWidth: 2, borderRadius: radii.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  button: { minHeight: 48, paddingVertical: spacing.sm, paddingHorizontal: spacing.xl, borderRadius: radii.pill, borderWidth: 2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.sm },
+  badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: radii.pill, alignSelf: 'flex-start' },
+  chip: { minHeight: layout.minTouchTarget, paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, borderWidth: 1.5, borderRadius: radii.pill, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  search: { paddingHorizontal: spacing.lg, borderWidth: 1, borderRadius: radii.pill, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });

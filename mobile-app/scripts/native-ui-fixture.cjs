@@ -1,7 +1,6 @@
 // Native rendering boundaries only; business logic remains real in callers.
 exports.fixtureModule = function fixtureModule(id, native) {
   if (id === 'expo-image') return { Image: 'Image' };
-  if (id.endsWith('cookbook-paper.png')) return 1;
   if (id === 'react-native-reanimated') return {
     __esModule: true,
     default: { createAnimatedComponent: component => component },
