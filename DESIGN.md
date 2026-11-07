@@ -1,7 +1,32 @@
-# Living Cookbook
+# Sip Happy (version 3)
 
-User-approved replacement visual world.
-Ivory paper #FFF7E8, tomato #B92318, butter #F7CA51, leafy #35532B, ink #271B15. Fine static paper grain, low contrast. Editorial serif for titles, readable sans for forms. 20pt page gutter, 4pt spacing base, 44pt minimum touch. Four labeled tabs with a centered plus action between Kitchen and Plan. The plus opens a native quick-add modal for receipt intake, household needed items and a device-saved freeform shopping list. Press feedback 100–150ms; native stacks and sheets. Reduced motion respected. Recipe imagery/source attribution visible in details.
+User-approved replacement visual world. It replaces "Living Cookbook", and the
+reference for patterns is the Mob meal-planner app. Full record: `VERSION-3.md`.
+
+**Palette, user-pinned.**
+- **Light:** Lemon Yellow #F8E45C is the base (hero areas, selected chips, active tab pill). Cobalt Blue #1734BE is the action colour (buttons, links, focus). Hot Pink #ED2B8C is the pop, used sparingly (quick-add button, cook-mode progress, "Use first").
+- **Pink text:** use #C2146C. Plain hot pink is never body text.
+- **Neutrals:** ink #0E1440, paper #FFFDF4, white cards, pale lemon #FCF4C4, pale pink #FDE7F1.
+- **Dark:** navy #0B1030. Cobalt becomes the hero and lemon the action colour.
+
+**Type.** Static DM Sans cuts: Remi Display 800 for titles, Remi Heading 700, Remi Label 600, DM Sans regular for body. Arabic uses the system font. No serif and no paper grain.
+
+**Shape and depth.**
+- Pill buttons (48pt) and pill chips; selected chips fill lemon without a checkmark, so layouts don't shift.
+- Cards are white, radius 22, with a soft 0/4/18 shadow.
+- Lists are divided rows inside one card, never a card per row.
+
+**Layout.**
+- 20pt page gutter, 4pt spacing base, 44pt minimum touch.
+- Four labelled tabs: the active tab sits on a lemon pill, and a centred hot-pink plus between Kitchen and Plan opens the native quick-add modal.
+
+**Cooking.** Cook mode is full screen: a segmented progress bar, one step per swipeable page in large type, a Method/Ingredients switch, per-step countdown timers, and the screen kept awake.
+
+**Motion.** Press feedback 100–150ms; native stacks and sheets. Reduced motion is respected; the pager jumps instead of animating.
+
+**Recipes.** Recipe imagery and source attribution stay visible in details.
 
 ## Back navigation and startup
-Place Back above the title at the leading edge (left English, right Arabic), with a compact hit area and directional arrow. Keep Close/Cancel distinct. Startup placeholders follow the real Home hierarchy and active theme; they are a single accessible busy indicator with no inactive controls. Animate opacity only and disable the pulse for reduced motion. Never add a minimum fake loading delay.
+- Back sits above the title at the leading edge (left in English, right in Arabic), with a compact hit area and a directional arrow. Close/Cancel stay distinct.
+- Startup placeholders follow the real Home hierarchy and the active theme. They are a single accessible busy indicator with no inactive controls.
+- Animate opacity only, and disable the pulse for reduced motion. Never add a minimum fake loading delay.
