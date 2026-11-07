@@ -419,14 +419,20 @@ test('backend detail without a suggestion shows no inferred statuses; lookup fai
   h.set({ status: 'error' }); assert(JSON.stringify(h.render(true)).includes('English description.'));
 });
 function cookingUi() {
-  const h = ui(), effects = []; let progress = cookingUtils.initialCookingSession;
+  const h = ui(), effects = []; let progress = cookingUtils.initialCookingSession; let hook = 0; const store = [];
   h.mocks.react.useEffect = effect => effects.push(effect);
+  h.mocks.react.useState = init => { const i = hook++; if (!(i in store)) store[i] = init; return [store[i], value => { store[i] = typeof value === 'function' ? value(store[i]) : value; }]; };
+  h.mocks.react.useRef = value => ({ current: value });
+  Object.assign(h.mocks['react-native'], { ScrollView: 'ScrollView', useWindowDimensions: () => ({ width: 400, height: 800 }) });
+  h.mocks['react-native-reanimated'] = { useReducedMotion: () => false };
+  h.mocks['expo-keep-awake'] = { useKeepAwake: () => {} };
+  h.mocks['@/components/step-timer'] = { StepTimer: 'StepTimer' };
   h.mocks['@/components/ui/core'].Chip = 'Chip';
   h.mocks['expo-router'].useLocalSearchParams = () => ({ id: 'one' });
   h.mocks['@/utils/cooking-session'] = cookingUtils;
   h.mocks['@/providers/backend-recipes-provider'].useBackendCookingSession = () => ({ session: progress, update: change => { progress = change(progress); } });
   const { BackendCookingScreen } = loadTsx('src/screens/backend-cooking-screen.tsx', h.mocks);
-  return { ...h, renderDetail: h.render, render: () => expand(BackendCookingScreen()), start: () => effects.at(-1)(), progress: () => progress };
+  return { ...h, renderDetail: h.render, render: () => { hook = 0; return expand(BackendCookingScreen()); }, start: () => effects.at(-1)(), progress: () => progress };
 }
 
 test('backend Cooking orders English steps and durations, shows every read-only checklist status, and completes without stock writes', () => {
@@ -437,19 +443,23 @@ test('backend Cooking orders English steps and durations, shows every read-only 
     const node = suggestion('one', { missing: [food('missing')], expired: [food('expired')], short: [{ ...food('short'), missingAmount: '1.000', unit: 'GRAM' }], unknown: [food('unknown')], assumedStaples: [food('salt')] });
     h.set({ detail: { id: 'one', status: 'ready', recipe, suggestion: node } });
     let tree = h.render(); h.start(); assert.equal(h.counts().get, 1);
-    assert.equal(nodes(tree, 'Screen')[0].props.rtl, language === 'ar');
+    assert(nodes(tree, 'View').some(n => n.props.style?.direction === (language === 'ar' ? 'rtl' : 'ltr')));
+    const segments = () => nodes(tree, 'Pressable').filter(n => n.props.testID === 'cook-progress-segment');
+    assert.equal(segments().length, 2);
+    assert.equal(nodes(tree, 'StepTimer')[0].props.minutes, 5, 'the current timed step offers a timer');
+    nodes(tree, 'Pressable').find(n => n.props.accessibilityRole === 'tab' && !n.props.accessibilityState.selected).props.onPress(); tree = h.render();
     for (const key of ['ENOUGH', 'MISSING', 'EXPIRED', 'UNKNOWN', 'ASSUMED', 'optional']) assert(JSON.stringify(tree).includes(messages[language][key]));
     assert(JSON.stringify(tree).includes(language === 'en' ? 'Short by 1 g' : 'ينقصك'));
+    nodes(tree, 'Pressable').find(n => n.props.accessibilityRole === 'tab' && !n.props.accessibilityState.selected).props.onPress(); tree = h.render();
     assert(nodes(tree, 'AppText').some(n => n.props.children === 'First English step.' && n.props.accessibilityLiveRegion === 'polite' && n.props.dir === 'ltr'));
     assert(nodes(tree, 'AppText').some(n => n.props.children === (language === 'en' ? '5 min' : '\u20665\u2069 دقيقة')));
-    assert.equal(nodes(tree, 'Chip')[0].props.selected, true);
+    assert.equal(segments()[0].props.accessibilityState.selected, true);
     assert.equal(nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].previous).props.disabled, true);
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].next).props.onPress(); tree = h.render();
     assert(nodes(tree, 'AppText').some(n => n.props.children === 'Second English step.' && n.props.accessibilityLiveRegion === 'polite'));
-    assert(!nodes(tree, 'SectionHeader').some(n => n.props.title === messages[language].ingredients));
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].previous).props.onPress();
     assert.equal(h.progress().current, 0); tree = h.render();
-    nodes(tree, 'Chip')[1].props.onPress(); tree = h.render();
+    segments()[1].props.onPress(); tree = h.render();
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].finish).props.onPress(); tree = h.render();
     assert.equal(h.progress().finished, true);
     nodes(tree, 'Button').find(n => n.props.label === cookedItMessages[language].yes).props.onPress();
