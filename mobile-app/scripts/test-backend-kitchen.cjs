@@ -169,7 +169,7 @@ function uiHarness() {
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
     if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: 'InventoryMetadataEditor' };
     if (id === 'react-native') return { ActivityIndicator: 'ActivityIndicator', View: 'View' };
-    if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText', 'ActionRow', 'Button', 'Card', 'Chip', 'EmptyState', 'PageHeader', 'Screen', 'SearchField', 'SectionHeader'].map(name => [name, name])), uiStyles: {} };
+    if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText', 'ActionRow', 'Button', 'Card', 'Chip', 'EmptyState', 'PageHeader', 'Screen', 'SearchField', 'SectionHeader', 'TextTabs'].map(name => [name, name])), uiStyles: {} };
     if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ ...state, dismissAdded, retry: () => { retryCount++; }, loadDetail: id => details.push(id) }) };
     if (id === '@/providers/inventory-provider') return { useInventory: () => local };
     if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
@@ -319,6 +319,19 @@ function homeLayoutHarness(backend, language = 'en', homePlan = { upcoming: [], 
   const nodes = (n, type) => Array.isArray(n) ? n.flatMap(x => nodes(x, type)) : !n || typeof n !== 'object' ? [] : [...(n.type === type ? [n] : []), ...nodes(n.props?.children, type)];
   return { render: () => { cursor = 0; return exported.default(); }, nodes, routes };
 }
+test('Home passes saved recipe photos to cards in English and Arabic', () => {
+  for (const language of ['en', 'ar']) {
+    const photo = 'https://example.com/saved-dish.jpg';
+    const h = homeLayoutHarness({ items: [], status: 'ready', today: '2026-06-02' }, language, {
+      upcoming: [], onList: [], recipes: [{ id: 'saved', householdId: 'house', name: 'Family dish', imageUrl: photo, servings: 2, prepTimeMin: 5, cookTimeMin: 10 }],
+    });
+    h.nodes(h.render(), 'RecipeTabs')[0].props.onChange('mine');
+    const card = h.nodes(h.render(), 'RecipeCard').find(node => node.props.id === 'saved');
+    assert.equal(card.props.image, photo);
+    card.props.onPress();
+    assert.equal(h.routes.at(-1).params.id, 'saved');
+  }
+});
 test('cookbook Home presents one sign-in action and no household content when signed out in EN/AR', () => {
   for (const lang of ['en','ar']) {
     const h = homeLayoutHarness(undefined, lang), tree = h.render();
@@ -372,14 +385,15 @@ test('unsupported labels remain visible; food details load from get, expose stoc
   h.set({ items: [{ ...item, readOnly: true, unitId: null, storageId: null, backendUnit: 'TABLESPOON', backendStorageLocation: 'COUNTER' }] });
   const row = h.nodes(h.render(), 'ActionRow')[0];
   assert.equal(row.props.subtitle, '1.25 tbsp · Counter');
-  assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'Counter'));
+  // Storage places are tabs now; the unsupported one still shows by its backend name.
+  assert(h.nodes(h.render(), 'TextTabs')[0].props.tabs.some(tab => tab.label === 'Counter'));
   assert.equal(row.props.trailing, undefined); // Shared ActionRow owns chevrons.
   h.language('ar');
   const arabic = h.nodes(h.render(), 'ActionRow')[0];
   assert.equal(arabic.props.subtitle, '\u20661.25\u2069 م.ك · على سطح العمل');
   assert.equal(arabic.props.subtitleDirection, 'rtl');
   assert.equal(arabic.props.trailing, undefined);
-  assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'على سطح العمل'));
+  assert(h.nodes(h.render(), 'TextTabs')[0].props.tabs.some(tab => tab.label === 'على سطح العمل'));
   h.language('en');
   h.render('BackendFoodDetailScreen'); h.effects.at(-1)(); assert.deepEqual(h.details, [item.id]);
   h.set({ detail: { id: item.id, status: 'ready', item } });

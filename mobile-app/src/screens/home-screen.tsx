@@ -54,9 +54,9 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   const upcoming = data.data?.upcoming ?? []; const onList = data.data?.onList ?? [];
   if (user && (kitchen.status === 'loading' && !kitchen.items.length || data.loading && !data.data)) return <AppSkeleton navigation={false} />;
   const time = (recipe: { prepTimeMin: number | null; cookTimeMin: number | null }) => { const m = recipeMinutes(recipe); return m === null ? null : `${m} ${c('min', 'دقيقة')}`; };
-  const card = (recipe: (typeof catalogue)[number]) => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time(recipe)} energy={energyLabel(recipe.nutrition, language)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? c(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={cardWidth} onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
+  const card = (recipe: (typeof catalogue)[number]) => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} image={recipe.imageUrl} time={time(recipe)} energy={energyLabel(recipe.nutrition, language)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? c(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={cardWidth} onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
   const browse = (key: string) => router.push({ pathname: '/feature', params: key === 'for-you' ? { feature: 'recipes' } : { feature: 'recipes', browse: key } });
-  return <Screen rtl={rtl} contentGap={28}>
+  return <Screen rtl={rtl} contentGap={36}>
     <View style={{ backgroundColor: colors.hero, marginHorizontal: -20, marginTop: -20, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 14, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
       <View style={uiStyles.row}><View style={{ flex: 1 }}><Brand kind="wordmark" height={32} /></View>
         <Pressable accessibilityRole="button" accessibilityLabel={c('Your account', 'حسابك')} onPress={() => feature('profile')} style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, opacity: pressed ? 0.8 : 1 })}><Icon name="profile" size={22} color={colors.text} /></Pressable></View>
@@ -81,7 +81,7 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
           {priority.slice(0, 2).map(item => <View key={item.id} style={uiStyles.row}>{ingredientImage(item.name) && <Image source={ingredientImage(item.name)} contentFit="cover" style={{ width: 36, height: 36, borderRadius: radii.sm }} />}<AppText variant="label" style={{ flex: 1 }}>{backendFoodName(item, language)} · {backendQuantityLabel(item, language)}</AppText></View>)}
           {priority.length > 0 && <AppText variant="caption" muted>{c('Based on dates you entered. Check food before use.', 'حسب التواريخ المسجلة. افحص الطعام قبل الاستخدام.')}</AppText>}
         </Pressable>
-        <View style={{ gap: spacing.sm }}>
+        <View style={{ gap: spacing.xs }}>
           <SectionHeader title={c('Recipes', 'الوصفات')} action={c('See all', 'عرض الكل')} onPress={() => browse(tab)} />
           <RecipeTabs tabs={[{ key: 'for-you', label: c('For you', 'لك') }, ...recipeTabs(catalogue, c)]} value={tab} onChange={setTab} rtl={rtl} />
           {tab === 'for-you' ? <BackendHomeRecipeIdeas kitchenStatus={kitchen.status} title={c('Tonight, sorted.', 'وجبة الليلة جاهزة.')} header={false} limit={6} />
@@ -89,13 +89,21 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
               {shown.length > 10 && <Button label={c(`See all ${shown.length} recipes`, `عرض كل الوصفات (${shown.length})`)} variant="secondary" onPress={() => browse(tab)} />}</View>}
         </View>
       </>}
-      <Card><SectionHeader title={c('Upcoming meals', 'الوجبات القادمة')} />
-        {upcoming.length ? upcoming.map(meal => row(meal.id, meal.recipeName, `${dayLabel(meal.mealDate)} · ${mealLabel(meal.mealType)} · ${Number(meal.servings)} ${c('servings', 'حصص')}`, () => router.push({ pathname: '/recipes/[id]', params: { id: meal.recipeId } }), meal.recipeId)) : <AppText muted>{c('A little room for something good.', 'مساحة لوجبة لذيذة.')}</AppText>}
-        {upcoming.length > 0 && <Button label={c('Add ingredients to shopping list', 'أضف المكونات إلى قائمة المشتريات')} icon="shopping" disabled={shop.busy} onPress={() => { void addUpcoming(); }} />}
-        <Feedback message={shop.message ?? shopNote} />
-        <Button label={c('Plan a meal', 'خطط لوجبة')} variant="secondary" onPress={() => router.navigate('/plan')} /></Card>
-      {onList.length > 0 && <Card><SectionHeader title={c('In your shopping list', 'في قائمة مشترياتك')} action={c('View list', 'عرض القائمة')} onPress={() => feature('shopping')} />
-        {onList.map(recipe => row(recipe.id, recipe.name, c(`${recipe.onList} of ${recipe.total} ingredients on your list`, `${recipe.onList} من ${recipe.total} مكونات في قائمتك`), () => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } }), recipe.id))}</Card>}
+      {/* A heading sits above its card, never inside it: the card holds the content, the heading names it. */}
+      <View style={{ gap: spacing.md }}>
+        <SectionHeader title={c('Upcoming meals', 'الوجبات القادمة')} action={c('Plan', 'خطط')} onPress={() => router.navigate('/plan')} />
+        <Card style={{ gap: spacing.xs, paddingVertical: spacing.sm }}>
+          {upcoming.length ? upcoming.map(meal => row(meal.id, meal.recipeName, `${dayLabel(meal.mealDate)} · ${mealLabel(meal.mealType)} · ${Number(meal.servings)} ${c('servings', 'حصص')}`, () => router.push({ pathname: '/recipes/[id]', params: { id: meal.recipeId } }), meal.recipeId))
+            : <View style={{ gap: spacing.sm, paddingVertical: spacing.sm }}><AppText muted>{c('A little room for something good.', 'مساحة لوجبة لذيذة.')}</AppText>
+              <Button label={c('Plan a meal', 'خطط لوجبة')} variant="secondary" onPress={() => router.navigate('/plan')} /></View>}
+          {upcoming.length > 0 && <View style={{ alignItems: 'flex-start', paddingTop: spacing.xs }}><Button label={c('Add ingredients to shopping list', 'أضف المكونات إلى قائمة المشتريات')} icon="shopping" variant="text" disabled={shop.busy} onPress={() => { void addUpcoming(); }} /></View>}
+          <Feedback message={shop.message ?? shopNote} />
+        </Card>
+      </View>
+      {onList.length > 0 && <View style={{ gap: spacing.md }}>
+        <SectionHeader title={c('In your shopping list', 'في قائمة مشترياتك')} action={c('View list', 'عرض القائمة')} onPress={() => feature('shopping')} />
+        <Card style={{ gap: spacing.xs, paddingVertical: spacing.sm }}>{onList.map(recipe => row(recipe.id, recipe.name, c(`${recipe.onList} of ${recipe.total} ingredients on your list`, `${recipe.onList} من ${recipe.total} مكونات في قائمتك`), () => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } }), recipe.id))}</Card>
+      </View>}
     </>}
   </Screen>;
 }

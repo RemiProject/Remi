@@ -3,7 +3,7 @@ import { recipeName } from '@/i18n/recipe-names';
 import { catalogLabel } from '@/i18n/catalog-labels';
 import { useEffect, useMemo, useState } from 'react';
 import { Image } from 'expo-image';
-import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
+import { Pressable, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, cubicBezier, useReducedMotion } from 'react-native-reanimated';
 import { AppText } from '@/components/ui/core';
 import { Icon } from '@/components/ui/icon';
@@ -91,18 +91,8 @@ function GridEntrance({ index, animate, children }: { index: number; animate: bo
   return <Animated.View entering={animate ? entering : undefined}>{children}</Animated.View>;
 }
 
-/** Text tabs with a hot-pink dot on the selected one; scrolls sideways when the cuisines run long. */
-export function RecipeTabs({ tabs, value, onChange, rtl }: { tabs: readonly { key: string; label: string }[]; value: string; onChange: (key: string) => void; rtl?: boolean }) {
-  const { colors } = useRemyTheme();
-  return <ScrollView horizontal showsHorizontalScrollIndicator={false} accessibilityRole="tablist" style={{ marginHorizontal: -20, direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ paddingHorizontal: 20, gap: 20 }}>
-    {tabs.map(tab => { const selected = tab.key === value;
-      return <Pressable key={tab.key} accessibilityRole="tab" accessibilityState={{ selected }} onPress={() => onChange(tab.key)} hitSlop={6}
-        style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: selected ? colors.accent : 'transparent' }} />
-        <AppText variant={selected ? 'label' : 'body'} style={{ color: selected ? colors.text : colors.textSecondary }}>{tab.label}</AppText>
-      </Pressable>; })}
-  </ScrollView>;
-}
+/** The cookbook's tabs are the shared text tabs. */
+export { TextTabs as RecipeTabs } from '@/components/ui/core';
 
 /** All, Quick, High protein, Under 500 kcal (when `min` recipes qualify), then the most common cuisines, most common first. */
 export function recipeTabs(recipes: readonly { cuisineName?: string | null; nutrition?: RecipeNutrition | null; householdId?: string | null }[], copy: (en: string, ar: string) => string, max = 6, min = 5) {

@@ -99,7 +99,8 @@ export function EmptyState({ title, description, action, onPress }: { title: str
     {action && onPress && <Button label={action} onPress={onPress} />}
   </View>;
 }
-export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleStyle, subtitleDirection, rtl, children, onPress, disabled = false, divider = false, accessibilityLabel }: PropsWithChildren<{
+export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleStyle, subtitleDirection, rtl, children, onPress, disabled = false, divider = false, dense = false, accessibilityLabel }: PropsWithChildren<{
+  /** Tighter vertical padding for long lists of items, such as the kitchen. */ dense?: boolean;
   title: string; subtitle?: string; icon?: IconName; leading?: React.ReactNode; trailing?: React.ReactNode; subtitleStyle?: TextProps['style']; subtitleDirection?: 'rtl' | 'ltr'; rtl?: boolean; onPress?: () => void; disabled?: boolean; divider?: boolean; accessibilityLabel?: string;
 }>) {
   const { colors } = useRemyTheme();
@@ -109,9 +110,9 @@ export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleSt
   const captionStyle: TextProps['style'] = { textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' };
   return <Pressable accessibilityRole={onPress ? 'button' : undefined} accessibilityState={{ disabled }} accessibilityLabel={accessibilityLabel}
     disabled={disabled || !onPress} onPress={onPress} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-    style={({ pressed }) => ({ padding: spacing.lg, minHeight: layout.minTouchTarget, backgroundColor: pressed ? colors.pressedSurface : colors.surface,
+    style={({ pressed }) => ({ padding: spacing.lg, paddingVertical: dense ? spacing.md : spacing.lg, minHeight: layout.minTouchTarget, backgroundColor: pressed ? colors.pressedSurface : colors.surface,
       borderRadius: radii.md, borderWidth: 2, borderColor: focused ? colors.focusBorder : 'transparent', ...(rtl !== undefined ? { direction: rtl ? 'rtl' : 'ltr' } : {}) })}>
-    {divider && <View style={{ height: 1, backgroundColor: colors.divider, marginTop: -spacing.lg, marginBottom: spacing.lg }} />}
+    {divider && <View style={{ height: 1, backgroundColor: colors.divider, marginTop: dense ? -spacing.md : -spacing.lg, marginBottom: dense ? spacing.md : spacing.lg }} />}
     <View style={uiStyles.row}>{leading ?? (icon && <Icon name={icon} color={colors.textSecondary} size={20} />)}
       <View style={[uiStyles.grow, { gap: spacing.xs }]}><AppText variant="label" style={{ color: disabled ? colors.textSecondary : colors.text, textAlign: rtl === undefined ? 'auto' : rtl ? 'right' : 'left' }}>{title}</AppText>
         {subtitle && <AppText variant="caption" muted dir={subtitleDirection} style={subtitleStyle ? [captionStyle, subtitleStyle] : captionStyle}>{subtitle}</AppText>}{children}
@@ -119,6 +120,19 @@ export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleSt
     </View>
   </Pressable>;
 }
+/** Text tabs with a hot-pink dot on the selected one; scrolls sideways when the cuisines run long. */
+export function TextTabs({ tabs, value, onChange, rtl }: { tabs: readonly { key: string; label: string }[]; value: string; onChange: (key: string) => void; rtl?: boolean }) {
+  const { colors } = useRemyTheme();
+  return <ScrollView horizontal showsHorizontalScrollIndicator={false} accessibilityRole="tablist" style={{ marginHorizontal: -20, direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ paddingHorizontal: 20, gap: 20 }}>
+    {tabs.map(tab => { const selected = tab.key === value;
+      return <Pressable key={tab.key} accessibilityRole="tab" accessibilityState={{ selected }} onPress={() => onChange(tab.key)} hitSlop={6}
+        style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: selected ? colors.accent : 'transparent' }} />
+        <AppText variant={selected ? 'label' : 'body'} style={{ color: selected ? colors.text : colors.textSecondary }}>{tab.label}</AppText>
+      </Pressable>; })}
+  </ScrollView>;
+}
+
 export const uiStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

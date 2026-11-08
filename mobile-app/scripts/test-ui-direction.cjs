@@ -82,7 +82,7 @@ test('real React Native Web markup gives Arabic inventory paragraphs an explicit
 });
 test('English inventory labels and paragraphs stay unchanged', () => {
   const { html, load } = fixture('en');
-  for (const line of ['0.75 kg · Pantry', '2 pieces · Refrigerator', '2 tbsp · Counter', 'Days until expiration: 29']) assert(html.includes(line), line);
+  for (const line of ['0.75 kg · Pantry', '2 pieces · Refrigerator', '2 tbsp · Counter', '29 days left']) assert(html.includes(line), line);
   assert.equal(load('utils/backend-kitchen-view.ts').backendQuantityLabel({ quantity: '1.250', unitId: 'kg' }, 'en'), '1.25 kg');
 });
 test('explicit paragraph direction is opt-in; shared text without it keeps the existing default', () => {
