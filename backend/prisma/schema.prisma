@@ -129,6 +129,7 @@ model Food {
   InventoryItem             InventoryItem[]
   MealItem                  MealItem[]
   nutrition                 NutritionProfile?
+  shelfLife                 FoodShelfLife?
   products                  Product[]
   PurchaseOrderItem         PurchaseOrderItem[]
   RecipeIngredient          RecipeIngredient[]
@@ -395,6 +396,7 @@ model InventoryItem {
   purchaseDate         DateTime?              @db.Date
   openedDate           DateTime?              @db.Date
   estimatedExpiryAt    DateTime?              @db.Timestamptz(6)
+  expiryEstimated      Boolean                @default(false)
   freshnessScore       Decimal?               @db.Decimal(4, 3)
   version              Int                    @default(1)
   archivedAt           DateTime?              @db.Timestamptz(6)
@@ -1499,4 +1501,21 @@ model AIRecommendationReason {
 
   @@unique([recommendationId, code], map: "AIRecommendationReason_recommendation_code_uq")
   @@map("AIRecommendationReason")
+}
+
+/// Average shelf life of a fresh food per storage place, from USDA FSIS FoodKeeper.
+model FoodShelfLife {
+  foodId               String   @id @db.Uuid
+  foodkeeperId         Int
+  roomMinDays          Int?
+  roomMaxDays          Int?
+  ripensAtRoomTemp     Boolean  @default(false)
+  fridgeMinDays        Int?
+  fridgeMaxDays        Int?
+  freezerMinDays       Int?
+  freezerMaxDays       Int?
+  freezeNotRecommended Boolean  @default(false)
+  source               String
+  updatedAt            DateTime @default(now()) @db.Timestamptz(6)
+  food                 Food     @relation(fields: [foodId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

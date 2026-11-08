@@ -2,7 +2,7 @@ import { kitchenRequest } from './kitchen-api';
 import type { ReceiptLineMatch, Storage } from '@/domain/receipt-review';
 import type { ReceiptUnit } from '@/domain/receipt-parser';
 
-const option = 'foodId name arabicName categoryCode categoryName defaultUnit gramsPerPiece storageLocation score';
+const option = 'foodId name arabicName categoryCode categoryName defaultUnit gramsPerPiece storageLocation keeps { counter fridge freezer ripensAtRoomTemp } score';
 const matchQuery = `query MatchReceiptItems($names: [String!]!) { matchReceiptItems(names: $names) { query confidence food { ${option} } alternatives { ${option} } inKitchen { quantity unit } } }`;
 const receiveMutation = 'mutation ReceiveReceipt($input: ReceiveReceiptInput!) { receiveReceipt(input: $input) { added replayed items { foodId inventoryItemId quantity unit } } }';
 

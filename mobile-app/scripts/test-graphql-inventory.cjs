@@ -112,9 +112,10 @@ test('list excludes all zero formats, retains exact positive quantities and omit
   assert.equal(result.length, 1);
   assert.deepEqual(result[0], {
     id: 'positive', foodId: 'tomato', name: 'Tomato', quantity: '0.001', unitId: 'kg', storageId: 'refrigerator',
-    backendUnit: 'KILOGRAM', backendStorageLocation: 'FRIDGE', readOnly: false, expirationDate: null, version: 2,
+    backendUnit: 'KILOGRAM', backendStorageLocation: 'FRIDGE', readOnly: false, expirationDate: null, expiryEstimated: false, purchaseDate: null, version: 2,
   });
-  for (const field of ['notes', 'photo', 'photoRef', 'categoryId', 'purchaseDate', 'createdAt', 'updatedAt']) assert.equal(Object.hasOwn(result[0], field), false);
+  for (const field of ['notes', 'photo', 'photoRef', 'categoryId', 'createdAt', 'updatedAt']) assert.equal(Object.hasOwn(result[0], field), false);
+  assert.equal(result[0].purchaseDate, null); // passed through from the backend, never invented
 });
 
 for (const unit of ['TABLESPOON', 'TEASPOON']) {

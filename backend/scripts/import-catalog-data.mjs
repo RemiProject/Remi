@@ -134,6 +134,43 @@ try {
     }
   });
 
+  // Shelf life: FoodKeeper rows (copied unchanged) and the catalogue mapping. Ranges become whole days.
+  const keeper = new Map();
+  try {
+    const lines = (await readFile(join(dir, 'foodkeeper-produce.psv'), 'utf8')).split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+    const header = lines[0].split('|');
+    for (const line of lines.slice(1)) { const cells = line.split('|'); keeper.set(Number(cells[0]), Object.fromEntries(header.map((h, i) => [h, (cells[i] ?? '').trim()]))); }
+  } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const DAYS = { Days: 1, Weeks: 7, Months: 30, Years: 365 };
+  /** The DOP ("from date of purchase") range when given, otherwise the plain one; null when FoodKeeper has no number. */
+  const range = (row, key) => {
+    for (const prefix of [`DOP_${key}`, key]) {
+      const min = Number(row[`${prefix}_Min`]), max = Number(row[`${prefix}_Max`]), unit = DAYS[row[`${prefix}_Metric`]];
+      if (min > 0 && max >= min && unit) return [Math.round(min * unit), Math.round(max * unit)];
+    }
+    return [null, null];
+  };
+  const said = (row, key, text) => [row[`${key}_Metric`], row[`DOP_${key}_Metric`]].includes(text);
+  await eachRow('shelf-life.csv', await load('shelf-life.csv'), async (r) => {
+    const id = Number(r.foodkeeper_id);
+    const row = keeper.get(id) ?? fail(`foodkeeper_id ${r.foodkeeper_id} is not in foodkeeper-produce.psv`);
+    const room = range(row, 'Pantry'), fridge = range(row, 'Refrigerate'), freezer = range(row, 'Freeze');
+    await q(`INSERT INTO "FoodShelfLife" ("foodId", "foodkeeperId", "roomMinDays", "roomMaxDays", "ripensAtRoomTemp", "fridgeMinDays", "fridgeMaxDays", "freezerMinDays", "freezerMaxDays", "freezeNotRecommended", source)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ON CONFLICT ("foodId") DO UPDATE SET "foodkeeperId" = EXCLUDED."foodkeeperId", "roomMinDays" = EXCLUDED."roomMinDays", "roomMaxDays" = EXCLUDED."roomMaxDays",
+        "ripensAtRoomTemp" = EXCLUDED."ripensAtRoomTemp", "fridgeMinDays" = EXCLUDED."fridgeMinDays", "fridgeMaxDays" = EXCLUDED."fridgeMaxDays",
+        "freezerMinDays" = EXCLUDED."freezerMinDays", "freezerMaxDays" = EXCLUDED."freezerMaxDays", "freezeNotRecommended" = EXCLUDED."freezeNotRecommended", source = EXCLUDED.source, "updatedAt" = now()`,
+      [await food(r.food), id, ...room, said(row, 'Pantry', 'When Ripe'), ...fridge, ...freezer, said(row, 'Freeze', 'Not Recommended'),
+        `USDA FSIS FoodKeeper v128, product ${id} (${row.Name}${row.Name_subtitle ? `: ${row.Name_subtitle}` : ''})`]);
+  });
+  // Food already in kitchens with no expiry gets the same estimate a new purchase would. Dates people entered stay.
+  const backfilled = await q(`UPDATE "InventoryItem" i SET "estimatedExpiryAt" = (coalesce(i."purchaseDate", i."createdAt"::date) + est.days) + time '12:00', "expiryEstimated" = true
+    FROM (SELECT i2.id, round((CASE i2."storageLocation" WHEN 'FRIDGE' THEN s."fridgeMinDays" + s."fridgeMaxDays" WHEN 'FREEZER' THEN s."freezerMinDays" + s."freezerMaxDays"
+            WHEN 'PANTRY' THEN s."roomMinDays" + s."roomMaxDays" WHEN 'COUNTER' THEN s."roomMinDays" + s."roomMaxDays" END) / 2.0)::int AS days
+          FROM "InventoryItem" i2 JOIN "FoodShelfLife" s ON s."foodId" = i2."foodId") est
+    WHERE est.id = i.id AND est.days IS NOT NULL AND i."estimatedExpiryAt" IS NULL AND i."archivedAt" IS NULL AND i.quantity > 0 RETURNING i.id`);
+  counts['expiry estimates filled'] = backfilled.length;
+
   const recipeIds = new Map();
   await eachRow('recipes.csv', await load('recipes.csv'), async (r) => {
     if (!r.recipe_key || !r.name) fail('recipe_key and name are required');

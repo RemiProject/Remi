@@ -308,9 +308,11 @@ type InventoryConnectionType {
 
 type InventoryItemDetailType {
   estimatedExpiryAt: DateTime
+  expiryEstimated: Boolean!
   foodId: ID!
   foodName: String!
   id: ID!
+  purchaseDate: LocalDate
   quantity: Decimal!
   storageLocation: StorageLocation!
   transactions: InventoryTransactionConnectionType!
@@ -320,9 +322,11 @@ type InventoryItemDetailType {
 
 type InventoryItemType {
   estimatedExpiryAt: DateTime
+  expiryEstimated: Boolean!
   foodId: ID!
   foodName: String!
   id: ID!
+  purchaseDate: LocalDate
   quantity: Decimal!
   storageLocation: StorageLocation!
   unit: Unit!
@@ -878,6 +882,7 @@ type ReceiptFoodOptionType {
   defaultUnit: Unit!
   foodId: ID!
   gramsPerPiece: Decimal
+  keeps: ReceiptKeepsType
   name: String!
   score: Float!
   storageLocation: StorageLocation!
@@ -889,6 +894,13 @@ input ReceiptItemInput {
   foodId: ID!
   storageLocation: StorageLocation!
   unit: Unit!
+}
+
+type ReceiptKeepsType {
+  counter: Int
+  freezer: Int
+  fridge: Int
+  ripensAtRoomTemp: Boolean!
 }
 
 type ReceiptLineMatchType {

@@ -8,6 +8,15 @@ import { StorageLocation } from '@/modules/inventory/storage-location.js';
 export enum ReceiptMatchConfidence { HIGH = 'HIGH', MEDIUM = 'MEDIUM', NONE = 'NONE' }
 registerEnumType(ReceiptMatchConfidence, { name: 'ReceiptMatchConfidence' });
 
+/** Average days a fresh food keeps in each place (USDA FoodKeeper); null where FoodKeeper gives no figure. */
+@ObjectType()
+export class ReceiptKeepsType {
+  @Field(() => Int, { nullable: true }) counter!: number | null;
+  @Field(() => Int, { nullable: true }) fridge!: number | null;
+  @Field(() => Int, { nullable: true }) freezer!: number | null;
+  @Field() ripensAtRoomTemp!: boolean;
+}
+
 @ObjectType()
 export class ReceiptFoodOptionType {
   @Field(() => ID) foodId!: string;
@@ -18,6 +27,7 @@ export class ReceiptFoodOptionType {
   @Field(() => Unit) defaultUnit!: Unit;
   @Field(() => DecimalScalar, { nullable: true }) gramsPerPiece!: string | null;
   @Field(() => StorageLocation) storageLocation!: StorageLocation;
+  @Field(() => ReceiptKeepsType, { nullable: true }) keeps!: ReceiptKeepsType | null;
   @Field(() => Float) score!: number;
 }
 

@@ -4,6 +4,8 @@ export type Storage = 'FRIDGE' | 'FREEZER' | 'PANTRY' | 'COUNTER';
 export interface ReceiptFoodOption {
   foodId: string; name: string; arabicName: string | null; categoryCode: string; categoryName: string;
   defaultUnit: string; gramsPerPiece: string | null; storageLocation: Storage; score: number;
+  /** Average days it keeps in each place (USDA FoodKeeper); null for foods without shelf-life data. */
+  keeps?: { counter: number | null; fridge: number | null; freezer: number | null; ripensAtRoomTemp: boolean } | null;
 }
 export interface ReceiptLineMatch {
   query: string; confidence: 'HIGH' | 'MEDIUM' | 'NONE'; food: ReceiptFoodOption | null;
@@ -56,6 +58,19 @@ export function groupByCategory(lines: readonly ReviewLine[]) {
     group.lines.push(line); groups.set(group.code, group);
   }
   return { groups: [...groups.values()], unmatched: lines.filter(line => !line.food) };
+}
+
+/**
+ * The probable expiry day for a line, as the server will store it: purchase day plus the average days for the
+ * chosen storage. "ripens" when it should sit on the counter until ripe; null when there is no figure.
+ */
+export function probableExpiry(line: Pick<ReviewLine, 'food' | 'storage'>, purchaseDay: string): { day: string; days: number } | 'ripens' | null {
+  const keeps = line.food?.keeps;
+  if (!keeps) return null;
+  const days = line.storage === 'FRIDGE' ? keeps.fridge : line.storage === 'FREEZER' ? keeps.freezer : keeps.counter;
+  if (days === null || days === undefined) return keeps.ripensAtRoomTemp && (line.storage === 'COUNTER' || line.storage === 'PANTRY') ? 'ripens' : null;
+  const [y, m, d] = purchaseDay.split('-').map(Number);
+  return { day: new Date(Date.UTC(y, m - 1, d + days, 12)).toISOString().slice(0, 10), days };
 }
 
 export const amountValid = (amount: string) => /^\d+(?:\.\d{1,3})?$/.test(amount.trim()) && Number(amount) > 0;

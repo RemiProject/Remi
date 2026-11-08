@@ -9,7 +9,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
 import { parseReceipt, type ReceiptParse } from '@/domain/receipt-parser';
-import { amountValid, buildReview, groupByCategory, RECEIPT_UNITS, submission, withFood, type ReceiptFoodOption, type ReviewLine, type Storage } from '@/domain/receipt-review';
+import { amountValid, buildReview, groupByCategory, probableExpiry, RECEIPT_UNITS, submission, withFood, type ReceiptFoodOption, type ReviewLine, type Storage } from '@/domain/receipt-review';
 import { matchReceiptItems, receiveReceipt } from '@/services/receipt-api';
 import { scanReceipt } from '@/services/receipt-ocr';
 import { uploadKitchenImage } from '@/services/intake-media';
@@ -21,7 +21,8 @@ import { isBackendInventoryEnabled } from '@/services/inventory-feature';
 import { IntakeShell, intakeError } from './intake-shell';
 
 type Language = 'en' | 'ar';
-const STORAGES: Storage[] = ['FRIDGE', 'FREEZER', 'PANTRY', 'COUNTER'];
+// The app edits these three; room temperature is Pantry.
+const STORAGES: Storage[] = ['FRIDGE', 'FREEZER', 'PANTRY'];
 const newKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 const foodName = (food: ReceiptFoodOption, language: Language) => language === 'ar' && food.arabicName ? food.arabicName : food.name.charAt(0).toUpperCase() + food.name.slice(1);
 
@@ -143,13 +144,13 @@ function ReviewView({ parse, lines, setLines, busy, adding, error, notice, langu
 
     {groups.map(group => <View key={group.code} style={{ gap: spacing.sm }}>
       <SectionHeader title={category(group.code, group.name)} />
-      {group.lines.map(line => <ReviewRow key={line.key} line={line} language={language} disabled={busy} onChange={change => update(line.key, change)} />)}
+      {group.lines.map(line => <ReviewRow key={line.key} line={line} language={language} disabled={busy} purchaseDay={parse.date ?? todayDay()} onChange={change => update(line.key, change)} />)}
     </View>)}
 
     {unmatched.length > 0 && <View style={{ gap: spacing.sm }}>
       <SectionHeader title={t.unmatched} />
       <AppText muted>{t.unmatchedHint}</AppText>
-      {unmatched.map(line => <ReviewRow key={line.key} line={line} language={language} disabled={busy} onChange={change => update(line.key, change)} />)}
+      {unmatched.map(line => <ReviewRow key={line.key} line={line} language={language} disabled={busy} purchaseDay={parse.date ?? todayDay()} onChange={change => update(line.key, change)} />)}
     </View>}
 
     {skipped.length > 0 && <View style={{ gap: spacing.sm }}>
@@ -167,7 +168,7 @@ function ReviewView({ parse, lines, setLines, busy, adding, error, notice, langu
   </>;
 }
 
-function ReviewRow({ line, language, disabled, onChange }: { line: ReviewLine; language: Language; disabled: boolean; onChange: (change: (line: ReviewLine) => ReviewLine) => void }) {
+function ReviewRow({ line, language, disabled, purchaseDay, onChange }: { line: ReviewLine; language: Language; disabled: boolean; purchaseDay: string; onChange: (change: (line: ReviewLine) => ReviewLine) => void }) {
   const t = receiptReviewCopy[language];
   const { colors } = useRemyTheme();
   const [searching, setSearching] = useState(false);
@@ -195,6 +196,7 @@ function ReviewRow({ line, language, disabled, onChange }: { line: ReviewLine; l
     {line.check && <View style={{ alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: radii.pill, backgroundColor: colors.warningSurface }}>
       <AppText variant="caption" style={{ color: colors.warningText }}>{t.check}</AppText>
     </View>}
+    {line.food && line.include && line.food.keeps && <ExpiryHint line={line} purchaseDay={purchaseDay} language={language} />}
     {line.food && line.include && <AppText variant="caption" muted>{have.length ? t.inKitchen(have.map(stock => `${Number(stock.quantity).toLocaleString(language)} ${t.units[stock.unit as keyof typeof t.units] ?? stock.unit}`).join(' + ')) : t.newFood}</AppText>}
 
     {open && <>
@@ -211,6 +213,17 @@ function ReviewRow({ line, language, disabled, onChange }: { line: ReviewLine; l
         <Button label={line.food ? t.changeFood : t.chooseFood} variant="text" disabled={disabled} onPress={() => setSearching(true)} />
       </View>}
   </Card>;
+}
+
+const todayDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+
+/** The probable expiry for the storage picked, from USDA FoodKeeper averages; it moves when storage changes. */
+function ExpiryHint({ line, purchaseDay, language }: { line: ReviewLine; purchaseDay: string; language: Language }) {
+  const t = receiptReviewCopy[language];
+  const expiry = probableExpiry(line, purchaseDay);
+  const text = expiry === 'ripens' ? t.ripens : expiry === null ? t.noShelfLife
+    : t.keepsUntil(new Date(`${expiry.day}T12:00:00`).toLocaleDateString(language, { day: 'numeric', month: 'short' }), expiry.days);
+  return <AppText variant="caption" muted>{text}</AppText>;
 }
 
 function FoodSearch({ initial, first, language, onPick, onSkip, onClose }: {

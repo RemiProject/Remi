@@ -25,7 +25,7 @@ export function suggestedStorage(categoryCode: string, name: string): StorageLoc
   switch (categoryCode) {
     case 'DAIRY': case 'MEAT': case 'POULTRY': case 'FISH': case 'EGGS': case 'SOY': return StorageLocation.FRIDGE;
     case 'VEGETABLES': return DRY_VEGETABLES.test(name) ? StorageLocation.PANTRY : StorageLocation.FRIDGE;
-    case 'FRUITS': return FRIDGE_FRUIT.test(name) ? StorageLocation.FRIDGE : StorageLocation.COUNTER;
+    case 'FRUITS': return FRIDGE_FRUIT.test(name) ? StorageLocation.FRIDGE : StorageLocation.PANTRY; // room temperature
     case 'BEVERAGES': case 'CONDIMENTS': return FRIDGE_OTHER.test(name) ? StorageLocation.FRIDGE : StorageLocation.PANTRY;
     default: return StorageLocation.PANTRY;
   }

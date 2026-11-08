@@ -22,7 +22,7 @@ describe('suggestedStorage', () => {
     expect(suggestedStorage('VEGETABLES', 'tomato')).toBe('FRIDGE');
     expect(suggestedStorage('VEGETABLES', 'onion')).toBe('PANTRY');
     expect(suggestedStorage('VEGETABLES', 'frozen spinach')).toBe('FREEZER');
-    expect(suggestedStorage('FRUITS', 'banana')).toBe('COUNTER');
+    expect(suggestedStorage('FRUITS', 'banana')).toBe('PANTRY');
     expect(suggestedStorage('FRUITS', 'strawberry')).toBe('FRIDGE');
     expect(suggestedStorage('GRAINS', 'basmati rice')).toBe('PANTRY');
     expect(suggestedStorage('SWEETS', 'chocolate ice cream')).toBe('FREEZER');

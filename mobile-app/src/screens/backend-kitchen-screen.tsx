@@ -28,7 +28,7 @@ function Expiry({ item }: { item: InventoryReadItem }) {
   const { today } = useBackendKitchen();
   const { language, t } = useLabels();
   const days = backendExpiryDays(item, today);
-  return <AppText variant="caption" muted dir={language === 'ar' ? 'rtl' : undefined}>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : `${t.days} ${inventoryNumberLabel(days.toLocaleString(language), language)}`}</AppText>;
+  return <AppText variant="caption" muted dir={language === 'ar' ? 'rtl' : undefined}>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : `${t.days} ${item.expiryEstimated ? `${t.about} ` : ''}${inventoryNumberLabel(days.toLocaleString(language), language)}`}</AppText>;
 }
 export function BackendKitchenState({ detail = false, retry }: { detail?: boolean; retry?: () => void }) {
   const state = useBackendKitchen();
@@ -127,6 +127,8 @@ export function BackendFoodDetailScreen() {
     <BackendKitchenState detail retry={() => { void loadDetail(id); }} />
     {item && <><PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} />
       <Card><AppText>{t.storage}: {backendStorageLabel(item, language)}</AppText><AppText>{t.expiry}: {item.expirationDate ?? t.unknown}</AppText><Expiry item={item} />
+        {item.expiryEstimated && <AppText variant="caption" muted>{t.estimated}</AppText>}
+        {item.purchaseDate && <AppText variant="caption" muted>{t.bought}: {item.purchaseDate}</AppText>}
         {item.readOnly && <AppText muted>{t.readOnly}</AppText>}</Card>
       <BackendStockActions key={`${owner}:${id}`} item={item} />
       <InventoryMetadataEditor key={`${id}:${item.version}`} item={item} />

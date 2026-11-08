@@ -250,4 +250,15 @@ test('review: confident matches are included, guesses are flagged, unknown lines
   assert.equal(withFood(lines[0], null).include, false);
 });
 
+test('probable expiry follows the chosen storage, from USDA averages', () => {
+  const { probableExpiry } = require('../src/domain/receipt-review.ts');
+  const apple = { foodId: 'a', keeps: { counter: 21, fridge: 35, freezer: 240, ripensAtRoomTemp: false } };
+  const banana = { foodId: 'b', keeps: { counter: null, fridge: 3, freezer: 75, ripensAtRoomTemp: true } };
+  assert.deepEqual(probableExpiry({ food: apple, storage: 'FRIDGE' }, '2026-11-08'), { day: '2026-12-13', days: 35 });
+  assert.deepEqual(probableExpiry({ food: apple, storage: 'COUNTER' }, '2026-11-08'), { day: '2026-11-29', days: 21 });
+  assert.equal(probableExpiry({ food: banana, storage: 'COUNTER' }, '2026-11-08'), 'ripens');
+  assert.deepEqual(probableExpiry({ food: banana, storage: 'FRIDGE' }, '2026-11-08'), { day: '2026-11-11', days: 3 });
+  assert.equal(probableExpiry({ food: { foodId: 'c', keeps: null }, storage: 'FRIDGE' }, '2026-11-08'), null);
+});
+
 console.log(`receipt parser: ${passed} passed`);

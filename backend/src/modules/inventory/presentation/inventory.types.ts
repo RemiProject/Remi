@@ -57,6 +57,9 @@ export class InventoryItemType {
   @Field(() => Unit) unit!: Unit;
   @Field(() => StorageLocation) storageLocation!: StorageLocation;
   @Field(() => Date, { nullable: true }) estimatedExpiryAt!: Date | null;
+  /** True when Remi estimated the expiry from USDA FoodKeeper shelf-life averages; false when a person set it. */
+  @Field() expiryEstimated!: boolean;
+  @Field(() => LocalDateScalar, { nullable: true }) purchaseDate!: string | null;
   @Field(() => Int) version!: number;
 }
 

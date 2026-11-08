@@ -29,6 +29,9 @@ export interface BackendInventoryItem {
   unit: BackendUnit;
   storageLocation: BackendStorageLocation;
   estimatedExpiryAt: string | null;
+  /** True when the expiry is Remi's estimate from USDA FoodKeeper averages, not a date someone entered. */
+  expiryEstimated?: boolean;
+  purchaseDate?: string | null;
   version: number;
 }
 

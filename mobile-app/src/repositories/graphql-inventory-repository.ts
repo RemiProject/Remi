@@ -7,7 +7,7 @@ import { isBackendInventoryEnabled } from '../services/inventory-feature';
 import type { BackendInventoryReadRepository, BackendInventoryRepository } from './backend-inventory-repository';
 
 type Auth = Pick<ReturnType<typeof createAuthService>, 'authenticatedGraphql' | 'getIdentityContext' | 'getIdentityRevision'>;
-const itemFields = 'id foodId foodName quantity unit storageLocation estimatedExpiryAt version';
+const itemFields = 'id foodId foodName quantity unit storageLocation estimatedExpiryAt expiryEstimated purchaseDate version';
 export const inventoryReadOperations = {
   list: `query Inventory($first: Int!, $after: String) { inventory(first: $first, after: $after) { nodes { ${itemFields} } hasNextPage endCursor } }`,
   get: `query InventoryItem($id: ID!) { inventoryItem(id: $id) { ${itemFields} transactions { nodes { id eventId movementType quantityDelta balanceAfter createdAt } hasNextPage endCursor } } }`,

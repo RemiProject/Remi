@@ -273,6 +273,19 @@ Remi used to read a receipt photo as plain text, and the person picked one line 
 - **Review screen:** foods grouped by category, each showing its receipt line, the amount, a suggested storage place and what you already have, all editable.
 - **Not done:** Android layout-aware OCR, expiry dates and price history (reasons in the doc).
 
+### 19. Probable expiry dates
+Source, method and checks: [`docs/shelf-life.md`](docs/shelf-life.md).
+
+- **What it does:** every fresh fruit or vegetable added to the kitchen gets its purchase day and a probable expiry date. The date is the average USDA FoodKeeper shelf life for where the food is kept.
+- **Coverage:** 130 catalogue foods are mapped to FoodKeeper rows, with the source rows kept unchanged.
+- **Honest gaps:** "When ripe" fruit at room temperature and foods where freezing isn't recommended get no date rather than an invented one.
+- **Moving food:** moving an estimated batch re-estimates it.
+- **People's dates:** a date someone types always wins.
+- **In the app:**
+  - **Receipt review:** each food shows "Probably good until …".
+  - **Kitchen:** estimated dates are marked "about" and explained on the food page.
+  - **Everything sorted by expiry** (Use first, recipe suggestions, first-expiring-first-used) now covers produce.
+
 ## Design archive
 
 `Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.

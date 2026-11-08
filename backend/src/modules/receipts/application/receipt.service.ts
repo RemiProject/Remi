@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { DomainError } from '@/shared/domain-error.js';
+import { StorageLocation } from '@/modules/inventory/storage-location.js';
 import { Unit } from '@/shared/food-unit.js';
 import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 import { InventoryLedgerService } from '@/modules/inventory/application/inventory-ledger.service.js';
 import { matchConfidence, suggestedStorage } from '@/modules/receipts/domain/receipt-match.js';
+import { bestStorage, shelfLifeDays, type ShelfLife } from '@/modules/inventory/domain/shelf-life.js';
 import type { ReceiptFoodOptionType, ReceiptLineMatchType, ReceiveReceiptInput, ReceiveReceiptResultType } from '@/modules/receipts/presentation/receipt.types.js';
 import { ReceiptMatchConfidence } from '@/modules/receipts/presentation/receipt.types.js';
 
 type ScoreRow = { ord: number; foodId: string; wordScore: number; wholeScore: number };
-type FoodRow = { id: string; name: string; arabicName: string | null; categoryCode: string; categoryName: string; defaultUnit: Unit; gramsPerPiece: string | null };
+type FoodRow = { id: string; name: string; arabicName: string | null; categoryCode: string; categoryName: string; defaultUnit: Unit; gramsPerPiece: string | null } & { [K in keyof ShelfLife]: ShelfLife[K] | null } & { hasShelfLife: boolean };
 type StockRow = { foodId: string; unit: Unit; quantity: string };
 
 export const MAX_RECEIPT_LINES = 80;
@@ -45,8 +47,10 @@ export class ReceiptService {
         ) m ORDER BY q.ord, m."wordScore" DESC, m."wholeScore" DESC`;
       const foodIds = [...new Set(scores.map(row => row.foodId))];
       const foods = foodIds.length ? await tx.$queryRaw<FoodRow[]>`
-        SELECT f."id", f."name", ar."alias" AS "arabicName", c."code" AS "categoryCode", c."name" AS "categoryName", f."defaultUnit"::text AS "defaultUnit", f."gramsPerPiece"::text AS "gramsPerPiece"
-        FROM "Food" f JOIN "FoodCategory" c ON c."id" = f."categoryId"
+        SELECT f."id", f."name", ar."alias" AS "arabicName", c."code" AS "categoryCode", c."name" AS "categoryName", f."defaultUnit"::text AS "defaultUnit", f."gramsPerPiece"::text AS "gramsPerPiece",
+          s."foodId" IS NOT NULL AS "hasShelfLife", s."roomMinDays", s."roomMaxDays", coalesce(s."ripensAtRoomTemp", false) AS "ripensAtRoomTemp", s."fridgeMinDays", s."fridgeMaxDays",
+          s."freezerMinDays", s."freezerMaxDays", coalesce(s."freezeNotRecommended", false) AS "freezeNotRecommended"
+        FROM "Food" f JOIN "FoodCategory" c ON c."id" = f."categoryId" LEFT JOIN "FoodShelfLife" s ON s."foodId" = f."id"
         LEFT JOIN LATERAL (SELECT a."alias" FROM "FoodAlias" a JOIN "Language" l ON l."id" = a."languageId" WHERE a."foodId" = f."id" AND l."code" = 'ar' ORDER BY a."isPrimary" DESC LIMIT 1) ar ON true
         WHERE f."id" = ANY(${foodIds}::uuid[])` : [];
       const stock = foodIds.length ? await tx.$queryRaw<StockRow[]>`
@@ -56,8 +60,14 @@ export class ReceiptService {
       const byId = new Map(foods.map(food => [food.id, food]));
       const option = (row: ScoreRow): ReceiptFoodOptionType => {
         const food = byId.get(row.foodId)!;
+        const shelf = food.hasShelfLife ? food as ShelfLife : null;
+        const keeps = (storage: string) => shelfLifeDays(shelf, storage)?.average ?? null;
         return { foodId: food.id, name: food.name, arabicName: food.arabicName, categoryCode: food.categoryCode, categoryName: food.categoryName,
-          defaultUnit: food.defaultUnit, gramsPerPiece: food.gramsPerPiece, storageLocation: suggestedStorage(food.categoryCode, food.name), score: Math.round(row.wordScore * 100) / 100 };
+          defaultUnit: food.defaultUnit, gramsPerPiece: food.gramsPerPiece,
+          // USDA's figures pick the storage when Remi has them; otherwise the category rule does.
+          storageLocation: (bestStorage(shelf) as StorageLocation | null) ?? suggestedStorage(food.categoryCode, food.name),
+          keeps: shelf ? { counter: keeps('COUNTER'), fridge: keeps('FRIDGE'), freezer: keeps('FREEZER'), ripensAtRoomTemp: shelf.ripensAtRoomTemp } : null,
+          score: Math.round(row.wordScore * 100) / 100 };
       };
       return queries.map((query, index) => {
         const rows = scores.filter(row => row.ord === index + 1);
