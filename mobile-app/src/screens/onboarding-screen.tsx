@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Button, Chip, Screen, uiStyles } from '@/components/ui/core';
 import { Icon } from '@/components/ui/icon';
 import { getCookbookContent } from '@/data/cookbook-content';
+import { recipeImage } from '@/components/recipe-card';
 import { defaultAnswers, diets, goals, MAX_GOALS, MAX_HOUSEHOLD, MAX_RECIPES, toggleOption, type OnboardingAnswers } from '@/domain/onboarding';
 import { onboardingMessages } from '@/i18n/onboarding';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
@@ -30,7 +31,7 @@ export default function OnboardingScreen() {
   const kitchen = useBackendKitchen();
   const catalogue = useKitchenData(loadRecipes);
   // Recipes with cookbook photography first, so the picker is visual; at most 8 to keep the step short.
-  const choices = [...(catalogue.data ?? [])].sort((a, b) => Number(!getCookbookContent(a.name, a.id)) - Number(!getCookbookContent(b.name, b.id))).slice(0, 8);
+  const choices = [...(catalogue.data ?? [])].sort((a, b) => Number(!recipeImage(a.name, a.id)) - Number(!recipeImage(b.name, b.id))).slice(0, 8);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>(defaultAnswers);
   const [busy, setBusy] = useState(false);
@@ -78,7 +79,7 @@ export default function OnboardingScreen() {
         {catalogue.loading && !choices.length && <AppText muted accessibilityLiveRegion="polite">{t.recipesLoading}</AppText>}
         {catalogue.error && <View style={{ gap: spacing.sm }}><AppText accessibilityRole="alert">{catalogue.error}</AppText><Button label={t.retry} variant="secondary" onPress={() => { void catalogue.reload(); }} /></View>}
         {choices.map((recipe) => { const content = getCookbookContent(recipe.name, recipe.id); const selected = answers.recipeIds.includes(recipe.id);
-          return <RecipeOption key={recipe.id} title={rtl && content ? content.nameAr : recipe.name} minutes={`${((recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)).toLocaleString(language)} ${t.minutes}`} image={content?.image} selectedLabel={t.selected}
+          return <RecipeOption key={recipe.id} title={rtl && content ? content.nameAr : recipe.name} minutes={`${((recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)).toLocaleString(language)} ${t.minutes}`} image={recipeImage(recipe.name, recipe.id)} selectedLabel={t.selected}
             selected={selected} disabled={!selected && answers.recipeIds.length >= MAX_RECIPES} onPress={() => set('recipeIds', toggleOption(answers.recipeIds, recipe.id, MAX_RECIPES))} />; })}
         {!answers.recipeIds.length && !!choices.length && <AppText variant="caption" muted>{t.recipesNeeded}</AppText>}
       </View> },

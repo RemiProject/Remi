@@ -3,6 +3,7 @@ import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { AppText } from '@/components/ui/core';
 import { Icon } from '@/components/ui/icon';
 import { getCookbookContent } from '@/data/cookbook-content';
+import { recipeImages } from '@/data/food-images';
 import { useRemyTheme } from '@/theme/provider';
 import { layout, radii } from '@/theme/tokens';
 
@@ -13,10 +14,14 @@ export function useGridCardWidth() {
   return Math.floor((Math.min(width, layout.maxWidth) - 40 - GAP) / 2);
 }
 
+/** Catalogue photo by recipe name (the catalogue importer keys global recipes by name), then the bundled cookbook photo. */
+export const recipeImage = (name: string, id?: string): number | undefined =>
+  recipeImages[name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase()] ?? getCookbookContent(name, id)?.image;
+
 /** The recipe's photo, or a typographic tile (its initial on a pale brand field) when it has none. */
 export function RecipeArt({ id, name, width, height, radius = radii.lg }: { id: string; name: string; width: number | '100%'; height: number; radius?: number }) {
   const { colors } = useRemyTheme();
-  const photo = getCookbookContent(name, id)?.image;
+  const photo = recipeImage(name, id);
   if (photo) return <Image source={photo} accessibilityLabel={name} contentFit="cover" style={{ width, height, borderRadius: radius }} />;
   const fields = [[colors.surfaceMuted, colors.primary], [colors.accentSoft, colors.accentText], [colors.primarySoft, colors.primary]] as const;
   // FNV-1a over the id: UUIDs share prefixes, so a plain character sum clusters on one colour.

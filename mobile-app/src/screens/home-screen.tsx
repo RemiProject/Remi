@@ -1,6 +1,6 @@
 import { RecipeArt, RecipeCard, RecipeGrid, RecipeTabs, filterRecipes, recipeMinutes, recipeTabs, useGridCardWidth } from '@/components/recipe-card';
 import { Brand } from '@/components/brand';
-import { spacing } from '@/theme/tokens';
+import { radii, spacing } from '@/theme/tokens';
 import { AppSkeleton } from '@/components/app-skeleton';
 import { BackendHomeRecipeIdeas } from './backend-home-recipe-ideas';
 import { ingredientImage } from '@/data/ingredient-images';
@@ -76,7 +76,7 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
           <View style={uiStyles.row}><View style={{ flex: 1, gap: 2 }}><AppText variant="label" style={{ color: colors.accentText }}>{c('Use first', 'استخدم أولاً')}</AppText>
             <AppText variant="caption" style={{ color: colors.text }}>{priority.length ? (priority.length === 1 ? c('1 ingredient to use soon', 'مكوّن واحد للاستخدام قريبًا') : c(`${priority.length} ingredients to use soon`, `${priority.length} مكونات للاستخدام قريبًا`)) : kitchen.items.length ? c('Nothing needs using in the next 3 days.', 'لا شيء يحتاج إلى استخدام خلال ٣ أيام.') : c('Add your first ingredient', 'أضف أول مكوّن')}</AppText></View>
             <Icon name="chevron" size={16} color={colors.accentText} rtl={rtl} /></View>
-          {priority.slice(0, 2).map(item => <View key={item.id} style={uiStyles.row}>{ingredientImage(item.name) && <Image source={ingredientImage(item.name)} contentFit="contain" style={{ width: 36, height: 36 }} />}<AppText variant="label" style={{ flex: 1 }}>{backendFoodName(item, language)} · {backendQuantityLabel(item, language)}</AppText></View>)}
+          {priority.slice(0, 2).map(item => <View key={item.id} style={uiStyles.row}>{ingredientImage(item.name) && <Image source={ingredientImage(item.name)} contentFit="cover" style={{ width: 36, height: 36, borderRadius: radii.sm }} />}<AppText variant="label" style={{ flex: 1 }}>{backendFoodName(item, language)} · {backendQuantityLabel(item, language)}</AppText></View>)}
           {priority.length > 0 && <AppText variant="caption" muted>{c('Based on dates you entered. Check food before use.', 'حسب التواريخ المسجلة. افحص الطعام قبل الاستخدام.')}</AppText>}
         </Pressable>
         <View style={{ gap: spacing.sm }}>

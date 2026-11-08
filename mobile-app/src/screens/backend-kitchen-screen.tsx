@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { radii } from '@/theme/tokens';
 import { ingredientImage } from '@/data/ingredient-images';
 import { Icon } from '@/components/ui/icon';
 import { InventoryMetadataEditor } from '@/components/inventory-metadata-editor';
@@ -49,7 +50,7 @@ function DeviceInventoryNotice() {
 }
 function BackendFoodRow({ item }: { item: InventoryReadItem }) {
   const { language, t, rtl } = useLabels();
-  return <ActionRow title={backendFoodName(item, language)} rtl={rtl} leading={<View style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>{ingredientImage(item.name) ? <Image source={ingredientImage(item.name)} contentFit="contain" accessibilityLabel={backendFoodName(item, language)} style={{ width: 64, height: 64 }} /> : <Icon name="food" size={30} />}</View>}
+  return <ActionRow title={backendFoodName(item, language)} rtl={rtl} leading={<View style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>{ingredientImage(item.name) ? <Image source={ingredientImage(item.name)} contentFit="cover" accessibilityLabel={backendFoodName(item, language)} style={{ width: 64, height: 64, borderRadius: radii.md }} /> : <Icon name="food" size={30} />}</View>}
     subtitle={backendRowSubtitle(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} subtitleStyle={{ writingDirection: rtl ? 'rtl' : 'ltr' }}
     onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}>
     <Expiry item={item} />{item.readOnly && <AppText variant="caption" muted>{t.readOnly}</AppText>}

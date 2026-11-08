@@ -28,7 +28,8 @@ reference for patterns is the Mob meal-planner app. Full record: `VERSION-3.md`.
 
 **Recipes.**
 - **Browsing** is a 2-column grid: the picture, with a white time badge on it, then the title (two lines) and a caption.
-- **No photo:** a recipe without one gets a letter tile, its initial in Remi Display on pale lemon, pink or cobalt, the same everywhere for that recipe. Never a stock photo or a fork icon.
+- **Photos:** every catalogue recipe has a square photo of the finished dish on warm ivory stone, in soft side light, one subject, no text. Ingredients use the same style, shown as rounded thumbnails in Kitchen and Use first. They are AI-generated illustrations, and More says so.
+- **No photo:** a recipe without one (a household's own recipe) gets a letter tile, its initial in Remi Display on pale lemon, pink or cobalt, the same everywhere for that recipe. Never a stock photo or a fork icon.
 - **Categories** are text tabs with a hot-pink dot on the selected one.
 - **Recipe page:** a full-bleed picture under a sheet with a grabber; the servings stepper beside the title; four lemon stat capsules; pink-bulleted ingredients with bold amounts; numbered directions; Start cooking pinned at the bottom.
 

@@ -321,7 +321,7 @@ test('card explanations use Arabic ingredient names, only three missing names, c
 
 function recipeCardModule(mocks) {
   return loadTsx('src/components/recipe-card.tsx', { ...mocks, 'react-native': { ...mocks['react-native'], ScrollView: 'ScrollView', useWindowDimensions: () => ({ width: 400, height: 800 }) },
-    'expo-image': { Image: 'Image' }, '@/theme/tokens': { ...mocks['@/theme/tokens'], layout: { maxWidth: 720 } } });
+    'expo-image': { Image: 'Image' }, '@/data/food-images': { recipeImages: {} }, '@/theme/tokens': { ...mocks['@/theme/tokens'], layout: { maxWidth: 720 } } });
 }
 function loadTsx(file, mocks) {
   const exports = {};
@@ -359,8 +359,9 @@ function ui() {
   };
   mocks['@/domain/cooked-it'] = require('../src/domain/cooked-it.ts');
   mocks['@/data/cookbook-content'] = { getCookbookContent: () => undefined };
-  mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
+  mocks['@/data/food-images'] = { recipeImages: {} };
   mocks['@/components/recipe-card'] = recipeCardModule(mocks);
+  mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
   return { pushed, set: update => { state = { ...state, ...update }; }, language: value => { language = value; },
     render: (detail = false) => expand(detail ? exported.BackendRecipeDetailScreen({ id: 'one' }) : exported.BackendRecipesScreen()),

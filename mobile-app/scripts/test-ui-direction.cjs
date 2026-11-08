@@ -32,6 +32,7 @@ function fixture(language = 'ar') {
       if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ owner: 'user', status: 'ready', items: [item, spoon, pieces], today: '2026-10-31', detail: { id: details.id, status: 'ready', item: details }, loadDetail: () => {} }) };
       if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: () => null };
       if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
+      if (id === '@/data/food-images') return { recipeImages: {}, ingredientImages: {}, sourcedImageCredits: [] };
       if (id === '@/components/backend-stock-actions') return { BackendStockActions: () => null };
       if (id === '@/components/appearance-controls') return { AppearanceControls: () => null };
       if (id === './home-screen') return { __esModule: true, default: () => null };

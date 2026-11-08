@@ -52,6 +52,7 @@ Legend: ✅ done · ⬜ to do
 | 14 | Launch screen | Remi logo, cobalt on paper (light) and white on night (dark), matching the app background | ✅ | this commit |
 | 13 | App icon | The chef's hat and face, cobalt on lemon, for iOS (Icon Composer, Liquid Glass), Android adaptive (with monochrome) and web favicon. Replaces the Expo placeholder | ✅ | this commit |
 | 15 | Recipe-first UI | Cleaner screens that show more recipes, after two food-app references the user shared (see the log): 2-column recipe grid, cuisine tabs, art tiles for recipes without photos, photo-sheet recipe page | ✅ | this commit |
+| 16 | Food photography | Photos for all 400 catalogue recipes and 474 ingredients from the image handoff, on cards, the recipe page, onboarding, Kitchen and Use first, with credits in More | ✅ | this commit |
 | 11 | Verification | Typecheck, lint and 430 tests pass. Simulator screenshots in light, dark and Arabic | ✅ | this commit |
 
 ## Log
@@ -213,16 +214,46 @@ Studied: two food-app concept shots the user shared, plus Mob's shipped widget i
   - The recipe detail screen in the same file keeps its placeholder.
   - Checked on the simulator (`light-13-from-my-kitchen-grid.png`); tests updated, and all 433 pass.
 
+### 16. Food photography
+Source: the Remi v3 image handoff (`START-HERE-CLAUDE.md`, `image-map.json`, `manifest.json`).
+- Delivered: 874 reviewed images (all 400 recipes and 474 ingredients). The 326 remaining ingredients are still to be generated.
+- 873 photos are AI-generated; one (garlic) is a CC BY-SA photograph.
+
+**Done:**
+- **Import (`mobile-app/scripts/import-food-images.py`):**
+  - Verifies each master's SHA-256 and uses only `generated_reviewed` / `sourced_reviewed` entries.
+  - Writes WebP copies to `assets/food/`: recipes 800 px, ingredients 256 px, about 30 MB in all.
+  - Generates `src/data/food-images.ts`.
+- **Matching:**
+  - Recipes: `recipe_key` → catalogue name (`recipes.csv`) → lower-cased name, the same key the backend importer upserts on. All 400 recipes in the local database resolve.
+  - Ingredients: exact food name, Arabic name and aliases. 474 of the database's 851 foods resolve.
+- **Recipes:**
+  - `RecipeArt` (cards, the recipe page hero, Upcoming meals), the recipe detail placeholder and onboarding's recipe picks show the photo through one `recipeImage()` lookup.
+  - Lookup order: the catalogue photo first, then the old bundled cookbook photo, then the letter tile.
+- **Ingredients:**
+  - `ingredientImage()` now reads the generated map, replacing the 4-photo regex and its PNGs.
+  - Kitchen rows (64 pt) and the Use first strip (36 pt) show the photo cropped to fill a rounded square. Before, it was letterboxed.
+- **Credits:**
+  - More now notes that dish and ingredient photos are AI-generated illustrations, and links the garlic photograph's author and licence.
+  - The More version label now reads Version 3.
+- **Checked:**
+  - On the simulator: Home, the recipe page, Kitchen, the cookbook, and More in light and dark, plus the cookbook in Arabic.
+  - `tsc` passes, and 435 tests pass. They include a new map check (`test-food-images.cjs`: every file exists and every catalogue recipe has a photo) and a lookup test.
+  - Screenshots: `light-14`…`light-16`.
+- **Archive:** `Design/version-3-sip-happy/food-photography/`.
+
 ## Design archive
 
 `Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.
 
 ## Still to do (next iterations)
 
-- **Recipe photos:** the local database has no recipe photos, because the cookbook seed only runs against `remi_cookbook`. Photo cards, the recipe hero and thumbnails were checked only in their placeholder state.
+- **Remaining ingredient photos:** 326 ingredients still need images (the handoff's generation resumes after its usage reset). Re-run `scripts/import-food-images.py` when they arrive.
+- **Ingredient photos on the recipe page:** the ingredient list still uses pink bullets; small photos could replace them now that 474 exist.
+- **Bundle size:** the photos add about 30 MB to the app. If that matters for release, serve them from the backend or a CDN instead.
 - **Arabic swipe direction:** in Arabic the progress bar runs right to left, but the step pager still swipes like English. Mirror the pager in RTL.
 - **Timer and ingredients view:** switching to the Ingredients view unmounts the step pages, so a running timer stops. Lift timer state into the screen, or keep the pager mounted and hidden.
-- **Home "Dish of the day":** a large Mob-style "Cook tonight" photo hero card that leads the rail. It needs the photo pipeline first.
+- **Home "Dish of the day":** a large Mob-style "Cook tonight" photo hero card that leads the rail. Every recipe now has a photo, so this is unblocked.
 - **Shopping header:** the three stacked actions at the top (quick list, this week's meals, add item) could become one row of icon pills, with the list moved up.
 - **Screens not reviewed one by one:** Kitchen, food detail, auth, health, household, intake/receipt, quick add, settings. They inherit the palette, type and components, and the ones opened looked right, but each still needs a visual pass.
 - **Not covered:** Android, physical devices and VoiceOver.

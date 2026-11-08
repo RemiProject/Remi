@@ -5,10 +5,11 @@ const ts = require('typescript');
 
 const mocks = { 'expo-image': { Image: 'Image' }, 'react-native': { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View', useWindowDimensions: () => ({ width: 402 }) },
   '@/components/ui/core': { AppText: 'AppText' }, '@/components/ui/icon': { Icon: 'Icon' }, '@/data/cookbook-content': { getCookbookContent: () => undefined },
+  '@/data/food-images': { recipeImages: { 'mish with tomato': 7 } },
   '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { layout: { maxWidth: 720 }, radii: { lg: 22, pill: 999 } } };
 const card = {};
 new Function('require', 'exports', ts.transpileModule(fs.readFileSync('src/components/recipe-card.tsx', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText)(id => mocks[id] ?? require(id), card);
-const { recipeTabs, filterRecipes, recipeMinutes, useGridCardWidth } = card;
+const { recipeTabs, filterRecipes, recipeMinutes, useGridCardWidth, recipeImage } = card;
 const copy = en => en;
 const recipe = (cuisineName, prepTimeMin, cookTimeMin) => ({ cuisineName, prepTimeMin, cookTimeMin });
 
@@ -27,4 +28,9 @@ test('recipe filters: quick means 30 minutes or less with a known time; cuisine 
 });
 test('grid cards split the phone width into two columns inside the 20 pt gutter', () => {
   assert.equal(useGridCardWidth(), Math.floor((402 - 40 - 12) / 2));
+});
+
+test('recipe photos resolve by catalogue name, ignoring case and spacing', () => {
+  assert.equal(recipeImage('Mish  with Tomato '), 7);
+  assert.equal(recipeImage('Unknown dish'), undefined);
 });

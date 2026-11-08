@@ -28,6 +28,7 @@ The three-colour idea came from a TikTok web-design tip by Marco Pérez.
 | `app-icon/` | The app icon: flat 1024 px, the iOS Icon Composer layer, the Android adaptive foreground and a preview at real sizes |
 | `splash/` | Launch-screen logos: `splash-icon.png` (cobalt, on `#FFFDF4`) and `splash-icon-dark.png` (white, on `#0B1030`), shown 180 pt wide, plus simulator captures `launch-light.png` and `launch-dark.png` |
 | `fonts/` | Static DM Sans cuts generated from the variable font: `DMSans-Display.ttf` (800, titles), `DMSans-Heading.ttf` (700), `DMSans-SemiBold.ttf` (600, labels), plus `DMSans.ttf` (body) and the OFL licence |
+| `food-photography/` | The photo set behind every recipe and 474 ingredients: index, style guide, credits and a review sheet. See its README |
 | `screenshots/` | iOS Simulator captures in light, dark and Arabic: Home, recipe, cook mode, shopping, planner, onboarding and the cook-mode done card |
 
 **Logo usage:** cobalt on light surfaces, white on dark or cobalt surfaces. Use at most one mascot per screen.

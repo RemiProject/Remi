@@ -1,6 +1,8 @@
 import { router } from 'expo-router';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { ActionRow, AppText, Card, PageHeader, Screen, SectionHeader } from '@/components/ui/core';
+import { sourcedImageCredits } from '@/data/food-images';
+import { useRemyTheme } from '@/theme/provider';
 import { useLanguage } from '@/providers/language-provider';
 import type { IconName } from '@/components/ui/icon';
 const groups: { title: string; ar: string; items: { id: string; name: string; ar: string; icon: IconName }[] }[] = [
@@ -23,9 +25,14 @@ const groups: { title: string; ar: string; items: { id: string; name: string; ar
   ] },
 ];
 export default function MoreScreen() {
-  const { language } = useLanguage(); const ar = language === 'ar';
+  const { language } = useLanguage(); const ar = language === 'ar'; const { colors } = useRemyTheme();
   return <Screen rtl={ar}><PageHeader title={ar ? 'المزيد من Remi' : 'A little more Remi.'} subtitle={ar ? 'كل ما يجعل مطبخك ملكك.' : 'Everything that makes your kitchen yours.'} />
     {groups.map(group => <View key={group.title} style={{ gap: 12 }}><SectionHeader title={ar ? group.ar : group.title} /><Card style={{ padding: 0, gap: 0 }}>{group.items.map((item,index) => <ActionRow key={item.id} title={ar ? item.ar : item.name} icon={item.icon} rtl={ar} divider={index > 0} onPress={() => router.push({ pathname: '/feature', params: { feature: item.id } })} />)}</Card></View>)}
-    <AppText variant="caption" muted>{ar ? 'Remi Cookbook · الإصدار ٢' : 'Remi Cookbook · Version 2'}</AppText>
+    <View style={{ gap: 4 }}>
+      <AppText variant="caption" muted>{ar ? 'صور الأطباق والمكونات مولّدة بالذكاء الاصطناعي لأغراض توضيحية، باستثناء:' : 'Dish and ingredient photos are AI-generated illustrations, except:'}</AppText>
+      {sourcedImageCredits.map(c => <AppText key={c.sourceUrl} variant="caption" accessibilityRole="link" onPress={() => { void Linking.openURL(c.sourceUrl); }} style={{ color: colors.primary }}>
+        {`${c.subject.charAt(0).toUpperCase()}${c.subject.slice(1)} · ${c.author} · ${c.license}`}</AppText>)}
+    </View>
+    <AppText variant="caption" muted>{ar ? 'Remi Cookbook · الإصدار ٣' : 'Remi Cookbook · Version 3'}</AppText>
   </Screen>;
 }
