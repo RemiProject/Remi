@@ -7,6 +7,8 @@ import { kitchenRequest, loadPlans, loadRecipes, shiftDay, todayKey, type MealPe
 import { planMeal } from '@/services/plan-shopping';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
 import { formatAmount } from '@/domain/plan-shopping';
+import { nutritionCopy, plannedDayTotals } from '@/domain/nutrition';
+import { useLanguage } from '@/providers/language-provider';
 
 const periods: readonly MealPeriod[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 export function ConnectedPlannerScreen({ embedded = false }: { embedded?: boolean }) { const identity = useKitchenIdentity(); return <PlannerContent key={identity} embedded={embedded} />; }
@@ -29,12 +31,20 @@ function PlannerContent({ embedded }: { embedded: boolean }) {
     await planMeal({ recipeId, date: selected, mealType: period, servings }); setEditing(false);
   };
   const meals = (state.data?.plans ?? []).flatMap(plan => plan.meals).filter(meal => meal.mealDate === selected);
+  const { language } = useLanguage(); const n = nutritionCopy[language]; const num = (v: number) => v.toLocaleString(language);
+  const totals = plannedDayTotals(meals, new Map(recipes.map(recipe => [recipe.id, recipe.nutrition])));
   return <ConnectedScreen title={copy('Your meal plan', 'خطة وجباتك')} back={!embedded}>
     <View style={uiStyles.row}><Button label={copy('Previous week', 'الأسبوع السابق')} variant="text" onPress={() => setSelected(shiftDay(selected, -7))} /><Button label={copy('Today', 'اليوم')} variant="text" onPress={() => setSelected(todayKey())} /><Button label={copy('Next week', 'الأسبوع التالي')} variant="text" onPress={() => setSelected(shiftDay(selected, 7))} /></View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>{Array.from({ length: 7 }, (_, index) => shiftDay(selected, index - 3)).map(date => <Chip key={date} label={new Date(`${date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })} selected={date === selected} onPress={() => setSelected(date)} />)}</ScrollView>
     <AppText variant="heading">{new Date(`${selected}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</AppText><DataNotice {...state} /><Feedback message={action.message} />
     {state.data && !meals.length && <EmptyState title={copy('A little room for something good.', 'مساحة لوجبة لذيذة.')} description={copy('Choose a recipe and make a plan for this day.', 'اختر وصفة وخطط لهذا اليوم.')} />}
     {meals.map(meal => <Card key={meal.id}><AppText variant="caption" muted>{({ BREAKFAST: copy('Breakfast', 'الإفطار'), LUNCH: copy('Lunch', 'الغداء'), DINNER: copy('Dinner', 'العشاء'), SNACK: copy('Snack', 'وجبة خفيفة') } as Record<string, string>)[meal.mealType] ?? copy('Meal', 'وجبة')} · {formatAmount(meal.servings)} {copy('servings', 'حصص')}</AppText><AppText variant="heading">{meal.recipeName}</AppText><View style={uiStyles.wrap}><Button label={copy('Open recipe', 'فتح الوصفة')} variant="secondary" onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: meal.recipeId } })} /><Button label={copy('Remove', 'إزالة')} variant="dangerText" disabled={action.busy} onPress={() => { void action.run(() => kitchenRequest('mutation RemoveMeal($id: ID!) { removePlannedMeal(id: $id) }', { id: meal.id }), copy('Meal removed from your plan.', 'أُزيلت الوجبة من الخطة.')); }} /></View></Card>)}
+    {meals.length > 0 && totals.missing < meals.length && <Card testID="planned-day-nutrition" style={{ gap: 6 }}>
+      <AppText variant="label">{n.planned}</AppText>
+      <AppText variant="heading">{num(totals.calories)}{totals.missing ? '+' : ''} {n.kcal}</AppText>
+      <AppText variant="caption" muted>{n.protein} {num(totals.proteinG)} {n.g} · {n.carbs} {num(totals.carbsG)} {n.g} · {n.fat} {num(totals.fatG)} {n.g}</AppText>
+      <AppText variant="caption" muted>{n.plannedNote}{totals.missing ? ` ${totals.missing === 1 ? n.plannedMissing(num(1)) : n.plannedMissingMany(num(totals.missing))}` : ''}</AppText>
+    </Card>}
     <Button label={copy('Plan a meal', 'خطط لوجبة')} disabled={action.busy} onPress={() => { void action.run(chooseRecipe); }} />
     {editing && <Card><SectionHeader title={copy('Add to your plan', 'أضف إلى خطتك')} /><FormField label={copy('Date (YYYY-MM-DD)', 'التاريخ (YYYY-MM-DD)')} value={selected} onChangeText={setSelected} autoCorrect={false} /><View style={uiStyles.wrap}>{periods.map(value => <Chip key={value} label={value.toLowerCase()} selected={period === value} onPress={() => setPeriod(value)} />)}</View>
       <SearchField value={query} onChangeText={setQuery} placeholder={copy('Search recipes', 'ابحث عن وصفة')} accessibilityLabel={copy('Search recipes', 'ابحث عن وصفة')} autoCorrect={false} />

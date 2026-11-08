@@ -6,6 +6,7 @@ import { getCookbookContent } from '@/data/cookbook-content';
 import { recipeImages } from '@/data/food-images';
 import { useRemyTheme } from '@/theme/provider';
 import { layout, radii } from '@/theme/tokens';
+import { LABEL_RULES, LIGHT_KCAL, nutritionComplete, nutritionCopy, type RecipeNutrition } from '@/domain/nutrition';
 
 const GAP = 12;
 /** Card width for a 2-column grid inside the standard 20 pt screen gutter. */
@@ -32,11 +33,11 @@ export function RecipeArt({ id, name, width, height, radius = radii.lg }: { id: 
   </View>;
 }
 
-export function RecipeCard({ id, name, time, caption, note, details = [], extra, textDir, width, onPress }: {
-  id: string; name: string; time: string | null; caption?: string; note?: string | null; details?: (string | null | undefined)[]; extra?: React.ReactNode; textDir?: 'rtl' | 'ltr'; width: number; onPress: () => void;
+export function RecipeCard({ id, name, time, caption, energy, note, details = [], extra, textDir, width, onPress }: {
+  id: string; name: string; time: string | null; caption?: string; energy?: string | null; note?: string | null; details?: (string | null | undefined)[]; extra?: React.ReactNode; textDir?: 'rtl' | 'ltr'; width: number; onPress: () => void;
 }) {
   const { colors } = useRemyTheme();
-  return <Pressable accessibilityRole="button" accessibilityLabel={[name, time, caption, ...details, note].filter(Boolean).join('. ')} onPress={onPress}
+  return <Pressable accessibilityRole="button" accessibilityLabel={[name, time, caption, energy, ...details, note].filter(Boolean).join('. ')} onPress={onPress}
     style={({ pressed }) => ({ width, gap: 8, transform: [{ scale: pressed ? 0.98 : 1 }] })}>
     <View>
       <RecipeArt id={id} name={name} width={width} height={Math.round(width * 0.8)} />
@@ -46,7 +47,7 @@ export function RecipeCard({ id, name, time, caption, note, details = [], extra,
     </View>
     <View style={{ gap: 2 }}>
       <AppText variant="label" numberOfLines={2} dir="ltr">{name}</AppText>
-      {caption && <AppText variant="caption" muted numberOfLines={1} dir={textDir}>{caption}</AppText>}
+      {(caption || energy) && <AppText variant="caption" muted numberOfLines={1} dir={textDir}>{[caption, energy].filter(Boolean).join(' · ')}</AppText>}
       {details.filter(Boolean).map(line => <AppText key={line} variant="caption" muted numberOfLines={2} dir={textDir}>{line}</AppText>)}
       {note && <AppText variant="caption" numberOfLines={2} dir={textDir} style={{ color: colors.accentText }}>{note}</AppText>}
       {extra}
@@ -71,16 +72,23 @@ export function RecipeTabs({ tabs, value, onChange, rtl }: { tabs: readonly { ke
   </ScrollView>;
 }
 
-/** All, Quick, then the most common cuisines (at least `min` recipes each), most common first. */
-export function recipeTabs(recipes: readonly { cuisineName?: string | null }[], copy: (en: string, ar: string) => string, max = 6, min = 5) {
+/** All, Quick, High protein, Under 500 kcal (when `min` recipes qualify), then the most common cuisines, most common first. */
+export function recipeTabs(recipes: readonly { cuisineName?: string | null; nutrition?: RecipeNutrition | null }[], copy: (en: string, ar: string) => string, max = 6, min = 5) {
   const counts = new Map<string, number>();
   for (const recipe of recipes) if (recipe.cuisineName) counts.set(recipe.cuisineName, (counts.get(recipe.cuisineName) ?? 0) + 1);
   const cuisines = [...counts].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1]).slice(0, max).map(([name]) => ({ key: `cuisine:${name}`, label: name }));
-  return [{ key: 'all', label: copy('All', 'الكل') }, { key: 'quick', label: copy('Quick', 'سريعة') }, ...cuisines];
+  const nutrition = [
+    { key: 'protein', label: copy(nutritionCopy.en.tabs.protein, nutritionCopy.ar.tabs.protein) },
+    { key: 'light', label: copy(nutritionCopy.en.tabs.light, nutritionCopy.ar.tabs.light) },
+  ].filter(tab => filterRecipes(recipes.map(r => ({ prepTimeMin: null, cookTimeMin: null, ...r })), tab.key).length >= min);
+  return [{ key: 'all', label: copy('All', 'الكل') }, { key: 'quick', label: copy('Quick', 'سريعة') }, ...nutrition, ...cuisines];
 }
 export const recipeMinutes = (recipe: { prepTimeMin: number | null; cookTimeMin: number | null }) => recipe.prepTimeMin === null && recipe.cookTimeMin === null ? null : (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0);
-export function filterRecipes<T extends { cuisineName?: string | null; prepTimeMin: number | null; cookTimeMin: number | null }>(recipes: readonly T[], tab: string): T[] {
+export function filterRecipes<T extends { cuisineName?: string | null; prepTimeMin: number | null; cookTimeMin: number | null; nutrition?: RecipeNutrition | null }>(recipes: readonly T[], tab: string): T[] {
   if (tab === 'quick') return recipes.filter(recipe => { const m = recipeMinutes(recipe); return m !== null && m <= 30; });
+  // Complete data only: a partial total would undercount and wrongly pass.
+  if (tab === 'protein') return recipes.filter(recipe => nutritionComplete(recipe.nutrition) && LABEL_RULES['high-protein'](recipe.nutrition));
+  if (tab === 'light') return recipes.filter(recipe => nutritionComplete(recipe.nutrition) && recipe.nutrition.calories <= LIGHT_KCAL);
   if (tab.startsWith('cuisine:')) return recipes.filter(recipe => recipe.cuisineName === tab.slice(8));
   return [...recipes];
 }

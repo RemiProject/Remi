@@ -1,4 +1,5 @@
 import { RecipeArt, RecipeCard, RecipeGrid, RecipeTabs, filterRecipes, recipeMinutes, recipeTabs, useGridCardWidth } from '@/components/recipe-card';
+import { energyLabel } from '@/domain/nutrition';
 import { Brand } from '@/components/brand';
 import { radii, spacing } from '@/theme/tokens';
 import { AppSkeleton } from '@/components/app-skeleton';
@@ -52,7 +53,7 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   const upcoming = data.data?.upcoming ?? []; const onList = data.data?.onList ?? [];
   if (user && (kitchen.status === 'loading' && !kitchen.items.length || data.loading && !data.data)) return <AppSkeleton navigation={false} />;
   const time = (recipe: { prepTimeMin: number | null; cookTimeMin: number | null }) => { const m = recipeMinutes(recipe); return m === null ? null : `${m} ${c('min', 'دقيقة')}`; };
-  const card = (recipe: (typeof catalogue)[number]) => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time(recipe)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? c(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={cardWidth} onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
+  const card = (recipe: (typeof catalogue)[number]) => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time(recipe)} energy={energyLabel(recipe.nutrition, language)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? c(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={cardWidth} onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
   const browse = (key: string) => router.push({ pathname: '/feature', params: key === 'for-you' ? { feature: 'recipes' } : { feature: 'recipes', browse: key } });
   return <Screen rtl={rtl} contentGap={28}>
     <View style={{ backgroundColor: colors.hero, marginHorizontal: -20, marginTop: -20, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 14, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>

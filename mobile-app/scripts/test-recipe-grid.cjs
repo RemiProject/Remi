@@ -5,7 +5,7 @@ const ts = require('typescript');
 
 const mocks = { 'expo-image': { Image: 'Image' }, 'react-native': { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View', useWindowDimensions: () => ({ width: 402 }) },
   '@/components/ui/core': { AppText: 'AppText' }, '@/components/ui/icon': { Icon: 'Icon' }, '@/data/cookbook-content': { getCookbookContent: () => undefined },
-  '@/data/food-images': { recipeImages: { 'mish with tomato': 7 } },
+  '@/data/food-images': { recipeImages: { 'mish with tomato': 7 } }, '@/domain/nutrition': require('../src/domain/nutrition.ts'),
   '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { layout: { maxWidth: 720 }, radii: { lg: 22, pill: 999 } } };
 const card = {};
 new Function('require', 'exports', ts.transpileModule(fs.readFileSync('src/components/recipe-card.tsx', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText)(id => mocks[id] ?? require(id), card);
@@ -33,4 +33,18 @@ test('grid cards split the phone width into two columns inside the 20 pt gutter'
 test('recipe photos resolve by catalogue name, ignoring case and spacing', () => {
   assert.equal(recipeImage('Mish  with Tomato '), 7);
   assert.equal(recipeImage('Unknown dish'), undefined);
+});
+
+test('High protein and Under 500 kcal tabs filter on complete nutrition only', () => {
+  const full = { countedIngredients: 3, totalIngredients: 3, incompleteNutrients: [], carbsG: 30, fatG: 10, fiberG: 2, sugarG: 2, sodiumMg: 100 };
+  const recipes = [
+    { name: 'Lean', prepTimeMin: 10, cookTimeMin: 10, nutrition: { ...full, calories: 450, proteinG: 35 } },
+    { name: 'Heavy', prepTimeMin: 10, cookTimeMin: 10, nutrition: { ...full, calories: 900, proteinG: 40 } },
+    { name: 'Partial', prepTimeMin: 10, cookTimeMin: 10, nutrition: { ...full, calories: 200, proteinG: 50, countedIngredients: 2 } },
+    { name: 'Unknown', prepTimeMin: 10, cookTimeMin: 10, nutrition: null },
+  ];
+  assert.deepEqual(filterRecipes(recipes, 'protein').map(r => r.name), ['Lean', 'Heavy']);
+  assert.deepEqual(filterRecipes(recipes, 'light').map(r => r.name), ['Lean']);
+  assert.deepEqual(recipeTabs(recipes, copy, 6, 1).map(t => t.key), ['all', 'quick', 'protein', 'light']);
+  assert.deepEqual(recipeTabs(recipes, copy, 6, 3).map(t => t.key), ['all', 'quick'], 'nutrition tabs need at least `min` recipes');
 });

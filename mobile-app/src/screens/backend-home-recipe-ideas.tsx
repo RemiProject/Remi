@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { energyLabel } from '@/domain/nutrition';
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { AppText, Button } from '@/components/ui/core';
@@ -37,7 +38,7 @@ export function BackendHomeRecipeIdeas({ kitchenStatus, title, header = true, li
       : <RecipeGrid>{state.nodes.slice(0, limit).map(node => {
           const recipe = node.recipe;
           const time = recipe.prepTimeMin === null || recipe.cookTimeMin === null ? null : `${recipeNumber(recipe.prepTimeMin + recipe.cookTimeMin, language)} ${t.minutes}`;
-          return <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time} caption={recipeCoverage(node, language)} note={recipeExpiry(node, state.today, language)} width={width}
+          return <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time} caption={recipeCoverage(node, language)} energy={energyLabel(recipe.nutrition, language)} note={recipeExpiry(node, state.today, language)} width={width}
             onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
         })}</RecipeGrid>}
   </View>;

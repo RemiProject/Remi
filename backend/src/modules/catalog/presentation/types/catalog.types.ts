@@ -24,8 +24,8 @@ export class NutritionProfileType {
   @Field(() => DecimalScalar) proteinG!: string;
   @Field(() => DecimalScalar) carbsG!: string;
   @Field(() => DecimalScalar) fatG!: string;
-  @Field(() => DecimalScalar) fiberG!: string;
-  @Field(() => DecimalScalar) sugarG!: string;
+  @Field(() => DecimalScalar, { nullable: true, description: 'Null when the source does not report it' }) fiberG!: string | null;
+  @Field(() => DecimalScalar, { nullable: true, description: 'Null when the source does not report it' }) sugarG!: string | null;
   @Field(() => DecimalScalar) sodiumMg!: string;
 }
 

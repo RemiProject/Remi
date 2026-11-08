@@ -1,18 +1,21 @@
 import { useRef, useState } from 'react';
+import { NutritionToday } from '@/components/nutrition-today';
+import { forgetNutritionGoal } from '@/components/nutrition-panel';
+import { useLanguage } from '@/providers/language-provider';
 import { View } from 'react-native';
-import { AppText, Button, Card, Chip, EmptyState, SectionHeader, uiStyles } from '@/components/ui/core';
+import { AppText, Button, Card, Chip, SectionHeader, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
 import { addFoodQuantity } from '@/services/backend-add-food';
-import { kitchenRequest, operationKey, searchFoods, todayKey, unitLabel, type CatalogFood, type NutritionDay, type Profile } from '@/services/kitchen-api';
+import { kitchenRequest, operationKey, searchFoods, shiftDay, todayKey, unitLabel, type CatalogFood, type NutritionDay, type Profile } from '@/services/kitchen-api';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
 
 const profileFields = 'dietaryPreferences profile { heightCm weightKg birthDate gender activityLevel } goal { goalType calorieTarget proteinTargetG targetWeightKg } allergies { foodId foodName severity } healthConditions { healthConditionId name status }';
 export function ConnectedHealthScreen({ embedded = false }: { embedded?: boolean }) { const identity = useKitchenIdentity(); return <HealthContent key={identity} embedded={embedded} />; }
 function HealthContent({ embedded }: { embedded: boolean }) {
   const copy = useCopy(); const day = todayKey();
-  const state = useKitchenData(async () => kitchenRequest<{ myProfile: Profile; dailyNutrition: NutritionDay[] }>(`query Health($from: String!, $to: String!) { myProfile { ${profileFields} } dailyNutrition(from: $from, to: $to) { date calories proteinG carbsG fatG mealCount isFinal } }`, { from: day, to: day }));
+  const state = useKitchenData(async () => kitchenRequest<{ myProfile: Profile; dailyNutrition: NutritionDay[] }>(`query Health($from: String!, $to: String!) { myProfile { ${profileFields} } dailyNutrition(from: $from, to: $to) { date calories proteinG carbsG fatG mealCount isFinal } }`, { from: shiftDay(day, -6), to: day }));
   const action = useAction(state.reload); const [editing, setEditing] = useState(false); const [height, setHeight] = useState(''); const [weight, setWeight] = useState(''); const [calories, setCalories] = useState(''); const [protein, setProtein] = useState(''); const [goal, setGoal] = useState('MAINTAIN'); const [search, setSearch] = useState(''); const [foods, setFoods] = useState<CatalogFood[]>([]); const [selected, setSelected] = useState<CatalogFood | null>(null); const [quantity, setQuantity] = useState('100'); const [logging, setLogging] = useState(false); const [severity, setSeverity] = useState('MODERATE'); const pending = useRef<Record<string, unknown> | null>(null); const [conditionOptions, setConditionOptions] = useState<{ id: string; name: string }[]>([]);
-  const profile = state.data?.myProfile; const nutrition = state.data?.dailyNutrition[0];
+  const profile = state.data?.myProfile; const { language } = useLanguage();
   const edit = () => { setHeight(profile?.profile?.heightCm ?? ''); setWeight(profile?.profile?.weightKg ?? ''); setCalories(String(profile?.goal?.calorieTarget ?? '')); setProtein(String(profile?.goal?.proteinTargetG ?? '')); setGoal(profile?.goal?.goalType ?? 'MAINTAIN'); setEditing(true); };
   const save = async () => {
     const profileInput: Record<string, unknown> = {}; if (height.trim()) profileInput.heightCm = addFoodQuantity(height); if (weight.trim()) profileInput.weightKg = addFoodQuantity(weight);
@@ -20,7 +23,7 @@ function HealthContent({ embedded }: { embedded: boolean }) {
     const goalInput: Record<string, unknown> = { goalType: goal };
     if (calories.trim()) { if (!/^\d+$/.test(calories.trim())) throw new Error('Enter a whole-number calorie target.'); goalInput.calorieTarget = Number(calories); }
     if (protein.trim()) { if (!/^\d+$/.test(protein.trim())) throw new Error('Enter a whole-number protein target.'); goalInput.proteinTargetG = Number(protein); }
-    await kitchenRequest('mutation SaveGoal($input: SetGoalInputType!) { setGoal(input: $input) { goalType } }', { input: goalInput }, false); setEditing(false);
+    await kitchenRequest('mutation SaveGoal($input: SetGoalInputType!) { setGoal(input: $input) { goalType } }', { input: goalInput }, false); forgetNutritionGoal(); setEditing(false);
   };
   const log = async () => {
     if (!selected) throw new Error(copy('Choose a food first.', 'اختر طعامًا أولًا.'));
@@ -30,8 +33,9 @@ function HealthContent({ embedded }: { embedded: boolean }) {
     pending.current = null; setLogging(false);
   };
   return <ConnectedScreen title={copy('Food & wellbeing', 'الغذاء والصحة')} back={!embedded}><DataNotice {...state} /><Feedback message={action.message} />
-    <SectionHeader title={copy('Today, from your logged meals', 'اليوم من وجباتك المسجلة')} />
-    {nutrition ? <Card><AppText variant="heading">{nutrition.calories} kcal</AppText><AppText>{copy('Protein', 'البروتين')} {nutrition.proteinG} g · {copy('Carbs', 'الكربوهيدرات')} {nutrition.carbsG} g · {copy('Fat', 'الدهون')} {nutrition.fatG} g</AppText><AppText muted>{nutrition.mealCount} {copy('meals recorded', 'وجبات مسجلة')}</AppText><AppText variant="caption" muted>{copy('Totals depend on available catalogue nutrition data and may be incomplete.', 'تعتمد الإجماليات على بيانات التغذية المتاحة وقد تكون غير مكتملة.')}</AppText></Card> : <EmptyState title={copy('No nutrition totals yet', 'لا توجد إجماليات بعد')} description={copy('Log a meal or finish a recipe. Totals appear after the nutrition worker processes the meal; missing food nutrition is not estimated.', 'سجّل وجبة أو أكمل وصفة. تظهر الإجماليات بعد معالجة الوجبة؛ لا نقدر القيم المفقودة.')} />}
+    <SectionHeader title={copy('Your nutrition', 'تغذيتك')} />
+    {state.data && <NutritionToday days={state.data.dailyNutrition} today={day} calorieTarget={profile?.goal?.calorieTarget ?? null} proteinTarget={profile?.goal?.proteinTargetG ?? null} language={language} />}
+    <AppText variant="caption" muted>{copy('Totals come from meals you log or cook here, using USDA values per ingredient. Foods without data are left out, never estimated.', 'الإجماليات من الوجبات التي تسجلها أو تطبخها هنا، بقيم USDA لكل مكوّن. الأطعمة بلا بيانات لا تُحسب ولا تُقدّر.')}</AppText>
     <Button label={copy('Refresh totals', 'تحديث الإجماليات')} variant="text" disabled={state.loading} onPress={() => { void state.reload(); }} />
     <Button label={copy('Log food eaten away', 'تسجيل طعام أُكل خارج المنزل')} onPress={() => { setLogging(!logging); setSelected(null); pending.current = null; }} />
     {logging && <Card><AppText muted>{copy('This records nutrition without changing kitchen stock. Use recipe cooking mode for food taken from your kitchen.', 'يسجّل التغذية دون تغيير المخزون. استخدم وضع الطبخ لطعام مطبخك.')}</AppText><FormField label={copy('Find a food', 'ابحث عن طعام')} value={search} onChangeText={value => { setSearch(value); setSelected(null); pending.current = null; }} /><Button label={copy('Search catalogue', 'بحث في الأطعمة')} variant="secondary" disabled={action.busy || !search.trim()} onPress={() => { void action.run(async () => setFoods(await searchFoods(search))); }} />{foods.map(food => <Chip key={food.id} label={food.name} selected={selected?.id === food.id} onPress={() => { setSelected(food); pending.current = null; }} />)}<FormField label={`${copy('Amount', 'الكمية')} (${selected ? unitLabel(selected.defaultUnit) : '…'})`} value={quantity} onChangeText={value => { setQuantity(value); pending.current = null; }} keyboardType="decimal-pad" /><Button label={copy('Record meal', 'تسجيل الوجبة')} disabled={action.busy} onPress={() => { void action.run(log, copy('Meal recorded. Refresh totals shortly.', 'سُجلت الوجبة. حدّث الإجماليات بعد قليل.')); }} /></Card>}

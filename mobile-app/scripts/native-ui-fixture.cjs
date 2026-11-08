@@ -1,5 +1,6 @@
 // Native rendering boundaries only; business logic remains real in callers.
 exports.fixtureModule = function fixtureModule(id, native) {
+  if (id === '@/domain/nutrition' || id === '../domain/nutrition') return require('../src/domain/nutrition.ts');
   if (id === 'expo-image') return { Image: 'Image' };
   if (id === 'react-native-reanimated') return {
     __esModule: true,

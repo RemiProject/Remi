@@ -112,7 +112,8 @@ try {
 
   await eachRow('nutrition.csv', await load('nutrition.csv'), async (r) => {
     if (!r.source) fail('source is required (where the values come from)');
-    const v = ['calories_per_100g', 'protein_g', 'carbs_g', 'fat_g', 'fiber_g', 'sugar_g', 'sodium_mg'].map((k) => decimal(r[k], k));
+    // A blank fibre or sugar value means the source did not report it; it is stored as NULL, never as 0.
+    const v = ['calories_per_100g', 'protein_g', 'carbs_g', 'fat_g', 'fiber_g', 'sugar_g', 'sodium_mg'].map((k) => decimal(r[k], k, { optional: k === 'fiber_g' || k === 'sugar_g' }));
     await q(`INSERT INTO "NutritionProfile" ("foodId", "caloriesPer100g", "proteinG", "carbsG", "fatG", "fiberG", "sugarG", "sodiumMg") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       ON CONFLICT ("foodId") DO UPDATE SET "caloriesPer100g" = EXCLUDED."caloriesPer100g", "proteinG" = EXCLUDED."proteinG", "carbsG" = EXCLUDED."carbsG",
         "fatG" = EXCLUDED."fatG", "fiberG" = EXCLUDED."fiberG", "sugarG" = EXCLUDED."sugarG", "sodiumMg" = EXCLUDED."sodiumMg", "updatedAt" = now()`, [await food(r.food), ...v]);

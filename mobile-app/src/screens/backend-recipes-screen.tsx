@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { energyLabel } from '@/domain/nutrition';
 import { router, useFocusEffect } from 'expo-router';
 import { ActivityIndicator, RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,7 +51,7 @@ export function BackendRecipesScreen({ onBrowseAll }: { onBrowseAll?: () => void
     {state.status === 'ready' && !empty && <RecipeGrid>{state.nodes.map(node => {
       const recipe = node.recipe, dir = rtl ? 'rtl' : 'ltr';
       const time = recipe.prepTimeMin === null || recipe.cookTimeMin === null ? null : `${recipeNumber(recipe.prepTimeMin + recipe.cookTimeMin, language)} ${t.minutes}`;
-      return <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time} width={width} textDir={dir}
+      return <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time} energy={energyLabel(recipe.nutrition, language)} width={width} textDir={dir}
         caption={recipeCoverage(node, language)} details={[recipeMissing(node, language), recipeExpired(node, language)]} note={recipeExpiry(node, state.today, language)}
         extra={node.safetyWarnings.length > 0 ? <Badge label={t.warnings} tone="warning" /> : undefined}
         onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;

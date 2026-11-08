@@ -4,6 +4,7 @@ import { newId } from '@/shared/ids.js';
 import { Unit } from '@/shared/food-unit.js';
 import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 import type { Tx } from '@/platform/db/tx-context.js';
+import { withNutrition } from './recipe-nutrition.loader.js';
 
 export type IngredientInput = { foodId: string; quantity: string; unit: Unit; optional?: boolean };
 export type StepInput = { instruction: string; durationMin?: number };
@@ -49,7 +50,7 @@ export class RecipeService {
           AND (${afterId}::uuid IS NULL OR (r."createdAt", r."id") > (SELECT c."createdAt", c."id" FROM "Recipe" c WHERE c."id" = ${afterId}::uuid AND c."archivedAt" IS NULL AND (c."householdId" IS NULL OR c."householdId" = ${householdId}::uuid)))
         ORDER BY r."createdAt", r."id" LIMIT ${first + 1}`;
       const hasNextPage = rows.length > first;
-      const nodes = rows.slice(0, first);
+      const nodes = await withNutrition(tx, rows.slice(0, first));
       const last = nodes[nodes.length - 1];
       return { nodes, hasNextPage, endCursor: last ? Buffer.from(String(last.id)).toString('base64url') : null };
     }, { householdId });
@@ -69,7 +70,8 @@ export class RecipeService {
       SELECT ri."id", ri."foodId", f."name" AS "foodName", ri."quantity"::text AS "quantity", ri."unit"::text AS "unit", ri."optional"
       FROM "RecipeIngredient" ri JOIN "Food" f ON f."id" = ri."foodId" WHERE ri."recipeId" = ${id}::uuid ORDER BY f."name"`;
     const steps = await tx.$queryRaw<Array<Record<string, unknown>>>`SELECT "id", "stepNumber", "instruction", "durationMin" FROM "RecipeStep" WHERE "recipeId" = ${id}::uuid ORDER BY "stepNumber"`;
-    return { ...recipes[0], ingredients, steps };
+    const [recipe] = await withNutrition(tx, recipes);
+    return { ...recipe, ingredients, steps };
   }
 }
 

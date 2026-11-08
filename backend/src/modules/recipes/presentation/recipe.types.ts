@@ -1,4 +1,4 @@
-import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Float, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Unit } from '@/shared/food-unit.js';
@@ -52,6 +52,20 @@ export class RecipeStepType {
   @Field(() => Int, { nullable: true }) durationMin!: number | null;
 }
 
+@ObjectType({ description: 'Estimated nutrition per serving, summed from raw ingredient values (USDA FoodData Central).' })
+export class RecipeNutritionType {
+  @Field(() => Int) calories!: number;
+  @Field(() => Float) proteinG!: number;
+  @Field(() => Float) carbsG!: number;
+  @Field(() => Float) fatG!: number;
+  @Field(() => Float) fiberG!: number;
+  @Field(() => Float) sugarG!: number;
+  @Field(() => Int) sodiumMg!: number;
+  @Field(() => Int, { description: 'Required ingredients included in the totals' }) countedIngredients!: number;
+  @Field(() => Int, { description: 'Required ingredients in the recipe' }) totalIngredients!: number;
+  @Field(() => [String], { description: 'Nutrients (FIBER, SUGAR) that some counted ingredient does not report; their totals are lower bounds' }) incompleteNutrients!: string[];
+}
+
 @ObjectType()
 export class RecipeSummaryType {
   @Field(() => ID) id!: string;
@@ -64,6 +78,7 @@ export class RecipeSummaryType {
   @Field(() => Int, { nullable: true }) prepTimeMin!: number | null;
   @Field(() => Int, { nullable: true }) cookTimeMin!: number | null;
   @Field(() => RecipeDifficulty) difficulty!: RecipeDifficulty;
+  @Field(() => RecipeNutritionType, { nullable: true, description: 'Null when no ingredient has nutrition data' }) nutrition!: RecipeNutritionType | null;
 }
 
 @ObjectType()

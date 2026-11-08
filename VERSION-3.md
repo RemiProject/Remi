@@ -53,6 +53,7 @@ Legend: ✅ done · ⬜ to do
 | 13 | App icon | The chef's hat and face, cobalt on lemon, for iOS (Icon Composer, Liquid Glass), Android adaptive (with monochrome) and web favicon. Replaces the Expo placeholder | ✅ | this commit |
 | 15 | Recipe-first UI | Cleaner screens that show more recipes, after two food-app references the user shared (see the log): 2-column recipe grid, cuisine tabs, art tiles for recipes without photos, photo-sheet recipe page | ✅ | this commit |
 | 16 | Food photography | Photos for all 400 catalogue recipes and 474 ingredients from the image handoff, on cards, the recipe page, onboarding, Kitchen and Use first, with credits in More | ✅ | this commit |
+| 17 | Nutrition | Recipe nutrition per serving from USDA data, with Mob-style macro boxes, labels, High protein and Under 500 kcal tabs, kcal on cards, planner day totals and a Health Today screen against goals. Plan and results in `docs/nutrition.md` | ✅ | this commit |
 | 11 | Verification | Typecheck, lint and 430 tests pass. Simulator screenshots in light, dark and Arabic | ✅ | this commit |
 
 ## Log
@@ -241,6 +242,21 @@ Source: the Remi v3 image handoff (`START-HERE-CLAUDE.md`, `image-map.json`, `ma
   - `tsc` passes, and 435 tests pass. They include a new map check (`test-food-images.cjs`: every file exists and every catalogue recipe has a photo) and a lookup test.
   - Screenshots: `light-14`…`light-16`.
 - **Archive:** `Design/version-3-sip-happy/food-photography/`.
+
+### 17. Nutrition
+Full evaluation, plan, results and rules: [`docs/nutrition.md`](docs/nutrition.md).
+
+From Mob's binary: per-serving recipe nutrition shown as nutrient boxes, nutrition labels, meal-plan goals, and generated low-calorie or high-protein adaptations. Remi already had USDA data for 676 foods, meal logging with daily totals, and goals, but recipes showed no nutrition.
+
+- **Data:** 31 USDA SR Legacy foods added, each with its FDC ID and pulled by script from the official CSVs. Fibre and sugar may now be empty when USDA doesn't report them (migration 0030), so a missing value is never stored as 0. Fully costed recipes went from 233 to 371 of 400.
+- **API:** `nutrition` on every recipe (list, detail and suggestions page) gives calories, protein, carbs, fat, fibre, sugar and sodium per serving. It uses the meal-logging unit maths and reports coverage plus which nutrients are lower bounds.
+- **App:**
+  - **Recipe page:** a Nutrition section with calories, % of your goal, the energy bar, macro boxes, fibre/sugar/sodium rows, labels, and a coverage and source note.
+  - **Recipe cards:** kcal on every card.
+  - **Tabs:** High protein and Under 500 kcal.
+  - **Planner:** day totals.
+  - **Health:** Today as progress bars against your goals, plus 7 days.
+- **Not done:** generated recipe adaptation, saturated fat and a goal-driven plan generator (reasons in the doc).
 
 ## Design archive
 

@@ -33,6 +33,8 @@ reference for patterns is the Mob meal-planner app. Full record: `VERSION-3.md`.
 - **Categories** are text tabs with a hot-pink dot on the selected one.
 - **Recipe page:** a full-bleed picture under a sheet with a grabber; the servings stepper beside the title; four lemon stat capsules; pink-bulleted ingredients with bold amounts; numbered directions; Start cooking pinned at the bottom.
 
+**Nutrition.** On the recipe page, after Ingredients: calories in Remi Display, % of goal in pink, a thin energy bar (cobalt protein, pink carbs, lemon fat; the palette swaps in dark), three white macro boxes, then hairline rows for fibre, sugar and sodium. Labels are pink pills. Partial data shows a + and "at least", never a guess. Cards add "460 kcal" to the caption. Health shows Today as progress bars against your own targets.
+
 **Cooking.** Cook mode is full screen: a segmented progress bar, one step per swipeable page in large type, a Method/Ingredients switch, per-step countdown timers, and the screen kept awake.
 
 **Motion.** Press feedback 100–150ms; native stacks and sheets. Reduced motion is respected; the pager jumps instead of animating.

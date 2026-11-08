@@ -34,6 +34,7 @@ function harness() {
       const sql = strings.join('?'); queries.push({ sql, values });
       if (sql.includes('AS snapshot')) return [{ snapshot: data.profile }];
       if (sql.includes('FROM "Household"')) return [{ timezone: data.timezone }];
+      if (sql.includes('LEFT JOIN "NutritionProfile" n ON n."foodId" = f."id"\n    WHERE ri."recipeId" = ANY')) return [];
       if (sql.includes('FROM "Recipe"')) return data.recipes;
       if (sql.includes('FROM "RecipeIngredient"')) return data.ingredients;
       if (sql.includes('FROM "InventoryItem"')) return data.batches;
@@ -51,13 +52,17 @@ function harness() {
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('RecipeSuggestionsService', () => {
-  it('ranks the full set before paging, enriches aliases, and uses six batched reads with no writes', async () => {
+  it('ranks the full set before paging, enriches aliases, and uses six batched reads plus one nutrition read for the page, with no writes', async () => {
     const h = harness();
     const page = await h.service.list('household', 'user', 1);
     expect(page).toMatchObject({ totalCount: 2, hasNextPage: true, missingStapleNames: [] });
     expect(page.nodes[0]).toMatchObject({ recipe: { id: 'owned', servings: 4 }, coverageRatio: 1, haveCount: 1, requiredCount: 1,
       expiringSoon: [{ foodId: 'tomato', foodName: 'tomato', expiryDay: '2026-06-03', aliases: [{ alias: 'طماطم', languageCode: 'ar', isPrimary: true }] }], safetyWarnings: [] });
-    expect(h.queries).toHaveLength(6);
+    expect(h.queries).toHaveLength(7);
+    const nutrition = h.queries.filter(q => q.sql.includes('"NutritionProfile" n ON n."foodId" = f."id"\n    WHERE ri."recipeId" = ANY'));
+    expect(nutrition).toHaveLength(1);
+    expect(nutrition[0].values).toEqual([['owned']]); // only the returned page, never the whole catalogue
+    expect(page.nodes[0].recipe).toHaveProperty('nutrition', null);
     expect(h.transactions.run).toHaveBeenCalledWith(expect.any(Function), { householdId: 'household', userId: 'user', readOnly: true });
     expect(h.tx.$executeRaw).toHaveBeenCalledTimes(1); // shared safety lock, never an inventory write
     const recipes = h.queries.find(q => q.sql.includes('FROM "Recipe"'))!;

@@ -1,4 +1,6 @@
 import { useLanguage } from '@/providers/language-provider';
+import { NutritionPanel, useNutritionGoal } from '@/components/nutrition-panel';
+import { energyLabel } from '@/domain/nutrition';
 import { useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { recipeFoodName, recipeIngredientStatus } from '@/utils/backend-recipe-view';
 import { backendRecipeMessages } from '@/i18n/backend-recipes';
@@ -46,7 +48,7 @@ function CatalogueScreen({ initial, onSuggestions }: { initial: string; onSugges
     </View>
     <DataNotice {...state} />
     {!state.loading && state.data && !visible.length && <EmptyState title={copy('No recipes found', 'لم نجد وصفات')} description={copy('Try another search or clear your filters.', 'جرّب بحثًا آخر أو امسح عوامل التصفية.')} action={copy('Clear filters', 'مسح التصفية')} onPress={() => { setQuery(''); setTab('all'); }} />}
-    <RecipeGrid>{visible.slice(0, limit).map(recipe => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time(recipe)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? copy(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={width}
+    <RecipeGrid>{visible.slice(0, limit).map(recipe => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time(recipe)} energy={energyLabel(recipe.nutrition, language)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? copy(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={width}
       onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />)}</RecipeGrid>
     {visible.length > limit && <Button label={copy(`Load more (${visible.length - limit} left)`, `تحميل المزيد (${visible.length - limit})`)} variant="secondary" onPress={() => setLimit(limit + 24)} />}
   </ConnectedScreen>;
@@ -57,6 +59,7 @@ export function ConnectedRecipeScreen() {
 function RecipeContent({ id }: { id: string }) {
   const copy = useCopy(); const { colors } = useRemyTheme(); const state = useKitchenData(() => loadRecipe(id)); const recipe = state.data; const [servings, setServings] = useState<number | null>(null);
   const matches = useBackendRecipes(); const { owner, ensureDetail } = matches; const { language } = useLanguage(); const insets = useSafeAreaInsets();
+  const goal = useNutritionGoal(!!owner);
   const [scrolled, setScrolled] = useState(false); const reduced = useReducedMotion();
   const barStyle = useAnimatedStyle(() => ({ opacity: withTiming(scrolled ? 1 : 0, { duration: reduced ? 0 : 160 }) }));
   useFocusEffect(useCallback(() => { if (owner) void ensureDetail(id); }, [owner, ensureDetail, id]));
@@ -120,6 +123,7 @@ function RecipeContent({ id }: { id: string }) {
             </View>
           </View>)}
         </View>
+        <NutritionPanel nutrition={recipe.nutrition} language={language} goal={goal} />
         <View style={{ gap: spacing.md }}>
           <AppText variant="heading" accessibilityRole="header">{copy('Directions', 'طريقة التحضير')}</AppText>
           {[...recipe.steps].sort((a, b) => a.stepNumber - b.stepNumber).map(step => <View key={step.id} style={[uiStyles.row, { alignItems: 'flex-start' }]}>

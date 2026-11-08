@@ -5,6 +5,7 @@ import { DomainError } from '@/shared/domain-error.js';
 import { SafetyEvaluator, SafetyProfileLoader, type SafetyIngredient } from '@/modules/safety/safety.public.js';
 import { ASSUMED_STAPLE_NAMES, resolveAssumedStaples } from '@/modules/recipes/domain/assumed-staples.js';
 import { matchAndRankRecipes, type IngredientMatch, type MatchingBatch, type MatchingIngredient, type MatchingRecipe } from '@/modules/recipes/domain/recipe-matcher.js';
+import { loadRecipeNutrition } from './recipe-nutrition.loader.js';
 
 export type SuggestionAlias = { id: string; alias: string; isPrimary: boolean; languageCode: string };
 export type SuggestionFood = { foodId: string; foodName: string; aliases: SuggestionAlias[] };
@@ -121,8 +122,10 @@ export class RecipeSuggestionsService {
       const offset = cursor ? nodes.findIndex(n => n.recipe.id === cursor.id) + 1 : 0;
       if (cursor && offset === 0) throw new DomainError('INVALID_CURSOR', 'The recipe suggestion cursor does not identify a result.');
       const page = nodes.slice(offset, offset + first);
+      // Added after the fingerprint so nutrition never invalidates a cursor.
+      const nutrition = await loadRecipeNutrition(tx, page.map(n => n.recipe.id));
       return {
-        nodes: page, totalCount: nodes.length, hasNextPage: offset + page.length < nodes.length,
+        nodes: page.map(n => ({ ...n, recipe: { ...n.recipe, nutrition: nutrition.get(n.recipe.id) ?? null } })), totalCount: nodes.length, hasNextPage: offset + page.length < nodes.length,
         endCursor: page.length ? Buffer.from(JSON.stringify({ v: 1, fingerprint, id: page[page.length - 1].recipe.id })).toString('base64url') : null,
         missingStapleNames: staples.missingNames,
       };

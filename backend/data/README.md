@@ -48,3 +48,8 @@ pnpm data:import
 فحص الاستيراد الآلي نجح للمجموعة، لكن هذا لا يثبت صحة البيانات الغذائية أو الملصقات أو فئات مسببات الحساسية. مصادر التغذية المسجلة هي USDA FoodData Central؛ يجب مراجعة مصادرها ومطابقة أسماء الأصناف ووسوم الحساسية والوصفات بواسطة مختص قبل استخدامها في توصيات إنتاجية. لا نعدّل قيم التغذية بالتخمين.
 
 تأكد من صحة `grams_per_piece` و`density_g_per_ml` للأصناف التي ستُستخدم بوحدات القطعة أو الحجم. تصنيف الحساسية غير الصحيح قد يجعل صنفًا غير آمن يظهر على أنه آمن.
+
+
+## Nutrition additions (version 3)
+
+`nutrition-usda-additions.csv` lists each food added from USDA SR Legacy with its FDC ID and USDA description. `scripts/usda-nutrition-rows.py` reads the official SR Legacy CSVs and prints the matching `nutrition.csv` rows. It refuses to run if a description doesn't match the ID. A blank `fiber_g` or `sugar_g` means USDA didn't report that nutrient; it's stored as NULL (migration 0030), never as 0.

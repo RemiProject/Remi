@@ -683,10 +683,14 @@ type NutritionProfile {
   caloriesPer100g: Decimal!
   carbsG: Decimal!
   fatG: Decimal!
-  fiberG: Decimal!
+
+  """Null when the source does not report it"""
+  fiberG: Decimal
   proteinG: Decimal!
   sodiumMg: Decimal!
-  sugarG: Decimal!
+
+  """Null when the source does not report it"""
+  sugarG: Decimal
 }
 
 input PlanMealInputType {
@@ -909,6 +913,30 @@ type RecipeIngredientType {
   unit: Unit!
 }
 
+"""
+Estimated nutrition per serving, summed from raw ingredient values (USDA FoodData Central).
+"""
+type RecipeNutritionType {
+  calories: Int!
+  carbsG: Float!
+
+  """Required ingredients included in the totals"""
+  countedIngredients: Int!
+  fatG: Float!
+  fiberG: Float!
+
+  """
+  Nutrients (FIBER, SUGAR) that some counted ingredient does not report; their totals are lower bounds
+  """
+  incompleteNutrients: [String!]!
+  proteinG: Float!
+  sodiumMg: Int!
+  sugarG: Float!
+
+  """Required ingredients in the recipe"""
+  totalIngredients: Int!
+}
+
 input RecipeStepInputType {
   durationMin: Int
   instruction: String!
@@ -972,6 +1000,9 @@ type RecipeSummaryType {
   householdId: ID
   id: ID!
   name: String!
+
+  """Null when no ingredient has nutrition data"""
+  nutrition: RecipeNutritionType
   prepTimeMin: Int
   servings: Int!
 }
@@ -986,6 +1017,9 @@ type RecipeType {
   id: ID!
   ingredients: [RecipeIngredientType!]!
   name: String!
+
+  """Null when no ingredient has nutrition data"""
+  nutrition: RecipeNutritionType
   prepTimeMin: Int
   servings: Int!
   steps: [RecipeStepType!]!
