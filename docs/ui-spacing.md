@@ -21,9 +21,11 @@ on this Mac, so this pass works from Remi's own screens and its design brief (`D
 | Home | "Upcoming meals" heading inside its card, closed by two full-width buttons | Heading with a "Plan" link above the card; rows with photos; one text action to add ingredients to shopping. "In your shopping list" follows the same pattern |
 | Planner | Three week links in a row, then the day chips, then the date; each meal a card with an "Open recipe" button | Day chips, then the date with ← → week buttons (and "Today" only when you are away from today); meals as photo rows that open the recipe, with a small "Remove" |
 | Recipe cards | Instant | Press shrinks the card slightly (120 ms); the first cards fade up once (40 ms apart) on first load only |
+| Shopping | Three full-width buttons stacked above the list, then two rows of chips | "Add item" as the one main button with "Add this week's meals" and "Write a quick list" as text actions under it; "To buy / All items" as text tabs with "By aisle" beside them |
+| Health | A "Refresh totals" button (the screen already refreshes when opened); each allergy and condition in its own card | The button is gone; allergies and conditions are rows in one card each |
 | Text buttons | 48 pt tall boxes that pushed layouts apart | 32 pt tall visually, same 48 pt touch area |
 
-Screenshots in `Design/version-3-sip-happy/screenshots/`: `light-22` to `light-26` and `ar-dark-07`.
+Screenshots in `Design/version-3-sip-happy/screenshots/`: `light-22` to `light-26`, `ar-dark-07`, and `ar-dark-08` (offline Home), `ar-dark-09` (Shopping) and `ar-dark-10` (food page).
 
 ## Shared code
 
@@ -41,4 +43,4 @@ Screenshots in `Design/version-3-sip-happy/screenshots/`: `light-22` to `light-2
 ## Still to do
 
 - **Crème:** study it once it is installed, and apply what it does well.
-- **Screens not yet reviewed in this pass:** shopping, food detail, Health and More.
+- **Screens not yet reviewed in this pass:** food detail and More.

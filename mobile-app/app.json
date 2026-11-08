@@ -2,7 +2,7 @@
   "expo": {
     "name": "Remi",
     "slug": "remi-cookbook",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "remi-cookbook",
@@ -10,6 +10,9 @@
     "ios": {
       "icon": "./assets/remi.icon",
       "bundleIdentifier": "com.remi.cookbook.independent",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
       "entitlements": {
         "keychain-access-groups": [
           "$(AppIdentifierPrefix)$(CFBundleIdentifier)"
@@ -54,9 +57,16 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Allow Remy to take an optional food photo.",
-          "photosPermission": "Allow Remy to select an optional food photo.",
+          "cameraPermission": "Remi uses the camera to photograph food and read receipts, so you can add groceries without typing.",
+          "photosPermission": "Remi opens your photos so you can add a food photo or a receipt you already took.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#0B1030"
         }
       ],
       "expo-font",

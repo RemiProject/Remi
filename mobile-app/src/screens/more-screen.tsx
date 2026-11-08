@@ -1,3 +1,4 @@
+import { APP_VERSION } from '@/data/app-version';
 import { router } from 'expo-router';
 import { Linking, View } from 'react-native';
 import { ActionRow, AppText, Card, PageHeader, Screen, SectionHeader } from '@/components/ui/core';
@@ -33,6 +34,10 @@ export default function MoreScreen() {
       {sourcedImageCredits.map(c => <AppText key={c.sourceUrl} variant="caption" accessibilityRole="link" onPress={() => { void Linking.openURL(c.sourceUrl); }} style={{ color: colors.primary }}>
         {`${c.subject.charAt(0).toUpperCase()}${c.subject.slice(1)} · ${c.author} · ${c.license}`}</AppText>)}
     </View>
-    <AppText variant="caption" muted>{ar ? 'Remi · الإصدار ٣' : 'Remi · Version 3'}</AppText>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 16 }}>
+      {(['privacy', 'terms'] as const).map(doc => <AppText key={doc} variant="caption" accessibilityRole="link" onPress={() => router.push({ pathname: '/legal', params: { doc } })} style={{ color: colors.primary, paddingVertical: 8 }}>
+        {doc === 'privacy' ? (ar ? 'سياسة الخصوصية' : 'Privacy policy') : (ar ? 'شروط الاستخدام' : 'Terms of use')}</AppText>)}
+    </View>
+    <AppText variant="caption" muted>{ar ? `Remi · الإصدار ${APP_VERSION}` : `Remi · Version ${APP_VERSION}`}</AppText>
   </Screen>;
 }

@@ -35,7 +35,7 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
     // One recipe failing to load only hides it from the list card; Home itself still renders.
     const details = (await Promise.all([...new Set(upcoming.map(meal => meal.recipeId))].map(id => loadRecipe(id).catch(() => null)))).filter(recipe => recipe !== null);
     return { recipes, upcoming, onList: recipesOnList(details, lists.filter(list => list.status === 'ACTIVE').flatMap(list => list.items)) };
-  });
+  }, 'home');
   const shop = useAction(data.reload); const [shopNote, setShopNote] = useState<string | null>(null);
   const addUpcoming = () => shop.run(async () => {
     const result = await addPlannedMealsToShopping(kitchen.status === 'ready' ? kitchen.items.map(item => ({ foodId: item.foodId, quantity: item.quantity, unit: item.backendUnit })) : []);

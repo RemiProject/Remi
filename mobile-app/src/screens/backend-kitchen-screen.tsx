@@ -32,6 +32,12 @@ function Expiry({ item }: { item: InventoryReadItem }) {
   const color = days === null ? undefined : days < 0 ? colors.errorText : days <= 3 ? colors.accentText : undefined;
   return <AppText variant="caption" muted={!color} dir={language === 'ar' ? 'rtl' : undefined} style={color ? { color } : undefined}>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : daysLeftLabel(language, inventoryNumberLabel(days.toLocaleString(language), language), days, item.expiryEstimated)}</AppText>;
 }
+function Fact({ label, first, children }: { label: string; first?: boolean; children: React.ReactNode }) {
+  const { colors } = useRemyTheme();
+  return <View style={[uiStyles.row, { justifyContent: 'space-between', minHeight: 48, paddingVertical: 10, borderTopWidth: first ? 0 : 1, borderColor: colors.divider }]}>
+    <AppText muted>{label}</AppText>{typeof children === 'string' ? <AppText variant="label">{children}</AppText> : children}
+  </View>;
+}
 export function BackendKitchenState({ detail = false, retry }: { detail?: boolean; retry?: () => void }) {
   const state = useBackendKitchen();
   const { t } = useLabels();
@@ -129,11 +135,16 @@ export function BackendFoodDetailScreen() {
   return <Screen rtl={rtl} scrollRef={scrollRef}><Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/kitchen')} />
     {owner && additionNotice != null && additionNoticeKind === 'updated' && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{stockActionMessages[language].updated}</AppText></Card>}
     <BackendKitchenState detail retry={() => { void loadDetail(id); }} />
-    {item && <><PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} />
-      <Card><AppText>{t.storage}: {backendStorageLabel(item, language)}</AppText><AppText>{t.expiry}: {item.expirationDate ?? t.unknown}</AppText><Expiry item={item} />
-        {item.expiryEstimated && <AppText variant="caption" muted>{t.estimated}</AppText>}
-        {item.purchaseDate && <AppText variant="caption" muted>{t.bought}: {item.purchaseDate}</AppText>}
-        {item.readOnly && <AppText muted>{t.readOnly}</AppText>}</Card>
+    {item && <>
+      {ingredientImage(item.name) && <Image source={ingredientImage(item.name)} contentFit="cover" accessibilityLabel={backendFoodName(item, language)} style={{ width: '100%', aspectRatio: 16 / 10, borderRadius: radii.lg }} />}
+      <PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} />
+      {/* The facts as label and value rows, one per line, so the eye reads down one column of values. */}
+      <Card style={{ gap: 0, paddingVertical: 4 }}>
+        <Fact label={t.storage} first>{backendStorageLabel(item, language)}</Fact>
+        <Fact label={t.expiry}><View style={{ alignItems: 'flex-end' }}><AppText>{item.expirationDate ?? t.unknown}</AppText><Expiry item={item} /></View></Fact>
+        {item.purchaseDate && <Fact label={t.bought}>{item.purchaseDate}</Fact>}
+      </Card>
+      {(item.expiryEstimated || item.readOnly) && <AppText variant="caption" muted>{[item.expiryEstimated && t.estimated, item.readOnly && t.readOnly].filter(Boolean).join(' ')}</AppText>}
       <BackendStockActions key={`${owner}:${id}`} item={item} />
       <InventoryMetadataEditor key={`${id}:${item.version}`} item={item} />
     </>}

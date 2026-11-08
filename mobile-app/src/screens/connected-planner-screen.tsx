@@ -23,7 +23,7 @@ function PlannerContent({ embedded }: { embedded: boolean }) {
   const params = useLocalSearchParams<{ recipeId?: string; date?: string; servings?: string }>(); const copy = useCopy();
   const [selected, setSelected] = useState(params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date) ? params.date : todayKey());
   const [editing, setEditing] = useState(!!params.recipeId); const [recipeId, setRecipeId] = useState(params.recipeId ?? ''); const [period, setPeriod] = useState<MealPeriod>('DINNER'); const [servings, setServings] = useState(params.servings ?? '2'); const [query, setQuery] = useState('');
-  const state = useKitchenData(async () => { const [plans, recipes] = await Promise.all([loadPlans(shiftDay(selected, -7), shiftDay(selected, 7)), loadRecipes()]); return { plans, recipes }; });
+  const state = useKitchenData(async () => { const [plans, recipes] = await Promise.all([loadPlans(shiftDay(selected, -7), shiftDay(selected, 7)), loadRecipes()]); return { plans, recipes }; }, `planner:${selected}`);
   const action = useAction(state.reload);
   const { reload } = state;
   useEffect(() => { void reload(); }, [selected, reload]);

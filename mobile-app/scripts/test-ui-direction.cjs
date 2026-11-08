@@ -63,7 +63,7 @@ function fixture(language = 'ar') {
   const stock = load('i18n/backend-stock-actions.ts').stockActionMessages[language];
   const number = load('utils/backend-kitchen-view.ts').inventoryNumberLabel;
   parts.push(wrap('insufficient', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.AppText, { dir: language === 'ar' ? 'rtl' : undefined }, stock.insufficient(`${number('1.25', language)} ${language === 'ar' ? 'كغ' : 'kg'}`)))));
-  parts.push(wrap('legacy-row', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.ActionRow, { title: 'Remy Chat', rtl: language === 'ar', onPress: () => {} }))));
+  parts.push(wrap('legacy-row', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.ActionRow, { title: 'Remi Chat', rtl: language === 'ar', onPress: () => {} }))));
   parts.push(wrap('more', React.createElement(load('screens/more-screen.tsx').default)));
   const html = renderToStaticMarkup(React.createElement(React.Fragment, null, ...parts));
   return { html: `<!doctype html><html dir="ltr"><head><meta charset="utf-8"><style>${native.StyleSheet.getSheet().textContent}</style></head><body>${html}</body></html>`, load, native };

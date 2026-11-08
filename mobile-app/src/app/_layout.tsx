@@ -1,4 +1,5 @@
 import { StartupGate } from '@/components/startup-gate';
+import { OfflineBanner } from '@/components/offline-banner';
 import { ShoppingProvider } from '@/providers/shopping-provider';
 import { PlannerProvider } from '@/providers/planner-provider';
 import { OnboardingProvider } from '@/providers/onboarding-provider';
@@ -27,6 +28,7 @@ function Navigation() {
         <Stack.Screen name="food/manual" options={{ presentation: 'modal', gestureEnabled: false }} />
         <Stack.Screen name="food/edit/[id]" options={{ presentation: 'modal', gestureEnabled: false }} />
       </Stack>
+      <OfflineBanner />
     </ThemeProvider>
   );
 }

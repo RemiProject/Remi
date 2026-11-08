@@ -22,7 +22,7 @@ import { IntakeShell, intakeError } from './intake-shell';
 
 type Language = 'en' | 'ar';
 // The app edits these three; room temperature is Pantry.
-const STORAGES: Storage[] = ['FRIDGE', 'FREEZER', 'PANTRY'];
+const STORAGES: Storage[] = ['FRIDGE', 'FREEZER', 'PANTRY', 'COUNTER'];
 const newKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 const foodName = (food: ReceiptFoodOption, language: Language) => language === 'ar' && food.arabicName ? food.arabicName : food.name.charAt(0).toUpperCase() + food.name.slice(1);
 

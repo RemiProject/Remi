@@ -1,16 +1,20 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 /**
- * REMI_NO_SHARE_EXTENSION=1 builds without the iOS share extension. The extension needs the App Group
- * group.com.remi.cookbook.independent registered on the Apple team; until it is, phone builds use this switch and
- * recipes are saved by pasting a link instead. Run `npx expo prebuild --platform ios` again after changing it.
+ * Two switches for builds signed by a team that has not set up these capabilities yet (see docs/release.md):
+ * - REMI_NO_SHARE_EXTENSION=1 builds without the iOS share extension, which needs the App Group
+ *   group.com.remi.cookbook.independent registered on the Apple team. Recipes are then saved by pasting a link.
+ * - REMI_NO_PUSH=1 builds without the Push Notifications entitlement. Reminders then stay inside the app.
+ * Run `npx expo prebuild --platform ios --clean` again after changing either.
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
-  if (!process.env.REMI_NO_SHARE_EXTENSION) return config as ExpoConfig;
+  const noShare = !!process.env.REMI_NO_SHARE_EXTENSION, noPush = !!process.env.REMI_NO_PUSH;
   return {
     ...config,
-    plugins: (config.plugins ?? []).map(plugin => Array.isArray(plugin) && plugin[0] === 'expo-sharing'
-      ? ['expo-sharing', { ...plugin[1], ios: { ...plugin[1]?.ios, enabled: false } }]
-      : plugin),
+    plugins: (config.plugins ?? [])
+      .filter(plugin => !(noPush && (Array.isArray(plugin) ? plugin[0] : plugin) === 'expo-notifications'))
+      .map(plugin => noShare && Array.isArray(plugin) && plugin[0] === 'expo-sharing'
+        ? ['expo-sharing', { ...plugin[1], ios: { ...plugin[1]?.ios, enabled: false } }]
+        : plugin),
   } as ExpoConfig;
 };

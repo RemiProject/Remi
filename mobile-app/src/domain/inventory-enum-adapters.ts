@@ -34,6 +34,7 @@ export function toBackendStorage(input: StorageId): EnumAdapterResult<BackendSto
     case 'refrigerator': return { supported: true, value: BackendStorageLocation.FRIDGE };
     case 'freezer': return { supported: true, value: BackendStorageLocation.FREEZER };
     case 'pantry': return { supported: true, value: BackendStorageLocation.PANTRY };
+    case 'counter': return { supported: true, value: BackendStorageLocation.COUNTER };
     default: return { supported: false, input, reason: 'UNSUPPORTED_STORAGE' };
   }
 }
@@ -43,6 +44,7 @@ export function toMobileStorage(input: BackendStorageLocation): EnumAdapterResul
     case BackendStorageLocation.FRIDGE: return { supported: true, value: 'refrigerator' };
     case BackendStorageLocation.FREEZER: return { supported: true, value: 'freezer' };
     case BackendStorageLocation.PANTRY: return { supported: true, value: 'pantry' };
+    case BackendStorageLocation.COUNTER: return { supported: true, value: 'counter' };
     default: return { supported: false, input, reason: 'UNSUPPORTED_STORAGE' };
   }
 }

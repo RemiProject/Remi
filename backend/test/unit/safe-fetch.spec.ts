@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fetchPublicPage, isPrivateAddress } from '@/modules/recipes/infrastructure/safe-fetch.js';
+import { fetchPublicPage, isPrivateAddress, vettedLookup } from '@/modules/recipes/infrastructure/safe-fetch.js';
 
 describe('recipe import fetch guard', () => {
   it('treats loopback, private, link-local, metadata and multicast addresses as private', () => {
@@ -15,5 +15,13 @@ describe('recipe import fetch guard', () => {
     await expect(fetchPublicPage('file:///etc/passwd')).rejects.toThrow(/http or https/);
     await expect(fetchPublicPage('https://user:pass@example.com/')).rejects.toThrow(/http or https/);
     await expect(fetchPublicPage('not a link')).rejects.toThrow(/not a web link/);
+  });
+});
+
+describe('vettedLookup', () => {
+  const run = (host: string, all: boolean) => new Promise<{ error: Error | null; address: unknown }>(resolve =>
+    vettedLookup(host, { all }, ((error: Error | null, address: unknown) => resolve({ error, address })) as never));
+  it('refuses a host whose answer is private, in both lookup forms the socket uses', async () => {
+    for (const all of [true, false]) expect((await run('localhost', all)).error?.message).toBe('localhost');
   });
 });

@@ -38,8 +38,13 @@ export interface RecipeSuggestionsConnection {
   missingStapleNames: string[];
 }
 
+const CACHE_TTL_MS = 5 * 60_000, CACHE_MAX = 500;
+
 @Injectable()
 export class RecipeSuggestionsService {
+  /** Ranked suggestions per household and person, reused while nothing they depend on has changed (the `state` query in `list`). */
+  private readonly cache = new Map<string, { state: string; at: number; nodes: RecipeSuggestion[]; missingStapleNames: string[] }>();
+
   constructor(
     private readonly transactions: TransactionRunner,
     private readonly profiles: SafetyProfileLoader,
@@ -58,6 +63,42 @@ export class RecipeSuggestionsService {
       if (!households.length) throw new DomainError('HOUSEHOLD_NOT_FOUND', 'The household no longer exists.', 404);
       const timezone = households[0].timezone;
       const now = new Date();
+      const day = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+      // Everything the ranking reads: the kitchen, the recipes and their ingredients, the catalogue, the person's safety profile, the day.
+      const [{ state }] = await tx.$queryRaw<[{ state: string }]>`
+        SELECT concat_ws('|', ${day}::text,
+          (SELECT concat(count(*), '/', max("updatedAt"), '/', sum(version)) FROM "InventoryItem" WHERE "householdId" = ${householdId}::uuid AND "archivedAt" IS NULL),
+          (SELECT concat(count(*), '/', max("updatedAt")) FROM "Recipe" WHERE "householdId" IS NULL OR "householdId" = ${householdId}::uuid),
+          (SELECT count(*) FROM "RecipeIngredient"), (SELECT concat(count(*), '/', max("updatedAt")) FROM "Food"),
+          (SELECT count(*) FROM "UserSafetyProfileEvent" WHERE "userId" = ${userId}::uuid)) AS state`;
+      const cacheKey = `${householdId}:${userId}`;
+      const hit = this.cache.get(cacheKey);
+      const fresh = hit && hit.state === state && Date.now() - hit.at < CACHE_TTL_MS
+        ? hit : { state, at: Date.now(), ...await this.rank(tx, householdId, timezone, now, profile) };
+      if (fresh !== hit) {
+        this.cache.delete(cacheKey);
+        if (this.cache.size >= CACHE_MAX) this.cache.delete(this.cache.keys().next().value!);
+        this.cache.set(cacheKey, fresh);
+      }
+      const { nodes } = fresh, staples = { missingNames: fresh.missingStapleNames };
+      // Includes every returned value, owner scope, and local day; unaffected by seconds ticking between pages.
+      const fingerprint = createHash('sha256').update(JSON.stringify({ userId, householdId, timezone, day, nodes, missingStaples: staples.missingNames })).digest('hex');
+      if (cursor && cursor.fingerprint !== fingerprint) throw new DomainError('STALE_RECIPE_SUGGESTIONS_CURSOR', 'Recipe suggestions changed. Restart from the first page.');
+      const offset = cursor ? nodes.findIndex(n => n.recipe.id === cursor.id) + 1 : 0;
+      if (cursor && offset === 0) throw new DomainError('INVALID_CURSOR', 'The recipe suggestion cursor does not identify a result.');
+      const page = nodes.slice(offset, offset + first);
+      // Added after the fingerprint so nutrition never invalidates a cursor.
+      const nutrition = await loadRecipeNutrition(tx, page.map(n => n.recipe.id));
+      return {
+        nodes: page.map(n => ({ ...n, recipe: { ...n.recipe, nutrition: nutrition.get(n.recipe.id) ?? null } })), totalCount: nodes.length, hasNextPage: offset + page.length < nodes.length,
+        endCursor: page.length ? Buffer.from(JSON.stringify({ v: 1, fingerprint, id: page[page.length - 1].recipe.id })).toString('base64url') : null,
+        missingStapleNames: staples.missingNames,
+      };
+    }, { householdId, userId, readOnly: true });
+  }
+
+  private async rank(tx: Parameters<Parameters<TransactionRunner['run']>[0]>[0], householdId: string, timezone: string, now: Date,
+    profile: Awaited<ReturnType<SafetyProfileLoader['loadInTransaction']>>): Promise<{ nodes: RecipeSuggestion[]; missingStapleNames: string[] }> {
       const recipes = await tx.$queryRaw<RecipeSummary[]>`
         SELECT r.id, r."householdId", r.name, r.description, r.servings, r."prepTimeMin", r."cookTimeMin",
           r.difficulty::text AS difficulty, r."cuisineId", c.name AS "cuisineName"
@@ -115,21 +156,7 @@ export class RecipeSuggestionsService {
         expiringSoon: match.expiringSoonFoods.map(item => ({ ...item, ...byFood.get(item.foodId)! })),
         safetyWarnings: warnings.get(match.recipeId)!,
       }));
-      // Includes every returned value, owner scope, and local day; unaffected by seconds ticking between pages.
-      const day = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
-      const fingerprint = createHash('sha256').update(JSON.stringify({ userId, householdId, timezone, day, nodes, missingStaples: staples.missingNames })).digest('hex');
-      if (cursor && cursor.fingerprint !== fingerprint) throw new DomainError('STALE_RECIPE_SUGGESTIONS_CURSOR', 'Recipe suggestions changed. Restart from the first page.');
-      const offset = cursor ? nodes.findIndex(n => n.recipe.id === cursor.id) + 1 : 0;
-      if (cursor && offset === 0) throw new DomainError('INVALID_CURSOR', 'The recipe suggestion cursor does not identify a result.');
-      const page = nodes.slice(offset, offset + first);
-      // Added after the fingerprint so nutrition never invalidates a cursor.
-      const nutrition = await loadRecipeNutrition(tx, page.map(n => n.recipe.id));
-      return {
-        nodes: page.map(n => ({ ...n, recipe: { ...n.recipe, nutrition: nutrition.get(n.recipe.id) ?? null } })), totalCount: nodes.length, hasNextPage: offset + page.length < nodes.length,
-        endCursor: page.length ? Buffer.from(JSON.stringify({ v: 1, fingerprint, id: page[page.length - 1].recipe.id })).toString('base64url') : null,
-        missingStapleNames: staples.missingNames,
-      };
-    }, { householdId, userId, readOnly: true });
+      return { nodes, missingStapleNames: staples.missingNames };
   }
 }
 

@@ -6,7 +6,7 @@ export const appMessages = {
     moreSubtitle: 'Tools and preferences for your kitchen.', appearance: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', session: 'Applies for this session.',
     previews: 'Browse your kitchen tools. Unavailable features are clearly marked.', unavailable: 'Currently unavailable', preview: 'Preview only', recipesAction: 'Browse sample recipes',
     settingsAction: 'Open settings', shoppingAction: 'Open shopping list', plannerAction: 'Open manual meal planner', notImplemented: 'Not implemented yet', missing: 'Feature not found', missingBody: 'This destination is not part of the current preview.',
-    notice: 'This screen is an availability notice, not a working service.', backMore: 'Back to More', local: 'Remy 0.4.0 · Local inventory',
+    notice: 'This screen is an availability notice, not a working service.', backMore: 'Back to More', local: 'Remi · Local inventory',
     healthBody: 'Nutrition features are planned. No health analysis or personalized recommendations are available.',
   },
   ar: {
@@ -20,8 +20,8 @@ export const appMessages = {
 } as const;
 
 export const menuGroupLabels = {
-  en: { 'Plan & cook': 'Plan & cook', 'Stay connected': 'Stay connected', 'You & Remy': 'You & Remy' },
-  ar: { 'Plan & cook': 'التخطيط والطهي', 'Stay connected': 'ابقَ على تواصل', 'You & Remy': 'أنت وريمي' },
+  en: { 'Plan & cook': 'Plan & cook', 'Stay connected': 'Stay connected', 'You & Remi': 'You & Remi' },
+  ar: { 'Plan & cook': 'التخطيط والطهي', 'Stay connected': 'ابقَ على تواصل', 'You & Remi': 'أنت وريمي' },
 };
 export const featureMessages: Record<'en' | 'ar', Record<string, { title: string; description: string }>> = {
   en: Object.fromEntries(menuItems.map(({ id, title, description }) => [id, { title, description }])),

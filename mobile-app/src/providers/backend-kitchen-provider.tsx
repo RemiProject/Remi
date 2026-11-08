@@ -9,6 +9,8 @@ import { getAuth } from '@/services/auth';
 import { isBackendInventoryEnabled } from '@/services/inventory-feature';
 import { loadInventoryArabicNames } from '@/services/inventory-catalog-names';
 import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
+import { connectivity } from '@/services/connectivity';
+import { offlineCache } from '@/services/offline-cache';
 import { useAuth } from './auth-provider';
 
 const Context = createContext<BackendKitchenStore | null>(null);
@@ -18,6 +20,7 @@ export function BackendKitchenProvider({ children }: PropsWithChildren) {
 function EnabledBackendKitchenProvider({ children }: PropsWithChildren) {
   const { user, busy, ready } = useAuth();
   const timezone = useRef<string | null>(null);
+  const ownerRef = useRef<string | null>(null);
   const [store] = useState(() => new BackendKitchenStore(() => {
     const auth = getAuth();
     const repository = createGraphqlInventoryRepository(auth, AsyncStorage)!;
@@ -39,14 +42,24 @@ function EnabledBackendKitchenProvider({ children }: PropsWithChildren) {
         return items[0];
       },
       async list() {
-        const { items, household } = await readWithNames(repository.list);
-        timezone.current = household.timezone;
-        return { items, today: inventoryExpiryDay(new Date().toISOString(), household.timezone)! };
+        const userId = ownerRef.current;
+        try {
+          const { items, household } = await readWithNames(repository.list);
+          timezone.current = household.timezone;
+          if (userId) offlineCache.write(userId, 'kitchen', { timezone: household.timezone, items });
+          return { items, today: inventoryExpiryDay(new Date().toISOString(), household.timezone)! };
+        } catch (error) {
+          // Offline: the kitchen as last loaded. Changes still need the server, so they fail with a clear message.
+          const saved = userId && connectivity.isOffline() ? await offlineCache.read<{ timezone: string; items: InventoryReadItem[] }>(userId, 'kitchen') : null;
+          if (!saved) throw error;
+          timezone.current = saved.timezone;
+          return { items: saved.items, today: inventoryExpiryDay(new Date().toISOString(), saved.timezone)! };
+        }
       },
     };
   }));
   const owner = ready && !busy ? user?.id ?? null : null;
-  useEffect(() => { timezone.current = null; store.setUser(owner); }, [store, owner]);
+  useEffect(() => { ownerRef.current = owner; timezone.current = null; store.setUser(owner); }, [store, owner]);
   useEffect(() => subscribeHouseholdSelection(() => {
     timezone.current = null;
     store.setUser(null);

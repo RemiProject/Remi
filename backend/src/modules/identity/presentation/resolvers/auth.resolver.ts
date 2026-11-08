@@ -17,7 +17,9 @@ import { RequestPasswordResetCommand } from '@/modules/identity/application/comm
 import { ResetPasswordCommand } from '@/modules/identity/application/commands/reset-password/reset-password.command.js';
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
 import { GetMeQuery } from '@/modules/identity/application/queries/get-me/get-me.query.js';
+import { DeleteAccountCommand } from '@/modules/identity/application/commands/delete-account/delete-account.command.js';
 import {
+  DeleteAccountInput,
   LoginInput,
   LogoutInput,
   RefreshAccessTokenInput,
@@ -65,6 +67,14 @@ export class AuthResolver {
   @Mutation(() => Boolean, { description: 'Revoke the session for the given refresh token (this device).' })
   async logout(@Ctx() ctx: RequestContext, @Args('input') i: LogoutInput) {
     await this.commandBus.execute(new LogoutCommand(ctx.userId, i.refreshToken));
+    return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean, { description: 'Permanently delete the signed-in account. Owned households pass to the next member or close.' })
+  async deleteAccount(@Ctx() ctx: RequestContext, @Args('input') i: DeleteAccountInput) {
+    await this.commandBus.execute(new DeleteAccountCommand(ctx.userId, i.password));
     return true;
   }
 

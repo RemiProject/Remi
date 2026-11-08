@@ -624,7 +624,8 @@ test('Cooking hook masks a changed identity immediately and provider clears prog
   let user = { id: 'a' }, revision = 1; const effects = [];
   const store = new BackendRecipesStore(() => assert.fail('No network needed for Cooking progress'));
   const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
-    react: { createContext: () => ({ Provider: 'Context' }), useContext: () => store, useState: () => [store],
+    '@/services/connectivity': { connectivity: { isOffline: () => false } }, '@/services/offline-cache': { offlineCache: {} },
+    react: { useRef: value => ({ current: value }), createContext: () => ({ Provider: 'Context' }), useContext: () => store, useState: () => [store],
       useEffect: effect => effects.push(effect), useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
     '@react-native-async-storage/async-storage': {}, '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes },
     '@/repositories/graphql-recipe-repository': {}, '@/services/inventory-feature': { isBackendInventoryEnabled: () => true },
@@ -651,7 +652,8 @@ test('Home initial ensure and provider inventory effects share one request, then
   let calls = 0; const effects = [];
   const store = new BackendRecipesStore(() => ({ list: async () => { calls++; return readPage(); } }));
   const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
-    react: { createContext: () => ({ Provider: 'RecipesContext' }), useContext: () => store,
+    '@/services/connectivity': { connectivity: { isOffline: () => false } }, '@/services/offline-cache': { offlineCache: {} },
+    react: { useRef: value => ({ current: value }), createContext: () => ({ Provider: 'RecipesContext' }), useContext: () => store,
       useState: () => [store], useEffect: effect => effects.push(effect), useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
     '@react-native-async-storage/async-storage': {},
     '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes }, '@/repositories/graphql-recipe-repository': {},
@@ -673,7 +675,8 @@ test('recipes provider masks account/household changes before effects and flag o
   let auth = { user: { id: 'user' }, busy: false, ready: true, error: null }, revision = 1, householdRevision = 1, enabled = true;
   const store = new BackendRecipesStore(() => ({ list: async () => readPage() })); store.setOwner('user:1:1'); await store.refresh();
   const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
-    react: { createContext: () => ({}), useContext: () => store, useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
+    '@/services/connectivity': { connectivity: { isOffline: () => false } }, '@/services/offline-cache': { offlineCache: {} },
+    react: { useRef: value => ({ current: value }), createContext: () => ({}), useContext: () => store, useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
     '@react-native-async-storage/async-storage': {},
     '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes }, '@/repositories/graphql-recipe-repository': {},
     '@/services/inventory-feature': { isBackendInventoryEnabled: () => enabled },

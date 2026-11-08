@@ -8,6 +8,8 @@ import { useLanguage } from '@/providers/language-provider';
 import { getAuth } from '@/services/auth';
 import { getActiveHouseholdRevision, subscribeHouseholdSelection } from '@/services/active-household-service';
 import { errorMessage } from '@/services/kitchen-api';
+import { connectivity } from '@/services/connectivity';
+import { offlineCache } from '@/services/offline-cache';
 
 export function useKitchenIdentity() {
   const { user } = useAuth(); const auth = getAuth();
@@ -20,7 +22,8 @@ export function ConnectedScreen({ title, children, footer, back = true }: PropsW
   return <SafeAreaView edges={back ? ['top','bottom'] : []} style={{ flex: 1 }}><Screen footer={user ? footer : undefined} rtl={language === 'ar'}><PageHeader title={title} back={back ? <Button label={copy('Back', 'رجوع')} variant="text" icon="back" rtl={language === 'ar'} onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} /> : undefined} />
     {!ready || busy ? <AppText>{copy('Loading your account…', 'جارٍ تحميل حسابك…')}</AppText> : !user ? <EmptyState title={copy('Your kitchen, together', 'مطبخك في مكان واحد')} description={copy('Sign in to sync recipes, plans and shopping with your household.', 'سجّل الدخول لمزامنة الوصفات والخطط والمشتريات مع أسرتك.')} action={copy('Sign in', 'تسجيل الدخول')} onPress={() => router.push('/login')} /> : children}</Screen></SafeAreaView>;
 }
-export function useKitchenData<T>(loader: () => Promise<T>) {
+/** `offlineKey` keeps the last result on the phone, shown when the server can't be reached. */
+export function useKitchenData<T>(loader: () => Promise<T>, offlineKey?: string) {
   const { user, ready, busy } = useAuth(); const revision = getAuth().getIdentityRevision();
   const [householdRevision, setHouseholdRevision] = useState(() => getActiveHouseholdRevision(getAuth()));
   useEffect(() => subscribeHouseholdSelection(() => setHouseholdRevision(getActiveHouseholdRevision(getAuth()))), []);
@@ -31,9 +34,19 @@ export function useKitchenData<T>(loader: () => Promise<T>) {
     const request = ++generation.current;
     if (!owner) { setState({ owner: null, data: null, error: null, loading: false }); return; }
     setState(current => ({ owner, data: current.owner === owner ? current.data : null, error: null, loading: true }));
-    try { const data = await loaderRef.current(); if (request === generation.current && revision === getAuth().getIdentityRevision()) setState({ owner, data, error: null, loading: false }); }
-    catch (error) { if (request === generation.current) setState(current => ({ ...current, owner, error: errorMessage(error), loading: false })); }
-  }, [owner, revision]);
+    try {
+      const data = await loaderRef.current();
+      if (request === generation.current && revision === getAuth().getIdentityRevision()) {
+        setState({ owner, data, error: null, loading: false });
+        if (offlineKey && user) offlineCache.write(user.id, offlineKey, data);
+      }
+    } catch (error) {
+      const saved = offlineKey && user && connectivity.isOffline() ? await offlineCache.read<T>(user.id, offlineKey) : null;
+      // Offline with a saved copy: show it; the offline banner says why it may be out of date.
+      if (request === generation.current) setState(current => saved && current.data === null ? { owner, data: saved, error: null, loading: false }
+        : { ...current, owner, error: current.data !== null && connectivity.isOffline() ? null : errorMessage(error), loading: false });
+    }
+  }, [owner, revision, offlineKey, user]);
   useFocusEffect(useCallback(() => { void reload(); return () => { generation.current++; }; }, [reload]));
   return { data: owner && state.owner === owner ? state.data : null, error: owner && state.owner === owner ? state.error : null, loading: !!owner && (state.owner !== owner || state.loading), reload };
 }

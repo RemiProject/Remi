@@ -39,7 +39,7 @@ export function ConnectedRecipesScreen() {
   return catalogue ? <CatalogueScreen initial={browse ?? 'all'} onSuggestions={() => setCatalogue(false)} /> : <BackendRecipesScreen onBrowseAll={() => setCatalogue(true)} />;
 }
 function CatalogueScreen({ initial, onSuggestions }: { initial: string; onSuggestions: () => void }) {
-  const copy = useCopy(); const { language } = useLanguage(); const state = useKitchenData(loadRecipes); const width = useGridCardWidth();
+  const copy = useCopy(); const { language } = useLanguage(); const state = useKitchenData(loadRecipes, 'recipes'); const width = useGridCardWidth();
   const [query, setQuery] = useState(''); const [tab, setTab] = useState(initial); const [limit, setLimit] = useState(24);
   const all = [...(state.data ?? [])].sort((a, b) => Number(!!getCookbookContent(b.name, b.id)) - Number(!!getCookbookContent(a.name, a.id)));
   const visible = filterRecipes(all, tab).filter(recipe => recipeNameMatches(recipe.name, query, language));
@@ -63,7 +63,7 @@ export function ConnectedRecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>(); const identity = useKitchenIdentity(); return <RecipeContent key={`${identity}:${id}`}  id={id} />;
 }
 function RecipeContent({ id }: { id: string }) {
-  const copy = useCopy(); const { colors } = useRemyTheme(); const state = useKitchenData(() => loadRecipe(id)); const recipe = state.data; const [servings, setServings] = useState<number | null>(null);
+  const copy = useCopy(); const { colors } = useRemyTheme(); const state = useKitchenData(() => loadRecipe(id), `recipe:${id}`); const recipe = state.data; const [servings, setServings] = useState<number | null>(null);
   const matches = useBackendRecipes(); const { owner, ensureDetail } = matches; const { language } = useLanguage(); const insets = useSafeAreaInsets();
   const goal = useNutritionGoal(!!owner);
   const reduced = useReducedMotion();

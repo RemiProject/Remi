@@ -147,6 +147,11 @@ scalar DateTime
 """Arbitrary-precision decimal serialized as a string"""
 scalar Decimal
 
+input DeleteAccountInput {
+  """The current password, to confirm it is really the account holder"""
+  password: String!
+}
+
 enum DietaryPreference {
   DAIRY_FREE
   GLUTEN_FREE
@@ -566,6 +571,11 @@ type Mutation {
   createPurchaseOrder(input: CreatePurchaseOrderInputType!): PurchaseOrderType!
   createRecipe(input: CreateRecipeInputType!): RecipeType!
   createShoppingList(input: CreateShoppingListInputType!): ShoppingListType!
+
+  """
+  Permanently delete the signed-in account. Owned households pass to the next member or close.
+  """
+  deleteAccount(input: DeleteAccountInput!): Boolean!
   deleteShoppingList(id: ID!): Boolean!
   discardStock(input: InventoryStockInput!): InventoryMutationResult!
   dismissRecommendation(id: String!): Boolean!
@@ -876,6 +886,9 @@ type Query {
   myDevices: [UserDeviceType!]!
   myHouseholds: [MyHousehold!]!
   myProfile: MyProfileType!
+
+  """The household's own recipes, newest first"""
+  myRecipes(after: String, first: Int! = 20): RecipeConnectionType!
   mySafetyHistory(after: String, first: Int! = 20): SafetyHistoryConnectionType!
   notificationBadge: NotificationBadgeType!
   notificationPreferences: [NotificationPreferenceType!]!

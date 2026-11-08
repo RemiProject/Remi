@@ -10,6 +10,10 @@ Start with [`VERSION-3.md`](../VERSION-3.md) for the current version: one sectio
 | [receipt-scanning.md](receipt-scanning.md) | Reading a receipt photo: research into receipt apps, the parser, catalogue matching, adding to the kitchen, and the first real receipt and its fixes |
 | [shelf-life.md](shelf-life.md) | Purchase dates and probable expiry dates for fresh produce from USDA FoodKeeper averages |
 | [account-setup/](account-setup/README.md) | Creating a Remi account on an iPhone, step by step with screenshots |
+| [recipe-import.md](recipe-import.md) | Saving a recipe from a link: page parsing, ingredient lines, catalogue matching and My recipes |
+| [ui-spacing.md](ui-spacing.md) | The spacing and motion pass: rules, before and after per screen |
+| [release.md](release.md) | Publishing: what is done in code, hosting, email, Apple account steps, App Store listing and privacy answers |
+| [privacy-policy.md](privacy-policy.md), [terms.md](terms.md) | The privacy policy and terms the app shows (generated from `mobile-app/src/data/legal.ts`) |
 | [phone-testing.md](phone-testing.md) | Building and installing on an iPhone against a local API, stress-test results, and bugs found on the phone |
 
 ## Data and content
@@ -28,7 +32,7 @@ Start with [`VERSION-3.md`](../VERSION-3.md) for the current version: one sectio
 |---|---|
 | [../backend/README.md](../backend/README.md) | Setup, scripts, phases and handoff notes |
 | [../backend/GRAPHQL_ENDPOINTS.md](../backend/GRAPHQL_ENDPOINTS.md) | Every GraphQL operation, including version 3's recipe nutrition, `matchReceiptItems`, `receiveReceipt` and expiry estimates |
-| `../backend/prisma/migrations/` | The schema, one SQL file per change. Version 3 added 0030 (nutrition values that USDA doesn't report), 0031 (shelf life) and 0032 (receipt storage fix) |
+| `../backend/prisma/migrations/` | The schema, one SQL file per change. Version 3 added 0030 (nutrition values that USDA doesn't report), 0031 (shelf life), 0032 (receipt storage fix), 0033 (saved recipes from links) and 0034 (account deletion) |
 
 ## Earlier versions
 

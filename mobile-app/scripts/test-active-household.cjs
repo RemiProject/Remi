@@ -31,6 +31,7 @@ function harness({ memberships = [member('one')], backendUrl = 'https://api.exam
   let currentUser = userId;
   const calls = [];
   const client = createBackendClient(backendUrl, async (_url, init) => {
+    if (String(_url).endsWith('/health/live')) return Response.json({ status: 'ok' });
     const call = { ...JSON.parse(init.body), headers: init.headers };
     calls.push(call);
     let data;

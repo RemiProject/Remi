@@ -1,3 +1,4 @@
+import { connectivity } from './connectivity';
 export function resolveBackendUrl(options: {
   explicitUrl?: string; development: boolean; platform: string; hostUri?: string | null; webHostname?: string;
 }): string {
@@ -38,7 +39,10 @@ export function createBackendClient(baseUrl: string, transport: typeof fetch = f
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 12000);
     try {
-      const response = await transport(`${baseUrl}${path}`, { ...init, signal: controller.signal });
+      let response: Response;
+      try { response = await transport(`${baseUrl}${path}`, { ...init, signal: controller.signal }); }
+      catch (error) { connectivity.report(false); throw error; }
+      connectivity.report(true);
       if (!response.ok) throw new BackendError(`Backend HTTP ${response.status}`, response.status);
       return await response.json() as T;
     } catch (error) {
@@ -63,6 +67,8 @@ export function createBackendClient(baseUrl: string, transport: typeof fetch = f
   }
   return {
     graphql,
+    /** Throws when the server cannot be reached; sends no credentials. */
+    async live() { await request<unknown>('/health/live'); },
     async checkConnection() {
       const health = await request<{ status: string }>('/health/live');
       if (health.status !== 'ok') throw new BackendError('Backend liveness check failed.');

@@ -292,6 +292,32 @@ Source, method and checks: [`docs/shelf-life.md`](docs/shelf-life.md).
   - **Kitchen:** estimated dates are marked "about" and explained on the food page.
   - **Everything sorted by expiry** (Use first, recipe suggestions, first-expiring-first-used) now covers produce.
 
+### 20. Saving recipes from links (`version-3-ui`)
+Details: [`docs/recipe-import.md`](docs/recipe-import.md).
+
+- Paste a recipe link (Quick add → Save a recipe from a link). The server reads the page's recipe data (schema.org JSON-LD), splits each ingredient line into amount, unit and food, and links the foods to the catalogue with the receipt matcher.
+- The recipe is saved for the household and appears under **My recipes** in the cookbook, with its photo, ingredient lines and an "Open the original" link.
+- The share sheet ("Share → Remi") is built but switched off until the App Group is registered (`docs/release.md`).
+
+### 21. Spacing and motion (`version-3-ui`)
+Details: [`docs/ui-spacing.md`](docs/ui-spacing.md).
+
+- Recipe page: a taller photo that stretches and parallaxes, one facts row, servings next to Ingredients.
+- Kitchen, Home, the planner, Shopping and Health: headings close to their content, one control row per decision, list rows instead of stacks of cards.
+- Recipe cards shrink slightly when pressed; grids fade up once on first load.
+
+### 22. Ready to publish (`version-3-ui`)
+Steps for the owner of the Apple and hosting accounts: [`docs/release.md`](docs/release.md).
+
+- **Account deletion** in Your account, confirmed with the password. Shared households pass to the next member.
+- **Privacy policy and terms** in the app (sign-up and More) and in [`docs/privacy-policy.md`](docs/privacy-policy.md) and [`docs/terms.md`](docs/terms.md), English and Arabic.
+- **Push reminders:** Notifications → Turn on reminders. The server delivers to iPhones through APNs and to Android through FCM.
+- **Offline:** the last loaded kitchen, plans, lists, recipes and Health stay readable; an offline strip says so. Being offline no longer signs you out when the session token is due for renewal.
+- **Counter** is now a storage place you can choose and edit.
+- **Faster suggestions:** ranked suggestions are cached per household and person, and recomputed when anything they depend on changes.
+- **Safer link import:** the server connects only to the address it checked, so a site that changes its DNS answer can't point it at a private network.
+- **Release setup:** version 3.0.0, permission prompts that name Remi and explain receipts, `eas.json`, and build switches for teams without push or App Groups (`REMI_NO_PUSH`, `REMI_NO_SHARE_EXTENSION`).
+
 ## Design archive
 
 `Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.
@@ -304,11 +330,10 @@ Source, method and checks: [`docs/shelf-life.md`](docs/shelf-life.md).
 - **Arabic swipe direction:** in Arabic the progress bar runs right to left, but the step pager still swipes like English. Mirror the pager in RTL.
 - **Timer and ingredients view:** switching to the Ingredients view unmounts the step pages, so a running timer stops. Lift timer state into the screen, or keep the pager mounted and hidden.
 - **Home "Dish of the day":** a large Mob-style "Cook tonight" photo hero card that leads the rail. Every recipe now has a photo, so this is unblocked.
-- **Shopping header:** the three stacked actions at the top (quick list, this week's meals, add item) could become one row of icon pills, with the list moved up.
-- **Screens not reviewed one by one:** Kitchen, food detail, auth, health, household, quick add, settings. They inherit the palette, type and components, and the ones opened looked right, but each still needs a visual pass.
+- **Screens not reviewed one by one:** food detail, auth, household, quick add, settings. They inherit the palette, type and components, and the ones opened looked right, but each still needs a visual pass.
 - **Android:** receipts there still use plain-text OCR without line positions. A Kotlin twin of `modules/receipt-vision` is the upgrade.
-- **Counter storage:** the app shows the Counter storage place but cannot edit it (`toMobileStorage`). Remi now suggests Pantry for room temperature; supporting Counter fully would need a new storage option in the app.
 - **Shelf life beyond produce:** FoodKeeper also covers dairy, meat, fish and bread; map them in `backend/data/shelf-life.csv`.
-- **Suggestions under load:** about 1.2 s at 25 concurrent requests (`docs/phone-testing.md`). Cache per household before a large launch.
 - **Debug builds:** they don't link against the prebuilt React Native core; use Release builds (see `docs/phone-testing.md`).
+- **Publishing:** hosting the server, real email, the APNs key and the App Group are account steps listed in `docs/release.md`.
+- **App studies:** the Crème (UI) and Pantri (receipts) reverse-engineering studies need those apps installed on this Mac; neither was, so both passes worked from Remi's own screens and published material.
 - **Not covered:** Android devices and VoiceOver. An iPhone 12 was tested (see `docs/phone-testing.md`).
