@@ -52,7 +52,7 @@ Legend: ✅ done · ⬜ to do
 | 14 | Launch screen | Remi logo, cobalt on paper (light) and white on night (dark), matching the app background | ✅ | this commit |
 | 13 | App icon | The chef's hat and face, cobalt on lemon, for iOS (Icon Composer, Liquid Glass), Android adaptive (with monochrome) and web favicon. Replaces the Expo placeholder | ✅ | this commit |
 | 15 | Recipe-first UI | Cleaner screens that show more recipes, after two food-app references the user shared (see the log): 2-column recipe grid, cuisine tabs, art tiles for recipes without photos, photo-sheet recipe page | ✅ | this commit |
-| 16 | Food photography | Photos for all 400 catalogue recipes and 474 ingredients from the image handoff, on cards, the recipe page, onboarding, Kitchen and Use first, with credits in More | ✅ | `14308f2` |
+| 16 | Food photography | Photos for all 400 catalogue recipes and all 800 catalogue ingredients from the image handoff, on cards, the recipe page, onboarding, Kitchen and Use first, with credits in More | ✅ | `14308f2` |
 | 17 | Nutrition | Recipe nutrition per serving from USDA data, with Mob-style macro boxes, labels, High protein and Under 500 kcal tabs, kcal on cards, planner day totals and a Health Today screen against goals. Plan and results in `docs/nutrition.md` | ✅ | `121df71` |
 | 18 | Receipt scanning | A receipt photo is read line by line (native Vision module, English and Arabic). Header, items and totals are split; bags, fees and household goods are left out. Items are matched to the catalogue and confirmed foods are added in one step. `docs/receipt-scanning.md` | ✅ | `26cfc0c`, `f977405` |
 | 19 | Probable expiry dates | Purchase day and USDA FoodKeeper average expiry for 130 fresh foods, re-estimated when moved, shown as "about" dates. `docs/shelf-life.md` | ✅ | `aefe6dd` |
@@ -223,17 +223,19 @@ Studied: two food-app concept shots the user shared, plus Mob's shipped widget i
 
 ### 16. Food photography
 Source: the Remi v3 image handoff (`START-HERE-CLAUDE.md`, `image-map.json`, `manifest.json`).
-- Delivered: 874 reviewed images (all 400 recipes and 474 ingredients). The 326 remaining ingredients are still to be generated.
-- 873 photos are AI-generated; one (garlic) is a CC BY-SA photograph.
+- Delivered: 1,200 reviewed images, the whole frozen catalogue (400 recipes and 800 ingredients). The first 874 arrived on 2026-11-07; the last 326 ingredients on 2026-11-09.
+- 1,199 photos are AI-generated; one (garlic) is a CC BY-SA photograph.
 
 **Done:**
 - **Import (`mobile-app/scripts/import-food-images.py`):**
   - Verifies each master's SHA-256 and uses only `generated_reviewed` / `sourced_reviewed` entries.
-  - Writes WebP copies to `assets/food/`: recipes 800 px, ingredients 256 px, about 30 MB in all.
+  - Writes WebP copies to `assets/food/`: recipes 800 px, ingredients 256 px (centred square crops, never upscaled), 33 MB in all. The full-size masters stay in the handoff, not in the app.
+  - Re-running it writes only photos whose source changed: `assets/food/sources.json` records each source's SHA-256. The second run added the 326 new ingredients and left the 874 existing files byte for byte as they were.
   - Generates `src/data/food-images.ts`.
 - **Matching:**
   - Recipes: `recipe_key` → catalogue name (`recipes.csv`) → lower-cased name, the same key the backend importer upserts on. All 400 recipes in the local database resolve.
-  - Ingredients: exact food name, Arabic name and aliases. 474 of the database's 851 foods resolve.
+  - Ingredients: exact food name, Arabic name and aliases. All 800 catalogue foods resolve (2,841 lookup keys).
+  - **Foods newer than the library (no photo, shown with the plain food icon):** `vegetable oil` (added to `foods.csv` for recipe import), and 50 foods that exist only in the development seed `backend/prisma/seed/catalog.seed.ts`: baklava, basbousa, basmati rice, beef mince, beef ribs, beef round, beef steak, black tea, bone marrow, broad beans, butter beans, camel meat, cannellini beans, carob drink, chicken stock, chocolate, coffee, cream, dates paste, falafel mix, farro, ghee oil, goat liver, green lentils, green onion, green tea, halloumi cheese, hibiscus tea, kunafa, lentil flour, liquid egg whites, molasses cookies, panko, parsley root, peas, plain flour, polenta, prawn, rolled oats, sardine, sea bream, soft drink, split peas, tahini halva, tangerine, toast bread, turkey leg, whey, whole chicken, whole egg. They were not mapped to look-alike photos. `scripts/test-food-images.cjs` fails if another catalogue food arrives without a photo, unless it is listed there.
 - **Recipes:**
   - `RecipeArt` (cards, the recipe page hero, Upcoming meals), the recipe detail placeholder and onboarding's recipe picks show the photo through one `recipeImage()` lookup.
   - Lookup order: the catalogue photo first, then the old bundled cookbook photo, then the letter tile.
@@ -324,8 +326,8 @@ Steps for the owner of the Apple and hosting accounts: [`docs/release.md`](docs/
 
 ## Still to do (next iterations)
 
-- **Remaining ingredient photos:** 326 ingredients still need images (the handoff's generation resumes after its usage reset). Re-run `scripts/import-food-images.py` when they arrive.
-- **Ingredient photos on the recipe page:** the ingredient list still uses pink bullets; small photos could replace them now that 474 exist.
+- **Photos for newer foods:** `vegetable oil` and the 50 seed-only foods listed in element 16 need photos (or should be folded into the CSV catalogue first). Photos for recipes people save from links come from the page they were saved from; generating one when a page has none is a separate feature, not started.
+- **Ingredient photos on the recipe page:** the ingredient list still uses pink bullets; small photos could replace them now that every catalogue ingredient has one.
 - **Bundle size:** the photos add about 30 MB to the app. If that matters for release, serve them from the backend or a CDN instead.
 - **Arabic swipe direction:** in Arabic the progress bar runs right to left, but the step pager still swipes like English. Mirror the pager in RTL.
 - **Timer and ingredients view:** switching to the Ingredients view unmounts the step pages, so a running timer stops. Lift timer state into the screen, or keep the pager mounted and hidden.

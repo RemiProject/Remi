@@ -5,7 +5,7 @@ Remi is a cooking and kitchen app: recipes, a planner, a shopping list and the f
 - **[docs/](docs/README.md):** the index of all documentation.
 
 What version 3 added, beyond the redesign:
-- **Food photography:** every recipe has a photo, and so do 474 ingredients.
+- **Food photography:** every catalogue recipe (400) and ingredient (800) has a photo.
 - **Recipe nutrition:** values per serving from USDA data, with labels, filters, planner totals and Health "Today". See [docs/nutrition.md](docs/nutrition.md).
 - **Receipt scanning:** a receipt photo is read line by line and matched to the catalogue. Bags, fees and household goods are left out, and the confirmed foods go into the kitchen in one step. See [docs/receipt-scanning.md](docs/receipt-scanning.md).
 - **Probable expiry dates:** fresh produce gets a purchase day and an expiry estimate from USDA FoodKeeper averages. See [docs/shelf-life.md](docs/shelf-life.md).
