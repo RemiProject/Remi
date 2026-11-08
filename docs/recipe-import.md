@@ -45,6 +45,8 @@ A host that changes its DNS answer between the check and the request is a known 
 ## App
 
 - **Share sheet:** `expo-sharing`'s share extension, configured in `app.json`, accepts web links and text. `src/app/+native-intent.ts` sends shares to `/import-recipe`.
+  - **Phone builds:** the extension needs the App Group `group.com.remi.cookbook.independent` registered on the Apple team. Until it is, phone builds are made with the extension turned off: `REMI_NO_SHARE_EXTENSION=1 npx expo prebuild --platform ios --clean`, then `pod install` (see `app.config.ts`). Pasting a link still works.
+  - **Turning it on:** in Xcode, open Remi → Signing & Capabilities, add App Groups, and add that group. Then prebuild again without the variable.
 - **Import screen (`/import-recipe`):** paste, or receive a shared page. Review the name, servings and which ingredients link to Remi's food list, then save.
 - **Where it appears:** a "My recipes" tab in the cookbook once one exists, plus "Save a recipe from a link" in the cookbook and the + menu.
 
