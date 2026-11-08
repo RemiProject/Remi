@@ -42,7 +42,8 @@ export function buildReview(parse: ReceiptParse, matches: readonly ReceiptLineMa
     const match = matches[index] ?? { query: item.name, confidence: 'NONE', food: null, alternatives: [], inKitchen: [] };
     const base: ReviewLine = { key: `${index}`, item, match, food: null, include: false, amount: '', unit: 'PIECE', storage: 'PANTRY', check: false };
     if (!match.food || match.confidence === 'NONE') return base;
-    return { ...withFood(base, match.food), check: match.confidence === 'MEDIUM' };
+    // An unsure match is suggested but not ticked: adding a wrong food is worse than adding none.
+    return { ...withFood(base, match.food), include: match.confidence === 'HIGH', check: match.confidence === 'MEDIUM' };
   });
 }
 
@@ -59,12 +60,13 @@ export function groupByCategory(lines: readonly ReviewLine[]) {
 
 export const amountValid = (amount: string) => /^\d+(?:\.\d{1,3})?$/.test(amount.trim()) && Number(amount) > 0;
 
-/** What will be sent, or the keys of included lines still missing an amount. */
-export function submission(lines: readonly ReviewLine[]):
-  | { ok: true; items: { foodId: string; amount: string; unit: ReceiptUnit; storageLocation: Storage }[] }
-  | { ok: false; missing: string[] } {
+/** Ticked lines ready to send, and the keys of ticked lines still missing an amount (sent later). */
+export function submission(lines: readonly ReviewLine[]) {
   const chosen = lines.filter(line => line.include && line.food);
-  const missing = chosen.filter(line => !amountValid(line.amount)).map(line => line.key);
-  if (missing.length) return { ok: false, missing };
-  return { ok: true, items: chosen.map(line => ({ foodId: line.food!.foodId, amount: String(Number(line.amount.trim())), unit: line.unit, storageLocation: line.storage })) };
+  const ready = chosen.filter(line => amountValid(line.amount));
+  return {
+    items: ready.map(line => ({ foodId: line.food!.foodId, amount: String(Number(line.amount.trim())), unit: line.unit, storageLocation: line.storage })),
+    keys: ready.map(line => line.key),
+    missing: chosen.filter(line => !amountValid(line.amount)).map(line => line.key),
+  };
 }

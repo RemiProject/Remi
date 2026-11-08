@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Icon } from '@/components/ui/icon';
 import { router } from 'expo-router';
 import { AppText, Badge, Button, Card, Chip, SectionHeader, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
@@ -48,6 +49,7 @@ function ReceiptBody() {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [uploadedRef, setUploadedRef] = useState('');
+  const [addedSoFar, setAddedSoFar] = useState(0);
   // One key per reviewed receipt: retrying a failed add can't add the same foods twice.
   const key = useRef(newKey());
   const guard = useRef(false);
@@ -74,20 +76,23 @@ function ReceiptBody() {
   });
   const add = () => run('adding', async () => {
     if (phase.name !== 'review') return;
-    const result = submission(lines);
-    if (!result.ok) { setError(t.missing(result.missing.length)); return; }
-    const done = await receiveReceipt({ idempotencyKey: key.current, purchaseDate: phase.parse.date ?? undefined, items: result.items });
+    const { items, keys, missing } = submission(lines);
+    if (!items.length) { setError(t.missing(missing.length)); return; }
+    const done = await receiveReceipt({ idempotencyKey: key.current, purchaseDate: phase.parse.date ?? undefined, items });
     try { await kitchen.retry(); } catch { /* The foods were added; Kitchen refreshes when it opens. */ }
-    setPhase({ name: 'done', added: done.added, replayed: done.replayed });
+    // Foods still waiting for an amount stay on screen; the next add is a new request.
+    const rest = lines.filter(line => !keys.includes(line.key));
+    if (missing.length) { key.current = newKey(); setLines(rest); setAddedSoFar(count => count + done.added); setNotice(t.addedSome(done.added, missing.length)); return; }
+    setPhase({ name: 'done', added: addedSoFar + done.added, replayed: done.replayed });
   });
-  const restart = () => { setPhase({ name: 'capture' }); setLines([]); setPhotoRef(undefined); setTyped(''); setShowTyped(false); setNotice(''); setError(''); };
+  const restart = () => { setAddedSoFar(0); setPhase({ name: 'capture' }); setLines([]); setPhotoRef(undefined); setTyped(''); setShowTyped(false); setNotice(''); setError(''); };
 
   if (phase.name === 'done') return <Card style={{ gap: spacing.md }}>
     <AppText variant="heading" accessibilityLiveRegion="polite">{phase.replayed ? t.alreadyAdded : t.added(phase.added)}</AppText>
     <View style={uiStyles.wrap}><Button label={t.openKitchen} onPress={() => router.replace('/kitchen')} /><Button label={t.another} variant="secondary" onPress={restart} /></View>
   </Card>;
 
-  if (phase.name === 'review') return <ReviewView parse={phase.parse} lines={lines} setLines={setLines} busy={busy !== ''} adding={busy === 'adding'} error={error} language={language} onAdd={() => { void add(); }} onRestart={restart} />;
+  if (phase.name === 'review') return <ReviewView parse={phase.parse} lines={lines} setLines={setLines} busy={busy !== ''} adding={busy === 'adding'} error={error} notice={notice} language={language} onAdd={() => { void add(); }} onRestart={restart} />;
 
   const ar = language === 'ar';
   return <>
@@ -107,15 +112,17 @@ function ReceiptBody() {
   </>;
 }
 
-function ReviewView({ parse, lines, setLines, busy, adding, error, language, onAdd, onRestart }: {
+function ReviewView({ parse, lines, setLines, busy, adding, error, notice, language, onAdd, onRestart }: {
   parse: ReceiptParse; lines: ReviewLine[]; setLines: (update: (lines: ReviewLine[]) => ReviewLine[]) => void;
-  busy: boolean; adding: boolean; error: string; language: Language; onAdd: () => void; onRestart: () => void;
+  busy: boolean; adding: boolean; error: string; notice: string; language: Language; onAdd: () => void; onRestart: () => void;
 }) {
   const t = receiptReviewCopy[language];
+  const { colors } = useRemyTheme();
   const [showSkipped, setShowSkipped] = useState(false);
   const { groups, unmatched } = useMemo(() => groupByCategory(lines), [lines]);
   const update = (lineKey: string, change: (line: ReviewLine) => ReviewLine) => setLines(all => all.map(line => line.key === lineKey ? change(line) : line));
-  const chosen = lines.filter(line => line.include && line.food).length;
+  const { items: ready, missing } = submission(lines);
+  const chosen = ready.length;
   const money = (value: number) => value.toLocaleString(language, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const date = parse.date ? new Date(`${parse.date}T12:00:00`).toLocaleDateString(language, { day: 'numeric', month: 'long', year: 'numeric' }) : t.today;
   const skipped = parse.ignored;
@@ -128,6 +135,10 @@ function ReviewView({ parse, lines, setLines, busy, adding, error, language, onA
       <AppText>{t.found(lines.filter(line => line.food).length)} · {t.skippedCount(skipped.length + unmatched.length)}</AppText>
       {parse.check.status === 'match' && <Badge tone="success" label={t.checkMatch(money(parse.check.printed!))} />}
       {parse.check.status === 'mismatch' && <Badge tone="warning" label={t.checkMismatch(money(parse.check.itemsSum), money(parse.check.printed!))} />}
+      <AppText variant="caption" muted>{t.tickHint}</AppText>
+      {missing.length > 0 && <AppText variant="caption" style={{ color: colors.warningText }}>{t.needAmount(missing.length)}</AppText>}
+      {notice !== '' && <AppText accessibilityLiveRegion="polite">{notice}</AppText>}
+      <Button label={adding ? t.adding : chosen === 0 && missing.length ? t.enterAmounts : t.addAll(chosen)} disabled={busy || chosen === 0} onPress={onAdd} />
     </Card>
 
     {groups.map(group => <View key={group.code} style={{ gap: spacing.sm }}>
@@ -151,7 +162,7 @@ function ReviewView({ parse, lines, setLines, busy, adding, error, language, onA
     </View>}
 
     {error !== '' && <AppText accessibilityRole="alert">{error}</AppText>}
-    <Button label={adding ? t.adding : t.addAll(chosen)} disabled={busy || chosen === 0} onPress={onAdd} />
+    <Button label={adding ? t.adding : chosen === 0 && missing.length ? t.enterAmounts : t.addAll(chosen)} disabled={busy || chosen === 0} onPress={onAdd} />
     <Button label={t.retake} variant="text" disabled={busy} onPress={onRestart} />
   </>;
 }
@@ -174,9 +185,14 @@ function ReviewRow({ line, language, disabled, onChange }: { line: ReviewLine; l
         {line.food && line.include && !open && <AppText>{[amountText, t.storages[line.storage]].filter(Boolean).join(' · ')}</AppText>}
         <AppText variant="caption" muted numberOfLines={2}>{line.item.raw}</AppText>
       </View>
-      {line.food && <Chip label={line.include ? t.add : t.skip} selected={line.include} disabled={disabled} onPress={() => onChange(current => ({ ...current, include: !current.include, check: false }))} />}
+      {line.food && <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: line.include, disabled }} accessibilityLabel={t.include(foodName(line.food, language))} disabled={disabled} hitSlop={10}
+        onPress={() => onChange(current => ({ ...current, include: !current.include, check: false }))}
+        style={{ width: 32, height: 32, borderRadius: radii.sm, borderWidth: 2, alignItems: 'center', justifyContent: 'center',
+          borderColor: line.include ? colors.primary : colors.border, backgroundColor: line.include ? colors.primary : 'transparent' }}>
+        {line.include && <Icon name="check" color={colors.onPrimary} size={20} />}
+      </Pressable>}
     </View>
-    {line.check && line.include && <View style={{ alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: radii.pill, backgroundColor: colors.warningSurface }}>
+    {line.check && <View style={{ alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: radii.pill, backgroundColor: colors.warningSurface }}>
       <AppText variant="caption" style={{ color: colors.warningText }}>{t.check}</AppText>
     </View>}
     {line.food && line.include && <AppText variant="caption" muted>{have.length ? t.inKitchen(have.map(stock => `${Number(stock.quantity).toLocaleString(language)} ${t.units[stock.unit as keyof typeof t.units] ?? stock.unit}`).join(' + ')) : t.newFood}</AppText>}

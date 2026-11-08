@@ -22,6 +22,8 @@ export interface ReceiptItem {
   name: string;
   /** How many were bought (packs or pieces). */
   count: number;
+  /** The receipt printed the count ("2 x", "3 @"), rather than one being assumed. */
+  counted: boolean;
   /** What one pack holds, read from the name ("1L", "500 g", "30 pcs"), or the weighed amount. */
   size: ReceiptAmount | null;
   /** Weighed by the shop, so `size` is the whole amount and `count` is 1. */
@@ -53,7 +55,12 @@ for (let i = 0; i < 10; i++) { DIGITS[String.fromCharCode(0x660 + i)] = String(i
 /** Arabic-Indic digits and separators to ASCII, and tidy spacing. */
 export const normalizeText = (text: string) => text.replace(/[٠-٩۰-۹٫٬،]/g, c => DIGITS[c] ?? c).replace(/[‎‏؜]/g, '')
   // OCR reads a quantity "x" as Cyrillic х/Х or as ×; standing alone it is the multiplication sign.
-  .replace(/(?<![\p{L}])[хХ×](?![\p{L}])/gu, 'x').replace(/\s+/g, ' ').trim();
+  .replace(/(?<![\p{L}])[хХ×](?![\p{L}])/gu, 'x')
+  // OCR reads "lb" as "1b", "Ib" or "ID": "1.85 1b", "/ ID", "0.011b" (0.01 lb).
+  .replace(/(\d)1b(?![\p{L}])/gu, '$1 lb').replace(/(?<=[\d/]\s?)(?:1b|Ib|ID|lD|1D)(?![\p{L}])/gu, 'lb')
+  // Logo marks: "FOODS®".
+  .replace(/[®™©]/gu, '')
+  .replace(/\s+/g, ' ').trim();
 
 const words = (list: string[]) => new RegExp(`(?<![\\p{L}\\p{N}])(?:${list.join('|')})(?![\\p{L}])`, 'iu');
 const ARABIC = /\p{Script=Arabic}/u;
@@ -64,7 +71,7 @@ const SUBTOTAL = words(['sub ?-?total', 'subtotal', 'المجموع الفرعي
 const TAX = words(['tax', 'vat', 'gst', 'hst', 'ضريبة', 'الضريبة', 'القيمة المضافة']);
 const PAYMENT = words(['visa', 'master ?card', 'mastercard', 'amex', 'mada', 'cash', 'card', 'credit', 'debit', 'tender(?:ed)?', 'change', 'apple pay', 'paid', 'approved', 'auth(?:orization)?', 'terminal', 'نقد[اًي]?', 'نقدي', 'كاش', 'شبكة', 'مدى', 'بطاقة', 'الباقي', 'المتبقي', 'مدفوع', 'فيزا']);
 const FOOTER = words(['thank', 'thanks', 'welcome', 'return', 'refund', 'exchange', 'policy', 'points', 'loyalty', 'member', 'you saved', 'saving[s]? today', 'items? sold', 'no\\.? of items', 'number of items', 'شكر[اً]?', 'نشكر', 'زيارتكم', 'استرجاع', 'استبدال', 'نقاط', 'عدد الأصناف', 'عدد القطع', 'وفرت']);
-const META = words(['tel', 'phone', 'fax', 'mobile', 'www', 'http', 'email', 'cashier', 'operator', 'clerk', 'server', 'register', 'till', 'pos', 'store ?#', 'branch', 'invoice', 'receipt', 'bill', 'order', 'table', 'trans(?:action)?', 'ref', 'vat ?(?:no|number|reg)', 'tax ?id', 'tin', 'cr ?no', 'date', 'time', 'هاتف', 'تليفون', 'جوال', 'فاكس', 'الكاشير', 'كاشير', 'فرع', 'فاتورة', 'إيصال', 'ايصال', 'رقم', 'الرقم الضريبي', 'سجل تجاري', 'التاريخ', 'الوقت']);
+const META = words(['tare', 'tare weight', 'net weight', 'tel', 'phone', 'fax', 'mobile', 'www', 'http', 'email', 'cashier', 'operator', 'clerk', 'server', 'register', 'till', 'pos', 'store ?#', 'branch', 'invoice', 'receipt', 'bill', 'order', 'table', 'trans(?:action)?', 'ref', 'vat ?(?:no|number|reg)', 'tax ?id', 'tin', 'cr ?no', 'date', 'time', 'هاتف', 'تليفون', 'جوال', 'فاكس', 'الكاشير', 'كاشير', 'فرع', 'فاتورة', 'إيصال', 'ايصال', 'رقم', 'الرقم الضريبي', 'سجل تجاري', 'التاريخ', 'الوقت']);
 const ADDRESS = words(['street', 'st\\.', 'road', 'rd\\.', 'avenue', 'ave\\.', 'blvd', 'district', 'floor', 'building', 'mall', 'شارع', 'طريق', 'حي', 'ميدان', 'برج', 'مول', 'الدور']);
 const DISCOUNT = words(['discount', 'disc', 'promo', 'promotion', 'coupon', 'saving', 'savings', 'offer', 'off', 'markdown', 'reduced', 'خصم', 'تخفيض', 'عرض', 'كوبون']);
 /** Charges that are not food even though they sit among the items. */
@@ -150,6 +157,8 @@ const UNIT_SRC = String.raw`kg|kgs|kilos?|g|gm|gms|gr|grm|grams?|ml|mls|l|lt|ltr
 const SIZE = new RegExp(String.raw`(?<![\p{L}\d.])(\d+(?:[.,]\d+)?)\s?(${UNIT_SRC})(?![\p{L}])`, 'iu');
 const MULTIPACK = new RegExp(String.raw`(?<![\p{L}\d.])(\d{1,3})\s?[x×*]\s?(\d+(?:[.,]\d+)?)\s?(${UNIT_SRC})(?![\p{L}])`, 'iu');
 const WEIGHED = new RegExp(String.raw`(\d+(?:[.,]\d+)?)\s?(kg|kgs|g|gm|lb|lbs|كجم|كغ|كيلو|جم|غ)\s?(?:[@x×*]|net|نت)\s?(?:${CURRENCY}\s?)?(${MONEY})(?:\s?\/\s?(?:kg|lb|كجم|كغ|كيلو))?`, 'iu');
+/** "2 @ 5 for $3.00": two bought at a multi-buy price. */
+const MULTI_BUY = new RegExp(String.raw`(?<![\d.,])(\d{1,3})\s?@\s?(\d{1,3})\s?(?:for|ب)\s?(?:${CURRENCY}\s?)?(${MONEY})`, 'iu');
 const QTY_AT = new RegExp(String.raw`(?<![\d.,])(\d{1,3})\s?(?:[x×*]|@|ea\.?|each)\s?(?:@\s?)?(?:${CURRENCY}\s?)?(${MONEY})(?:\s?(?:ea|each|للحبة))?`, 'iu');
 const QTY_WORD = /(?:qty|quantity|الكمية|كمية|عدد)\s?[:.]?\s?(\d{1,3})(?!\d)/iu;
 const LEADING_QTY = /^(\d{1,2})\s?[x×*]?\s+(?=\p{L})/u;
@@ -158,7 +167,7 @@ const CODE = /(?<![\p{L}])(?:#?\d{4,}|[A-Z]?\d{5,}[A-Z]?)(?![\p{L}])/gu;
 
 /** Abbreviations that shop tills print, expanded so the catalogue search can match them. */
 const ABBREVIATIONS: Record<string, string> = {
-  chkn: 'chicken', chk: 'chicken', chick: 'chicken', brst: 'breast', bnls: 'boneless', sknls: 'skinless', thgh: 'thigh', drmstk: 'drumstick',
+  chkn: 'chicken', ckn: 'chicken', roti: 'roasted', pln: 'plain', brw: 'brown', brn: 'brown', shred: 'shredded', shrd: 'shredded', blk: 'black', bn: 'bean', chk: 'chicken', chick: 'chicken', brst: 'breast', bnls: 'boneless', sknls: 'skinless', thgh: 'thigh', drmstk: 'drumstick',
   grnd: 'ground', gr: 'ground', bf: 'beef', mnc: 'mince', lmb: 'lamb', stk: 'steak',
   tom: 'tomato', toms: 'tomato', tmt: 'tomato', pot: 'potato', pots: 'potato', ptto: 'potato', onn: 'onion', onio: 'onion', crt: 'carrot', crrt: 'carrot', cucmbr: 'cucumber', cuc: 'cucumber', lett: 'lettuce', ltce: 'lettuce', brcl: 'broccoli', cauli: 'cauliflower', mush: 'mushroom', mshrm: 'mushroom', pep: 'pepper', ppr: 'pepper', grn: 'green', grlc: 'garlic', zuc: 'zucchini', aubrg: 'eggplant', aubergine: 'eggplant', courgette: 'zucchini', capsicum: 'bell pepper',
   ban: 'banana', bnna: 'banana', bana: 'banana', appl: 'apple', aple: 'apple', orng: 'orange', strwb: 'strawberry', strwbry: 'strawberry', grp: 'grape', grps: 'grape', lmn: 'lemon', wmln: 'watermelon', avo: 'avocado', avoc: 'avocado',
@@ -168,7 +177,7 @@ const ABBREVIATIONS: Record<string, string> = {
   jce: 'juice', jc: 'juice', ornj: 'orange', wtr: 'water', min: 'mineral', sprk: 'sparkling', cof: 'coffee', cofe: 'coffee', choc: 'chocolate', choco: 'chocolate', bisc: 'biscuit', ckie: 'cookie', ckies: 'cookies', pnt: 'peanut', btr2: 'butter', alm: 'almond', almd: 'almond', wlnt: 'walnut', hny: 'honey', jm: 'jam', ktchp: 'ketchup', mayo: 'mayonnaise', mstd: 'mustard', vin: 'vinegar', sce: 'sauce', sauc: 'sauce', pste: 'paste', tna: 'tuna', sard: 'sardine', slmn: 'salmon', shrmp: 'shrimp', prwn: 'prawn', frz: 'frozen', frzn: 'frozen', cnd: 'canned', tin: 'canned',
 };
 /** Words that describe the pack or the shop, not the food. */
-const NOISE = /(?<![\p{L}])(?:org|organic|fresh|frsh|premium|prem|select|choice|value|family|economy|eco|classic|original|orig|natural|nat|pack|pk|pkt|bag|btl|bottle|can|jar|box|tray|loose|each|ea|kg|lb|ltd|plu|sku|item|promo|offer|new|طازج|طازة|عبوة|علبة|كيس|زجاجة|سائب|عرض|جديد)(?![\p{L}])/giu;
+const NOISE = /(?<![\p{L}])(?:og|cv|conv|org|organic|non gmo|gmo|fresh|frsh|premium|prem|select|choice|value|family|economy|eco|classic|original|orig|natural|nat|pack|pk|pkt|bag|btl|bottle|can|jar|box|tray|loose|each|ea|kg|lb|ltd|plu|sku|item|promo|offer|new|طازج|طازة|عبوة|علبة|كيس|زجاجة|سائب|عرض|جديد)(?![\p{L}])/giu;
 
 /** A receipt name, cleaned for the catalogue: lower case, no codes or sizes, abbreviations expanded. */
 export function cleanItemName(raw: string): string {
@@ -194,14 +203,17 @@ function sizeFromName(name: string): ReceiptAmount | null {
   }
   return null;
 }
+/** Largest believable pack per unit; "365 L" on a Whole Foods 365 egg carton is a brand, not 365 litres. */
+const MAX_PACK: Record<ReceiptUnit, number> = { GRAM: 25_000, KILOGRAM: 25, MILLILITER: 10_000, LITER: 10, PIECE: 120 };
+const plausible = (value: ReceiptAmount | null) => value && value.amount > 0 && value.amount <= MAX_PACK[value.unit] ? value : null;
 const round = (value: ReceiptAmount): ReceiptAmount => ({ ...value, amount: Math.round(value.amount * 1000) / 1000 });
 
-interface ItemFields { name: string; count: number; size: ReceiptAmount | null; weighed: boolean; unitPrice: number | null; total: number | null }
+interface ItemFields { name: string; count: number; counted: boolean; size: ReceiptAmount | null; weighed: boolean; unitPrice: number | null; total: number | null }
 
 /** Pulls quantity, weight and prices out of one item line. Returns null when no name is left. */
 export function readItemLine(line: string): ItemFields | null {
   let text = normalizeText(line);
-  let total: number | null = null; let unitPrice: number | null = null; let count = 1; let weighed = false; let size: ReceiptAmount | null = null;
+  let total: number | null = null; let unitPrice: number | null = null; let count = 1; let counted = false; let weighed = false; let size: ReceiptAmount | null = null;
 
   const weighedMatch = WEIGHED.exec(text);
   if (weighedMatch) {
@@ -218,30 +230,30 @@ export function readItemLine(line: string): ItemFields | null {
   }
   if (!weighed) {
     const qtyAt = QTY_AT.exec(text);
-    if (qtyAt) { count = Number(qtyAt[1]); unitPrice = parseMoney(qtyAt[2]); text = text.replace(qtyAt[0], ' '); }
+    if (qtyAt) { counted = true; count = Number(qtyAt[1]); unitPrice = parseMoney(qtyAt[2]); text = text.replace(qtyAt[0], ' '); }
     // A second price left on the row is the unit price ("MILK 2 1.50 3.00").
     const second = TRAILING_PRICE.exec(text);
     if (second && total !== null) {
       unitPrice ??= parseMoney(second[1]); text = text.slice(0, second.index);
       const qty = /(?:^|\s)(\d{1,2})\s*$/.exec(text);
-      if (qty) { count = Number(qty[1]); text = text.slice(0, qty.index); }
+      if (qty) { counted = true; count = Number(qty[1]); text = text.slice(0, qty.index); }
     }
     const qtyWord = QTY_WORD.exec(text);
-    if (qtyWord) { count = Number(qtyWord[1]); text = text.replace(qtyWord[0], ' '); }
+    if (qtyWord) { counted = true; count = Number(qtyWord[1]); text = text.replace(qtyWord[0], ' '); }
     const leadingQty = LEADING_QTY.exec(text);
-    if (leadingQty && count === 1) { count = Number(leadingQty[1]); text = text.slice(leadingQty[0].length); }
+    if (leadingQty && count === 1) { counted = true; count = Number(leadingQty[1]); text = text.slice(leadingQty[0].length); }
     const trailingQty = TRAILING_QTY.exec(text);
-    if (trailingQty && count === 1) { count = Number(trailingQty[1]); text = text.slice(0, trailingQty.index); }
-    size = sizeFromName(text);
+    if (trailingQty && count === 1) { counted = true; count = Number(trailingQty[1]); text = text.slice(0, trailingQty.index); }
+    size = plausible(sizeFromName(text));
   }
   if (unitPrice !== null && total !== null && !weighed && count === 1 && unitPrice > 0) {
     const implied = Math.round(total / unitPrice);
-    if (implied > 1 && Math.abs(implied * unitPrice - total) < 0.011) count = implied;
+    if (implied > 1 && Math.abs(implied * unitPrice - total) < 0.011) { count = implied; counted = true; }
   }
-  if (count < 1 || count > 99) count = 1;
+  if (count < 1 || count > 99) { count = 1; counted = false; }
   const name = cleanItemName(text);
   if (!LETTERS.test(name)) return null;
-  return { name, count, size, weighed, unitPrice, total };
+  return { name, count, counted, size, weighed, unitPrice, total };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -290,8 +302,8 @@ export function kindOf(row: string): Kind {
   if (FOOTER.test(row)) return 'footer';
   if (DISCOUNT.test(row) || /(?:^|\s)-\d+[.,]\d{2}\s*$|\d[.,]\d{2}-\s*$/.test(row)) return 'discount';
   if (DEPARTMENT_ROW.test(row.replace(/[^\p{L}\s]/gu, '').trim())) return 'department';
-  if (!letters || /^\W*(?:[x×*@]|qty|kg|g|lb|ea|each|كجم|كغ|جم)\b/iu.test(row) || /^\s*\d/.test(row) && (QTY_AT.test(row) || WEIGHED.test(row)) && !LETTERS.test(cleanItemName(row))) {
-    if (QTY_AT.test(row) || WEIGHED.test(row)) return 'quantity';
+  if (!letters || /^\W*(?:[x×*@]|qty|kg|g|lb|ea|each|كجم|كغ|جم)\b/iu.test(row) || /^\s*\d/.test(row) && (QTY_AT.test(row) || WEIGHED.test(row) || MULTI_BUY.test(row)) && !LETTERS.test(cleanItemName(row.replace(MULTI_BUY, ' ')))) {
+    if (QTY_AT.test(row) || WEIGHED.test(row) || MULTI_BUY.test(row)) return 'quantity';
     if (ONLY_MONEY.test(row)) return 'money';
     return 'meta';
   }
@@ -318,6 +330,7 @@ export function parseReceipt(input: readonly string[], today = new Date()): Rece
   let subtotal: number | null = null; let total: number | null = null;
   // Priced lines that are not items (a bag, a deposit) still count toward the printed total.
   let charges = 0;
+  let storeWords = 0; let lastHeader = -1;
 
   const priceOf = (row: string) => { const m = TRAILING_PRICE.exec(row) ?? (ARABIC.test(row) ? LEADING_PRICE.exec(row) : null); return m ? parseMoney(m[1]) : null; };
   const push = (raw: string, fields: ItemFields) => {
@@ -328,7 +341,11 @@ export function parseReceipt(input: readonly string[], today = new Date()): Rece
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]; const kind = kinds[i];
     if (firstItem < 0 || i < firstItem) {
-      if (!store && kind === 'text' && /\p{L}{3,}/u.test(row) && !FOOTER.test(row)) store = row.slice(0, 60);
+      const word = /^[\p{L}&'-]+\.?$/u.test(row) ? row.replace(/\.$/, '') : null;
+      if (!store && kind === 'text' && /\p{L}{3,}/u.test(row) && !FOOTER.test(row)) { store = row.replace(/\.$/, '').slice(0, 60); storeWords = word ? 1 : 9; }
+      // A logo printed one word per row ("WHOLE" / "FOODS." / "MARKET") is one name.
+      else if (store && word && storeWords < 3 && i === lastHeader + 1) { store = `${store} ${word}`; storeWords++; }
+      if (store) lastHeader = i;
       ignore(row, 'header'); continue;
     }
     if (i >= end) {
@@ -404,12 +421,17 @@ function readQuantity(row: string): Partial<ItemFields> {
   const total = (() => { const m = TRAILING_PRICE.exec(text.replace(weighed?.[0] ?? '\u0000', ' ')); return m && weighed?.[3] !== m[1] ? parseMoney(m[1]) : null; })();
   if (weighed) {
     const unit = unitOf(weighed[2]);
-    if (unit) return { size: round({ amount: Number(weighed[1].replace(',', '.')) * unit[1], unit: unit[0] }), weighed: true, count: 1, unitPrice: parseMoney(weighed[3]), total };
+    if (unit) return { size: round({ amount: Number(weighed[1].replace(',', '.')) * unit[1], unit: unit[0] }), weighed: true, count: 1, counted: false, unitPrice: parseMoney(weighed[3]), total };
+  }
+  const multi = MULTI_BUY.exec(text);
+  if (multi) {
+    const m = TRAILING_PRICE.exec(text.replace(multi[0], ' '));
+    return { count: Number(multi[1]), counted: true, unitPrice: Math.round((parseMoney(multi[3]) / Number(multi[2])) * 100) / 100, total: m ? parseMoney(m[1]) : null };
   }
   const qty = QTY_AT.exec(text);
   if (qty) {
     const rest = text.replace(qty[0], ' '); const m = TRAILING_PRICE.exec(rest);
-    return { count: Number(qty[1]), unitPrice: parseMoney(qty[2]), total: m ? parseMoney(m[1]) : null };
+    return { count: Number(qty[1]), counted: true, unitPrice: parseMoney(qty[2]), total: m ? parseMoney(m[1]) : null };
   }
   return {};
 }
@@ -418,11 +440,12 @@ function readQuantity(row: string): Partial<ItemFields> {
  * How much of the food this line adds to the kitchen, or null when the receipt doesn't say
  * (a pack with no printed size of a food sold by weight). The review screen then asks.
  */
-export function receiptAmount(item: Pick<ReceiptItem, 'count' | 'size' | 'weighed'>, food: { defaultUnit: string; gramsPerPiece?: string | number | null }): ReceiptAmount | null {
+export function receiptAmount(item: Pick<ReceiptItem, 'count' | 'counted' | 'size' | 'weighed'>, food: { defaultUnit: string; gramsPerPiece?: string | number | null }): ReceiptAmount | null {
   if (item.size) {
     if (item.weighed || item.size.unit !== 'PIECE') return round({ amount: item.size.amount * (item.weighed ? 1 : item.count), unit: item.size.unit });
     return { amount: item.size.amount * item.count, unit: 'PIECE' };
   }
-  if (food.defaultUnit === 'PIECE' || (food.gramsPerPiece !== null && food.gramsPerPiece !== undefined && Number(food.gramsPerPiece) > 0)) return { amount: item.count, unit: 'PIECE' };
-  return null;
+  // Only a printed count is trusted: "BRW EGG 2.99" is a carton, not one egg.
+  const byPiece = food.defaultUnit === 'PIECE' || (food.gramsPerPiece !== null && food.gramsPerPiece !== undefined && Number(food.gramsPerPiece) > 0);
+  return byPiece && item.counted ? { amount: item.count, unit: 'PIECE' } : null;
 }

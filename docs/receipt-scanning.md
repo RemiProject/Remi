@@ -133,14 +133,38 @@ photo ─► receipt-vision (Apple Vision, positions)
 | PRINGLES ORIGINAL 165G | no match, left out unless chosen | — |
 
 **Tests:**
-- **Receipt parsing and review** (`scripts/test-receipt-parser.cjs`): 12 tests, covering English, Arabic and US receipts, quantity rows above and below, wrapped names, discounts, departments, mismatched totals, real Vision output of a tilted English photo and an Arabic photo, and the review rules.
+- **Receipt parsing and review** (`scripts/test-receipt-parser.cjs`): 14 tests, including the Whole Foods receipt from both OCR engines, covering English, Arabic and US receipts, quantity rows above and below, wrapped names, discounts, departments, mismatched totals, real Vision output of a tilted English photo and an Arabic photo, and the review rules.
 - **OCR service:** `scripts/test-receipt.cjs`.
 - **Backend:** `test/unit/receipt-match.spec.ts`.
 - **API run:** adding a receipt and retrying it added nothing twice, and a negative amount was rejected.
 - **On the simulator:** the full flow, from photo to review to "Added 9 foods", ended with all 9 purchase batches in the database under the receipt's date. A non-receipt photo (a leaf) gave "couldn't read this photo" and no foods. Screenshots: `light-21-receipt-review.png` and `ar-dark-05-receipt-review.png` in `Design/version-3-sip-happy/screenshots/`.
 - **Catalogue aliases added** for receipts: `full cream milk`, `fresh milk` and `milk` for whole milk, and the Arabic plurals صدور دجاج، أوراك دجاج، أجنحة دجاج.
 
-## 6. Rules
+## 6. First real receipt (Whole Foods, from the phone)
+
+The first receipt scanned on the phone added nothing:
+- **The add was never sent.** The server log shows the receipt was matched twice, but no add request followed.
+- **The "Add" pill was the cause.** Each food had a yellow pill labelled "Add" that looked like an action but actually switched the food to "Skip". The real add button sat at the bottom of a long list.
+- **The receipt also broke the parser** in six ways:
+  - multi-buy prices ("2 @ 5 for $3.00");
+  - "lb" read by the OCR as "1b" or "ID";
+  - "Tare Weight" rows read as items;
+  - the brand "365 L" read as 365 litres;
+  - the logo split into "WHOLE" / "FOODS®" / "MARKET";
+  - till codes OG, CV, CKN, ROTI, PLN and BRW.
+- **"romaine heart" matched beef heart.** It was an unsure match, but unsure matches were ticked by default.
+
+Fixes:
+
+| | Fix |
+|---|---|
+| UI | A checkbox replaces the pill. The add button and a one-line explanation sit at the top, under the summary. Unsure matches start unticked. Foods with an amount are added straight away; the rest stay on screen to fill in or untick |
+| Parser | Multi-buy prices; "1b", "Ib" and "ID" after a number or slash read as lb; tare and net-weight rows ignored; ®, ™ and © stripped; a logo split one word per row joined into one name; pack sizes capped at believable values; more till abbreviations. A count is only trusted when printed, so "BRW EGG $2.99" asks how many instead of assuming 1 egg |
+| Catalogue | `romaine`, `romaine heart` → lettuce; `black bean` → black beans |
+
+Result: both the Mac's and the phone's OCR of this receipt now give "WHOLE FOODS MARKET", 16 items and an exact match with the $49.62 subtotal. Both are kept as fixtures (`receipt-vision-wholefoods.json`, `receipt-rows-wholefoods-ios.json`).
+
+## 7. Rules
 
 - **Nothing is added without confirmation.** Uncertain matches are flagged, unknown lines are left out, and amounts are never invented.
 - **Every skipped line is shown with its reason**, so a wrong skip can be seen.

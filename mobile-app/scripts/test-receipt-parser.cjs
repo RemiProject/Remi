@@ -170,14 +170,16 @@ test('rows rebuilt from Vision boxes, including a slightly tilted photo', () => 
 });
 
 test('item lines and names', () => {
-  assert.deepEqual(readItemLine('3 x LEMON 1.50 4.50'), { name: 'lemon', count: 3, size: null, weighed: false, unitPrice: 1.5, total: 4.5 });
+  assert.deepEqual(readItemLine('3 x LEMON 1.50 4.50'), { name: 'lemon', count: 3, counted: true, size: null, weighed: false, unitPrice: 1.5, total: 4.5 });
   assert.equal(cleanItemName('ORG GRND BF 85% 1LB'), 'ground beef');
   assert.equal(cleanItemName('FRZN MIXED VEG 900G'), 'frozen mixed vegetable');
   assert.equal(readItemLine('12345678'), null);
   assert.equal(findDate(['Date 31/02/2026']), null);
   assert.equal(findDate(['01/01/2030'], today), null);
   assert.deepEqual(receiptAmount({ count: 2, size: null, weighed: false }, { defaultUnit: 'GRAM', gramsPerPiece: null }), null);
-  assert.deepEqual(receiptAmount({ count: 4, size: null, weighed: false }, { defaultUnit: 'GRAM', gramsPerPiece: '120' }), { amount: 4, unit: 'PIECE' });
+  assert.deepEqual(receiptAmount({ count: 4, counted: true, size: null, weighed: false }, { defaultUnit: 'GRAM', gramsPerPiece: '120' }), { amount: 4, unit: 'PIECE' });
+  // A count of one that the receipt never printed is not trusted (a carton of eggs at 2.99).
+  assert.equal(receiptAmount({ count: 1, counted: false, size: null, weighed: false }, { defaultUnit: 'PIECE' }), null);
 });
 
 test('real Apple Vision output of a tilted receipt photo (scripts/fixtures/receipt-vision-tilted.json)', () => {
@@ -200,6 +202,27 @@ test('real Apple Vision output of an Arabic receipt photo (scripts/fixtures/rece
   assert.deepEqual(parse.ignored.filter(l => ['non-food', 'fee'].includes(l.reason)).map(l => l.reason).sort(), ['fee', 'non-food']);
 });
 
+test('real Apple Vision output of a US Whole Foods receipt (scripts/fixtures/receipt-vision-wholefoods.json)', () => {
+  const vision = require('./fixtures/receipt-vision-wholefoods.json');
+  const parse = parseReceipt(rowsFromLines(vision.lines, vision.width, vision.height), today);
+  assert.equal(parse.store, 'WHOLE FOODS MARKET');
+  assert.deepEqual(names(parse), ['fiesta shredded', 'cilantro bunch', 'romaine heart', '3bc light roast', 'roasted chicken plain', 'balsamic vinegar', 'black bean', 'limes', 'hass avocados', 'whole wheat tortilla', 'banana', 'brown egg', 'gala apples', 'sweet onion', 'cherry tomato', 'frien sour cream']);
+  const by = Object.fromEntries(parse.items.map(i => [i.name, i]));
+  assert.deepEqual([by.limes.count, by.limes.total], [2, 1.2]); // 2 @ 5 for $3.00
+  assert.deepEqual(by.banana.size, { amount: 839.16, unit: 'GRAM' }); // 1.85 lb, OCR printed "1b"
+  assert.equal(by['brown egg'].size, null); // "365 L" is the brand, not 365 litres
+  assert.equal(parse.ignored.filter(l => /tare/i.test(l.text)).length, 3);
+  assert.deepEqual(parse.check, { status: 'match', itemsSum: 49.62, printed: 49.62 });
+});
+
+test('iOS Vision rows of the same Whole Foods receipt, with its OCR quirks ("FOODS®", "/ ID" for "/ lb")', () => {
+  const parse = parseReceipt(require('./fixtures/receipt-rows-wholefoods-ios.json'), today);
+  assert.equal(parse.store, 'WHOLE FOODS MARKET');
+  assert.equal(parse.items.length, 16);
+  assert.deepEqual(parse.items.find(i => i.name === 'sweet onion').size, { amount: 235.872, unit: 'GRAM' });
+  assert.deepEqual(parse.check, { status: 'match', itemsSum: 49.62, printed: 49.62 });
+});
+
 const { buildReview, groupByCategory, submission, withFood } = require('../src/domain/receipt-review.ts');
 test('review: confident matches are included, guesses are flagged, unknown lines stay out', () => {
   const parse = parseReceipt(['SHOP', 'MILK FULL CREAM 1L 2 x 38.00 76.00', 'CREAMY THING 400G 30.00', 'PRINGLES 165G 85.00', 'RICE 120.00', 'TOTAL 311.00'], today);
@@ -212,17 +235,18 @@ test('review: confident matches are included, guesses are flagged, unknown lines
     { query: '', confidence: 'HIGH', food: rice, alternatives: [], inKitchen: [] },
   ]);
   assert.deepEqual(lines.map(l => [l.include, l.check, l.amount, l.unit, l.storage]), [
-    [true, false, '2', 'LITER', 'FRIDGE'], [true, true, '400', 'GRAM', 'FRIDGE'], [false, false, '', 'PIECE', 'PANTRY'], [true, false, '', 'GRAM', 'PANTRY'],
+    [true, false, '2', 'LITER', 'FRIDGE'], [false, true, '400', 'GRAM', 'FRIDGE'], [false, false, '', 'PIECE', 'PANTRY'], [true, false, '', 'GRAM', 'PANTRY'],
   ]);
   const { groups, unmatched } = groupByCategory(lines);
   assert.deepEqual(groups.map(g => [g.code, g.lines.length]), [['DAIRY', 2], ['GRAINS', 1]]);
   assert.equal(unmatched.length, 1);
   // Rice has no printed size, so nothing is sent until the person enters one.
-  assert.deepEqual(submission(lines), { ok: false, missing: ['3'] });
+  assert.deepEqual(submission(lines).missing, ['3']);
+  assert.deepEqual(submission(lines).keys, ['0']); // milk is ready now; rice waits for its amount
   lines[3] = { ...lines[3], amount: '5' }; lines[3] = { ...lines[3], unit: 'KILOGRAM' };
   const sent = submission(lines);
-  assert.equal(sent.ok, true);
-  assert.deepEqual(sent.items.map(i => [i.foodId, i.amount, i.unit]), [['whole milk', '2', 'LITER'], ['cream', '400', 'GRAM'], ['white rice', '5', 'KILOGRAM']]);
+  assert.deepEqual(sent.missing, []);
+  assert.deepEqual(sent.items.map(i => [i.foodId, i.amount, i.unit]), [['whole milk', '2', 'LITER'], ['white rice', '5', 'KILOGRAM']]);
   assert.equal(withFood(lines[0], null).include, false);
 });
 

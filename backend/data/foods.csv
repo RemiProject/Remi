@@ -12,7 +12,7 @@ eggplant,باذنجان,VEGETABLES,GRAM,,,بتنجان|بدنجان,aubergine
 zucchini,كوسة,VEGETABLES,GRAM,,,كوسا,courgette|squash
 okra,بامية,VEGETABLES,GRAM,,,بامي,lady fingers|bamia
 green beans,فاصوليا خضراء,VEGETABLES,GRAM,,,فاصوليا خضرا,string beans|snap beans
-lettuce,خس,VEGETABLES,GRAM,,,خس بلدي,romaine lettuce|cos lettuce
+lettuce,خس,VEGETABLES,GRAM,,,خس بلدي,romaine lettuce|cos lettuce|romaine|romaine heart
 spinach,سبانخ,VEGETABLES,GRAM,,,سبانخ بلدي,
 arugula,جرجير,VEGETABLES,GRAM,,,,rocket|roquette
 cabbage,كرنب,VEGETABLES,GRAM,,,ملفوف,white cabbage
@@ -320,7 +320,7 @@ cooked bulgur,برغل مطبوخ,GRAINS,GRAM,,,برغل مسلوق,
 cooked couscous,كسكسي مطبوخ,GRAINS,GRAM,,,كسكس مطبوخ,
 cooked oatmeal,شوفان مطبوخ,GRAINS,GRAM,,,عصيدة شوفان,porridge
 cooked quinoa,كينوا مطبوخة,GRAINS,GRAM,,,,
-black beans,فاصوليا سوداء,LEGUMES,GRAM,,,,
+black beans,فاصوليا سوداء,LEGUMES,GRAM,,,,black bean
 mung beans,فول المونج,LEGUMES,GRAM,,,ماش,green gram
 lima beans,فاصوليا ليما,LEGUMES,GRAM,,,فاصوليا عريضة,
 navy beans,فاصوليا نيفي,LEGUMES,GRAM,,,فاصوليا بيضاء صغيرة,haricot
