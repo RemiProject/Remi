@@ -1,5 +1,8 @@
 # Creating a Remi account on an iPhone
 
+Walked through end to end on 8 November 2026: the account was created in the app, signed in by username, confirmed in
+the database (with its household), and signed in again through the Mac's Wi-Fi address that the phone build uses.
+
 How to create an account in the Remi app (version 3, local development server). The screenshots come from the iOS
 Simulator, which runs the same app as a phone install.
 
@@ -35,6 +38,8 @@ Profile shows **Log in** and **Create account**. Tap **Create account**.
 | Password | 8–128 characters, with at least one uppercase letter, one number and one special character. The four yellow checks tick as each rule is met |
 | Confirm password | The same password again |
 
+![All four password rules met](03-password-rules-met.png)
+
 ### 3. Create the account
 
 Tap **Create account**.
@@ -42,15 +47,19 @@ Tap **Create account**.
 - **First time on the phone:** iOS asks to let Remi find devices on your local network. Tap **Allow**, or the request
   can't reach the Mac. If you missed it, turn it on in Settings → Privacy & Security → Local Network → Remi.
 - **On success** the form is replaced by: "Account created. You are not logged in." It **does not sign you in**.
+- The server also creates a household called **My Kitchen**, with you as its owner.
+
+![Account created](04-account-created.png)
 
 ### 4. Log in
 
-Tap **Log in** under the message. Enter your **email or username** and your password, then tap **Log in**. You land on
-Profile, which shows your name and email. "Email not verified" is expected on this dev server.
+Tap **Log in** under the message. Enter your **email or username** and your password, then tap **Log in**.
 
-### 5. Onboarding
+![Log in](05-log-in.png)
 
-The app may then open its short setup. Fill it in or skip it; you can change it later in More.
+You land on Profile, which shows your name and email. "Email not verified" is expected on this dev server.
+
+![Signed in](06-signed-in-profile.png)
 
 ## Good to know
 
