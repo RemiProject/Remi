@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
-import { useIncomingShare } from 'expo-sharing';
+import { clearSharedPayloads, getSharedPayloads } from 'expo-sharing';
 import Animated, { FadeIn, FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { AppText, Button, Card, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
@@ -40,6 +40,18 @@ const copy = {
   },
 };
 
+/**
+ * The link shared to Remi from another app, if any, cleared once read. Builds without the share extension have no
+ * App Group, and expo-sharing throws there (a release build would close); that simply means nothing was shared.
+ */
+function sharedLink(): string | null {
+  try {
+    const link = getSharedPayloads().map(payload => firstUrl(payload.value)).find(Boolean) ?? null;
+    if (link) clearSharedPayloads();
+    return link;
+  } catch { return null; }
+}
+
 export default function ImportRecipeScreen() {
   const { language } = useLanguage();
   return <IntakeShell title={copy[language].title}><ImportBody /></IntakeShell>;
@@ -49,7 +61,6 @@ function ImportBody() {
   const { language } = useLanguage(); const t = copy[language]; const ar = language === 'ar';
   const { colors } = useRemyTheme(); const reduced = useReducedMotion();
   const params = useLocalSearchParams<{ url?: string; shared?: string }>();
-  const share = useIncomingShare();
   const [url, setUrl] = useState(params.url ?? '');
   const [busy, setBusy] = useState<'' | 'reading' | 'saving'>('');
   const [error, setError] = useState('');
@@ -73,11 +84,11 @@ function ImportBody() {
   // A link handed over by the share sheet or a deep link is read straight away.
   useEffect(() => {
     if (started.current) return;
-    const shared = share.sharedPayloads.map(payload => firstUrl(payload.value)).find(Boolean);
+    const shared = sharedLink();
     const incoming = shared ?? (params.url ? firstUrl(params.url) : null);
     // Read after this render settles rather than setting state inside the effect.
-    if (incoming) { started.current = true; if (shared) share.clearSharedPayloads(); queueMicrotask(() => { void read(incoming); }); }
-  }, [share.sharedPayloads, params.url]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (incoming) { started.current = true; queueMicrotask(() => { void read(incoming); }); }
+  }, [params.url]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const save = async () => {
     if (!preview || busy) return;
