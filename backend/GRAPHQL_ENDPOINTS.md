@@ -1005,3 +1005,80 @@ query MyNotifications {
   myDevices { id platform appVersion lastSeenAt revokedAt }
 }
 ```
+
+## Version 3: nutrition, receipts and expiry estimates
+
+All operations below need `Authorization` and `x-household-id` headers, like the other household-scoped calls.
+
+### Recipe `nutrition`
+
+`recipes`, `recipe` and `recipeSuggestions` return `nutrition` per serving. It is computed from the required ingredients through the unit converter; optional ingredients are left out. Values are estimates from raw-ingredient USDA data. See `docs/nutrition.md`.
+
+```graphql
+query {
+  recipe(id: "…") {
+    name
+    nutrition { calories proteinG carbsG fatG fiberG sugarG sodiumMg countedIngredients totalIngredients incompleteNutrients }
+  }
+}
+```
+
+- **Field meanings:**
+  - `nutrition` is `null` when no ingredient could be counted.
+  - When `countedIngredients < totalIngredients`, the figures are lower bounds.
+  - `incompleteNutrients` lists `FIBER` or `SUGAR` when a counted ingredient has no reported value.
+
+### `matchReceiptItems`
+
+**Query · Household · throttled to 30 per minute**
+
+Matches cleaned receipt item names (at most 80) to catalogue foods. Matching uses trigram similarity against food names, English and Arabic aliases, and packaged product names. Results come back in the same order as the input. See `docs/receipt-scanning.md`.
+
+```graphql
+query ($names: [String!]!) {
+  matchReceiptItems(names: $names) {
+    query
+    confidence          # HIGH | MEDIUM | NONE
+    food { foodId name arabicName categoryCode categoryName defaultUnit gramsPerPiece storageLocation
+           keeps { counter fridge freezer ripensAtRoomTemp } score }
+    alternatives { foodId name storageLocation score }
+    inKitchen { quantity unit }
+  }
+}
+```
+
+- **`confidence`:** `HIGH` means the food name covers the line. `MEDIUM` is a suggestion the person confirms. `NONE` means no food is returned.
+- **`storageLocation`:** the suggested place, from USDA FoodKeeper figures when Remi has them, otherwise from the category.
+- **`keeps`:** average days the food keeps in each place. It is `null` for foods without shelf-life data.
+
+### `receiveReceipt`
+
+**Mutation · Household**
+
+Adds every confirmed line as a purchase batch (`PURCHASED` event, `PURCHASE_RECEIPT` movement) in one transaction.
+
+```graphql
+mutation ($input: ReceiveReceiptInput!) {
+  receiveReceipt(input: $input) { added replayed items { foodId inventoryItemId quantity unit } }
+}
+```
+
+```json
+{ "input": { "idempotencyKey": "receipt-7f3a", "purchaseDate": "2026-11-07",
+  "items": [{ "foodId": "…", "amount": "2", "unit": "LITER", "storageLocation": "FRIDGE" }] } }
+```
+
+- **Limits:** between 1 and 80 items.
+- **Idempotency:** each line is keyed `receipt:<idempotencyKey>:<index>`, so repeating the call adds nothing twice and returns `replayed: true`.
+- **Expiry:** leave `estimatedExpiryAt` out and the expiry is estimated (next section).
+
+### Expiry estimates on inventory
+
+- **On every add:** `InventoryItemType` now has `purchaseDate` and `expiryEstimated`. Adding stock (`addStock`, `receiveReceipt`, purchase-order receipts) without `estimatedExpiryAt` stores the purchase day (default today) and, for mapped fresh produce, a probable expiry.
+  - **The estimate:** the purchase day plus the average USDA FoodKeeper shelf life for the storage place. `expiryEstimated` is `true`.
+  - **No date:** there is no figure at room temperature for "when ripe" fruit, and none in the freezer when freezing isn't recommended.
+- **`updateInventoryMetadata`:**
+  - **Moving an estimated batch:** if the date sent is unchanged, it is re-estimated for the new place.
+  - **Sending a different date:** it is kept as the person's, and `expiryEstimated` becomes `false`.
+
+See `docs/shelf-life.md`.

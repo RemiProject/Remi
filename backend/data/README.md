@@ -53,3 +53,15 @@ pnpm data:import
 ## Nutrition additions (version 3)
 
 `nutrition-usda-additions.csv` lists each food added from USDA SR Legacy with its FDC ID and USDA description. `scripts/usda-nutrition-rows.py` reads the official SR Legacy CSVs and prints the matching `nutrition.csv` rows. It refuses to run if a description doesn't match the ID. A blank `fiber_g` or `sugar_g` means USDA didn't report that nutrient; it's stored as NULL (migration 0030), never as 0.
+
+## Shelf life (version 3)
+
+`foodkeeper-produce.psv` holds USDA FSIS FoodKeeper's fresh fruit and vegetable rows, copied unchanged: 102 rows from data version 128, CC0. The header records the source URL, byte size and SHA-256. `shelf-life.csv` maps 130 catalogue foods to a FoodKeeper row (`food,foodkeeper_id,note`). Only fresh, raw produce is mapped; foods FoodKeeper doesn't cover are left out rather than given a guessed figure.
+
+The importer converts ranges to days (days 1, weeks 7, months 30, years 365), stores them in `FoodShelfLife` (migration 0031), and gives food already in kitchens an estimate when it has none. It never overwrites a date someone entered. How the dates are used is in `docs/shelf-life.md`.
+
+Receipt aliases added to `foods.csv` for receipt matching:
+- `full cream milk`, `fresh milk` and `milk` → whole milk.
+- `romaine` and `romaine heart` → lettuce.
+- `black bean` → black beans.
+- The Arabic plurals صدور دجاج, أوراك دجاج and أجنحة دجاج.

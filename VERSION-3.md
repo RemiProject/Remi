@@ -52,9 +52,15 @@ Legend: ✅ done · ⬜ to do
 | 14 | Launch screen | Remi logo, cobalt on paper (light) and white on night (dark), matching the app background | ✅ | this commit |
 | 13 | App icon | The chef's hat and face, cobalt on lemon, for iOS (Icon Composer, Liquid Glass), Android adaptive (with monochrome) and web favicon. Replaces the Expo placeholder | ✅ | this commit |
 | 15 | Recipe-first UI | Cleaner screens that show more recipes, after two food-app references the user shared (see the log): 2-column recipe grid, cuisine tabs, art tiles for recipes without photos, photo-sheet recipe page | ✅ | this commit |
-| 16 | Food photography | Photos for all 400 catalogue recipes and 474 ingredients from the image handoff, on cards, the recipe page, onboarding, Kitchen and Use first, with credits in More | ✅ | this commit |
-| 17 | Nutrition | Recipe nutrition per serving from USDA data, with Mob-style macro boxes, labels, High protein and Under 500 kcal tabs, kcal on cards, planner day totals and a Health Today screen against goals. Plan and results in `docs/nutrition.md` | ✅ | this commit |
-| 11 | Verification | Typecheck, lint and 430 tests pass. Simulator screenshots in light, dark and Arabic | ✅ | this commit |
+| 16 | Food photography | Photos for all 400 catalogue recipes and 474 ingredients from the image handoff, on cards, the recipe page, onboarding, Kitchen and Use first, with credits in More | ✅ | `14308f2` |
+| 17 | Nutrition | Recipe nutrition per serving from USDA data, with Mob-style macro boxes, labels, High protein and Under 500 kcal tabs, kcal on cards, planner day totals and a Health Today screen against goals. Plan and results in `docs/nutrition.md` | ✅ | `121df71` |
+| 18 | Receipt scanning | A receipt photo is read line by line (native Vision module, English and Arabic). Header, items and totals are split; bags, fees and household goods are left out. Items are matched to the catalogue and confirmed foods are added in one step. `docs/receipt-scanning.md` | ✅ | `26cfc0c`, `f977405` |
+| 19 | Probable expiry dates | Purchase day and USDA FoodKeeper average expiry for 130 fresh foods, re-estimated when moved, shown as "about" dates. `docs/shelf-life.md` | ✅ | `aefe6dd` |
+| 20 | Planner recipe search | The planner's recipe picker searches instead of listing all 400 recipes | ✅ | `639e004` |
+| 21 | Account guide | Creating an account on an iPhone, with screenshots. `docs/account-setup/` | ✅ | `f935a75`, `f76149b` |
+| 22 | App name | "Remi" on the home screen and the More screen (was "Remi Cookbook") | ✅ | `e84afb1` |
+| 23 | Phone testing | Release build on an iPhone 12 against the local API, a 550-request stress test, and the bugs it found. `docs/phone-testing.md` | ✅ | `639e004`, `f977405`, `aefe6dd` |
+| 11 | Verification | Typecheck and lint clean. Backend: 157 tests pass. App: 441 of 442 pass, with the live-backend test skipped. Simulator screenshots in light, dark and Arabic | ✅ | `aefe6dd` |
 
 ## Log
 
@@ -271,7 +277,7 @@ Remi used to read a receipt photo as plain text, and the person picked one line 
 - **Matching:** `matchReceiptItems` matches each cleaned name against catalogue names, aliases and product names by trigram similarity. Unsure matches are flagged; unknown lines are left out.
 - **Adding:** `receiveReceipt` adds every confirmed line as a purchase batch in one transaction, dated from the receipt. A retry adds nothing twice.
 - **Review screen:** foods grouped by category, each showing its receipt line, the amount, a suggested storage place and what you already have, all editable.
-- **Not done:** Android layout-aware OCR, expiry dates and price history (reasons in the doc).
+- **Not done:** Android layout-aware OCR and price history (reasons in the doc). Expiry dates came later, in element 19.
 
 ### 19. Probable expiry dates
 Source, method and checks: [`docs/shelf-life.md`](docs/shelf-life.md).
@@ -300,4 +306,9 @@ Source, method and checks: [`docs/shelf-life.md`](docs/shelf-life.md).
 - **Home "Dish of the day":** a large Mob-style "Cook tonight" photo hero card that leads the rail. Every recipe now has a photo, so this is unblocked.
 - **Shopping header:** the three stacked actions at the top (quick list, this week's meals, add item) could become one row of icon pills, with the list moved up.
 - **Screens not reviewed one by one:** Kitchen, food detail, auth, health, household, quick add, settings. They inherit the palette, type and components, and the ones opened looked right, but each still needs a visual pass.
-- **Not covered:** Android, physical devices and VoiceOver.
+- **Android:** receipts there still use plain-text OCR without line positions. A Kotlin twin of `modules/receipt-vision` is the upgrade.
+- **Counter storage:** the app shows the Counter storage place but cannot edit it (`toMobileStorage`). Remi now suggests Pantry for room temperature; supporting Counter fully would need a new storage option in the app.
+- **Shelf life beyond produce:** FoodKeeper also covers dairy, meat, fish and bread; map them in `backend/data/shelf-life.csv`.
+- **Suggestions under load:** about 1.2 s at 25 concurrent requests (`docs/phone-testing.md`). Cache per household before a large launch.
+- **Debug builds:** they don't link against the prebuilt React Native core; use Release builds (see `docs/phone-testing.md`).
+- **Not covered:** Android devices and VoiceOver. An iPhone 12 was tested (see `docs/phone-testing.md`).

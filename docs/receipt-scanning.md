@@ -28,8 +28,7 @@ What separates a good scanner from a bad one comes down to four things:
 ### Shipped-app inspection (REA)
 
 ReciMe, already on this Mac, was checked first: all 250 of its "receipt" strings are App Store purchase receipts
-(RevenueCat, Superwall), not food receipts. Pantri was chosen to inspect next, once it is installed on this Mac
-from the App Store's iPhone & iPad apps. See section 6.
+(RevenueCat, Superwall), not food receipts. Pantri was chosen to inspect next, but it has not been installed on this Mac, so **no receipt app has been inspected with REA yet**. The design above rests on the published app descriptions and on testing real receipts (section 6).
 
 ## 2. What Remi had
 
@@ -77,7 +76,7 @@ from the App Store's iPhone & iPad apps. See section 6.
 | | Item | Why |
 |---|---|---|
 | ✖ | Android Vision-quality layout | Android still uses ML Kit through `expo-text-extractor`, which returns lines without positions; Remi ships on iOS. A Kotlin twin of `receipt-vision` is the upgrade |
-| ✖ | Expiry dates from the receipt | Receipts don't print them, and Remi has no shelf-life data to estimate from. The person can set one in the kitchen |
+| ✅ | Expiry dates for receipt purchases | Receipts don't print them, so fresh produce gets a probable date from USDA FoodKeeper averages for where it is kept, shown in the review. See `docs/shelf-life.md` (added after this plan) |
 | ✖ | Prices and spending history | Out of scope for the kitchen; prices are read only to check the total |
 | ✖ | Sending photos to an AI service | Receipts stay on the phone; only the cleaned item names go to Remi's own server |
 
