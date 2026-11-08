@@ -1,3 +1,5 @@
+import { recipeContent, recipeContentDirection } from '@/i18n/recipe-content';
+import { recipeName } from '@/i18n/recipe-names';
 import { useCallback } from 'react';
 import { energyLabel } from '@/domain/nutrition';
 import { router, useFocusEffect } from 'expo-router';
@@ -83,9 +85,9 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
     {owner && notice && <Card><AppText accessibilityLiveRegion="polite" dir={rtl ? 'rtl' : 'ltr'}>{cookedItMessages[language].removed}</AppText></Card>}
     {recipe && <>
       <SafetyWarnings detail warnings={detail?.suggestion?.safetyWarnings ?? []} />
-      <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
+      <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} /><AppText variant="title" dir={language === 'ar' ? 'rtl' : 'ltr'}>{recipeName(recipe.name, language)}</AppText>
       <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(recipe, language)}</AppText>
-      {recipe.description && <><SectionHeader title={t.description} /><AppText dir="ltr">{recipe.description}</AppText></>}
+      {recipe.description && <><SectionHeader title={t.description} /><AppText dir={recipeContentDirection(recipe.description, language)}>{recipeContent(recipe.description, language)}</AppText></>}
       <Button label={cookedItMessages[language].cooked} onPress={() => router.push({ pathname: '/cooked-it', params: { id } })} />
       <SectionHeader title={t.ingredients} />
       {detail?.matchingLoading && <AppText accessibilityLiveRegion="polite">{t.matchingLoading}</AppText>}
@@ -104,7 +106,7 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
       {!recipe.steps.length && <AppText muted>{t.noSteps}</AppText>}
       {recipe.steps.map(step => <Card key={step.id}>
         <AppText variant="label" dir={rtl ? 'rtl' : 'ltr'}>{recipeNumber(step.stepNumber, language)}{step.durationMin !== null ? ` · ${recipeNumber(step.durationMin, language)} ${t.minutes}` : ''}</AppText>
-        <AppText dir="ltr">{step.instruction}</AppText>
+        <AppText dir={recipeContentDirection(step.instruction, language)}>{recipeContent(step.instruction, language)}</AppText>
       </Card>)}
     </>}
   </Screen></SafeAreaView>;

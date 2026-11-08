@@ -1,3 +1,6 @@
+import { useLanguage } from '@/providers/language-provider';
+import { recipeName } from '@/i18n/recipe-names';
+import { catalogLabel } from '@/i18n/catalog-labels';
 import { useEffect, useMemo, useState } from 'react';
 import { Image } from 'expo-image';
 import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
@@ -25,14 +28,16 @@ export const recipeImage = (name: string, id?: string): number | undefined =>
 /** The recipe's photo, or a typographic tile (its initial on a pale brand field) when it has none. */
 export function RecipeArt({ id, name, width, height, radius = radii.lg, uri }: { id: string; name: string; width: number | '100%'; height: number; radius?: number; uri?: string | null }) {
   const { colors } = useRemyTheme();
+  const { language } = useLanguage();
+  const title = recipeName(name, language);
   // A saved recipe brings its own photo from the page it came from.
   const photo = recipeImage(name, id) ?? (uri ? { uri } : undefined);
-  if (photo) return <Image source={photo} accessibilityLabel={name} contentFit="cover" style={{ width, height, borderRadius: radius }} />;
+  if (photo) return <Image source={photo} accessibilityLabel={title} contentFit="cover" style={{ width, height, borderRadius: radius }} />;
   const fields = [[colors.surfaceMuted, colors.primary], [colors.accentSoft, colors.accentText], [colors.primarySoft, colors.primary]] as const;
   // FNV-1a over the id: UUIDs share prefixes, so a plain character sum clusters on one colour.
   const [ground, ink] = fields[[...id].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0, 2166136261) % fields.length];
-  const initial = (name.match(/\p{L}/u)?.[0] ?? '·').toLocaleUpperCase();
-  return <View accessibilityRole="image" accessibilityLabel={name} style={{ width, height, borderRadius: radius, backgroundColor: ground, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+  const initial = (title.match(/\p{L}/u)?.[0] ?? '·').toLocaleUpperCase();
+  return <View accessibilityRole="image" accessibilityLabel={title} style={{ width, height, borderRadius: radius, backgroundColor: ground, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
     <AppText variant="title" style={{ color: ink, fontSize: height * 0.4, lineHeight: height * 0.5 }}>{initial}</AppText>
   </View>;
 }
@@ -41,9 +46,11 @@ export function RecipeCard({ id, name, time, caption, energy, note, details = []
   id: string; name: string; image?: string | null; time: string | null; caption?: string; energy?: string | null; note?: string | null; details?: (string | null | undefined)[]; extra?: React.ReactNode; textDir?: 'rtl' | 'ltr'; width: number; onPress: () => void;
 }) {
   const { colors } = useRemyTheme(); const reduced = useReducedMotion();
+  const { language } = useLanguage();
+  const title = recipeName(name, language);
   // Press feedback on press-in, as a CSS transition: twice per tap, never per frame.
   const [pressed, setPressed] = useState(false);
-  return <Pressable accessibilityRole="button" accessibilityLabel={[name, time, caption, energy, ...details, note].filter(Boolean).join('. ')} onPress={onPress}
+  return <Pressable accessibilityRole="button" accessibilityLabel={[title, time, caption && catalogLabel(caption, language), energy, ...details, note].filter(Boolean).join('. ')} onPress={onPress}
     onPressIn={() => setPressed(true)} onPressOut={() => setPressed(false)} pressRetentionOffset={16} style={{ width }}>
     <Animated.View style={{ gap: 8, transform: [{ scale: pressed && !reduced ? 0.97 : 1 }], transitionProperty: 'transform', transitionDuration: '120ms', transitionTimingFunction: EASE_OUT }}>
     <View>
@@ -53,8 +60,8 @@ export function RecipeCard({ id, name, time, caption, energy, note, details = []
       </View>}
     </View>
     <View style={{ gap: 2 }}>
-      <AppText variant="label" numberOfLines={2} dir="ltr">{name}</AppText>
-      {(caption || energy) && <AppText variant="caption" muted numberOfLines={1} dir={textDir}>{[caption, energy].filter(Boolean).join(' · ')}</AppText>}
+      <AppText variant="label" numberOfLines={2} dir={title === name ? 'ltr' : 'rtl'}>{title}</AppText>
+      {(caption || energy) && <AppText variant="caption" muted numberOfLines={1} dir={textDir}>{[caption && catalogLabel(caption, language), energy].filter(Boolean).join(' · ')}</AppText>}
       {details.filter(Boolean).map(line => <AppText key={line} variant="caption" muted numberOfLines={2} dir={textDir}>{line}</AppText>)}
       {note && <AppText variant="caption" numberOfLines={2} dir={textDir} style={{ color: colors.accentText }}>{note}</AppText>}
       {extra}
@@ -101,7 +108,7 @@ export function RecipeTabs({ tabs, value, onChange, rtl }: { tabs: readonly { ke
 export function recipeTabs(recipes: readonly { cuisineName?: string | null; nutrition?: RecipeNutrition | null; householdId?: string | null }[], copy: (en: string, ar: string) => string, max = 6, min = 5) {
   const counts = new Map<string, number>();
   for (const recipe of recipes) if (recipe.cuisineName) counts.set(recipe.cuisineName, (counts.get(recipe.cuisineName) ?? 0) + 1);
-  const cuisines = [...counts].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1]).slice(0, max).map(([name]) => ({ key: `cuisine:${name}`, label: name }));
+  const cuisines = [...counts].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1]).slice(0, max).map(([name]) => ({ key: `cuisine:${name}`, label: copy(name, catalogLabel(name, 'ar')) }));
   const nutrition = [
     { key: 'protein', label: copy(nutritionCopy.en.tabs.protein, nutritionCopy.ar.tabs.protein) },
     { key: 'light', label: copy(nutritionCopy.en.tabs.light, nutritionCopy.ar.tabs.light) },

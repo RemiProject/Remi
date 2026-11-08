@@ -289,6 +289,25 @@ test('recipe count units use English singular/plural and Arabic plural categorie
   assert.equal(view.recipeIngredientStatus(ingredient(), node, 'ar'), 'ينقصك \u20661\u2069 قطعة');
 });
 
+test('recipe ingredients render without Intl.PluralRules on the native runtime', () => {
+  const descriptor = Object.getOwnPropertyDescriptor(Intl, 'PluralRules');
+  Object.defineProperty(Intl, 'PluralRules', { configurable: true, value: undefined });
+  try {
+    for (const [unit, singular, plural] of [['PIECE', 'piece', 'pieces'], ['CUP', 'cup', 'cups']]) {
+      for (const [amount, shown, label] of [['1.000', '1', singular], ['2.000', '2', plural], ['0.500', '0.5', plural]]) {
+        assert.equal(view.recipeQuantity(amount, unit, 'en'), `${shown} ${label}`);
+      }
+    }
+    for (const [amount, label] of [['0', 'أكواب'], ['1', 'كوب'], ['2', 'كوبان'], ['3', 'أكواب'], ['10', 'أكواب'], ['11', 'كوب'], ['99', 'كوب'], ['100', 'كوب'], ['103', 'أكواب'], ['3.5', 'كوب']]) {
+      assert.equal(view.recipeQuantity(amount, 'CUP', 'ar'), `\u2066${amount}\u2069 ${label}`);
+    }
+    const node = suggestion('one', { short: [{ ...food(), missingAmount: '1.000', unit: 'PIECE' }] });
+    assert.equal(view.recipeIngredientStatus(ingredient(), node, 'en'), 'Short by 1 piece');
+  } finally {
+    Object.defineProperty(Intl, 'PluralRules', descriptor);
+  }
+});
+
 test('expired foods stay separate from missing on cards and required/optional detail rows in both languages', async () => {
   const expired = { ...food('expired'), arabicName: 'طماطم' };
   const h = harness({ pages: [page([suggestion('one', { missing: [], expired: [food()], expiringSoon: [] })])] });

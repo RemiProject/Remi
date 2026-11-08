@@ -3,7 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const ts = require('typescript');
 
-const mocks = { react: { useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}], useEffect: () => {}, useMemo: factory => factory() },
+let language = 'en';
+const mocks = { '@/providers/language-provider': { useLanguage: () => ({ language }) }, '@/i18n/recipe-names': require('../src/i18n/recipe-names.ts'), '@/i18n/catalog-labels': require('../src/i18n/catalog-labels.ts'), react: { useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}], useEffect: () => {}, useMemo: factory => factory() },
   'react-native-reanimated': require('./native-ui-fixture.cjs').fixtureModule('react-native-reanimated'), 'expo-image': { Image: 'Image' }, 'react-native': { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View', useWindowDimensions: () => ({ width: 402 }) },
   '@/components/ui/core': { AppText: 'AppText' }, '@/components/ui/icon': { Icon: 'Icon' }, '@/data/cookbook-content': { getCookbookContent: () => undefined },
   '@/data/food-images': { recipeImages: { 'mish with tomato': 7 } }, '@/domain/nutrition': require('../src/domain/nutrition.ts'),
@@ -48,4 +49,39 @@ test('High protein and Under 500 kcal tabs filter on complete nutrition only', (
   assert.deepEqual(filterRecipes(recipes, 'light').map(r => r.name), ['Lean']);
   assert.deepEqual(recipeTabs(recipes, copy, 6, 1).map(t => t.key), ['all', 'quick', 'protein', 'light']);
   assert.deepEqual(recipeTabs(recipes, copy, 6, 3).map(t => t.key), ['all', 'quick'], 'nutrition tabs need at least `min` recipes');
+});
+
+test('Arabic titles cover all 400 catalogue photos while English and unknown recipe names stay intact', () => {
+  const { recipeName, recipeNameMatches } = require('../src/i18n/recipe-names.ts');
+  const names = [...fs.readFileSync('src/data/food-images.ts', 'utf8').split('};')[0].matchAll(/^  "([^"]+)": require/gm)].map(match => match[1]);
+  assert.equal(names.length, 400);
+  for (const name of names) {
+    assert.match(recipeName(name, 'ar'), /[\u0600-\u06ff]/u, name);
+    assert.equal(recipeName(name, 'en'), name);
+  }
+  assert.equal(recipeName('Molokhia with Chicken', 'ar'), 'ملوخية بالدجاج');
+  assert.equal(recipeName('Chicken Broth with Vegetables', 'ar'), 'شوربة دجاج بالخضار');
+  assert.equal(recipeName('Roasted tomato pasta', 'ar'), 'باستا بالطماطم المشوية');
+  assert.equal(recipeName('Family special', 'ar'), 'Family special');
+  assert(recipeNameMatches('Molokhia with Chicken', 'ملوخية', 'ar'));
+  assert(recipeNameMatches('Molokhia with Chicken', 'chicken', 'ar'));
+  assert(!recipeNameMatches('Molokhia with Chicken', 'ملوخية', 'en'));
+});
+
+test('switching language changes visible card titles and accessibility labels without changing photos or recipe ids', () => {
+  const props = { id: 'recipe-1', name: 'Mish with Tomato', time: '5 min', width: 180, onPress: () => {} };
+  const descendants = tree => !tree || typeof tree !== 'object' ? [] : Array.isArray(tree) ? tree.flatMap(descendants) : [tree, ...descendants(tree.props?.children)];
+  try {
+    language = 'ar';
+    let tree = card.RecipeCard(props);
+    assert.match(tree.props.accessibilityLabel, /^مش بالطماطم/);
+    const title = descendants(tree).find(node => node.props?.children === 'مش بالطماطم');
+    assert.equal(title.props.dir, 'rtl');
+    assert.equal(card.RecipeArt({ ...props, height: 140 }).props.source, 7);
+    language = 'en';
+    tree = card.RecipeCard(props);
+    assert.match(tree.props.accessibilityLabel, /^Mish with Tomato/);
+    assert.equal(descendants(tree).find(node => node.props?.children === 'Mish with Tomato').props.dir, 'ltr');
+    assert.equal(card.RecipeArt({ ...props, height: 140 }).props.source, 7);
+  } finally { language = 'en'; }
 });

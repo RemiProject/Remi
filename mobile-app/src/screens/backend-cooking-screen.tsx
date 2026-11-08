@@ -1,3 +1,5 @@
+import { recipeContent, recipeContentDirection } from '@/i18n/recipe-content';
+import { recipeName } from '@/i18n/recipe-names';
 import { Brand } from '@/components/brand';
 import { scaleMealAmount } from '@/domain/cooked-it';
 import { useEffect, useRef, useState } from 'react';
@@ -56,7 +58,7 @@ export function BackendCookingScreen() {
   if (session.finished) return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><View style={{ flex: 1, padding: 20, gap: spacing.lg, justifyContent: 'center', direction: dir }}>
     <View style={{ padding: spacing.xl, gap: spacing.md, borderRadius: radii.lg, backgroundColor: colors.hero }}>
       <View style={[uiStyles.row, { alignItems: 'flex-end' }]}><AppText variant="title" accessibilityRole="header" style={[uiStyles.grow, { color: colors.onHero }]}>{r.cookingDone}</AppText><Brand kind="mascot" height={96} /></View>
-      <AppText variant="label" dir="ltr" style={{ color: colors.onHero }}>{recipe.name}</AppText>
+      <AppText variant="label" dir={dir} style={{ color: colors.onHero }}>{recipeName(recipe.name, language)}</AppText>
       <AppText dir={dir} style={{ color: colors.onHero }}>{t.summary}</AppText>
     </View>
     <AppText dir={dir}>{cookedItMessages[language].prompt}</AppText>
@@ -67,7 +69,7 @@ export function BackendCookingScreen() {
   const last = current === steps.length - 1;
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><View style={{ flex: 1, direction: dir }}>
     <View style={{ paddingHorizontal: 20, paddingTop: spacing.sm, gap: spacing.md }}>
-      <View style={uiStyles.row}>{exit}<AppText variant="caption" muted numberOfLines={1} dir="ltr" style={[uiStyles.grow, { textAlign: rtl ? 'left' : 'right' }]}>{recipe.name} · {count} {rtl ? 'حصص' : 'servings'}</AppText></View>
+      <View style={uiStyles.row}>{exit}<AppText variant="caption" muted numberOfLines={1} dir={dir} style={[uiStyles.grow, { textAlign: rtl ? 'left' : 'right' }]}>{recipeName(recipe.name, language)} · {count} {rtl ? 'حصص' : 'servings'}</AppText></View>
       <View accessibilityRole="progressbar" accessibilityLabel={t.progress} accessibilityValue={{ min: 0, max: steps.length, now: session.completed.length }} style={{ flexDirection: 'row', gap: 4 }}>
         {steps.map((step, index) => <Pressable key={step.id} testID="cook-progress-segment" accessibilityRole="button" accessibilityLabel={`${t.step} ${recipeNumber(index + 1, language)} · ${session.completed.includes(index) ? t.completed : t.remaining}`}
           accessibilityState={{ selected: index === current }} hitSlop={{ top: 14, bottom: 14 }} onPress={() => { setView('method'); go(index); }}
@@ -83,7 +85,7 @@ export function BackendCookingScreen() {
       onMomentumScrollEnd={event => { const index = Math.round(event.nativeEvent.contentOffset.x / width); if (index !== current) go(index); }}>
       {steps.map((step, index) => <ScrollView key={step.id} style={{ width }} contentContainerStyle={{ padding: 24, paddingTop: spacing.xxl, gap: spacing.lg, direction: dir }}>
         <AppText variant="label" dir={dir} style={{ color: colors.accentText }}>{t.step} {recipeNumber(index + 1, language)} {t.of} {recipeNumber(steps.length, language)}</AppText>
-        <AppText variant="heading" dir="ltr" accessibilityLiveRegion={index === current ? 'polite' : 'none'} style={{ fontSize: 27, lineHeight: 36 }}>{step.instruction}</AppText>
+        <AppText variant="heading" dir={recipeContentDirection(step.instruction, language)} accessibilityLiveRegion={index === current ? 'polite' : 'none'} style={{ fontSize: 27, lineHeight: 36 }}>{recipeContent(step.instruction, language)}</AppText>
         {step.durationMin !== null && <><AppText muted dir={dir}>{duration(step.durationMin)}</AppText><StepTimer minutes={step.durationMin} /></>}
       </ScrollView>)}
     </ScrollView> : <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, gap: spacing.md }}>

@@ -1,3 +1,4 @@
+import { foodName } from '../i18n/catalog-food-names';
 import type { BackendRecipe, RecipeFood, RecipeSuggestion, RecipeSummary } from '../domain/backend-recipes';
 import type { BackendUnit } from '../domain/backend-inventory';
 import { toMobileUnit } from '../domain/inventory-enum-adapters';
@@ -8,8 +9,20 @@ import { displayInventoryQuantity, inventoryNumberLabel } from './backend-kitche
 
 type Language = 'en' | 'ar';
 export const recipeFoodName = (food: RecipeFood, language: Language) => language === 'ar'
-  ? food.arabicName?.trim() || food.foodName : food.foodName.charAt(0).toLocaleUpperCase('en') + food.foodName.slice(1);
+  ? food.arabicName?.trim() || foodName(food.foodName, language) : food.foodName.charAt(0).toLocaleUpperCase('en') + food.foodName.slice(1);
 export const recipeNumber = (value: number, language: Language) => inventoryNumberLabel(value.toLocaleString(language), language);
+// Hermes does not always provide Intl.PluralRules. These are the cardinal rules for our two languages.
+function countPlural(value: number, language: Language): Intl.LDMLPluralRule {
+  const amount = Math.abs(value);
+  if (language === 'en') return amount === 1 ? 'one' : 'other';
+  if (amount === 0) return 'zero';
+  if (amount === 1) return 'one';
+  if (amount === 2) return 'two';
+  const remainder = amount % 100;
+  if (Number.isInteger(remainder) && remainder >= 3 && remainder <= 10) return 'few';
+  if (Number.isInteger(remainder) && remainder >= 11 && remainder <= 99) return 'many';
+  return 'other';
+}
 export function recipeQuantity(value: string, unit: BackendUnit, language: Language) {
   const mapped = toMobileUnit(unit);
   const labels: Partial<Record<BackendUnit, string>> = backendKitchenMessages[language];
@@ -17,7 +30,7 @@ export function recipeQuantity(value: string, unit: BackendUnit, language: Langu
   if (unit === 'PIECE' || unit === 'CUP') {
     const forms: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string } = recipeCountUnitLabels[language][unit];
     // Numeric conversion selects grammar only; the displayed decimal stays exact.
-    label = forms[new Intl.PluralRules(language).select(Number(value))] ?? forms.other;
+    label = forms[countPlural(Number(value), language)] ?? forms.other;
   }
   return `${inventoryNumberLabel(displayInventoryQuantity(value), language)} ${label}`;
 }

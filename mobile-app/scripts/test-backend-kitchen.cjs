@@ -93,8 +93,8 @@ test('display names use Arabic aliases or canonical fallback, capitalize English
   const raw = { ...item, name: 'olive oil', arabicName: 'زيت زيتون' }, before = JSON.stringify(raw);
   assert.equal(backendView.backendFoodName(raw, 'ar'), 'زيت زيتون');
   assert.equal(backendView.backendFoodName(raw, 'en'), 'Olive oil');
-  assert.equal(backendView.backendFoodName({ ...raw, arabicName: undefined }, 'ar'), 'olive oil');
-  assert.equal(backendView.backendFoodName({ ...raw, arabicName: '  ' }, 'ar'), 'olive oil');
+  assert.equal(backendView.backendFoodName({ ...raw, arabicName: undefined }, 'ar'), 'زيت زيتون');
+  assert.equal(backendView.backendFoodName({ ...raw, arabicName: '  ' }, 'ar'), 'زيت زيتون');
   assert.equal(backendKitchenView([raw], 'زيت', 'all', 'name', false, '2026-06-01', 'ar')[0], raw);
   assert.equal(JSON.stringify(raw), before);
 });

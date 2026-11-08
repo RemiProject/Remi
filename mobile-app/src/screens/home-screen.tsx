@@ -1,3 +1,4 @@
+import { recipeName, recipeNameMatches } from '@/i18n/recipe-names';
 import { RecipeArt, RecipeCard, RecipeGrid, RecipeTabs, filterRecipes, recipeMinutes, recipeTabs, useGridCardWidth } from '@/components/recipe-card';
 import { energyLabel } from '@/domain/nutrition';
 import { Brand } from '@/components/brand';
@@ -43,10 +44,10 @@ export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
   const dayLabel = (date: string) => date === todayKey() ? c('Today', 'اليوم') : date === shiftDay(todayKey(), 1) ? c('Tomorrow', 'غدًا') : new Date(`${date}T12:00:00`).toLocaleDateString(language, { weekday: 'long' });
   const mealLabel = (type: string) => ({ BREAKFAST: c('Breakfast', 'الإفطار'), LUNCH: c('Lunch', 'الغداء'), DINNER: c('Dinner', 'العشاء'), SNACK: c('Snack', 'وجبة خفيفة') } as Record<string, string>)[type] ?? c('Meal', 'وجبة');
   const thumb = (name: string, id: string) => <RecipeArt id={id} name={name} width={56} height={56} radius={14} />;
-  const row = (key: string, title: string, caption: string, onPress: () => void, recipeId?: string) => <Pressable key={key} accessibilityRole="button" accessibilityLabel={`${title}. ${caption}`} onPress={onPress} style={({ pressed }) => [uiStyles.row, { paddingVertical: 8, borderRadius: 16, backgroundColor: pressed ? colors.pressedSurface : 'transparent' }]}>
-    {recipeId && thumb(title, recipeId)}<View style={{ flex: 1, gap: 2 }}><AppText variant="label">{title}</AppText><AppText variant="caption" muted>{caption}</AppText></View><Icon name="chevron" size={16} rtl={rtl} /></Pressable>;
+  const row = (key: string, title: string, caption: string, onPress: () => void, recipeId?: string) => <Pressable key={key} accessibilityRole="button" accessibilityLabel={`${recipeName(title, language)}. ${caption}`} onPress={onPress} style={({ pressed }) => [uiStyles.row, { paddingVertical: 8, borderRadius: 16, backgroundColor: pressed ? colors.pressedSurface : 'transparent' }]}>
+    {recipeId && thumb(title, recipeId)}<View style={{ flex: 1, gap: 2 }}><AppText variant="label">{recipeName(title, language)}</AppText><AppText variant="caption" muted>{caption}</AppText></View><Icon name="chevron" size={16} rtl={rtl} /></Pressable>;
   const catalogue = [...(data.data?.recipes ?? [])].sort((a, b) => Number(!!getCookbookContent(b.name, b.id)) - Number(!!getCookbookContent(a.name, a.id)));
-  const recipes = catalogue.filter(recipe => recipe.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const recipes = catalogue.filter(recipe => recipeNameMatches(recipe.name, query, language));
   const shown = filterRecipes(catalogue, tab); const cardWidth = useGridCardWidth();
   const foods = kitchen.items.filter(item => backendFoodName(item, language).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const priority = kitchen.items.filter(item => { const days = backendExpiryDays(item, kitchen.today); return days !== null && days >= 0 && days <= 3; }).sort((a,b) => (backendExpiryDays(a,kitchen.today) ?? 99) - (backendExpiryDays(b,kitchen.today) ?? 99));

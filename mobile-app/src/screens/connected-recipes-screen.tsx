@@ -1,3 +1,6 @@
+import { recipeName, recipeNameMatches } from '@/i18n/recipe-names';
+import { recipeContent } from '@/i18n/recipe-content';
+import { catalogLabel, localizedUnit } from '@/i18n/catalog-labels';
 import { useLanguage } from '@/providers/language-provider';
 import { NutritionPanel, useNutritionGoal } from '@/components/nutrition-panel';
 import { energyLabel } from '@/domain/nutrition';
@@ -21,7 +24,7 @@ import { AppText, Button, Card, EmptyState, SearchField, uiStyles } from '@/comp
 import { RecipeArt, RecipeCard, RecipeGrid, RecipeTabs, filterRecipes, recipeImage, recipeMinutes, recipeTabs, useGridCardWidth } from '@/components/recipe-card';
 import { FormField } from '@/components/ui/form-field';
 import { getCookbookContent } from '@/data/cookbook-content';
-import { kitchenRequest, loadRecipe, loadRecipes, loadShopping, operationKey, recipeDetailFields, scaleQuantity, todayKey, unitLabel, type ShoppingList } from '@/services/kitchen-api';
+import { kitchenRequest, loadRecipe, loadRecipes, loadShopping, operationKey, recipeDetailFields, scaleQuantity, todayKey, type ShoppingList } from '@/services/kitchen-api';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
 
 function RoundButton({ label, accessibilityLabel, disabled, onPress }: { label: string; accessibilityLabel: string; disabled: boolean; onPress: () => void }) {
@@ -39,7 +42,7 @@ function CatalogueScreen({ initial, onSuggestions }: { initial: string; onSugges
   const copy = useCopy(); const { language } = useLanguage(); const state = useKitchenData(loadRecipes); const width = useGridCardWidth();
   const [query, setQuery] = useState(''); const [tab, setTab] = useState(initial); const [limit, setLimit] = useState(24);
   const all = [...(state.data ?? [])].sort((a, b) => Number(!!getCookbookContent(b.name, b.id)) - Number(!!getCookbookContent(a.name, a.id)));
-  const visible = filterRecipes(all, tab).filter(recipe => recipe.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const visible = filterRecipes(all, tab).filter(recipe => recipeNameMatches(recipe.name, query, language));
   const choose = (key: string) => { if (key === 'kitchen') onSuggestions(); else { setTab(key); setLimit(24); } };
   const time = (recipe: (typeof all)[number]) => { const m = recipeMinutes(recipe); return m === null ? null : `${m} ${copy('min', 'دقيقة')}`; };
   return <ConnectedScreen title={copy('The cookbook', 'كتاب الطبخ')}>
@@ -91,7 +94,7 @@ function RecipeContent({ id }: { id: string }) {
     }
   };
   if (!recipe) return <ConnectedScreen title={copy('Recipe', 'الوصفة')}><DataNotice {...state} /></ConnectedScreen>;
-  const rtl = language === 'ar'; const minutes = recipeMinutes(recipe); const heroHeight = (metadata || recipe.imageUrl || recipeImage(recipe.name, recipe.id) ? 380 : 240) + insets.top;
+  const rtl = language === 'ar'; const minutes = recipeMinutes(recipe); const heroHeight = (metadata || recipe.imageUrl || recipeImage(recipe.name, recipe.id) ? 300 : 220) + insets.top;
   heroH.set(heroHeight);
   const lines = recipe.ingredientLines ?? [];
   const remove = () => Alert.alert(copy('Remove from My recipes?', 'إزالة من وصفاتي؟'), copy('The recipe is removed for everyone in your household.', 'ستُزال الوصفة لكل أفراد أسرتك.'), [
@@ -107,34 +110,30 @@ function RecipeContent({ id }: { id: string }) {
   return <View style={{ flex: 1, backgroundColor: colors.background }}>
     <Animated.ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }} style={{ direction: rtl ? 'rtl' : 'ltr' }} scrollEventThrottle={16} onScroll={onScroll}>
       <Animated.View style={heroStyle}><RecipeArt id={recipe.id} name={recipe.name} width="100%" height={heroHeight} radius={0} uri={recipe.imageUrl} /></Animated.View>
-      <View style={{ marginTop: -28, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.background, paddingHorizontal: 20, paddingTop: 10, gap: 36 }}>
+      <View style={{ marginTop: -28, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.background, paddingHorizontal: 20, paddingTop: 10, gap: spacing.xl }}>
         <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: colors.border }} />
         {matches.removedNotice?.recipeId === id && <AppText accessibilityLiveRegion="polite">{cookedItMessages[language].removed}</AppText>}
-        <View style={{ gap: 20, marginBottom: -12 }}>
-          <View style={{ gap: 6 }}><AppText variant="title" accessibilityRole="header" dir={textDir(recipe.name)} style={{ fontSize: 28, lineHeight: 33 }}>{recipe.name}</AppText>
-            {(recipe.cuisineName || recipe.sourceName) && <AppText muted>{recipe.cuisineName ?? copy(`From ${recipe.sourceName}`, `من ${recipe.sourceName}`)}</AppText>}</View>
-          {/* One quiet row of facts: the photo and the title lead, the numbers support. */}
-          <View style={{ flexDirection: 'row', paddingVertical: 14, borderRadius: radii.lg, backgroundColor: colors.surface, boxShadow: `0 4px 18px ${colors.shadow}` }}>
-            {stats.map((stat, index) => <View key={stat.icon} accessible accessibilityLabel={`${stat.value} ${stat.label}`} style={{ flex: 1, alignItems: 'center', gap: 4, borderStartWidth: index ? 1 : 0, borderColor: colors.divider }}>
-              <Icon name={stat.icon} size={18} color={colors.accentText} />
-              <AppText variant="label" numberOfLines={1}>{stat.value}</AppText>
-              <AppText variant="caption" muted numberOfLines={1} style={{ fontSize: 12, lineHeight: 15 }}>{stat.label}</AppText>
-            </View>)}
+        <View style={[uiStyles.row, { alignItems: 'flex-start' }]}>
+          <View style={[uiStyles.grow, { gap: 4 }]}><AppText variant="title" accessibilityRole="header" dir={rtl ? 'rtl' : 'ltr'} style={{ fontSize: 28, lineHeight: 33 }}>{recipeName(recipe.name, language)}</AppText>
+            {(recipe.cuisineName || recipe.sourceName) && <AppText muted>{recipe.cuisineName ? catalogLabel(recipe.cuisineName, language) : copy(`From ${recipe.sourceName}`, `من ${recipe.sourceName}`)}</AppText>}</View>
+          <View style={[uiStyles.row, { gap: 8, paddingTop: 2 }]}>
+            <RoundButton label="−" accessibilityLabel={copy('Fewer servings', 'حصص أقل')} disabled={count <= 1} onPress={() => setServings(count - 1)} />
+            <View accessible accessibilityLabel={copy(`${count} servings`, `${count} حصص`)} style={{ alignItems: 'center', minWidth: 28 }}><AppText variant="heading" accessibilityLiveRegion="polite">{count}</AppText><AppText variant="caption" muted style={{ fontSize: 11, lineHeight: 13 }}>{copy('serv.', 'حصص')}</AppText></View>
+            <RoundButton label="+" accessibilityLabel={copy('More servings', 'حصص أكثر')} disabled={count >= 20} onPress={() => setServings(count + 1)} />
           </View>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          {stats.map(stat => <View key={stat.icon} accessible accessibilityLabel={`${stat.value} ${stat.label}`} style={{ flex: 1, alignItems: 'center', gap: 6, paddingTop: 8, paddingBottom: 14, borderRadius: radii.pill, backgroundColor: colors.hero }}>
+            <View style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }}><Icon name={stat.icon} size={20} color={colors.text} /></View>
+            <AppText variant="label" numberOfLines={1} style={{ color: colors.onHero }}>{stat.value}</AppText>
+            <AppText variant="caption" numberOfLines={1} style={{ color: colors.onHero, fontSize: 12, lineHeight: 15 }}>{stat.label}</AppText>
+          </View>)}
         </View>
         {detail?.matchingError && <Card><AppText accessibilityRole="alert">{labels.matchingError}</AppText><Button label={labels.retry} onPress={() => { void matches.loadDetail(id); }} /></Card>}
         {!!detail?.suggestion?.safetyWarnings.length && <Card style={{ backgroundColor: colors.warningSurface }}><AppText variant="label" style={{ color: colors.warningText }}>{labels.warnings}</AppText><AppText>{labels.warningBody}</AppText>{detail.suggestion.safetyWarnings.map(code => <AppText key={code}>{(labels as Record<string, string>)[code] ?? labels.otherWarning}</AppText>)}</Card>}
-        {!!recipe.description && <AppText>{getCookbookContent(recipe.name, recipe.id) ? recipe.description.split('\n\n')[0] : recipe.description}</AppText>}
+        {!!recipe.description && <AppText>{recipeContent(getCookbookContent(recipe.name, recipe.id) ? recipe.description.split('\n\n')[0] : recipe.description, language)}</AppText>}
         <View style={{ gap: spacing.md }}>
-          <View style={[uiStyles.row, { gap: spacing.md }]}>
-            <AppText variant="heading" accessibilityRole="header" style={uiStyles.grow}>{copy('Ingredients', 'المكونات')}</AppText>
-            {/* Servings sit with what they change. */}
-            <View style={[uiStyles.row, { gap: 10 }]}>
-              <RoundButton label="−" accessibilityLabel={copy('Fewer servings', 'حصص أقل')} disabled={count <= 1} onPress={() => setServings(count - 1)} />
-              <View accessible accessibilityLabel={copy(`${count} servings`, `${count} حصص`)} style={{ alignItems: 'center', minWidth: 28 }}><AppText variant="heading" accessibilityLiveRegion="polite">{count}</AppText><AppText variant="caption" muted style={{ fontSize: 11, lineHeight: 13 }}>{copy('serv.', 'حصص')}</AppText></View>
-              <RoundButton label="+" accessibilityLabel={copy('More servings', 'حصص أكثر')} disabled={count >= 20} onPress={() => setServings(count + 1)} />
-            </View>
-          </View>
+          <AppText variant="heading" accessibilityRole="header">{copy('Ingredients', 'المكونات')}</AppText>
           {lines.length > 0 && count !== recipe.servings && <AppText variant="caption" muted>{copy(`Amounts as written, for ${recipe.servings} servings.`, `الكميات كما كُتبت، لـ${recipe.servings} حصص.`)}</AppText>}
           {lines.map(line => <View key={line.position} style={[uiStyles.row, { alignItems: 'flex-start' }]}>
             <View style={{ width: 9, height: 9, borderRadius: 5, marginTop: 7, backgroundColor: line.foodId ? colors.accent : colors.border }} />
@@ -143,7 +142,7 @@ function RecipeContent({ id }: { id: string }) {
           {!lines.length && recipe.ingredients.map(ingredient => <View key={ingredient.id} style={[uiStyles.row, { alignItems: 'flex-start' }]}>
             <View style={{ width: 9, height: 9, borderRadius: 5, marginTop: 7, backgroundColor: colors.accent }} />
             <View style={[uiStyles.grow, { gap: 2 }]}>
-              <AppText><AppText variant="label">{formatAmount(scaleQuantity(ingredient.quantity, count, recipe.servings))} {unitLabel(ingredient.unit)}</AppText>  {recipeFoodName(ingredient, language)}{ingredient.optional && !detail?.suggestion ? copy(' · optional', ' · اختياري') : ''}</AppText>
+              <AppText><AppText variant="label">{formatAmount(scaleQuantity(ingredient.quantity, count, recipe.servings))} {localizedUnit(ingredient.unit, language)}</AppText>  {recipeFoodName(ingredient, language)}{ingredient.optional && !detail?.suggestion ? copy(' · optional', ' · اختياري') : ''}</AppText>
               {detail?.suggestion && <AppText variant="caption" muted>{recipeIngredientStatus(ingredient, detail.suggestion, language)}</AppText>}
             </View>
           </View>)}
@@ -153,7 +152,7 @@ function RecipeContent({ id }: { id: string }) {
           <AppText variant="heading" accessibilityRole="header">{copy('Directions', 'طريقة التحضير')}</AppText>
           {[...recipe.steps].sort((a, b) => a.stepNumber - b.stepNumber).map(step => <View key={step.id} style={[uiStyles.row, { alignItems: 'flex-start' }]}>
             <View style={{ width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.selectedSurface }}><AppText variant="label" style={{ color: colors.selectedText, fontSize: 13 }}>{step.stepNumber}</AppText></View>
-            <View style={[uiStyles.grow, { gap: 4, paddingTop: 3 }]}><AppText dir={textDir(step.instruction)} style={{ textAlign: textDir(step.instruction) === 'rtl' ? 'right' : 'left' }}>{step.instruction}</AppText>{step.durationMin !== null && <View style={[uiStyles.row, { gap: 6 }]}><Icon name="clock" size={14} color={colors.textSecondary} /><AppText variant="caption" muted>{step.durationMin} {copy('min', 'دقيقة')}</AppText></View>}</View>
+            <View style={[uiStyles.grow, { gap: 4, paddingTop: 3 }]}><AppText dir={textDir(recipeContent(step.instruction, language))} style={{ textAlign: textDir(recipeContent(step.instruction, language)) === 'rtl' ? 'right' : 'left' }}>{recipeContent(step.instruction, language)}</AppText>{step.durationMin !== null && <View style={[uiStyles.row, { gap: 6 }]}><Icon name="clock" size={14} color={colors.textSecondary} /><AppText variant="caption" muted>{step.durationMin} {copy('min', 'دقيقة')}</AppText></View>}</View>
           </View>)}
         </View>
         <View style={{ gap: spacing.sm }}>
@@ -171,7 +170,7 @@ function RecipeContent({ id }: { id: string }) {
     </Animated.ScrollView>
     {/* Once the picture has scrolled away, a plain bar keeps text out from under the status bar and names the recipe. */}
     <Animated.View pointerEvents="none" style={[barStyle, { position: 'absolute', top: 0, left: 0, right: 0, height: insets.top + 60, paddingTop: insets.top, paddingHorizontal: 76, justifyContent: 'center', backgroundColor: colors.background, borderBottomWidth: 1, borderColor: colors.divider }]}>
-      <AppText variant="label" numberOfLines={1} dir="ltr" style={{ textAlign: 'center' }}>{recipe.name}</AppText></Animated.View>
+      <AppText variant="label" numberOfLines={1} dir="ltr" style={{ textAlign: 'center' }}>{recipeName(recipe.name, language)}</AppText></Animated.View>
     <Pressable accessibilityRole="button" accessibilityLabel={copy('Back', 'رجوع')} onPress={() => router.canGoBack() ? router.back() : router.replace('/')} hitSlop={6}
       style={({ pressed }) => ({ position: 'absolute', top: insets.top + 8, [rtl ? 'right' : 'left']: 20, width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, opacity: pressed ? 0.8 : 1 })}>
       <Icon name="back" size={20} color={colors.text} rtl={rtl} /></Pressable>
