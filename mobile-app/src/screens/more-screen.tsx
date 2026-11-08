@@ -33,6 +33,6 @@ export default function MoreScreen() {
       {sourcedImageCredits.map(c => <AppText key={c.sourceUrl} variant="caption" accessibilityRole="link" onPress={() => { void Linking.openURL(c.sourceUrl); }} style={{ color: colors.primary }}>
         {`${c.subject.charAt(0).toUpperCase()}${c.subject.slice(1)} · ${c.author} · ${c.license}`}</AppText>)}
     </View>
-    <AppText variant="caption" muted>{ar ? 'Remi Cookbook · الإصدار ٣' : 'Remi Cookbook · Version 3'}</AppText>
+    <AppText variant="caption" muted>{ar ? 'Remi · الإصدار ٣' : 'Remi · Version 3'}</AppText>
   </Screen>;
 }
