@@ -3,7 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const ts = require('typescript');
 
-const mocks = { 'expo-image': { Image: 'Image' }, 'react-native': { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View', useWindowDimensions: () => ({ width: 402 }) },
+const mocks = { react: { useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}], useEffect: () => {}, useMemo: factory => factory() },
+  'react-native-reanimated': require('./native-ui-fixture.cjs').fixtureModule('react-native-reanimated'), 'expo-image': { Image: 'Image' }, 'react-native': { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View', useWindowDimensions: () => ({ width: 402 }) },
   '@/components/ui/core': { AppText: 'AppText' }, '@/components/ui/icon': { Icon: 'Icon' }, '@/data/cookbook-content': { getCookbookContent: () => undefined },
   '@/data/food-images': { recipeImages: { 'mish with tomato': 7 } }, '@/domain/nutrition': require('../src/domain/nutrition.ts'),
   '@/theme/provider': { useRemyTheme: () => ({ colors: {} }) }, '@/theme/tokens': { layout: { maxWidth: 720 }, radii: { lg: 22, pill: 999 } } };

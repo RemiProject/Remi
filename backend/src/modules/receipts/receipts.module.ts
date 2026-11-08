@@ -3,5 +3,5 @@ import { InventoryModule } from '@/modules/inventory/inventory.module.js';
 import { ReceiptService } from './application/receipt.service.js';
 import { ReceiptResolver } from './presentation/receipt.resolver.js';
 
-@Module({ imports: [InventoryModule], providers: [ReceiptService, ReceiptResolver] })
+@Module({ imports: [InventoryModule], providers: [ReceiptService, ReceiptResolver], exports: [ReceiptService] })
 export class ReceiptsModule {}

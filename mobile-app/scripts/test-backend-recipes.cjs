@@ -343,7 +343,7 @@ function expand(tree) {
 function ui() {
   let language = 'en', state = { ...emptyRecipes, owner: 'a', status: 'ready', nodes: [suggestion()], today: '2026-06-02', kitchenEmpty: false };
   const pushed = [], focused = []; let refresh = 0, more = 0, get = 0;
-  const react = { useCallback: callback => callback };
+  const react = { useCallback: callback => callback, useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}], useEffect: () => {}, useMemo: factory => factory() };
   const mocks = {
     react,
     'expo-router': { router: { push: route => pushed.push(route), replace: route => pushed.push(route), canGoBack: () => false }, useFocusEffect: effect => focused.push(effect) },
@@ -431,7 +431,7 @@ function cookingUi() {
   h.mocks.react.useState = init => { const i = hook++; if (!(i in store)) store[i] = init; return [store[i], value => { store[i] = typeof value === 'function' ? value(store[i]) : value; }]; };
   h.mocks.react.useRef = value => ({ current: value });
   Object.assign(h.mocks['react-native'], { ScrollView: 'ScrollView', useWindowDimensions: () => ({ width: 400, height: 800 }) });
-  h.mocks['react-native-reanimated'] = { useReducedMotion: () => false };
+  h.mocks['react-native-reanimated'] = { ...require('./native-ui-fixture.cjs').fixtureModule('react-native-reanimated'), default: { View: 'AnimatedView', createAnimatedComponent: component => component } };
   h.mocks['expo-keep-awake'] = { useKeepAwake: () => {} };
   h.mocks['@/components/step-timer'] = { StepTimer: 'StepTimer' };
   h.mocks['@/components/ui/core'].Chip = 'Chip';
@@ -537,7 +537,7 @@ test('Home recipe ideas show four ranked backend cards, metadata, coverage, expi
     assert(nodes(tree, 'AppText').filter(n => n.props.children === 'Recipe backend-0').every(n => n.props.dir === 'ltr'));
     nodes(tree, 'Pressable')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'backend-0' } });
     nodes(tree, 'Button')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/feature', params: { feature: 'recipes' } });
-    effects.at(-1)();
+    effects.splice(0).forEach(effect => effect()); // this render's effects, whatever order components register them in
   }
   assert.equal(h.counts().refresh, 2);
 });

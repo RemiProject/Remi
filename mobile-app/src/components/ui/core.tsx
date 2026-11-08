@@ -52,9 +52,13 @@ export function Button({ label, onPress, variant = 'primary', icon, disabled = f
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
   const feedback = (down: boolean) => { setPressed(down); scale.set(withTiming(down && !reduced ? 0.98 : 1, { duration: 120, easing: Easing.bezier(0.23, 1, 0.32, 1) })); };
   const color = disabled ? colors.disabledText : variant === 'primary' ? colors.onPrimary : variant === 'destructive' ? colors.onDestructive : variant === 'dangerText' ? colors.destructive : colors.primary;
+  const textual = variant === 'text' || variant === 'dangerText';
+  // Text buttons keep a 48pt touch area through hitSlop instead of reserving it visually, so a heading's "See all"
+  // or a card's last link doesn't push the layout apart.
   return <AnimatedPressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} onPressIn={() => feedback(true)} onPressOut={() => feedback(false)}
+    hitSlop={textual ? { top: 8, bottom: 8 } : undefined} pressRetentionOffset={16}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-    style={[styles.button, pressStyle, (variant === 'text' || variant === 'dangerText') && { paddingHorizontal: spacing.sm }, icon === 'back' && { alignSelf: 'flex-start' }, {
+    style={[styles.button, pressStyle, textual && { minHeight: 32, paddingVertical: 4, paddingHorizontal: spacing.sm }, icon === 'back' && { alignSelf: 'flex-start' }, {
       backgroundColor: disabled ? colors.disabledSurface : variant === 'primary' ? (pressed ? colors.primaryPressed : colors.primary) : variant === 'destructive' ? colors.destructive : pressed ? colors.pressedSurface : variant === 'secondary' ? colors.primarySoft : 'transparent',
       borderColor: focused ? colors.focusBorder : 'transparent',
       borderWidth: focused ? 3 : 2,

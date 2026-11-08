@@ -287,6 +287,25 @@ type ImageUploadTicketType {
   uploadUrl: String!
 }
 
+input ImportedIngredientInput {
+  foodId: ID
+  optional: Boolean! = false
+  quantity: Decimal
+  text: String!
+  unit: Unit
+}
+
+type ImportedIngredientType {
+  alternatives: [ReceiptFoodOptionType!]!
+  confidence: ReceiptMatchConfidence!
+  food: ReceiptFoodOptionType
+  name: String!
+  optional: Boolean!
+  quantity: Decimal
+  text: String!
+  unit: Unit
+}
+
 type InsufficientStockType {
   available: Decimal!
   foodId: ID
@@ -533,6 +552,7 @@ type Mutation {
   addStock(input: InventoryStockInput!): InventoryMutationResult!
   addToShoppingList(input: AddToShoppingListInputType!): ShoppingListItemType!
   adjustStock(input: InventoryAdjustmentInput!): InventoryMutationResult!
+  archiveRecipe(id: ID!): Boolean!
 
   """
   Step 2 of 2: validates the uploaded bytes and records the image. Idempotent per storageKey.
@@ -593,6 +613,7 @@ type Mutation {
   revokeDevice(id: String!): Boolean!
   revokeInvitation(input: RevokeInvitationInput!): Boolean!
   saveCookbookLeftover(input: SaveCookbookLeftoverInput!): CookbookLeftover!
+  saveImportedRecipe(input: SaveImportedRecipeInput!): RecipeType!
   setCookbookLeftoverStatus(id: ID!, status: String!): CookbookLeftover!
   setDietaryPreferences(input: SetDietaryPreferencesInputType!): MyProfileType!
   setGoal(input: SetGoalInputType!): UserGoalType!
@@ -860,6 +881,7 @@ type Query {
   notificationPreferences: [NotificationPreferenceType!]!
   notifications(after: String, first: Int! = 20): NotificationConnectionType!
   predictions(after: String, first: Int! = 20, type: PredictionType!): PredictionConnectionType!
+  previewRecipeImport(url: String!): RecipeImportPreviewType!
 
   """
   Checks a scanned barcode against the caller's own safety profile. Null when the barcode is unknown.
@@ -960,11 +982,36 @@ enum RecipeDifficulty {
   MEDIUM
 }
 
+"""A recipe read from a web page, before it is saved."""
+type RecipeImportPreviewType {
+  author: String
+  cookTimeMin: Int
+  description: String
+  imageUrl: String
+  ingredients: [ImportedIngredientType!]!
+  name: String!
+  prepTimeMin: Int
+
+  """Set when this household already saved a recipe from the same link"""
+  savedRecipeId: ID
+  servings: Int
+  sourceName: String
+  sourceUrl: String!
+  steps: [String!]!
+}
+
 input RecipeIngredientInputType {
   foodId: ID!
   optional: Boolean! = false
   quantity: Decimal!
   unit: Unit!
+}
+
+type RecipeIngredientLineType {
+  """The catalogue food this line was matched to, if any"""
+  foodId: ID
+  position: Int!
+  text: String!
 }
 
 enum RecipeIngredientMatchStatus {
@@ -1071,12 +1118,17 @@ type RecipeSummaryType {
   difficulty: RecipeDifficulty!
   householdId: ID
   id: ID!
+  imageUrl: String
   name: String!
 
   """Null when no ingredient has nutrition data"""
   nutrition: RecipeNutritionType
   prepTimeMin: Int
   servings: Int!
+  sourceName: String
+
+  """The page a saved recipe came from"""
+  sourceUrl: String
 }
 
 type RecipeType {
@@ -1087,6 +1139,10 @@ type RecipeType {
   difficulty: RecipeDifficulty!
   householdId: ID
   id: ID!
+  imageUrl: String
+
+  """Ingredient lines as the source page printed them (saved recipes only)"""
+  ingredientLines: [RecipeIngredientLineType!]!
   ingredients: [RecipeIngredientType!]!
   name: String!
 
@@ -1094,6 +1150,10 @@ type RecipeType {
   nutrition: RecipeNutritionType
   prepTimeMin: Int
   servings: Int!
+  sourceName: String
+
+  """The page a saved recipe came from"""
+  sourceUrl: String
   steps: [RecipeStepType!]!
 }
 
@@ -1209,6 +1269,19 @@ input SaveCookbookLeftoverInput {
   portions: Int!
   storage: String!
   useBy: String
+}
+
+input SaveImportedRecipeInput {
+  cookTimeMin: Int
+  description: String
+  imageUrl: String
+  ingredients: [ImportedIngredientInput!]!
+  name: String!
+  prepTimeMin: Int
+  servings: Int!
+  sourceName: String
+  sourceUrl: String!
+  steps: [String!]!
 }
 
 enum SearchDocumentType {

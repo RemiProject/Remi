@@ -3,6 +3,7 @@ import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsInt, IsOption
 import { Type } from 'class-transformer';
 import { Unit } from '@/shared/food-unit.js';
 import { DecimalScalar } from '@/platform/graphql/scalars.js';
+import { RecipeIngredientLineType } from './recipe-import.types.js';
 
 export enum RecipeDifficulty { EASY = 'EASY', MEDIUM = 'MEDIUM', HARD = 'HARD' }
 registerEnumType(RecipeDifficulty, { name: 'RecipeDifficulty' });
@@ -79,12 +80,16 @@ export class RecipeSummaryType {
   @Field(() => Int, { nullable: true }) cookTimeMin!: number | null;
   @Field(() => RecipeDifficulty) difficulty!: RecipeDifficulty;
   @Field(() => RecipeNutritionType, { nullable: true, description: 'Null when no ingredient has nutrition data' }) nutrition!: RecipeNutritionType | null;
+  @Field(() => String, { nullable: true, description: 'The page a saved recipe came from' }) sourceUrl!: string | null;
+  @Field(() => String, { nullable: true }) sourceName!: string | null;
+  @Field(() => String, { nullable: true }) imageUrl!: string | null;
 }
 
 @ObjectType()
 export class RecipeType extends RecipeSummaryType {
   @Field(() => [RecipeIngredientType]) ingredients!: RecipeIngredientType[];
   @Field(() => [RecipeStepType]) steps!: RecipeStepType[];
+  @Field(() => [RecipeIngredientLineType], { description: 'Ingredient lines as the source page printed them (saved recipes only)' }) ingredientLines!: RecipeIngredientLineType[];
 }
 
 @ObjectType()

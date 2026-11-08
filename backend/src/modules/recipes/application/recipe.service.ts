@@ -44,11 +44,29 @@ export class RecipeService {
     const afterId = decodeCursor(after);
     return this.transactions.run(async (tx) => {
       const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt"
+        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl"
         FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId"
         WHERE r."archivedAt" IS NULL AND (r."householdId" IS NULL OR r."householdId" = ${householdId}::uuid)
           AND (${afterId}::uuid IS NULL OR (r."createdAt", r."id") > (SELECT c."createdAt", c."id" FROM "Recipe" c WHERE c."id" = ${afterId}::uuid AND c."archivedAt" IS NULL AND (c."householdId" IS NULL OR c."householdId" = ${householdId}::uuid)))
         ORDER BY r."createdAt", r."id" LIMIT ${first + 1}`;
+      const hasNextPage = rows.length > first;
+      const nodes = await withNutrition(tx, rows.slice(0, first));
+      const last = nodes[nodes.length - 1];
+      return { nodes, hasNextPage, endCursor: last ? Buffer.from(String(last.id)).toString('base64url') : null };
+    }, { householdId });
+  }
+
+  /** The household's own recipes ("My recipes"), newest first. */
+  async listMine(householdId: string, first = 20, after?: string) {
+    if (first < 1 || first > 50) throw new DomainError('INVALID_PAGE_SIZE', 'first must be between 1 and 50.');
+    const afterId = decodeCursor(after);
+    return this.transactions.run(async (tx) => {
+      const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl"
+        FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId"
+        WHERE r."archivedAt" IS NULL AND r."householdId" = ${householdId}::uuid
+          AND (${afterId}::uuid IS NULL OR (r."createdAt", r."id") < (SELECT c."createdAt", c."id" FROM "Recipe" c WHERE c."id" = ${afterId}::uuid AND c."householdId" = ${householdId}::uuid))
+        ORDER BY r."createdAt" DESC, r."id" DESC LIMIT ${first + 1}`;
       const hasNextPage = rows.length > first;
       const nodes = await withNutrition(tx, rows.slice(0, first));
       const last = nodes[nodes.length - 1];
@@ -62,7 +80,7 @@ export class RecipeService {
 
   private async getInTransaction(tx: Tx, householdId: string, id: string) {
     const recipes = await tx.$queryRaw<Array<Record<string, unknown>>>`
-      SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt"
+      SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl"
       FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId"
       WHERE r."id" = ${id}::uuid AND r."archivedAt" IS NULL AND (r."householdId" IS NULL OR r."householdId" = ${householdId}::uuid)`;
     if (!recipes.length) throw new DomainError('RECIPE_NOT_FOUND', 'The recipe does not exist in this household.', 404);
@@ -70,8 +88,9 @@ export class RecipeService {
       SELECT ri."id", ri."foodId", f."name" AS "foodName", ri."quantity"::text AS "quantity", ri."unit"::text AS "unit", ri."optional"
       FROM "RecipeIngredient" ri JOIN "Food" f ON f."id" = ri."foodId" WHERE ri."recipeId" = ${id}::uuid ORDER BY f."name"`;
     const steps = await tx.$queryRaw<Array<Record<string, unknown>>>`SELECT "id", "stepNumber", "instruction", "durationMin" FROM "RecipeStep" WHERE "recipeId" = ${id}::uuid ORDER BY "stepNumber"`;
+    const ingredientLines = await tx.$queryRaw<Array<Record<string, unknown>>>`SELECT l."position", l."text", ri."foodId" FROM "RecipeIngredientLine" l LEFT JOIN "RecipeIngredient" ri ON ri."id" = l."recipeIngredientId" WHERE l."recipeId" = ${id}::uuid ORDER BY l."position"`;
     const [recipe] = await withNutrition(tx, recipes);
-    return { ...recipe, ingredients, steps };
+    return { ...recipe, ingredients, steps, ingredientLines };
   }
 }
 

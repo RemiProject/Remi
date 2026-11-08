@@ -155,6 +155,7 @@ egg yolk,صفار البيض,EGGS,PIECE,17.0,,صفار بيض|مح,egg yolks
 duck egg,بيض بط,EGGS,PIECE,70.0,,بيضة بط,
 quail egg,بيض سمان,EGGS,PIECE,9.0,,بيض سمان صغير,quail eggs
 olive oil,زيت زيتون,OILS,MILLILITER,,0.913,زيت الزيتون,
+vegetable oil,زيت نباتي,OILS,GRAM,,,زيت طبخ|زيت للقلي,cooking oil|neutral oil|frying oil
 sunflower oil,زيت عباد الشمس,OILS,MILLILITER,,0.921,زيت عباد,sunflowerseed oil
 corn oil,زيت ذرة,OILS,MILLILITER,,0.921,زيت درة,maize oil
 cottonseed oil,زيت بذرة القطن,OILS,MILLILITER,,0.921,زيت بذرة|زيت قطن,cotton seed oil
