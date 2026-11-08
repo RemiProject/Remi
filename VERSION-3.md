@@ -258,6 +258,21 @@ From Mob's binary: per-serving recipe nutrition shown as nutrient boxes, nutriti
   - **Health:** Today as progress bars against your goals, plus 7 days.
 - **Not done:** generated recipe adaptation, saturated fat and a goal-driven plan generator (reasons in the doc).
 
+### 18. Receipt scanning
+Research, plan, results and rules: [`docs/receipt-scanning.md`](docs/receipt-scanning.md).
+
+Remi used to read a receipt photo as plain text, and the person picked one line at a time. Now it understands the receipt and adds the foods to the kitchen in one step.
+
+- **Reading:**
+  - A native Vision module returns each text line with its position, reads English and Arabic, and respects photo orientation.
+  - The app rebuilds printed rows (straightening tilted photos) and splits header, items and totals.
+  - It reads quantities, weights, pack sizes and discounts.
+  - It leaves out bags, fees and household goods, and checks the items against the printed total.
+- **Matching:** `matchReceiptItems` matches each cleaned name against catalogue names, aliases and product names by trigram similarity. Unsure matches are flagged; unknown lines are left out.
+- **Adding:** `receiveReceipt` adds every confirmed line as a purchase batch in one transaction, dated from the receipt. A retry adds nothing twice.
+- **Review screen:** foods grouped by category, each showing its receipt line, the amount, a suggested storage place and what you already have, all editable.
+- **Not done:** Android layout-aware OCR, expiry dates and price history (reasons in the doc).
+
 ## Design archive
 
 `Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.
@@ -271,5 +286,5 @@ From Mob's binary: per-serving recipe nutrition shown as nutrient boxes, nutriti
 - **Timer and ingredients view:** switching to the Ingredients view unmounts the step pages, so a running timer stops. Lift timer state into the screen, or keep the pager mounted and hidden.
 - **Home "Dish of the day":** a large Mob-style "Cook tonight" photo hero card that leads the rail. Every recipe now has a photo, so this is unblocked.
 - **Shopping header:** the three stacked actions at the top (quick list, this week's meals, add item) could become one row of icon pills, with the list moved up.
-- **Screens not reviewed one by one:** Kitchen, food detail, auth, health, household, intake/receipt, quick add, settings. They inherit the palette, type and components, and the ones opened looked right, but each still needs a visual pass.
+- **Screens not reviewed one by one:** Kitchen, food detail, auth, health, household, quick add, settings. They inherit the palette, type and components, and the ones opened looked right, but each still needs a visual pass.
 - **Not covered:** Android, physical devices and VoiceOver.

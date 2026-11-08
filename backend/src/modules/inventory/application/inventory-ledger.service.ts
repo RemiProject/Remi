@@ -69,6 +69,11 @@ export class InventoryLedgerService {
     return this.transactions.run((tx) => this.addInTransaction(tx, householdId, actorUserId, input, 'PURCHASED', 'PURCHASE_RECEIPT', 'RECEIPT'), { householdId, userId: actorUserId });
   }
 
+  /** Adds a bought batch inside the caller's transaction, so a whole scanned receipt lands at once or not at all. */
+  receiveWithinTransaction(tx: Tx, householdId: string, actorUserId: string, input: StockInput): Promise<StockResult> {
+    return this.addInTransaction(tx, householdId, actorUserId, input, 'PURCHASED', 'PURCHASE_RECEIPT', 'RECEIPT');
+  }
+
   /** Receive a partial or complete purchase-order line through the inventory ledger facade. */
   async receivePurchaseOrderItemWithinTransaction(tx: Tx, householdId: string, actorUserId: string, purchaseOrderItemId: string, input: StockInput): Promise<StockResult> {
     validateInput(input);

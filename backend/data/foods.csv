@@ -75,10 +75,10 @@ lamb liver,كبدة ضأن,MEAT,GRAM,,,كبدة ضاني,
 beef kidney,كلى بقري,MEAT,GRAM,,,كلاوي,beef kidneys
 beef tripe,كرشة,MEAT,GRAM,,,كرشة بقري,tripe
 chicken,دجاج,POULTRY,GRAM,,,فراخ|فرخة,chicken meat
-chicken breast,صدر دجاج,POULTRY,GRAM,,,صدور فراخ|صدر فراخ,chicken fillet
-chicken thigh,ورك دجاج,POULTRY,GRAM,,,أوراك فراخ|ورك فراخ,chicken thighs
+chicken breast,صدر دجاج,POULTRY,GRAM,,,صدور فراخ|صدر فراخ|صدور دجاج,chicken fillet|chicken breasts
+chicken thigh,ورك دجاج,POULTRY,GRAM,,,أوراك فراخ|ورك فراخ|أوراك دجاج,chicken thighs
 chicken drumstick,ساق دجاج,POULTRY,GRAM,,,دبوس فراخ,drumsticks
-chicken wing,جناح دجاج,POULTRY,GRAM,,,أجنحة فراخ|جناح فراخ,chicken wings
+chicken wing,جناح دجاج,POULTRY,GRAM,,,أجنحة فراخ|جناح فراخ|أجنحة دجاج,chicken wings
 chicken liver,كبدة دجاج,POULTRY,GRAM,,,كبدة فراخ,chicken livers
 chicken gizzard,قوانص دجاج,POULTRY,GRAM,,,قوانص|قوانص فراخ,gizzards
 duck,بط,POULTRY,GRAM,,,بطة,duck meat
@@ -134,7 +134,7 @@ green peas,بازلاء,LEGUMES,GRAM,,,بسلة|بسلة خضرا,garden peas
 soybeans,فول الصويا,LEGUMES,GRAM,,,صويا,soya beans
 lupini beans,ترمس,LEGUMES,GRAM,,,ترمس ناشف,lupin beans|lupins
 hummus,حمص بالطحينة,LEGUMES,GRAM,,,حمص بطحينة,hummus dip|houmous
-whole milk,لبن,DAIRY,MILLILITER,,1.031,حليب|لبن كامل الدسم,full fat milk
+whole milk,لبن,DAIRY,MILLILITER,,1.031,حليب|لبن كامل الدسم,full fat milk|full cream milk|fresh milk|milk
 low fat milk,لبن قليل الدسم,DAIRY,MILLILITER,,1.031,حليب قليل الدسم|لبن لايت,1% milk
 skim milk,لبن خالي الدسم,DAIRY,MILLILITER,,1.036,حليب منزوع الدسم,nonfat milk|fat free milk
 buttermilk,لبن رائب,DAIRY,MILLILITER,,1.036,رايب|لبن رايب,cultured buttermilk

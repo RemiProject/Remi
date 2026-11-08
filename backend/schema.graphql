@@ -561,6 +561,7 @@ type Mutation {
   markNotificationRead(id: String!): NotificationItemType!
   planMeal(input: PlanMealInputType!): PlannedMealType!
   receivePurchaseOrderItem(input: ReceivePurchaseOrderItemInputType!): PurchaseReceiptType!
+  receiveReceipt(input: ReceiveReceiptInput!): ReceiveReceiptResultType!
 
   """
   Rotates the refresh token and returns a new access + refresh pair (Session-backed).
@@ -843,6 +844,7 @@ type Query {
   inventoryItem(id: ID!, transactionAfter: String, transactionFirst: Int! = 20): InventoryItemDetailType!
   languages: [Language!]!
   locales: [Locale!]!
+  matchReceiptItems(names: [String!]!): [ReceiptLineMatchType!]!
   me: Me!
   mealPlans(from: String!, to: String!): [MealPlanTypeObject!]!
   myCookbookFeedback: [CookbookFeedback!]!
@@ -869,9 +871,67 @@ type Query {
   stockForecast(foodId: ID!): [FoodDepletionPredictionType!]!
 }
 
+type ReceiptFoodOptionType {
+  arabicName: String
+  categoryCode: String!
+  categoryName: String!
+  defaultUnit: Unit!
+  foodId: ID!
+  gramsPerPiece: Decimal
+  name: String!
+  score: Float!
+  storageLocation: StorageLocation!
+}
+
+input ReceiptItemInput {
+  amount: Decimal!
+  estimatedExpiryAt: DateTime
+  foodId: ID!
+  storageLocation: StorageLocation!
+  unit: Unit!
+}
+
+type ReceiptLineMatchType {
+  alternatives: [ReceiptFoodOptionType!]!
+  confidence: ReceiptMatchConfidence!
+  food: ReceiptFoodOptionType
+  inKitchen: [ReceiptStockType!]!
+  query: String!
+}
+
+enum ReceiptMatchConfidence {
+  HIGH
+  MEDIUM
+  NONE
+}
+
+type ReceiptStockType {
+  quantity: Decimal!
+  unit: Unit!
+}
+
 input ReceivePurchaseOrderItemInputType {
   idempotencyKey: String!
   purchaseOrderItemId: ID!
+  quantity: Decimal!
+  unit: Unit!
+}
+
+input ReceiveReceiptInput {
+  idempotencyKey: String!
+  items: [ReceiptItemInput!]!
+  purchaseDate: LocalDate
+}
+
+type ReceiveReceiptResultType {
+  added: Int!
+  items: [ReceivedReceiptItemType!]!
+  replayed: Boolean!
+}
+
+type ReceivedReceiptItemType {
+  foodId: ID!
+  inventoryItemId: ID!
   quantity: Decimal!
   unit: Unit!
 }
