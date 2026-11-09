@@ -329,6 +329,14 @@ Details: [`docs/feel-and-nutrition.md`](docs/feel-and-nutrition.md).
 - **Server:** `weightHistory` and `nutritionOverview` queries.
 - **Checked:** on the iOS Simulator in English light and Arabic dark with an account that has one logged day. A 30-day test account was seeded, but the screens were not viewed with it (signing it in on a second simulator was not possible here).
 
+### 24. Rings, awards and the widget (`version-3-ui`)
+Details and the research behind it: [`docs/rings-and-widget.md`](docs/rings-and-widget.md).
+
+- **Nutrition is a tab** in place of Plan; the meal plan is in More → Meal plan and one tap from Home and Shopping.
+- **Three daily rings** (Fuel, Protein, Fibre) on a night panel with the week as small rings. Fuel closes within 10% of the calorie goal either side, so eating less never closes it.
+- **A forgiving streak** (one rest day in any 7) and **nine awards** for showing up and balance; a ring closing or a new award gets one haptic, chime and banner.
+- **A home screen and Lock Screen widget** (small, medium, circular, rectangular) with the rings, calories left and the streak. It needs the App Group, so phone builds on a personal team leave it out (`REMI_NO_WIDGETS=1`).
+
 ## Design archive
 
 `Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.

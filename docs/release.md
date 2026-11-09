@@ -51,9 +51,11 @@ These need the Apple Developer Program team that signs the app.
    (Keys → +, Apple Push Notifications service), download the `.p8` once, and set `APNS_KEY_ID`, `APNS_TEAM_ID` and
    `APNS_PRIVATE_KEY` on the server. Builds signed in Xcode for a device use the sandbox (`APNS_SANDBOX=true`);
    TestFlight and App Store builds use production.
-2. **App Group (share sheet):** register `group.com.remi.cookbook.independent` and add it to the App ID. Then build
-   without `REMI_NO_SHARE_EXTENSION` and "Share → Remi" saves recipes from Safari and other apps.
-3. A personal (free) team cannot have either capability: Xcode refuses to sign. Until the app is signed by a paid team, build with `REMI_NO_PUSH=1` and `REMI_NO_SHARE_EXTENSION=1`
+2. **App Group (share sheet and widget):** register `group.com.remi.cookbook.independent` and add it to the App ID
+   and to the widget's App ID (`com.remi.cookbook.independent.ExpoWidgetsTarget`). Then build without
+   `REMI_NO_SHARE_EXTENSION` and `REMI_NO_WIDGETS`: "Share → Remi" saves recipes, and the Remi rings widget appears in
+   the widget gallery.
+3. A personal (free) team cannot have either capability: Xcode refuses to sign. Until the app is signed by a paid team, build with `REMI_NO_PUSH=1`, `REMI_NO_SHARE_EXTENSION=1` and `REMI_NO_WIDGETS=1`
    (`npx expo prebuild --platform ios --clean` after changing either). Reminders then stay inside the app and recipes
    are saved by pasting a link.
 4. **Production build:** `npx eas build --platform ios --profile production`, then

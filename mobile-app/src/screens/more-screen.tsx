@@ -6,9 +6,10 @@ import { sourcedImageCredits } from '@/data/food-images';
 import { useRemyTheme } from '@/theme/provider';
 import { useLanguage } from '@/providers/language-provider';
 import type { IconName } from '@/components/ui/icon';
-const groups: { title: string; ar: string; items: { id: string; name: string; ar: string; icon: IconName; href?: '/nutrition' }[] }[] = [
+const groups: { title: string; ar: string; items: { id: string; name: string; ar: string; icon: IconName; href?: '/plan' }[] }[] = [
   { title: 'Something good to cook', ar: 'وجبات لذيذة', items: [
     { id: 'recipes', name: 'The cookbook', ar: 'كتاب الطبخ', icon: 'recipe' },
+    { id: 'plan', name: 'Meal plan', ar: 'خطة الوجبات', icon: 'calendar', href: '/plan' },
     { id: 'shopping', name: 'Shopping list', ar: 'قائمة المشتريات', icon: 'shopping' },
     { id: 'leftovers', name: 'Leftovers', ar: 'بقايا الطعام', icon: 'food' },
     { id: 'chat', name: 'Kitchen helper', ar: 'مساعد المطبخ', icon: 'chat' },
@@ -19,7 +20,6 @@ const groups: { title: string; ar: string; items: { id: string; name: string; ar
     { id: 'photos', name: 'Kitchen photos', ar: 'صور المطبخ', icon: 'photo' },
   ] },
   { title: 'Made for you', ar: 'من أجلك', items: [
-    { id: 'nutrition', name: 'Nutrition', ar: 'التغذية', icon: 'calendar', href: '/nutrition' },
     { id: 'profile', name: 'Your account', ar: 'حسابك', icon: 'profile' },
     { id: 'health', name: 'Nutrition & preferences', ar: 'التغذية والتفضيلات', icon: 'health' },
     { id: 'settings', name: 'Settings', ar: 'الإعدادات', icon: 'settings' },

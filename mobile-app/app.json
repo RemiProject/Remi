@@ -99,6 +99,29 @@
           "recordAudioAndroid": false,
           "enableBackgroundPlayback": false
         }
+      ],
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.remi.cookbook.independent",
+          "widgets": [
+            {
+              "name": "RemiRings",
+              "displayName": "Remi rings",
+              "description": "Today's Fuel, Protein and Fibre rings, calories left and your streak.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular"
+                ],
+                "initialLayout": "src/widgets/remi-rings.tsx"
+              },
+              "android": null
+            }
+          ]
+        }
       ]
     ],
     "experiments": {

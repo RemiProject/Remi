@@ -37,7 +37,7 @@ xcrun devicectl device process launch --device <device-udid> --terminate-existin
 - **First install:** iOS refuses to open an app from an untrusted developer. On the phone, open Settings → General → VPN & Device Management and trust the developer, then launch again.
 - **First launch:** allow Remi to find devices on the local network. Otherwise sign-in cannot reach the Mac.
 - **Use Release builds.** A Debug build fails to link (`facebook::react::Sealable` undefined), because the prebuilt React Native core is the Release flavour. Release builds work on the simulator too; build for the simulator with `-destination 'id=<simulator-udid>'` and `EXPO_PUBLIC_API_URL=http://localhost:3000`.
-- **Personal team:** the share extension needs an App Group and reminders need Push Notifications; a personal team can sign neither. Generate the phone project without them first: `REMI_NO_PUSH=1 REMI_NO_SHARE_EXTENSION=1 npx expo prebuild --platform ios --clean` (see `docs/release.md`).
+- **Personal team:** the share extension needs an App Group and reminders need Push Notifications; a personal team can sign neither. Generate the phone project without them first: `REMI_NO_PUSH=1 REMI_NO_SHARE_EXTENSION=1 REMI_NO_WIDGETS=1 npx expo prebuild --platform ios --clean` (see `docs/release.md`).
 - **Native modules:** after adding one (such as `modules/receipt-vision`), run `pod install` in `ios/` before building.
 
 Creating an account on the phone is described step by step in [account-setup/](account-setup/README.md).

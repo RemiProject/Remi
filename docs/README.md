@@ -13,6 +13,7 @@ Start with [`VERSION-3.md`](../VERSION-3.md) for the current version: one sectio
 | [recipe-import.md](recipe-import.md) | Saving a recipe from a link: page parsing, ingredient lines, catalogue matching and My recipes |
 | [ui-spacing.md](ui-spacing.md) | The spacing and motion pass: rules, before and after per screen |
 | [feel-and-nutrition.md](feel-and-nutrition.md) | Haptics, sounds and motion, and the Nutrition dashboard page |
+| [rings-and-widget.md](rings-and-widget.md) | Nutrition rings, the forgiving streak, awards and the Remi widget, with the review research behind them |
 | [release.md](release.md) | Publishing: what is done in code, hosting, email, Apple account steps, App Store listing and privacy answers |
 | [privacy-policy.md](privacy-policy.md), [terms.md](terms.md) | The privacy policy and terms the app shows (generated from `mobile-app/src/data/legal.ts`) |
 | [phone-testing.md](phone-testing.md) | Building and installing on an iPhone against a local API, stress-test results, and bugs found on the phone |
