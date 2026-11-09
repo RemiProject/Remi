@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { AppText, Button, Card, EmptyState, PageHeader, Screen, SectionHeader, TextTabs, uiStyles } from '@/components/ui/core';
-import { ActivityRings, Medal, ringColors } from '@/components/activity-rings';
+import { ActivityRings, Medal, useRingColors } from '@/components/activity-rings';
 import { awards, forgivingStreak, ringsFor, type Award, type RingKey } from '@/domain/nutrition-rings';
 import { feedback } from '@/services/feedback';
 import { syncRemiWidget } from '@/services/remi-widget';
@@ -41,7 +40,7 @@ async function load(today: string): Promise<Data> {
 
 export default function NutritionScreen() {
   const { user, ready } = useAuth(); const { language } = useLanguage(); const ar = language === 'ar';
-  const { colors, mode } = useRemyTheme(); const reduced = useReducedMotion();
+  const { colors } = useRemyTheme(); const reduced = useReducedMotion();
   const c = (en: string, arabic: string) => ar ? arabic : en;
   const [period, setPeriod] = useState<Period>('week');
   const [allRows, setAllRows] = useState(false);
@@ -49,8 +48,8 @@ export default function NutritionScreen() {
   const [cheer, setCheer] = useState<string | null>(null);
   const today = todayKey();
   const state = useKitchenData(() => load(today), 'nutrition');
-  // Three distinct hues in both themes (dark mode's primary is lemon, so protein gets its own blue there).
-  const series = mode === 'dark' ? { protein: '#8C9BFF', carbs: '#F8E45C', fat: colors.accent } : { protein: colors.primary, carbs: '#D9B300', fat: colors.accent };
+  // The recipe page's macro mapping, so a colour means the same nutrient everywhere.
+  const series = { protein: colors.macroProtein, carbs: colors.macroCarbs, fat: colors.macroFat };
   const logFood = <Button label={c('Log food', 'سجّل طعامًا')} icon="add" variant="secondary" onPress={() => router.push('/health')} />;
 
   const view = useMemo(() => {
@@ -107,10 +106,10 @@ export default function NutritionScreen() {
   const tabs = [{ key: 'today', label: c('Today', 'اليوم') }, { key: 'week', label: c('7 days', '٧ أيام') }, { key: 'month', label: c('30 days', '٣٠ يومًا') }, { key: 'all', label: c('All time', 'كل الوقت') }];
   const enter = (i: number) => reduced ? undefined : FadeInDown.duration(260).delay(i * 50);
 
-  if (ready && !user) return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={ar}>
+  if (ready && !user) return <View style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={ar}>
     <PageHeader title={c('Nutrition', 'التغذية')} />
     <EmptyState title={c('Your eating, at a glance.', 'طعامك في لمحة.')} description={c('Sign in to see your days, weeks and months.', 'سجّل الدخول لترى أيامك وأسابيعك وأشهرك.')} action={c('Sign in', 'تسجيل الدخول')} onPress={() => router.push('/login')} />
-  </Screen></SafeAreaView>;
+  </Screen></View>;
 
   const data = state.data; const avg = view && (view.kind === 'all' ? view.average : view.summary.average);
   const loggedCount = view ? view.kind === 'all' ? view.logged : view.summary.logged.length : 0;
@@ -139,9 +138,10 @@ export default function NutritionScreen() {
 
   const ringSummary = (closed: number) => closed === 3 ? c('All three rings closed today. Lovely.', 'أغلقت الحلقات الثلاث اليوم. رائع.')
     : c(`${closed} of 3 rings closed today.`, `${closed} من ٣ حلقات مغلقة اليوم.`);
-  const medalColor = (a: Award) => ({ flame: ringColors.fuel, rings: '#5B6CFF', health: '#4FAF3A', recipe: '#E0A800', award: '#E0A800' })[a.icon];
+  // Medals in the brand's three colours, each with the ink or white that reads on it.
+  const medalColor = (a: Award) => ({ flame: [colors.accent, colors.onAccent], rings: [colors.primary, colors.onPrimary], health: [colors.hero, colors.onHero], recipe: [colors.hero, colors.onHero], award: [colors.primary, colors.onPrimary] } as const)[a.icon];
 
-  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={ar}>
+  return <View style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={ar}>
     <PageHeader title={c('Nutrition', 'التغذية')} action={logFood} subtitle={game ? ringSummary(game.today.filter(r => r.closed).length) : undefined} />
     {cheer && <Animated.View key={cheer} entering={reduced ? undefined : FadeInDown.springify().damping(14)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 18, backgroundColor: colors.accentSoft }}>
       <Icon name="award" size={22} color={colors.accentText} /><AppText variant="label" style={[uiStyles.grow, { color: colors.accentText }]}>{cheer}</AppText>
@@ -153,7 +153,7 @@ export default function NutritionScreen() {
     {game && <Animated.View entering={enter(1)}><Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
       <View style={{ width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft }}><Icon name="flame" size={26} color={colors.accentText} /></View>
       <View style={uiStyles.grow}>
-        <AppText style={{ fontSize: 26, lineHeight: 30, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{game.streak.days} <AppText muted>{c('day streak', game.streak.days === 1 ? 'يوم متتالٍ' : 'أيام متتالية')}</AppText></AppText>
+        <AppText variant="figure" style={{ fontSize: 28, lineHeight: 32 }}>{game.streak.days} <AppText muted>{c('day streak', game.streak.days === 1 ? 'يوم متتالٍ' : 'أيام متتالية')}</AppText></AppText>
         <AppText variant="caption" muted>{game.streak.restUsed ? c('Rest day used this week. Log today to keep going.', 'استخدمت يوم الراحة هذا الأسبوع. سجّل اليوم لتستمر.') : c('One rest day a week is on us.', 'يوم راحة واحد في الأسبوع لا يكسر السلسلة.')}</AppText>
       </View>
       <View style={{ alignItems: 'center' }}><AppText variant="heading" style={{ fontVariant: ['tabular-nums'] }}>{game.awards.filter(a => a.earned).length}/{game.awards.length}</AppText><AppText variant="caption" muted>{c('awards', 'أوسمة')}</AppText></View>
@@ -162,7 +162,7 @@ export default function NutritionScreen() {
     {game && <Animated.View entering={enter(2)}><Block icon="award" title={c('Awards', 'الأوسمة')}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
         {game.awards.map(a => <Medal key={a.id} award={a} title={ar ? a.ar[0] : a.en[0]} note={a.earned ? (ar ? a.ar[1] : a.en[1]) : c(`${a.have} / ${a.need}`, `${a.have} من ${a.need}`)}
-          color={medalColor(a)} muted={colors.surfaceMuted} ink={colors.textSecondary} />)}
+          color={medalColor(a)[0]} onColor={medalColor(a)[1]} muted={colors.surfaceMuted} ink={colors.textSecondary} />)}
       </View>
     </Block></Animated.View>}
 
@@ -176,7 +176,7 @@ export default function NutritionScreen() {
       <Animated.View entering={enter(0)}><Card style={{ gap: 14 }}>
         <AppText variant="caption" muted>{view.kind === 'today' ? c('Eaten today', 'المتناول اليوم') : c('Average per logged day', 'المتوسط لكل يوم مسجّل')}</AppText>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-          <AppText style={{ fontSize: 34, lineHeight: 40, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{n(headline)}</AppText>
+          <AppText variant="figure">{n(headline)}</AppText>
           <AppText muted>{c('kcal', 'سعرة')}</AppText>
         </View>
         {target ? <ProgressBar value={headline} max={target} color={colors.primary} start="0" end={c(`Goal ${n(target)}`, `الهدف ${n(target)}`)} over={c(`${n(headline - target)} over`, `+${n(headline - target)}`)} />
@@ -222,7 +222,7 @@ export default function NutritionScreen() {
     {data && <Animated.View entering={enter(4)}><Block icon="health" title={c('Health', 'الصحة')}>
       {trend ? <>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-          <AppText style={{ fontSize: 24, lineHeight: 30, fontWeight: '600', fontVariant: ['tabular-nums'] }}>{kg(trend.latest)}</AppText>
+          <AppText variant="figure" style={{ fontSize: 26, lineHeight: 30 }}>{kg(trend.latest)}</AppText>
           {trend.change !== null && <AppText variant="caption" style={{ color: goodChange(trend.change) === true ? colors.successText : goodChange(trend.change) === false ? colors.accentText : colors.textSecondary }}>
             {`${trend.change > 0 ? '+' : ''}${kg(trend.change)} ${windowStart ? c('in this period', 'في هذه الفترة') : c('since your first weigh-in', 'منذ أول وزن')}`}</AppText>}
         </View>
@@ -242,7 +242,7 @@ export default function NutritionScreen() {
       <Icon name="info" size={18} color={colors.textSecondary} />
       <AppText variant="caption" muted style={uiStyles.grow}>{c('Totals come from meals you cook or log in Remi, using USDA values per ingredient. Days with nothing logged are left out of averages. Not medical advice.', 'الإجماليات من الوجبات التي تطبخها أو تسجّلها في ريمي، بقيم وزارة الزراعة الأمريكية لكل مكوّن. الأيام بلا تسجيل لا تدخل في المتوسطات. ليست نصيحة طبية.')}</AppText>
     </View>
-  </Screen></SafeAreaView>;
+  </Screen></View>;
 }
 
 /** A titled block on a card: an icon and heading, then its rows, the way a Notion page stacks blocks. */
@@ -277,19 +277,26 @@ type Game = { goal: { calorieTarget: number | null; proteinTargetG: number | nul
  * week as small rings to tap through. The panel stays dark in both themes so the ring colours glow.
  */
 function RingsHero({ game, selected, today, onSelect, ar, c }: { game: Game; selected: string; today: string; onSelect: (date: string) => void; ar: boolean; c: (en: string, arabic: string) => string }) {
+  const { colors } = useRemyTheme(); const ringColors = useRingColors();
+  const ink = colors.onHero, mist = colors.onHeroMuted;
   const rings = game.week.find(d => d.date === selected)?.rings ?? game.today;
   const fmt = (v: number) => Math.round(v).toLocaleString('en');
   const names: Record<RingKey, string> = { fuel: c('Fuel', 'الطاقة'), protein: c('Protein', 'البروتين'), fibre: c('Fibre', 'الألياف') };
   const unit = (key: RingKey) => key === 'fuel' ? (game.goal.calorieTarget ? c('kcal', 'سعرة') : c('meals', 'وجبات')) : c('g', 'غ');
   const dayName = selected === today ? c('Today', 'اليوم') : new Date(`${selected}T12:00:00`).toLocaleDateString(ar ? 'ar' : 'en', { weekday: 'long', day: 'numeric', month: 'short' });
-  return <View style={{ backgroundColor: '#0E1440', borderRadius: 28, padding: 20, gap: 20 }}>
+  // The rings live on the app's hero surface (lemon in light, cobalt in dark), like Home's header.
+  return <View style={{ backgroundColor: colors.hero, borderRadius: 28, padding: 20, gap: 20 }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
       <ActivityRings key={selected} rings={rings} size={148} stroke={17} label={rings.map(r => `${names[r.key]} ${fmt(r.value)} / ${fmt(r.target)}`).join(', ')} />
       <View style={{ flex: 1, gap: 12 }}>
-        <AppText variant="caption" style={{ color: '#A9AECF' }}>{dayName}</AppText>
+        <AppText variant="caption" style={{ color: mist }}>{dayName}</AppText>
         {rings.map(r => <View key={r.key} style={{ gap: 1 }}>
-          <AppText variant="label" style={{ color: ringColors[r.key], fontSize: 14 }}>{names[r.key]}{r.closed ? ' ✓' : r.over ? c(' · over', ' · تجاوز') : ''}</AppText>
-          <AppText style={{ color: '#FFFFFF', fontSize: 20, lineHeight: 24, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{fmt(r.value)}<AppText style={{ color: '#A9AECF', fontSize: 14 }}>{` / ${fmt(r.target)} ${unit(r.key)}`}</AppText></AppText>
+          {/* The ring's colour lives in its dot; the words stay in ink so they read on the hero. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ringColors[r.key] }} />
+            <AppText variant="label" style={{ color: ink, fontSize: 14 }}>{names[r.key]}{r.closed ? ' ✓' : r.over ? c(' · over', ' · تجاوز') : ''}</AppText>
+          </View>
+          <AppText variant="figure" style={{ color: ink, fontSize: 22, lineHeight: 26 }}>{fmt(r.value)}<AppText style={{ color: mist, fontSize: 14 }}>{` / ${fmt(r.target)} ${unit(r.key)}`}</AppText></AppText>
         </View>)}
       </View>
     </View>
@@ -297,8 +304,8 @@ function RingsHero({ game, selected, today, onSelect, ar, c }: { game: Game; sel
       {game.week.map(d => { const on = d.date === selected;
         return <Pressable key={d.date} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={new Date(`${d.date}T12:00:00`).toLocaleDateString(ar ? 'ar' : 'en', { weekday: 'long' })}
           onPress={() => { if (!on) feedback.select(); onSelect(d.date); }} hitSlop={4}
-          style={{ alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 14, backgroundColor: on ? 'rgba(255,255,255,0.10)' : 'transparent' }}>
-          <AppText variant="caption" style={{ color: on ? '#FFFFFF' : '#A9AECF', fontSize: 12 }}>{new Date(`${d.date}T12:00:00`).toLocaleDateString(ar ? 'ar' : 'en', { weekday: 'narrow' })}</AppText>
+          style={{ alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 14, backgroundColor: on ? `${ink}1A` : 'transparent' }}>
+          <AppText variant="caption" style={{ color: on ? ink : mist, fontSize: 12 }}>{new Date(`${d.date}T12:00:00`).toLocaleDateString(ar ? 'ar' : 'en', { weekday: 'narrow' })}</AppText>
           <ActivityRings rings={d.rings} size={34} stroke={4} animate={false} />
         </Pressable>; })}
     </View>

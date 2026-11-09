@@ -29,7 +29,7 @@ gamified nutrition apps:
 
 ## The Nutrition tab
 
-1. **Rings on a night panel:** big Fuel, Protein and Fibre rings that sweep in (900 ms, staggered), the numbers
+1. **Rings on the hero surface** (lemon in light, cobalt in dark, like Home's header): big Fuel, Protein and Fibre rings that sweep in (900 ms, staggered), the numbers
    beside them, and the last 7 days as small rings; tap a day to see it.
 2. **Streak card:** the day count, the rest-day state, and awards earned.
 3. **Awards:** medallions, coloured when earned, with a progress ring and "3 / 7" while not.

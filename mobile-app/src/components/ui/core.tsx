@@ -8,7 +8,7 @@ import { useLanguage } from '@/providers/language-provider';
 import { Icon, type IconName } from './icon';
 import { feedback } from '../../services/feedback';
 
-type TextVariant = 'title' | 'heading' | 'body' | 'caption' | 'label' | 'brand';
+type TextVariant = 'title' | 'heading' | 'body' | 'caption' | 'label' | 'brand' | 'figure';
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 const ScreenDirection = createContext<boolean | undefined>(undefined);
@@ -18,12 +18,12 @@ export function AppText({ variant = 'body', muted = false, style, dir, ...props 
   const fonts = useRemyFonts();
   const rtl = useContext(ScreenDirection);
   const { language } = useLanguage();
-  const cut = variant === 'brand' || variant === 'title' ? fonts.brand : variant === 'heading' ? fonts.heading : variant === 'label' ? fonts.label : fonts.body;
+  const cut = variant === 'brand' || variant === 'title' || variant === 'figure' ? fonts.brand : variant === 'heading' ? fonts.heading : variant === 'label' ? fonts.label : fonts.body;
   const family = language === 'ar' ? typography.family : cut;
   // Static cuts carry their own weight; asking iOS for a heavier weight of a one-face family falls back to the system font.
   const display = variant !== 'body' && variant !== 'caption' && fonts.ready;
   // Native RTL layouts mirror physical alignment; keep layout physical and paragraph direction explicit.
-  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, ...(display && language !== 'ar' ? { fontWeight: '400' as const, letterSpacing: 0 } : {}), color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, Platform.OS !== 'web' && { direction: 'ltr' }, style]} />;
+  return <Text {...props} {...(dir && Platform.OS === 'web' ? { dir } : {})} style={[textStyles[variant], { fontFamily: family, ...(display && language !== 'ar' ? { fontWeight: '400' as const, letterSpacing: tracking[variant] ?? 0 } : {}), color: muted ? colors.textSecondary : colors.text, textAlign: 'auto' }, rtl !== undefined && { textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, dir && { writingDirection: dir }, Platform.OS !== 'web' && { direction: 'ltr' }, style]} />;
 }
 export function PageHeader({ title, subtitle, subtitleDirection, action, back }: { title: string; subtitle?: string; subtitleDirection?: 'rtl' | 'ltr'; action?: React.ReactNode; back?: React.ReactNode }) {
   return <View style={{ gap: spacing.xs }}>{back && <View testID="page-header-back" style={{ alignItems: 'flex-start', marginBottom: spacing.sm }}>{back}</View>}<View style={[uiStyles.row, { flexWrap: 'wrap' }]}>
@@ -127,6 +127,30 @@ export function ActionRow({ title, subtitle, icon, leading, trailing, subtitleSt
     </View>
   </Pressable>;
 }
+/**
+ * An iOS-style segmented control for choosing one of a few settings: a muted track and a raised thumb that slides
+ * to the choice (200 ms, strong ease-out; instant under Reduce Motion). The thumb is absolutely positioned and
+ * childless, so moving it lays out nothing else.
+ */
+export function Segmented({ options, value, onChange, disabled = false, label }: { options: readonly { key: string; label: string }[]; value: string; onChange: (key: string) => void; disabled?: boolean; label?: string }) {
+  const { colors, mode } = useRemyTheme();
+  const reduced = useReducedMotion();
+  const [width, setWidth] = useState(0);
+  const index = Math.max(0, options.findIndex(o => o.key === value)), segment = options.length ? (width - 6) / options.length : 0;
+  const rtl = useContext(ScreenDirection) ?? false;
+  const offset = 3 + (rtl ? options.length - 1 - index : index) * segment;
+  return <View accessibilityRole="radiogroup" accessibilityLabel={label} onLayout={e => setWidth(e.nativeEvent.layout.width)}
+    style={{ flexDirection: rtl ? 'row-reverse' : 'row', height: 40, padding: 3, borderRadius: radii.pill, backgroundColor: mode === 'dark' ? colors.surfaceMuted : colors.pressedSurface, direction: 'ltr', opacity: disabled ? 0.6 : 1 }}>
+    {width > 0 && <Animated.View pointerEvents="none" style={{ position: 'absolute', top: 3, bottom: 3, left: 0, width: segment, borderRadius: radii.pill,
+      backgroundColor: mode === 'dark' ? colors.surfaceElevated : colors.surface, boxShadow: `0 2px 6px ${colors.shadow}`,
+      transform: [{ translateX: offset }], transitionProperty: 'transform', transitionDuration: reduced ? '0ms' : '200ms', transitionTimingFunction: EASE_OUT }} />}
+    {options.map(option => { const selected = option.key === value;
+      return <Pressable key={option.key} accessibilityRole="radio" accessibilityState={{ selected, disabled }} disabled={disabled} hitSlop={4}
+        onPress={() => { if (!selected) { feedback.select(); onChange(option.key); } }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <AppText variant="label" numberOfLines={1} style={{ fontSize: 14, color: selected ? colors.text : colors.textSecondary }}>{option.label}</AppText>
+      </Pressable>; })}
+  </View>;
+}
 /** Text tabs with a hot-pink dot on the selected one; scrolls sideways when the cuisines run long. */
 export function TextTabs({ tabs, value, onChange, rtl }: { tabs: readonly { key: string; label: string }[]; value: string; onChange: (key: string) => void; rtl?: boolean }) {
   const { colors } = useRemyTheme();
@@ -147,8 +171,12 @@ export const uiStyles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   stack: { gap: spacing.lg }, grow: { flex: 1, minWidth: 0 },
 });
+/** Size-specific tracking: large display type tightens as it grows (never for Arabic, where spacing breaks the joins). */
+const tracking: Partial<Record<TextVariant, number>> = { figure: -0.8, title: -0.5, brand: -0.3, heading: -0.2 };
 const textStyles = StyleSheet.create({
   title: { fontSize: 32, lineHeight: 37, fontWeight: '800' },
+  /** A headline number: display cut, tabular figures so values don't jitter as they change. */
+  figure: { fontSize: 34, lineHeight: 40, fontWeight: '800', fontVariant: ['tabular-nums'] },
   heading: { fontSize: 21, lineHeight: 27, fontWeight: '700' },
   body: { ...typography.body }, caption: { fontSize: 13, lineHeight: 19 },
   label: { fontSize: 15, lineHeight: 21, fontWeight: '600' }, brand: { ...typography.brand },

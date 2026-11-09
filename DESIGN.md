@@ -35,6 +35,12 @@ reference for patterns is the Mob meal-planner app. Full record: `VERSION-3.md`.
 
 **Nutrition.** On the recipe page, after Ingredients: calories in Remi Display, % of goal in pink, a thin energy bar (cobalt protein, pink carbs, lemon fat; the palette swaps in dark), three white macro boxes, then hairline rows for fibre, sugar and sodium. Labels are pink pills. Partial data shows a + and "at least", never a guess. Cards add "460 kcal" to the caption. Health shows Today as progress bars against your own targets.
 
+**Nutrition tab.** Rings sit on the hero surface, like Home's header: lemon with hot-pink Fuel, cobalt Protein and ink Fibre rings in light; cobalt with pink, lemon and white in dark. Tracks are one neutral tint (the hero's ink at 12%), never the ring colour, and an empty ring shows only its track. Ring names stay in ink with the colour in a dot. Macros everywhere keep the recipe page's mapping (`macroProtein`, `macroCarbs`, `macroFat` tokens). Medals use the three brand colours with the ink or white that reads on each. The widget follows the same hero rule.
+
+**Numbers and tracking.** Headline numbers use the `figure` text style: the display cut, tabular figures, 34 pt. Large display type tightens as it grows (figure -0.8, title -0.5, heading -0.2); Arabic is never letter-spaced.
+
+**Settings controls.** A choice among two or three options (language, appearance) is a segmented control: a muted pill track and a raised white thumb that slides to the choice in 200 ms.
+
 **Cooking.** Cook mode is full screen: a segmented progress bar, one step per swipeable page in large type, a Method/Ingredients switch, per-step countdown timers, and the screen kept awake.
 
 **Motion.** Press feedback 100–150ms; native stacks and sheets. Reduced motion is respected; the pager jumps instead of animating.

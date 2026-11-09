@@ -24,6 +24,10 @@ export const themes = {
     warningSurface: '#FFF6CC', warningText: '#6B5300', successSurface: '#E3F4EA', successText: '#1F5A3A',
     errorSurface: '#FDE7F1', errorText: '#A10F58', destructive: '#B3125F', onDestructive: '#FFFFFF',
     unavailableSurface: '#ECECF4', unavailableText: '#4B5070',
+    // Nutrition's daily rings sit on the hero surface (lemon here), so each ring colour is chosen against it.
+    ringFuel: palette['Hot Pink'], ringProtein: palette['Cobalt Blue'], ringFibre: palette.Ink,
+    // Macros keep the recipe page's mapping everywhere: cobalt protein, pink carbs, lemon fat.
+    macroProtein: palette['Cobalt Blue'], macroCarbs: palette['Hot Pink'], macroFat: palette['Lemon Yellow'],
   },
   dark: {
     background: palette.Night, surface: '#151B45', surfaceMuted: '#1E2658', surfaceElevated: '#232C63',
@@ -39,6 +43,9 @@ export const themes = {
     warningSurface: '#3A3415', warningText: palette['Lemon Yellow'], successSurface: '#12352A', successText: '#9BE3BD',
     errorSurface: '#3D1230', errorText: '#FF9CCB', destructive: '#FF9CCB', onDestructive: palette.Night,
     unavailableSurface: '#1E2658', unavailableText: '#B4B9DD',
+    // On the cobalt hero: pink, lemon and white, the dark theme's own swap.
+    ringFuel: '#FF6FB5', ringProtein: palette['Lemon Yellow'], ringFibre: '#FFFFFF',
+    macroProtein: palette['Lemon Yellow'], macroCarbs: '#FF6FB5', macroFat: palette['Cobalt Blue'],
   },
 } as const;
 

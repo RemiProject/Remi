@@ -12,7 +12,10 @@ export type RemiRingsProps = { fuel: number; protein: number; fibre: number; clo
  */
 const RemiRings = (props: RemiRingsProps, environment: WidgetEnvironment) => {
   'widget';
-  const pink = '#FF4F9A', blue = '#7C8CFF', green = '#9BE15D', night = '#0E1440', mist = '#A9AECF';
+  // Remi's hero surface, as in the app: lemon with pink, cobalt and ink rings in light; cobalt with pink, lemon and white in dark.
+  const dark = environment.colorScheme === 'dark';
+  const surface = dark ? '#1734BE' : '#F8E45C', ink = dark ? '#FFFFFF' : '#0E1440', mist = dark ? '#DCE2FF' : '#3D3A12';
+  const pink = dark ? '#FF6FB5' : '#ED2B8C', blue = dark ? '#F8E45C' : '#1734BE', green = dark ? '#FFFFFF' : '#0E1440';
   const ar = props.arabic;
   const t = (en: string, arabic: string) => ar ? arabic : en;
   const left = props.caloriesLeft;
@@ -40,11 +43,12 @@ const RemiRings = (props: RemiRingsProps, environment: WidgetEnvironment) => {
   }
   if (environment.widgetFamily === 'systemMedium') {
     const row = (label: string, value: number, color: string) => <HStack spacing={6}>
-      <Text modifiers={[font({ weight: 'semibold', size: 13 }), foregroundStyle(color)]}>{label}</Text>
+      <Text modifiers={[font({ size: 10 }), foregroundStyle(color)]}>●</Text>
+      <Text modifiers={[font({ weight: 'semibold', size: 13 }), foregroundStyle(ink)]}>{label}</Text>
       <Spacer />
-      <Text modifiers={[font({ weight: 'bold', size: 15 }), monospacedDigit(), foregroundStyle('#FFFFFF')]}>{`${Math.round(Math.min(9.99, value) * 100)}%`}</Text>
+      <Text modifiers={[font({ weight: 'bold', size: 15 }), monospacedDigit(), foregroundStyle(ink)]}>{`${Math.round(Math.min(9.99, value) * 100)}%`}</Text>
     </HStack>;
-    return <HStack spacing={18} modifiers={[containerBackground(night, 'widget'), padding({ all: 4 }), link]}>
+    return <HStack spacing={18} modifiers={[containerBackground(surface, 'widget'), padding({ all: 4 }), link]}>
       <ZStack modifiers={[frame({ width: 120, height: 120 })]}>{rings(1.45)}</ZStack>
       <VStack alignment="leading" spacing={7}>
         {row(t('Fuel', 'الطاقة'), props.fuel, pink)}
@@ -55,10 +59,10 @@ const RemiRings = (props: RemiRingsProps, environment: WidgetEnvironment) => {
     </HStack>;
   }
   // systemSmall: the rings, and the one number that matters next.
-  return <VStack spacing={10} modifiers={[containerBackground(night, 'widget'), link]}>
+  return <VStack spacing={10} modifiers={[containerBackground(surface, 'widget'), link]}>
     <ZStack modifiers={[frame({ width: 96, height: 96 })]}>{rings(1.15)}</ZStack>
     <VStack spacing={1}>
-      <Text modifiers={[font({ weight: 'bold', size: 14 }), monospacedDigit(), foregroundStyle('#FFFFFF')]}>{leftLine}</Text>
+      <Text modifiers={[font({ weight: 'bold', size: 14 }), monospacedDigit(), foregroundStyle(ink)]}>{leftLine}</Text>
       <Text modifiers={[font({ size: 11 }), foregroundStyle(mist)]}>{streakLine}</Text>
     </VStack>
   </VStack>;
