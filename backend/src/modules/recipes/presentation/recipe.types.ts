@@ -1,8 +1,9 @@
-import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Float, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Unit } from '@/shared/food-unit.js';
 import { DecimalScalar } from '@/platform/graphql/scalars.js';
+import { RecipeIngredientLineType } from './recipe-import.types.js';
 
 export enum RecipeDifficulty { EASY = 'EASY', MEDIUM = 'MEDIUM', HARD = 'HARD' }
 registerEnumType(RecipeDifficulty, { name: 'RecipeDifficulty' });
@@ -52,6 +53,20 @@ export class RecipeStepType {
   @Field(() => Int, { nullable: true }) durationMin!: number | null;
 }
 
+@ObjectType({ description: 'Estimated nutrition per serving, summed from raw ingredient values (USDA FoodData Central).' })
+export class RecipeNutritionType {
+  @Field(() => Int) calories!: number;
+  @Field(() => Float) proteinG!: number;
+  @Field(() => Float) carbsG!: number;
+  @Field(() => Float) fatG!: number;
+  @Field(() => Float) fiberG!: number;
+  @Field(() => Float) sugarG!: number;
+  @Field(() => Int) sodiumMg!: number;
+  @Field(() => Int, { description: 'Required ingredients included in the totals' }) countedIngredients!: number;
+  @Field(() => Int, { description: 'Required ingredients in the recipe' }) totalIngredients!: number;
+  @Field(() => [String], { description: 'Nutrients (FIBER, SUGAR) that some counted ingredient does not report; their totals are lower bounds' }) incompleteNutrients!: string[];
+}
+
 @ObjectType()
 export class RecipeSummaryType {
   @Field(() => ID) id!: string;
@@ -64,12 +79,17 @@ export class RecipeSummaryType {
   @Field(() => Int, { nullable: true }) prepTimeMin!: number | null;
   @Field(() => Int, { nullable: true }) cookTimeMin!: number | null;
   @Field(() => RecipeDifficulty) difficulty!: RecipeDifficulty;
+  @Field(() => RecipeNutritionType, { nullable: true, description: 'Null when no ingredient has nutrition data' }) nutrition!: RecipeNutritionType | null;
+  @Field(() => String, { nullable: true, description: 'The page a saved recipe came from' }) sourceUrl!: string | null;
+  @Field(() => String, { nullable: true }) sourceName!: string | null;
+  @Field(() => String, { nullable: true }) imageUrl!: string | null;
 }
 
 @ObjectType()
 export class RecipeType extends RecipeSummaryType {
   @Field(() => [RecipeIngredientType]) ingredients!: RecipeIngredientType[];
   @Field(() => [RecipeStepType]) steps!: RecipeStepType[];
+  @Field(() => [RecipeIngredientLineType], { description: 'Ingredient lines as the source page printed them (saved recipes only)' }) ingredientLines!: RecipeIngredientLineType[];
 }
 
 @ObjectType()

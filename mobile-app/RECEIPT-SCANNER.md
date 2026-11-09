@@ -1,5 +1,7 @@
 # Receipt scanner
 
+> **Superseded in version 3** by [`docs/receipt-scanning.md`](../docs/receipt-scanning.md): receipts are now read line by line with positions, items are matched to the catalogue, and confirmed foods are added in one step. The notes below describe the earlier text-only scanner.
+
 Mobile command examples use the current pnpm-only workflow (`pnpm.cmd` on Windows; `pnpm` on macOS/Linux). Recorded validation results remain historical; the commands shown are current equivalents.
 
 ## Diagnostic follow-up (14 October 2026)

@@ -1,42 +1,54 @@
 import { Platform } from 'react-native';
 
+// Version 3 palette (user-pinned): lemon is the base, cobalt the action, hot pink the pop.
 export const palette = {
-  'Remi Blue': '#B92318', 'Deep Navy': '#752116', Cream: '#FFF7E8',
-  'Sky Blue': '#F7CA51', Tomato: '#C22C1C', 'Butter Yellow': '#F7CA51',
+  'Lemon Yellow': '#F8E45C', 'Cobalt Blue': '#1734BE', 'Hot Pink': '#ED2B8C',
+  Ink: '#0E1440', Paper: '#FFFDF4', Night: '#0B1030',
 } as const;
 
+// Contrast (WCAG): ink on paper 17.3, cobalt on white 9.3, cobalt on lemon 7.2, ink on lemon 13.6,
+// secondary #4B5070 on paper 7.7, subtle #5E6383 on white 5.9, pink text #C2146C on paper 5.7.
+// Dark: text on night 17.0, lemon on night 14.4, pink #FF6FB5 on night 7.2, white on cobalt hero 9.3.
 export const themes = {
   light: {
-    background: palette.Cream, surface: '#FFFCF4', surfaceMuted: '#F7E7BF', surfaceElevated: '#FFFCF4',
-    text: '#271B15', textSecondary: '#655549', textSubtle: '#756451', border: '#D8C7AA', divider: '#E7D8C0',
-    primary: palette['Remi Blue'], primaryPressed: palette['Deep Navy'], onPrimary: '#FFFCF4', primarySoft: '#F7CA51',
-    selectedSurface: '#F7CA51', selectedText: palette['Deep Navy'], selectedBorder: palette['Remi Blue'],
-    pressedSurface: '#EAD7B2', focusBorder: palette['Remi Blue'],
-    inputSurface: '#FFFCF4', inputBorder: '#A98D6C', placeholder: '#756451',
-    disabledSurface: '#E5D9C6', disabledText: '#655549',
-    navSurface: '#FFFCF4', navSelected: '#F7CA51', modalSurface: '#FFFCF4', overlay: 'rgba(16, 24, 32, 0.45)',
-    accent: palette.Tomato, hero: palette['Remi Blue'], onHero: palette.Cream, onHeroMuted: palette['Sky Blue'],
-    warningSurface: '#FFF3D7', warningText: '#775413', successSurface: '#E6ECD9', successText: '#35532B',
-    errorSurface: '#FAEEEA', errorText: '#92351D', destructive: '#92351D', onDestructive: '#FFFCF4',
-    unavailableSurface: '#F7E7BF', unavailableText: '#655549',
+    background: palette.Paper, surface: '#FFFFFF', surfaceMuted: '#FCF4C4', surfaceElevated: '#FFFFFF',
+    text: palette.Ink, textSecondary: '#4B5070', textSubtle: '#5E6383', border: '#DCDDEA', divider: '#ECECF4',
+    primary: palette['Cobalt Blue'], primaryPressed: '#10268F', onPrimary: '#FFFFFF', primarySoft: '#E4E8FB',
+    selectedSurface: palette['Lemon Yellow'], selectedText: palette.Ink, selectedBorder: palette['Lemon Yellow'],
+    pressedSurface: '#F1F2FA', focusBorder: palette['Cobalt Blue'],
+    inputSurface: '#FFFFFF', inputBorder: '#8E92B0', placeholder: '#5E6383',
+    disabledSurface: '#ECECF4', disabledText: '#5E6383',
+    navSurface: palette.Paper, navSelected: palette['Lemon Yellow'], modalSurface: '#FFFFFF', overlay: 'rgba(14, 20, 64, 0.45)',
+    accent: palette['Hot Pink'], accentText: '#C2146C', onAccent: '#FFFFFF', accentSoft: '#FDE7F1',
+    logo: palette['Cobalt Blue'], hero: palette['Lemon Yellow'], onHero: palette.Ink, onHeroMuted: '#3D3A12', shadow: 'rgba(14, 20, 64, 0.10)',
+    warningSurface: '#FFF6CC', warningText: '#6B5300', successSurface: '#E3F4EA', successText: '#1F5A3A',
+    errorSurface: '#FDE7F1', errorText: '#A10F58', destructive: '#B3125F', onDestructive: '#FFFFFF',
+    unavailableSurface: '#ECECF4', unavailableText: '#4B5070',
+    // Nutrition's daily rings sit on the hero surface (lemon here), so each ring colour is chosen against it.
+    ringFuel: palette['Hot Pink'], ringProtein: palette['Cobalt Blue'], ringFibre: palette.Ink,
+    // Macros keep the recipe page's mapping everywhere: cobalt protein, pink carbs, lemon fat.
+    macroProtein: palette['Cobalt Blue'], macroCarbs: palette['Hot Pink'], macroFat: palette['Lemon Yellow'],
   },
   dark: {
-    background: '#211B17', surface: '#2D241E', surfaceMuted: '#382D24', surfaceElevated: '#423329',
-    text: '#FFF3DC', textSecondary: '#D6C6AD', textSubtle: '#BCA88C', border: '#5A4838', divider: '#4A3A2D',
-    primary: palette['Sky Blue'], primaryPressed: '#E6B547', onPrimary: '#271B15', primarySoft: '#4A3825',
-    selectedSurface: '#4A3825', selectedText: '#FFF3DC', selectedBorder: palette['Sky Blue'],
-    pressedSurface: '#56412D', focusBorder: palette['Sky Blue'],
-    inputSurface: '#2D241E', inputBorder: '#A08B70', placeholder: '#BCA88C',
-    disabledSurface: '#413529', disabledText: '#C6B395',
-    navSurface: '#2D241E', navSelected: '#4A3825', modalSurface: '#423329', overlay: 'rgba(0, 0, 0, 0.65)',
-    accent: palette['Butter Yellow'], hero: '#423329', onHero: '#FFF3DC', onHeroMuted: '#D6C6AD',
-    warningSurface: '#393223', warningText: '#E9C980', successSurface: '#24372E', successText: '#B7DFC2',
-    errorSurface: '#3B2928', errorText: '#F3B6A6', destructive: '#F3B6A6', onDestructive: '#291E1A',
-    unavailableSurface: '#382D24', unavailableText: '#D6C6AD',
+    background: palette.Night, surface: '#151B45', surfaceMuted: '#1E2658', surfaceElevated: '#232C63',
+    text: '#F3F4FF', textSecondary: '#B4B9DD', textSubtle: '#9DA3CF', border: '#2E3770', divider: '#232B5E',
+    primary: palette['Lemon Yellow'], primaryPressed: '#E5CF3C', onPrimary: palette.Night, primarySoft: '#2B3470',
+    selectedSurface: palette['Lemon Yellow'], selectedText: palette.Night, selectedBorder: palette['Lemon Yellow'],
+    pressedSurface: '#232C63', focusBorder: palette['Lemon Yellow'],
+    inputSurface: '#151B45', inputBorder: '#6E76AE', placeholder: '#9DA3CF',
+    disabledSurface: '#1E2658', disabledText: '#9DA3CF',
+    navSurface: palette.Night, navSelected: '#2B3470', modalSurface: '#232C63', overlay: 'rgba(0, 0, 0, 0.65)',
+    accent: '#FF6FB5', accentText: '#FF9CCB', onAccent: palette.Night, accentSoft: '#3D1230',
+    logo: '#FFFFFF', hero: palette['Cobalt Blue'], onHero: '#FFFFFF', onHeroMuted: '#DCE2FF', shadow: 'rgba(0, 0, 0, 0.35)',
+    warningSurface: '#3A3415', warningText: palette['Lemon Yellow'], successSurface: '#12352A', successText: '#9BE3BD',
+    errorSurface: '#3D1230', errorText: '#FF9CCB', destructive: '#FF9CCB', onDestructive: palette.Night,
+    unavailableSurface: '#1E2658', unavailableText: '#B4B9DD',
+    // On the cobalt hero: pink, lemon and white, the dark theme's own swap.
+    ringFuel: '#FF6FB5', ringProtein: palette['Lemon Yellow'], ringFibre: '#FFFFFF',
+    macroProtein: palette['Lemon Yellow'], macroCarbs: '#FF6FB5', macroFat: palette['Cobalt Blue'],
   },
 } as const;
 
-// Actual brand fonts are still missing. Keep native fallbacks until licensed local assets exist.
 export const typography = {
   family: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   brand: { fontSize: 28, fontWeight: '800' as const },
@@ -45,5 +57,5 @@ export const typography = {
   label: { fontSize: 12, fontWeight: '600' as const },
 };
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
-export const radii = { sm: 6, md: 12, lg: 18, pill: 999 } as const;
+export const radii = { sm: 8, md: 14, lg: 22, pill: 999 } as const;
 export const layout = { maxWidth: 720, minTouchTarget: 44 } as const;

@@ -7,6 +7,7 @@ import { TransactionRunner } from '@/platform/db/transaction-runner.js';
 import type { Tx } from '@/platform/db/tx-context.js';
 import { eligibleMealBatches, type MealExpiryPolicy } from '@/modules/inventory/domain/eligible-meal-batches.js';
 import { allocateFefo } from '@/modules/inventory/domain/fefo-allocator.js';
+import { estimateExpiry, type ShelfLife } from '@/modules/inventory/domain/shelf-life.js';
 
 type FoodRow = { id: string; densityGPerMl: string | null; gramsPerPiece: string | null };
 type BatchRow = { id: string; quantity: string; unit: Unit; version: number; estimatedExpiryAt: Date | null };
@@ -51,12 +52,27 @@ export class InventoryLedgerService {
 
   async updateMetadata(householdId: string, userId: string, input: { inventoryItemId: string; expectedVersion: number; storageLocation: string; estimatedExpiryAt: Date | null }) {
     return this.transactions.run(async tx => {
+      const current = (await tx.$queryRaw<Array<{ foodId: string; storageLocation: string; estimatedExpiryAt: Date | null; expiryEstimated: boolean; purchaseDay: string }>>`
+        SELECT "foodId", "storageLocation"::text AS "storageLocation", "estimatedExpiryAt", "expiryEstimated", to_char(coalesce("purchaseDate", "createdAt"::date), 'YYYY-MM-DD') AS "purchaseDay"
+        FROM "InventoryItem" WHERE "id" = ${input.inventoryItemId}::uuid AND "householdId" = ${householdId}::uuid`)[0];
+      let expiry = input.estimatedExpiryAt; let estimated = false;
+      if (current) {
+        const sameDate = (current.estimatedExpiryAt?.getTime() ?? null) === (input.estimatedExpiryAt?.getTime() ?? null);
+        // An estimated date follows the food when it moves (fridge to freezer); a date a person typed stays theirs.
+        if (sameDate && current.expiryEstimated) {
+          estimated = true;
+          if (current.storageLocation !== input.storageLocation) {
+            expiry = estimateExpiry(await shelfLife(tx, current.foodId), input.storageLocation, current.purchaseDay);
+            estimated = expiry !== null;
+          }
+        }
+      }
       await tx.$executeRaw`SELECT set_config('app.inventory_ledger_write', 'true', true)`;
-      const changed = await tx.$executeRaw`UPDATE "InventoryItem" SET "storageLocation" = ${input.storageLocation}::"StorageLocation", "estimatedExpiryAt" = ${input.estimatedExpiryAt}::timestamptz, "version" = "version" + 1, "updatedAt" = now() WHERE "id" = ${input.inventoryItemId}::uuid AND "householdId" = ${householdId}::uuid AND "version" = ${input.expectedVersion}`;
-      const rows = await tx.$queryRaw<Array<{ id: string; foodId: string; foodName: string; quantity: string; unit: Unit; storageLocation: string; estimatedExpiryAt: Date | null; version: number }>>`SELECT i."id", i."foodId", f."name" AS "foodName", i."quantity"::text AS "quantity", i."unit"::text AS "unit", i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."version" FROM "InventoryItem" i JOIN "Food" f ON f."id"=i."foodId" WHERE i."id"=${input.inventoryItemId}::uuid AND i."householdId"=${householdId}::uuid`;
+      const changed = await tx.$executeRaw`UPDATE "InventoryItem" SET "storageLocation" = ${input.storageLocation}::"StorageLocation", "estimatedExpiryAt" = ${expiry}::timestamptz, "expiryEstimated" = ${estimated}, "version" = "version" + 1, "updatedAt" = now() WHERE "id" = ${input.inventoryItemId}::uuid AND "householdId" = ${householdId}::uuid AND "version" = ${input.expectedVersion}`;
+      const rows = await tx.$queryRaw<Array<{ id: string; foodId: string; foodName: string; quantity: string; unit: Unit; storageLocation: string; estimatedExpiryAt: Date | null; expiryEstimated: boolean; purchaseDate: string | null; version: number }>>`SELECT i."id", i."foodId", f."name" AS "foodName", i."quantity"::text AS "quantity", i."unit"::text AS "unit", i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."expiryEstimated", to_char(i."purchaseDate", 'YYYY-MM-DD') AS "purchaseDate", i."version" FROM "InventoryItem" i JOIN "Food" f ON f."id"=i."foodId" WHERE i."id"=${input.inventoryItemId}::uuid AND i."householdId"=${householdId}::uuid`;
       const row = rows[0];
       if (!row) throw new DomainError('INVENTORY_ITEM_NOT_FOUND', 'This food is no longer in your kitchen.', 404);
-      if (!changed && (row.storageLocation !== input.storageLocation || (row.estimatedExpiryAt?.getTime() ?? null) !== (input.estimatedExpiryAt?.getTime() ?? null))) throw new DomainError('INVENTORY_CONFLICT', 'This food changed. Reload it before editing.', 409);
+      if (!changed && (row.storageLocation !== input.storageLocation || (row.estimatedExpiryAt?.getTime() ?? null) !== (expiry?.getTime() ?? null))) throw new DomainError('INVENTORY_CONFLICT', 'This food changed. Reload it before editing.', 409);
       return row;
     }, { householdId, userId });
   }
@@ -67,6 +83,11 @@ export class InventoryLedgerService {
 
   receiveStock(householdId: string, actorUserId: string, input: StockInput): Promise<StockResult> {
     return this.transactions.run((tx) => this.addInTransaction(tx, householdId, actorUserId, input, 'PURCHASED', 'PURCHASE_RECEIPT', 'RECEIPT'), { householdId, userId: actorUserId });
+  }
+
+  /** Adds a bought batch inside the caller's transaction, so a whole scanned receipt lands at once or not at all. */
+  receiveWithinTransaction(tx: Tx, householdId: string, actorUserId: string, input: StockInput): Promise<StockResult> {
+    return this.addInTransaction(tx, householdId, actorUserId, input, 'PURCHASED', 'PURCHASE_RECEIPT', 'RECEIPT');
   }
 
   /** Receive a partial or complete purchase-order line through the inventory ledger facade. */
@@ -105,7 +126,8 @@ export class InventoryLedgerService {
       const cumulative = milli(event[0].quantity) + milli(input.amount);
       await tx.$executeRaw`UPDATE "FoodEvent" SET "quantity" = ${formatMilli(cumulative)}::numeric WHERE "id" = ${eventId}::uuid AND "householdId" = ${householdId}::uuid`;
     }
-    await tx.$executeRaw`INSERT INTO "InventoryItem" ("id", "householdId", "foodId", "quantity", "unit", "storageLocation", "purchaseDate", "estimatedExpiryAt") VALUES (${itemId}::uuid, ${householdId}::uuid, ${input.foodId}::uuid, 0, ${input.unit}::"Unit", ${input.storageLocation ?? 'PANTRY'}::"StorageLocation", ${input.purchaseDate ?? new Date().toISOString().slice(0, 10)}::date, ${input.estimatedExpiryAt ?? null}::timestamptz)`;
+    const expiry = await this.expiry(tx, input.foodId, input);
+    await tx.$executeRaw`INSERT INTO "InventoryItem" ("id", "householdId", "foodId", "quantity", "unit", "storageLocation", "purchaseDate", "estimatedExpiryAt", "expiryEstimated") VALUES (${itemId}::uuid, ${householdId}::uuid, ${input.foodId}::uuid, 0, ${input.unit}::"Unit", ${input.storageLocation ?? 'PANTRY'}::"StorageLocation", ${expiry.purchaseDay}::date, ${expiry.at}::timestamptz, ${expiry.estimated})`;
     if (!event.length) await tx.$executeRaw`UPDATE "FoodEvent" SET "inventoryItemId" = ${itemId}::uuid WHERE "id" = ${eventId}::uuid AND "householdId" = ${householdId}::uuid`;
     await tx.$executeRaw`SELECT set_config('app.inventory_ledger_write', 'true', true)`;
     const updated = await tx.$queryRaw<Array<{ quantity: string }>>`UPDATE "InventoryItem" SET "quantity" = ${input.amount}::numeric, "version" = "version" + 1 WHERE "id" = ${itemId}::uuid AND "householdId" = ${householdId}::uuid AND "version" = 1 AND "quantity" = 0 RETURNING "quantity"::text AS "quantity"`;
@@ -132,13 +154,24 @@ export class InventoryLedgerService {
     return this.transactions.run((tx) => this.adjustInTransaction(tx, householdId, actorUserId, input), { householdId, userId: actorUserId });
   }
 
+  /**
+   * The batch's purchase day and expiry. A date the person gave wins; otherwise fresh foods get the probable
+   * expiry from USDA FoodKeeper averages for where they are kept (estimated = true). The purchase day defaults to today.
+   */
+  private async expiry(tx: Tx, foodId: string, input: Pick<StockInput, 'purchaseDate' | 'estimatedExpiryAt' | 'storageLocation'>) {
+    const purchaseDay = input.purchaseDate ?? new Date().toISOString().slice(0, 10);
+    if (input.estimatedExpiryAt) return { purchaseDay, at: input.estimatedExpiryAt, estimated: false };
+    const at = estimateExpiry(await shelfLife(tx, foodId), input.storageLocation ?? 'PANTRY', purchaseDay);
+    return { purchaseDay, at, estimated: at !== null };
+  }
+
   async list(householdId: string, first = 20, after?: string) {
     if (first < 1 || first > 50) throw new DomainError('INVALID_PAGE_SIZE', 'first must be between 1 and 50.');
     const afterId = decodeCursor(after);
     return this.transactions.run(async (tx) => {
       const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
         SELECT i."id", i."foodId", f."name" AS "foodName", i."quantity"::text AS "quantity", i."unit"::text AS "unit",
-               i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."version"
+               i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."expiryEstimated", to_char(i."purchaseDate", 'YYYY-MM-DD') AS "purchaseDate", i."version"
         FROM "InventoryItem" i JOIN "Food" f ON f."id" = i."foodId"
         WHERE i."householdId" = ${householdId}::uuid AND i."archivedAt" IS NULL AND (${afterId}::uuid IS NULL OR i."id" > ${afterId}::uuid)
         ORDER BY i."id" LIMIT ${first + 1}`;
@@ -154,7 +187,7 @@ export class InventoryLedgerService {
     return this.transactions.run(async (tx) => {
       const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
         SELECT i."id", i."foodId", f."name" AS "foodName", i."quantity"::text AS "quantity", i."unit"::text AS "unit",
-                i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."version"
+                i."storageLocation"::text AS "storageLocation", i."estimatedExpiryAt", i."expiryEstimated", to_char(i."purchaseDate", 'YYYY-MM-DD') AS "purchaseDate", i."version"
          FROM "InventoryItem" i JOIN "Food" f ON f."id" = i."foodId"
          WHERE i."householdId" = ${householdId}::uuid AND i."id" = ${itemId}::uuid AND i."archivedAt" IS NULL`;
       if (!rows.length) throw new DomainError('INVENTORY_ITEM_NOT_FOUND', 'The selected inventory batch does not exist.', 404);
@@ -182,7 +215,8 @@ export class InventoryLedgerService {
       return loadReplay(tx, householdId, existing);
     }
     const itemId = newId();
-    await tx.$executeRaw`INSERT INTO "InventoryItem" ("id", "householdId", "foodId", "quantity", "unit", "storageLocation", "purchaseDate", "estimatedExpiryAt") VALUES (${itemId}::uuid, ${householdId}::uuid, ${food.id}::uuid, 0, ${input.unit}::"Unit", ${input.storageLocation ?? 'PANTRY'}::"StorageLocation", ${input.purchaseDate ?? null}::date, ${input.estimatedExpiryAt ?? null}::timestamptz)`;
+    const expiry = await this.expiry(tx, food.id, input);
+    await tx.$executeRaw`INSERT INTO "InventoryItem" ("id", "householdId", "foodId", "quantity", "unit", "storageLocation", "purchaseDate", "estimatedExpiryAt", "expiryEstimated") VALUES (${itemId}::uuid, ${householdId}::uuid, ${food.id}::uuid, 0, ${input.unit}::"Unit", ${input.storageLocation ?? 'PANTRY'}::"StorageLocation", ${expiry.purchaseDay}::date, ${expiry.at}::timestamptz, ${expiry.estimated})`;
     await tx.$executeRaw`UPDATE "FoodEvent" SET "inventoryItemId" = ${itemId}::uuid WHERE "id" = ${eventId}::uuid AND "householdId" = ${householdId}::uuid`;
     await tx.$executeRaw`SELECT set_config('app.inventory_ledger_write', 'true', true)`;
     const updated = await tx.$queryRaw<Array<{ quantity: string; version: number }>>`UPDATE "InventoryItem" SET "quantity" = ${input.amount}::numeric, "version" = "version" + 1 WHERE "id" = ${itemId}::uuid AND "householdId" = ${householdId}::uuid AND "version" = 1 AND "quantity" = 0 RETURNING "quantity"::text AS "quantity", "version"`;
@@ -338,6 +372,11 @@ function milli(value: string): bigint {
 
 function formatMilli(value: bigint): string {
   return `${value / 1000n}.${(value % 1000n).toString().padStart(3, '0')}`;
+}
+
+async function shelfLife(tx: Tx, foodId: string): Promise<ShelfLife | null> {
+  const rows = await tx.$queryRaw<ShelfLife[]>`SELECT "roomMinDays", "roomMaxDays", "ripensAtRoomTemp", "fridgeMinDays", "fridgeMaxDays", "freezerMinDays", "freezerMaxDays", "freezeNotRecommended" FROM "FoodShelfLife" WHERE "foodId" = ${foodId}::uuid`;
+  return rows[0] ?? null;
 }
 
 async function insertEvent(tx: Tx, id: string, householdId: string, actorUserId: string, foodId: string, itemId: string | null, type: 'ADDED' | 'PURCHASED' | 'EATEN' | 'WASTED' | 'REMOVED', source: 'USER' | 'RECEIPT', input: StockInput): Promise<boolean> {

@@ -10,10 +10,12 @@ const { createBackendClient, BackendError } = require('../src/services/backend-c
 const tokens = (id) => ({ accessToken: `test-access-${id}`, refreshToken: `test-refresh-${id}`, expiresInSeconds: 120 });
 const user = { id: 'test-user', email: 'test@example.invalid', name: 'Test', timezone: 'Africa/Cairo', languageCode: 'en', emailVerifiedAt: null };
 function harness(responses, initial = null) {
-  let value = initial, clock = 1000000;
+  let value = initial, clock = 1000000; const net = { offline: false };
   const calls = [];
   const storage = { read: async () => value, write: async v => { value = v; }, clear: async () => { value = null; } };
   const client = createBackendClient('https://api.example.invalid', async (_url, init) => {
+    if (net.offline) throw new TypeError('Network request failed');
+    if (String(_url).endsWith('/health/live')) return Response.json({ status: 'ok' });
     const body = JSON.parse(init.body);
     calls.push({ ...body, headers: init.headers });
     const next = responses.shift();
@@ -22,7 +24,7 @@ function harness(responses, initial = null) {
     return Response.json(next);
   });
   const make = (url = 'https://api.example.invalid') => createAuthService(client, storage, url, () => clock);
-  return { auth: make(), make, calls, storage, stored: () => value, advance: ms => { clock += ms; } };
+  return { auth: make(), make, calls, storage, net, stored: () => value, advance: ms => { clock += ms; } };
 }
 const login = h => h.auth.login({ email: user.email, password: 'test-password' });
 
@@ -184,4 +186,35 @@ test('secure storage errors fail login instead of silently persisting elsewhere'
   h.storage.write = async () => { throw new Error('native failure'); };
   await assert.rejects(login(h), { code: 'STORAGE' });
   await assert.rejects(h.auth.me(), { code: 'NO_SESSION' });
+});
+
+test('deleteAccount sends the password with bearer auth and clears the session only once the server confirms', async () => {
+  const h = harness([{ data: { login: tokens(1) } }, { errors: [{ message: 'That password is not right.', extensions: { code: 'INVALID_PASSWORD', status: 403 } }] }, { data: { deleteAccount: true } }]);
+  await login(h);
+  await assert.rejects(h.auth.deleteAccount('wrong'), { codes: ['INVALID_PASSWORD'] });
+  assert.ok(h.stored(), 'a refused deletion keeps the person signed in');
+  await h.auth.deleteAccount('test-password');
+  assert.equal(h.calls[2].query, authOperations.deleteAccount);
+  assert.equal(h.calls[2].headers.Authorization, 'Bearer test-access-1');
+  assert.deepEqual(h.calls[2].variables, { input: { password: 'test-password' } });
+  assert.equal(h.stored(), null);
+});
+
+test('offline, Remi opens with the account the server last confirmed and keeps the session', async () => {
+  const h = harness([{ data: { login: tokens(1) } }, { data: { me: user } }]);
+  await login(h);
+  assert.deepEqual(await h.auth.me(), user);
+  h.net.offline = true;
+  const restarted = h.make(); // a cold start reads the saved record
+  assert.deepEqual(await restarted.me(), user);
+  h.advance(10 * 60 * 1000); // the access token has expired: refreshing must wait for a connection
+  assert.deepEqual(await restarted.me(), user);
+  assert.equal(JSON.parse(h.stored()).session.refreshToken, 'test-refresh-1', 'the single-use refresh token was not spent');
+});
+
+test('without a saved account, an unreachable server is still an error, not a sign-in', async () => {
+  const h = harness([{ data: { login: tokens(1) } }]);
+  await login(h);
+  h.net.offline = true;
+  await assert.rejects(h.make().me(), { name: 'BackendError' });
 });

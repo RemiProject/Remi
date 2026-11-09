@@ -8,9 +8,9 @@ export const backendKitchenMessages = {
     deviceError: 'The items on this device could not be read.', deviceLoading: 'Checking items on this device…',
     saved: 'foods in your household', writesSoon: 'Editing name, dates and storage is coming soon.',
     add: 'Add food', edit: 'Edit', delete: 'Delete', readOnly: 'Read-only', storage: 'Storage',
-    search: 'Search your food', all: 'All', name: 'Name', expiry: 'Expiration date', useFirst: 'Use First',
+    search: 'Search your food', all: 'All', name: 'Name', expiry: 'Expiry', useFirst: 'Use first',
     none: 'No matching food', clear: 'Clear search and filters', unknown: 'No expiration date', today: 'Expires today', expired: 'Past expiration date',
-    days: 'Days until expiration:', back: 'Back', notFound: 'This food is unavailable. Return to Kitchen or retry.',
+    days: 'Days until expiration:', about: 'about', estimated: 'Estimated from USDA shelf-life averages for where it is kept. Check the food before eating it.', bought: 'Bought', back: 'Back', notFound: 'This food is unavailable. Return to Kitchen or retry.',
     TABLESPOON: 'tbsp', TEASPOON: 'tsp', COUNTER: 'Counter', OTHER: 'Other',
   },
   ar: {
@@ -24,7 +24,12 @@ export const backendKitchenMessages = {
     add: 'إضافة طعام', edit: 'تعديل', delete: 'حذف', readOnly: 'للقراءة فقط', storage: 'التخزين',
     search: 'ابحث عن طعامك', all: 'الكل', name: 'الاسم', expiry: 'تاريخ الانتهاء', useFirst: 'استخدم أولاً',
     none: 'لا يوجد طعام مطابق', clear: 'مسح البحث والفلاتر', unknown: 'لا يوجد تاريخ انتهاء', today: 'ينتهي اليوم', expired: 'تجاوز تاريخ الانتهاء',
-    days: 'الأيام المتبقية للانتهاء:', back: 'رجوع', notFound: 'هذا الطعام غير متاح. عُد إلى المطبخ أو أعد المحاولة.',
+    days: 'الأيام المتبقية للانتهاء:', about: 'حوالي', estimated: 'تقدير من متوسطات مدة الحفظ لدى وزارة الزراعة الأمريكية حسب مكان الحفظ. افحص الطعام قبل تناوله.', bought: 'تاريخ الشراء', back: 'رجوع', notFound: 'هذا الطعام غير متاح. عُد إلى المطبخ أو أعد المحاولة.',
     TABLESPOON: 'م.ك', TEASPOON: 'م.ص', COUNTER: 'على سطح العمل', OTHER: 'أخرى',
   },
 } as const;
+
+/** "2 days left", "About 3 days left" (an estimated date); Arabic keeps its existing wording. */
+export const daysLeftLabel = (language: 'en' | 'ar', n: string, count: number, about: boolean) => language === 'ar'
+  ? `الأيام المتبقية للانتهاء: ${about ? 'حوالي ' : ''}${n}`
+  : `${about ? 'About ' : ''}${n} ${count === 1 ? 'day' : 'days'} left`;

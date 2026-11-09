@@ -1,7 +1,7 @@
 export interface FoodAliasRow { id: string; alias: string; isPrimary: boolean; language: { code: string } }
 export interface NutritionRow {
   caloriesPer100g: string; proteinG: string; carbsG: string; fatG: string;
-  fiberG: string; sugarG: string; sodiumMg: string;
+  fiberG: string | null; sugarG: string | null; sodiumMg: string;
 }
 export interface FoodRow {
   id: string; name: string; defaultUnit: string; gramsPerPiece: string | null; densityGPerMl: string | null;

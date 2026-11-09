@@ -32,7 +32,7 @@ test('skeleton respects Reduce Motion and exposes one indeterminate loading surf
       'react-native': { ScrollView: 'ScrollView', View: 'View' }, 'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
       'expo-status-bar': { StatusBar: 'StatusBar' }, 'expo-splash-screen': { hide() {} },
       'react-native-reanimated': { __esModule: true, default: { createAnimatedComponent: () => 'Pulse' }, useReducedMotion: () => reduced },
-      '@/theme/provider': { useRemyTheme: () => ({ colors: {}, mode: 'light' }) }, '@/providers/language-provider': { useLanguage: () => ({ language: 'ar' }) }, './ui/core': { AppText: 'AppText' },
+      './brand': { Brand: 'Brand' }, '@/theme/provider': { useRemyTheme: () => ({ colors: {}, mode: 'light' }) }, '@/providers/language-provider': { useLanguage: () => ({ language: 'ar' }) }, './ui/core': { AppText: 'AppText' },
     });
     const nodes = n => Array.isArray(n) ? n.flatMap(nodes) : !n || typeof n !== 'object' ? [] : [n,...nodes(n.props?.children)];
     const tree = nodes(AppSkeleton({})), loader = tree.find(n => n.props?.testID === 'app-startup-skeleton');

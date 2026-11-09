@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { AppText, Chip, uiStyles } from '@/components/ui/core';
+import { AppText, Segmented, uiStyles } from '@/components/ui/core';
 import { useRemyTheme } from '@/theme/provider';
 import { useLanguage } from '@/providers/language-provider';
 import { appMessages } from '@/i18n/app';
@@ -10,7 +10,8 @@ export function AppearanceControls() {
   const { language } = useLanguage(); const t = appMessages[language]; const a = appearanceMessages[language];
   return <View style={uiStyles.stack}>
     <AppText variant="heading">{t.appearance}</AppText>
-    <View style={uiStyles.wrap}>{(['system', 'light', 'dark'] as const).map(value => <Chip key={value} label={t[value]} selected={appearance === value} onPress={() => setAppearance(value)} />)}</View>
+    <Segmented label={t.appearance} value={appearance} onChange={value => setAppearance(value as 'system' | 'light' | 'dark')}
+      options={(['system', 'light', 'dark'] as const).map(value => ({ key: value, label: t[value] }))} />
     <AppText variant="caption" accessibilityLiveRegion="polite" accessibilityRole={error ? 'alert' : undefined} style={error ? { color: colors.errorText } : undefined} muted={!error}>
       {error === 'write' ? a.writeError : error === 'read' ? a.readError : saving ? a.saving : a.note}
     </AppText>

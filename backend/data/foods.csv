@@ -12,7 +12,7 @@ eggplant,باذنجان,VEGETABLES,GRAM,,,بتنجان|بدنجان,aubergine
 zucchini,كوسة,VEGETABLES,GRAM,,,كوسا,courgette|squash
 okra,بامية,VEGETABLES,GRAM,,,بامي,lady fingers|bamia
 green beans,فاصوليا خضراء,VEGETABLES,GRAM,,,فاصوليا خضرا,string beans|snap beans
-lettuce,خس,VEGETABLES,GRAM,,,خس بلدي,romaine lettuce|cos lettuce
+lettuce,خس,VEGETABLES,GRAM,,,خس بلدي,romaine lettuce|cos lettuce|romaine|romaine heart
 spinach,سبانخ,VEGETABLES,GRAM,,,سبانخ بلدي,
 arugula,جرجير,VEGETABLES,GRAM,,,,rocket|roquette
 cabbage,كرنب,VEGETABLES,GRAM,,,ملفوف,white cabbage
@@ -75,10 +75,10 @@ lamb liver,كبدة ضأن,MEAT,GRAM,,,كبدة ضاني,
 beef kidney,كلى بقري,MEAT,GRAM,,,كلاوي,beef kidneys
 beef tripe,كرشة,MEAT,GRAM,,,كرشة بقري,tripe
 chicken,دجاج,POULTRY,GRAM,,,فراخ|فرخة,chicken meat
-chicken breast,صدر دجاج,POULTRY,GRAM,,,صدور فراخ|صدر فراخ,chicken fillet
-chicken thigh,ورك دجاج,POULTRY,GRAM,,,أوراك فراخ|ورك فراخ,chicken thighs
+chicken breast,صدر دجاج,POULTRY,GRAM,,,صدور فراخ|صدر فراخ|صدور دجاج,chicken fillet|chicken breasts
+chicken thigh,ورك دجاج,POULTRY,GRAM,,,أوراك فراخ|ورك فراخ|أوراك دجاج,chicken thighs
 chicken drumstick,ساق دجاج,POULTRY,GRAM,,,دبوس فراخ,drumsticks
-chicken wing,جناح دجاج,POULTRY,GRAM,,,أجنحة فراخ|جناح فراخ,chicken wings
+chicken wing,جناح دجاج,POULTRY,GRAM,,,أجنحة فراخ|جناح فراخ|أجنحة دجاج,chicken wings
 chicken liver,كبدة دجاج,POULTRY,GRAM,,,كبدة فراخ,chicken livers
 chicken gizzard,قوانص دجاج,POULTRY,GRAM,,,قوانص|قوانص فراخ,gizzards
 duck,بط,POULTRY,GRAM,,,بطة,duck meat
@@ -134,7 +134,7 @@ green peas,بازلاء,LEGUMES,GRAM,,,بسلة|بسلة خضرا,garden peas
 soybeans,فول الصويا,LEGUMES,GRAM,,,صويا,soya beans
 lupini beans,ترمس,LEGUMES,GRAM,,,ترمس ناشف,lupin beans|lupins
 hummus,حمص بالطحينة,LEGUMES,GRAM,,,حمص بطحينة,hummus dip|houmous
-whole milk,لبن,DAIRY,MILLILITER,,1.031,حليب|لبن كامل الدسم,full fat milk
+whole milk,لبن,DAIRY,MILLILITER,,1.031,حليب|لبن كامل الدسم,full fat milk|full cream milk|fresh milk|milk
 low fat milk,لبن قليل الدسم,DAIRY,MILLILITER,,1.031,حليب قليل الدسم|لبن لايت,1% milk
 skim milk,لبن خالي الدسم,DAIRY,MILLILITER,,1.036,حليب منزوع الدسم,nonfat milk|fat free milk
 buttermilk,لبن رائب,DAIRY,MILLILITER,,1.036,رايب|لبن رايب,cultured buttermilk
@@ -155,6 +155,7 @@ egg yolk,صفار البيض,EGGS,PIECE,17.0,,صفار بيض|مح,egg yolks
 duck egg,بيض بط,EGGS,PIECE,70.0,,بيضة بط,
 quail egg,بيض سمان,EGGS,PIECE,9.0,,بيض سمان صغير,quail eggs
 olive oil,زيت زيتون,OILS,MILLILITER,,0.913,زيت الزيتون,
+vegetable oil,زيت نباتي,OILS,GRAM,,,زيت طبخ|زيت للقلي,cooking oil|neutral oil|frying oil
 sunflower oil,زيت عباد الشمس,OILS,MILLILITER,,0.921,زيت عباد,sunflowerseed oil
 corn oil,زيت ذرة,OILS,MILLILITER,,0.921,زيت درة,maize oil
 cottonseed oil,زيت بذرة القطن,OILS,MILLILITER,,0.921,زيت بذرة|زيت قطن,cotton seed oil
@@ -320,7 +321,7 @@ cooked bulgur,برغل مطبوخ,GRAINS,GRAM,,,برغل مسلوق,
 cooked couscous,كسكسي مطبوخ,GRAINS,GRAM,,,كسكس مطبوخ,
 cooked oatmeal,شوفان مطبوخ,GRAINS,GRAM,,,عصيدة شوفان,porridge
 cooked quinoa,كينوا مطبوخة,GRAINS,GRAM,,,,
-black beans,فاصوليا سوداء,LEGUMES,GRAM,,,,
+black beans,فاصوليا سوداء,LEGUMES,GRAM,,,,black bean
 mung beans,فول المونج,LEGUMES,GRAM,,,ماش,green gram
 lima beans,فاصوليا ليما,LEGUMES,GRAM,,,فاصوليا عريضة,
 navy beans,فاصوليا نيفي,LEGUMES,GRAM,,,فاصوليا بيضاء صغيرة,haricot

@@ -1,15 +1,16 @@
 import { Image } from 'expo-image';
+import { radii, spacing } from '@/theme/tokens';
 import { ingredientImage } from '@/data/ingredient-images';
 import { Icon } from '@/components/ui/icon';
 import { InventoryMetadataEditor } from '@/components/inventory-metadata-editor';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View, type ScrollViewInstance } from 'react-native';
-import { AppText, ActionRow, Button, Card, Chip, EmptyState, PageHeader, Screen, SearchField, SectionHeader, uiStyles } from '@/components/ui/core';
+import { AppText, ActionRow, Button, Card, Chip, EmptyState, PageHeader, Screen, SearchField, SectionHeader, TextTabs, uiStyles } from '@/components/ui/core';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
 import { useInventory } from '@/providers/inventory-provider';
 import { useLanguage } from '@/providers/language-provider';
-import { backendKitchenMessages } from '@/i18n/backend-kitchen';
+import { backendKitchenMessages, daysLeftLabel } from '@/i18n/backend-kitchen';
 import { backendAddFoodMessages } from '@/i18n/backend-add-food';
 import { stockActionMessages } from '@/i18n/backend-stock-actions';
 import { BackendStockActions } from '@/components/backend-stock-actions';
@@ -26,8 +27,16 @@ function useLabels() {
 function Expiry({ item }: { item: InventoryReadItem }) {
   const { today } = useBackendKitchen();
   const { language, t } = useLabels();
-  const days = backendExpiryDays(item, today);
-  return <AppText variant="caption" muted dir={language === 'ar' ? 'rtl' : undefined}>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : `${t.days} ${inventoryNumberLabel(days.toLocaleString(language), language)}`}</AppText>;
+  const days = backendExpiryDays(item, today); const { colors } = useRemyTheme();
+  // Soon is pink, past is red; everything else stays quiet.
+  const color = days === null ? undefined : days < 0 ? colors.errorText : days <= 3 ? colors.accentText : undefined;
+  return <AppText variant="caption" muted={!color} dir={language === 'ar' ? 'rtl' : undefined} style={color ? { color } : undefined}>{days === null ? t.unknown : days < 0 ? t.expired : days === 0 ? t.today : daysLeftLabel(language, inventoryNumberLabel(days.toLocaleString(language), language), days, item.expiryEstimated)}</AppText>;
+}
+function Fact({ label, first, children }: { label: string; first?: boolean; children: React.ReactNode }) {
+  const { colors } = useRemyTheme();
+  return <View style={[uiStyles.row, { justifyContent: 'space-between', minHeight: 48, paddingVertical: 10, borderTopWidth: first ? 0 : 1, borderColor: colors.divider }]}>
+    <AppText muted>{label}</AppText>{typeof children === 'string' ? <AppText variant="label">{children}</AppText> : children}
+  </View>;
 }
 export function BackendKitchenState({ detail = false, retry }: { detail?: boolean; retry?: () => void }) {
   const state = useBackendKitchen();
@@ -47,9 +56,9 @@ function DeviceInventoryNotice() {
     {status === 'error' ? <><AppText accessibilityRole="alert">{t.deviceError}</AppText><Button label={t.retry} onPress={retryRead} /></> : status !== 'ready' && <AppText muted>{t.deviceLoading}</AppText>}
   </Card>;
 }
-function BackendFoodRow({ item }: { item: InventoryReadItem }) {
+function BackendFoodRow({ item, divider }: { item: InventoryReadItem; divider?: boolean }) {
   const { language, t, rtl } = useLabels();
-  return <ActionRow title={backendFoodName(item, language)} rtl={rtl} leading={<View style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>{ingredientImage(item.name) ? <Image source={ingredientImage(item.name)} contentFit="contain" accessibilityLabel={backendFoodName(item, language)} style={{ width: 64, height: 64 }} /> : <Icon name="food" size={30} />}</View>}
+  return <ActionRow dense divider={divider} title={backendFoodName(item, language)} rtl={rtl} leading={<View style={{ width: 56, height: 56, alignItems: 'center', justifyContent: 'center' }}>{ingredientImage(item.name) ? <Image source={ingredientImage(item.name)} contentFit="cover" accessibilityLabel={backendFoodName(item, language)} style={{ width: 56, height: 56, borderRadius: radii.md }} /> : <Icon name="food" size={28} />}</View>}
     subtitle={backendRowSubtitle(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} subtitleStyle={{ writingDirection: rtl ? 'rtl' : 'ltr' }}
     onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}>
     <Expiry item={item} />{item.readOnly && <AppText variant="caption" muted>{t.readOnly}</AppText>}
@@ -80,11 +89,13 @@ export function BackendKitchenScreen() {
     {status === 'ready' && <>
       {items.length === 0 ? <EmptyState title={t.empty} description={t.emptyBody} /> : <>
         <SearchField value={query} onChangeText={setQuery} placeholder={t.search} accessibilityLabel={t.search} style={{ textAlign: rtl ? 'right' : 'left' }} />
-          <View style={[uiStyles.wrap, { backgroundColor: colors.selectedSurface, borderRadius: 14, padding: 6 }]}><Chip label={t.all} selected={storage === 'all'} onPress={() => setStorage('all')} />
-            {storages.map(([id, label]) => <Chip key={id} label={label} selected={storage === id} onPress={() => setStorage(id)} />)}</View>
-          <View style={uiStyles.wrap}><Chip label={t.name} selected={sort === 'name'} onPress={() => setSort('name')} /><Chip label={t.expiry} selected={sort === 'expiry'} onPress={() => setSort('expiry')} />
-            <Chip label={t.useFirst} selected={priority} onPress={() => setPriority(!priority)} /></View>
-          {visible.length ? <Card style={{ padding: 0 }}>{visible.map(item => <BackendFoodRow key={item.id} item={item} />)}</Card> : <EmptyState title={t.none} description="" action={t.clear} onPress={() => { setQuery(''); setStorage('all'); setPriority(false); }} />}
+          {/* Where it is kept, as the same text tabs the cookbook uses; then how to order it, in one row. */}
+          <View style={{ gap: spacing.xs }}>
+            <TextTabs tabs={[{ key: 'all', label: t.all }, ...storages.map(([key, label]) => ({ key, label }))]} value={storage} onChange={setStorage} rtl={rtl} />
+            <View style={uiStyles.wrap}><Chip label={t.expiry} selected={sort === 'expiry'} onPress={() => setSort('expiry')} /><Chip label={t.name} selected={sort === 'name'} onPress={() => setSort('name')} />
+              <Chip label={t.useFirst} selected={priority} onPress={() => setPriority(!priority)} /></View>
+          </View>
+          {visible.length ? <Card style={{ padding: 0, gap: 0 }}>{visible.map((item, index) => <BackendFoodRow key={item.id} item={item} divider={index > 0} />)}</Card> : <EmptyState title={t.none} description="" action={t.clear} onPress={() => { setQuery(''); setStorage('all'); setPriority(false); }} />}
       </>}
     </>}
     <DeviceInventoryNotice />
@@ -124,9 +135,16 @@ export function BackendFoodDetailScreen() {
   return <Screen rtl={rtl} scrollRef={scrollRef}><Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/kitchen')} />
     {owner && additionNotice != null && additionNoticeKind === 'updated' && <Card style={{ backgroundColor: colors.successSurface }}><AppText accessibilityLiveRegion="polite" style={{ color: colors.successText }}>{stockActionMessages[language].updated}</AppText></Card>}
     <BackendKitchenState detail retry={() => { void loadDetail(id); }} />
-    {item && <><PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} />
-      <Card><AppText>{t.storage}: {backendStorageLabel(item, language)}</AppText><AppText>{t.expiry}: {item.expirationDate ?? t.unknown}</AppText><Expiry item={item} />
-        {item.readOnly && <AppText muted>{t.readOnly}</AppText>}</Card>
+    {item && <>
+      {ingredientImage(item.name) && <Image source={ingredientImage(item.name)} contentFit="cover" accessibilityLabel={backendFoodName(item, language)} style={{ width: '100%', aspectRatio: 16 / 10, borderRadius: radii.lg }} />}
+      <PageHeader title={backendFoodName(item, language)} subtitle={backendQuantityLabel(item, language)} subtitleDirection={rtl ? 'rtl' : undefined} />
+      {/* The facts as label and value rows, one per line, so the eye reads down one column of values. */}
+      <Card style={{ gap: 0, paddingVertical: 4 }}>
+        <Fact label={t.storage} first>{backendStorageLabel(item, language)}</Fact>
+        <Fact label={t.expiry}><View style={{ alignItems: 'flex-end' }}><AppText>{item.expirationDate ?? t.unknown}</AppText><Expiry item={item} /></View></Fact>
+        {item.purchaseDate && <Fact label={t.bought}>{item.purchaseDate}</Fact>}
+      </Card>
+      {(item.expiryEstimated || item.readOnly) && <AppText variant="caption" muted>{[item.expiryEstimated && t.estimated, item.readOnly && t.readOnly].filter(Boolean).join(' ')}</AppText>}
       <BackendStockActions key={`${owner}:${id}`} item={item} />
       <InventoryMetadataEditor key={`${id}:${item.version}`} item={item} />
     </>}

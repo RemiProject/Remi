@@ -143,14 +143,14 @@ test('concurrent save cannot dispatch twice or change a busy attempt', async () 
 });
 for (const action of ['used', 'discard', 'fix', 'mistake']) {
   test(`read-only ${action} cannot open or send a mutation`, async () => {
-    for (const overrides of [{ unit: 'TABLESPOON' }, { unit: 'TEASPOON' }, { storageLocation: 'COUNTER' }, { storageLocation: 'OTHER' }]) {
+    for (const overrides of [{ unit: 'TABLESPOON' }, { unit: 'TEASPOON' }, { storageLocation: 'OTHER' }]) {
       const h = harness({ item: mapped({ ...raw, ...overrides }) }); start(h, action);
       assert.equal(h.store.getSnapshot().action, null); assert.equal(await h.store.submit(true), false); assert.equal(h.calls.length, 0);
     }
   });
 }
 test('a fresh adjustment read that becomes unsupported is rejected', async () => {
-  const h = harness({ latest: { ...raw, storageLocation: 'COUNTER' } }); start(h, 'fix', '1');
+  const h = harness({ latest: { ...raw, storageLocation: 'OTHER' } }); start(h, 'fix', '1');
   await h.store.submit(); assert.equal(h.store.getSnapshot().error.code, 'READ_ONLY'); assert.equal(h.mutations().length, 0);
 });
 for (const input of ['0', '-1', '1.2345', '١,٢٣٤٥', 'NaN', 'Infinity', '1e3', '', '1,2.3']) {
@@ -291,7 +291,7 @@ for (const language of ['en', 'ar']) {
     h.nodes(h.render(), 'Chip')[0].props.onPress(); assert.equal(h.store().getSnapshot().unit, 'g');
   });
   test(`${language}: unsupported unit/storage disables all four actions`, () => {
-    for (const overrides of [{ unit: 'TABLESPOON' }, { storageLocation: 'COUNTER' }]) {
+    for (const overrides of [{ unit: 'TABLESPOON' }, { storageLocation: 'OTHER' }]) {
       const h = uiHarness({ language, item: mapped({ ...raw, ...overrides }) });
       for (const action of ['used', 'discard', 'fix', 'mistake']) assert.equal(button(h, stockActionMessages[language][action]).props.disabled, true);
     }

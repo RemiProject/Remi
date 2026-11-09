@@ -1,15 +1,18 @@
 {
   "expo": {
-    "name": "Remi Cookbook",
+    "name": "Remi",
     "slug": "remi-cookbook",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "remi-cookbook",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/remi.icon",
       "bundleIdentifier": "com.remi.cookbook.independent",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
       "entitlements": {
         "keychain-access-groups": [
           "$(AppIdentifierPrefix)$(CFBundleIdentifier)"
@@ -18,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#F8F6E6",
+        "backgroundColor": "#F8E45C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -42,23 +45,84 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F8F6E6",
+          "backgroundColor": "#FFFDF4",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 180,
+          "dark": {
+            "backgroundColor": "#0B1030",
+            "image": "./assets/images/splash-icon-dark.png"
+          }
         }
       ],
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Allow Remy to take an optional food photo.",
-          "photosPermission": "Allow Remy to select an optional food photo.",
+          "cameraPermission": "Remi uses the camera to photograph food and read receipts, so you can add groceries without typing.",
+          "photosPermission": "Remi opens your photos so you can add a food photo or a receipt you already took.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#0B1030"
         }
       ],
       "expo-font",
       "expo-image",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-sharing",
+        {
+          "ios": {
+            "enabled": true,
+            "activationRule": {
+              "supportsWebUrlWithMaxCount": 1,
+              "supportsWebPageWithMaxCount": 1,
+              "supportsText": true
+            }
+          },
+          "android": {
+            "enabled": true,
+            "singleShareMimeTypes": [
+              "text/plain"
+            ]
+          }
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.remi.cookbook.independent",
+          "widgets": [
+            {
+              "name": "RemiRings",
+              "displayName": "Remi rings",
+              "description": "Today's Fuel, Protein and Fibre rings, calories left and your streak.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular"
+                ],
+                "initialLayout": "src/widgets/remi-rings.tsx"
+              },
+              "android": null
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

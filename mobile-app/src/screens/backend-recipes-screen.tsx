@@ -1,8 +1,12 @@
+import { recipeContent, recipeContentDirection } from '@/i18n/recipe-content';
+import { recipeName } from '@/i18n/recipe-names';
 import { useCallback } from 'react';
+import { energyLabel } from '@/domain/nutrition';
 import { router, useFocusEffect } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Badge, Button, Card, EmptyState, PageHeader, Screen, SectionHeader, uiStyles } from '@/components/ui/core';
+import { RecipeCard, RecipeGrid, useGridCardWidth } from '@/components/recipe-card';
 import { RecipePlaceholder } from '@/components/recipe-placeholder';
 import { useBackendRecipes } from '@/providers/backend-recipes-provider';
 import { useLanguage } from '@/providers/language-provider';
@@ -11,7 +15,6 @@ import { cookedItMessages } from '@/i18n/cooked-it';
 import { cookingMessages } from '@/i18n/cooking';
 import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { recipeCoverage, recipeExpired, recipeExpiry, recipeFoodName, recipeIngredientStatus, recipeMetadata, recipeMissing, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
-import { radii, spacing } from '@/theme/tokens';
 
 function useLabels() {
   const { language } = useLanguage();
@@ -37,7 +40,7 @@ export function BackendRecipesScreen({ onBrowseAll }: { onBrowseAll?: () => void
   const state = useBackendRecipes();
   const { owner, ensureLoaded } = state;
   const { t, language, rtl } = useLabels();
-  const { colors } = useRemyTheme();
+  const { colors } = useRemyTheme(); const width = useGridCardWidth();
   useFocusEffect(useCallback(() => { if (owner) void ensureLoaded(); }, [owner, ensureLoaded]));
   const empty = state.status === 'ready' && (state.kitchenEmpty || !state.nodes.length);
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}
@@ -47,22 +50,14 @@ export function BackendRecipesScreen({ onBrowseAll }: { onBrowseAll?: () => void
     <RecipeState status={state.status} retry={state.refresh} />
     {state.status === 'ready' && <Button label={t.refresh} variant="text" onPress={state.refresh} />}
     {empty && <EmptyState title={t.empty} description={t.emptyBody} action={t.add} onPress={() => router.push('/food-entry')} />}
-    {state.status === 'ready' && !empty && state.nodes.map(node => {
-      const missing = recipeMissing(node, language), expired = recipeExpired(node, language), expiry = recipeExpiry(node, state.today, language);
-      return <Pressable key={node.recipe.id} accessibilityRole="button" accessibilityLabel={node.recipe.name}
-        onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: node.recipe.id } })}
-        style={({ pressed }) => ({ borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
-        <RecipePlaceholder label={t.placeholder} name={node.recipe.name} id={node.recipe.id} /><View style={{ padding: spacing.lg, gap: spacing.sm }}>
-          <AppText variant="heading" dir="ltr">{node.recipe.name}</AppText>
-          <AppText variant="caption" dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(node.recipe, language)}</AppText>
-          <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeCoverage(node, language)}</AppText>
-          {missing && <AppText muted dir={rtl ? 'rtl' : 'ltr'}>{missing}</AppText>}
-          {expired && <AppText muted dir={rtl ? 'rtl' : 'ltr'}>{expired}</AppText>}
-          {expiry && <AppText dir={rtl ? 'rtl' : 'ltr'}>{expiry}</AppText>}
-          <SafetyWarnings warnings={node.safetyWarnings} />
-        </View>
-      </Pressable>;
-    })}
+    {state.status === 'ready' && !empty && <RecipeGrid>{state.nodes.map(node => {
+      const recipe = node.recipe, dir = rtl ? 'rtl' : 'ltr';
+      const time = recipe.prepTimeMin === null || recipe.cookTimeMin === null ? null : `${recipeNumber(recipe.prepTimeMin + recipe.cookTimeMin, language)} ${t.minutes}`;
+      return <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} time={time} energy={energyLabel(recipe.nutrition, language)} width={width} textDir={dir}
+        caption={recipeCoverage(node, language)} details={[recipeMissing(node, language), recipeExpired(node, language)]} note={recipeExpiry(node, state.today, language)}
+        extra={node.safetyWarnings.length > 0 ? <Badge label={t.warnings} tone="warning" /> : undefined}
+        onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
+    })}</RecipeGrid>}
     {state.moreError && <AppText accessibilityRole="alert">{t.moreError}</AppText>}
     {state.status === 'ready' && !empty && state.hasNextPage && <Button label={state.loadingMore ? t.loading : state.moreError ? t.retry : t.more} disabled={state.loadingMore} onPress={state.loadMore} />}
   </Screen></SafeAreaView>;
@@ -90,9 +85,9 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
     {owner && notice && <Card><AppText accessibilityLiveRegion="polite" dir={rtl ? 'rtl' : 'ltr'}>{cookedItMessages[language].removed}</AppText></Card>}
     {recipe && <>
       <SafetyWarnings detail warnings={detail?.suggestion?.safetyWarnings ?? []} />
-      <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} /><AppText variant="title" dir="ltr">{recipe.name}</AppText>
+      <RecipePlaceholder label={t.placeholder} name={recipe.name} id={recipe.id} /><AppText variant="title" dir={language === 'ar' ? 'rtl' : 'ltr'}>{recipeName(recipe.name, language)}</AppText>
       <AppText dir={rtl ? 'rtl' : 'ltr'}>{recipeMetadata(recipe, language)}</AppText>
-      {recipe.description && <><SectionHeader title={t.description} /><AppText dir="ltr">{recipe.description}</AppText></>}
+      {recipe.description && <><SectionHeader title={t.description} /><AppText dir={recipeContentDirection(recipe.description, language)}>{recipeContent(recipe.description, language)}</AppText></>}
       <Button label={cookedItMessages[language].cooked} onPress={() => router.push({ pathname: '/cooked-it', params: { id } })} />
       <SectionHeader title={t.ingredients} />
       {detail?.matchingLoading && <AppText accessibilityLiveRegion="polite">{t.matchingLoading}</AppText>}
@@ -111,7 +106,7 @@ export function BackendRecipeDetailScreen({ id }: { id: string }) {
       {!recipe.steps.length && <AppText muted>{t.noSteps}</AppText>}
       {recipe.steps.map(step => <Card key={step.id}>
         <AppText variant="label" dir={rtl ? 'rtl' : 'ltr'}>{recipeNumber(step.stepNumber, language)}{step.durationMin !== null ? ` · ${recipeNumber(step.durationMin, language)} ${t.minutes}` : ''}</AppText>
-        <AppText dir="ltr">{step.instruction}</AppText>
+        <AppText dir={recipeContentDirection(step.instruction, language)}>{recipeContent(step.instruction, language)}</AppText>
       </Card>)}
     </>}
   </Screen></SafeAreaView>;

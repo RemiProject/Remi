@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "tomatoes",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-443aa0b9-ef84-4059-9dc4-340ff666b069.png",
+    "bundledPath": "mobile-app/assets/cookbook/ingredient-tomatoes.png",
+    "sha256": "af5c4607248be5f1ba6ec972b22d24b8c94bae29f8b1a3c018718a2ade6221a9",
+    "bytes": 331732,
+    "transparent": true
+  },
+  {
+    "slug": "spinach",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-6ee49c61-a43e-4618-ab76-f47bb82fdd06.png",
+    "bundledPath": "mobile-app/assets/cookbook/ingredient-spinach.png",
+    "sha256": "33211b3fa89f66efe9951e6d1eed0f9b9dd43d781a104584db849e6240a04803",
+    "bytes": 354008,
+    "transparent": true
+  },
+  {
+    "slug": "lemon",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-2b1c7d79-1b30-4df5-a90b-cb12ed4989f2.png",
+    "bundledPath": "mobile-app/assets/cookbook/ingredient-lemon.png",
+    "sha256": "410be2a0f6c520b8aeba5e00b593ed43cb3b51f8fccd7bf155e242a869b830e3",
+    "bytes": 326109,
+    "transparent": true
+  },
+  {
+    "slug": "yogurt",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-7d96c192-7c34-4276-9ad3-7b50942e6ba4.png",
+    "bundledPath": "mobile-app/assets/cookbook/ingredient-yogurt.png",
+    "sha256": "fc3ccb1274690026b657ca579451e59cd40b562b6c0eb34613a40a4561d15963",
+    "bytes": 250661,
+    "transparent": true
+  }
+]

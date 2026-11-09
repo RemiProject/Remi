@@ -21,7 +21,7 @@ function harness() {
     react, 'react/jsx-runtime': { jsx: element, jsxs: element },
     'react-native': { ...Object.fromEntries(['ActivityIndicator','KeyboardAvoidingView','Pressable','ScrollView','TextInput','View'].map(k => [k,k])), Platform: { OS: 'ios' } },
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
-    '@/components/ui/core': { AppText: 'AppText' },
+    '@/components/ui/core': { AppText: 'AppText' }, './brand': { Brand: 'Brand' },
     '@/components/auth-ui': Object.fromEntries(['AuthShell','AuthInput','AuthAction','AuthNotice','AuthLink'].map(k => [k,k])),
     '@/theme/provider': { useRemyTheme: () => ({ colors: { border: '#ddd', primary: '#293E7A' } }) },
     '@/theme/fonts': { useRemyFonts: () => ({ body: 'System' }) },

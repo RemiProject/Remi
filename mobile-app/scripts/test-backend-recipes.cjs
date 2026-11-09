@@ -289,6 +289,25 @@ test('recipe count units use English singular/plural and Arabic plural categorie
   assert.equal(view.recipeIngredientStatus(ingredient(), node, 'ar'), 'ينقصك \u20661\u2069 قطعة');
 });
 
+test('recipe ingredients render without Intl.PluralRules on the native runtime', () => {
+  const descriptor = Object.getOwnPropertyDescriptor(Intl, 'PluralRules');
+  Object.defineProperty(Intl, 'PluralRules', { configurable: true, value: undefined });
+  try {
+    for (const [unit, singular, plural] of [['PIECE', 'piece', 'pieces'], ['CUP', 'cup', 'cups']]) {
+      for (const [amount, shown, label] of [['1.000', '1', singular], ['2.000', '2', plural], ['0.500', '0.5', plural]]) {
+        assert.equal(view.recipeQuantity(amount, unit, 'en'), `${shown} ${label}`);
+      }
+    }
+    for (const [amount, label] of [['0', 'أكواب'], ['1', 'كوب'], ['2', 'كوبان'], ['3', 'أكواب'], ['10', 'أكواب'], ['11', 'كوب'], ['99', 'كوب'], ['100', 'كوب'], ['103', 'أكواب'], ['3.5', 'كوب']]) {
+      assert.equal(view.recipeQuantity(amount, 'CUP', 'ar'), `\u2066${amount}\u2069 ${label}`);
+    }
+    const node = suggestion('one', { short: [{ ...food(), missingAmount: '1.000', unit: 'PIECE' }] });
+    assert.equal(view.recipeIngredientStatus(ingredient(), node, 'en'), 'Short by 1 piece');
+  } finally {
+    Object.defineProperty(Intl, 'PluralRules', descriptor);
+  }
+});
+
 test('expired foods stay separate from missing on cards and required/optional detail rows in both languages', async () => {
   const expired = { ...food('expired'), arabicName: 'طماطم' };
   const h = harness({ pages: [page([suggestion('one', { missing: [], expired: [food()], expiringSoon: [] })])] });
@@ -319,6 +338,10 @@ test('card explanations use Arabic ingredient names, only three missing names, c
   assert.deepEqual(Object.keys(messages.en).sort(), Object.keys(messages.ar).sort());
 });
 
+function recipeCardModule(mocks) {
+  return loadTsx('src/components/recipe-card.tsx', { ...mocks, 'react-native': { ...mocks['react-native'], ScrollView: 'ScrollView', useWindowDimensions: () => ({ width: 400, height: 800 }) },
+    'expo-image': { Image: 'Image' }, '@/data/food-images': { recipeImages: {} }, '@/theme/tokens': { ...mocks['@/theme/tokens'], layout: { maxWidth: 720 } } });
+}
 function loadTsx(file, mocks) {
   const exports = {};
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -339,12 +362,13 @@ function expand(tree) {
 function ui() {
   let language = 'en', state = { ...emptyRecipes, owner: 'a', status: 'ready', nodes: [suggestion()], today: '2026-06-02', kitchenEmpty: false };
   const pushed = [], focused = []; let refresh = 0, more = 0, get = 0;
-  const react = { useCallback: callback => callback };
+  const react = { useCallback: callback => callback, useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}], useEffect: () => {}, useMemo: factory => factory() };
   const mocks = {
     react,
     'expo-router': { router: { push: route => pushed.push(route), replace: route => pushed.push(route), canGoBack: () => false }, useFocusEffect: effect => focused.push(effect) },
     'react-native': Object.fromEntries(['View', 'Pressable', 'RefreshControl', 'ActivityIndicator'].map(key => [key, key])),
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
+    '@/components/brand': { Brand: 'Brand' },
     '@/components/ui/core': { ...Object.fromEntries(['AppText', 'Badge', 'Button', 'Card', 'EmptyState', 'PageHeader', 'Screen', 'SectionHeader'].map(key => [key, key])), uiStyles: {} },
     '@/components/ui/icon': { Icon: 'Icon' },
     '@/providers/backend-recipes-provider': { useBackendRecipes: () => ({ ...state, ensureLoaded: () => { refresh++; }, refresh: () => { refresh++; }, loadMore: () => { more++; }, loadDetail: () => { get++; }, ensureDetail: () => { get++; } }) },
@@ -354,6 +378,8 @@ function ui() {
   };
   mocks['@/domain/cooked-it'] = require('../src/domain/cooked-it.ts');
   mocks['@/data/cookbook-content'] = { getCookbookContent: () => undefined };
+  mocks['@/data/food-images'] = { recipeImages: {} };
+  mocks['@/components/recipe-card'] = recipeCardModule(mocks);
   mocks['@/components/recipe-placeholder'] = loadTsx('src/components/recipe-placeholder.tsx', mocks);
   const exported = loadTsx('src/screens/backend-recipes-screen.tsx', mocks);
   return { pushed, set: update => { state = { ...state, ...update }; }, language: value => { language = value; },
@@ -373,12 +399,12 @@ test('backend recipe list signed-out/loading/empty/error/retry states work in En
   }
   assert.equal(h.counts().refresh, 2);
 });
-test('backend recipe cards show server names, coverage, missing/expiry explanations, metadata and neutral images', () => {
+test('backend recipe cards show server names, time, coverage, missing/expiry explanations and letter-tile art', () => {
   const h = ui(), node = suggestion('one', { safetyWarnings: ['DISLIKE_FOOD'], missing: [{ ...food(), arabicName: 'طماطم' }], expiringSoon: [{ ...food(), arabicName: 'طماطم', expiryDay: '2026-06-03' }] });
   h.set({ nodes: [node], hasNextPage: true }); let tree = h.render();
   const text = JSON.stringify(tree); assert(text.includes('You have 1 of 2')); assert(text.includes('Missing: Tomato')); assert(text.includes('Uses your Tomato, expires tomorrow'));
-  assert(text.includes('15 min · Easy · Servings: 4')); assert.equal(nodes(tree, 'Badge')[0].props.label, messages.en.warnings);
-  assert.equal(nodes(tree, 'View').find(n => n.props.accessibilityRole === 'image').props.accessibilityLabel, messages.en.placeholder);
+  assert(text.includes('15 min')); assert.equal(nodes(tree, 'Badge')[0].props.label, messages.en.warnings);
+  assert.equal(nodes(tree, 'View').find(n => n.props.accessibilityRole === 'image').props.accessibilityLabel, node.recipe.name, 'the art tile names the recipe; no stock photo');
   assert(!text.includes('unsplash')); assert(!text.includes('sample recipes'));
   nodes(tree, 'Pressable')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'one' } });
   nodes(tree, 'Button').find(n => n.props.label === messages.en.more).props.onPress();
@@ -419,14 +445,20 @@ test('backend detail without a suggestion shows no inferred statuses; lookup fai
   h.set({ status: 'error' }); assert(JSON.stringify(h.render(true)).includes('English description.'));
 });
 function cookingUi() {
-  const h = ui(), effects = []; let progress = cookingUtils.initialCookingSession;
+  const h = ui(), effects = []; let progress = cookingUtils.initialCookingSession; let hook = 0; const store = [];
   h.mocks.react.useEffect = effect => effects.push(effect);
+  h.mocks.react.useState = init => { const i = hook++; if (!(i in store)) store[i] = init; return [store[i], value => { store[i] = typeof value === 'function' ? value(store[i]) : value; }]; };
+  h.mocks.react.useRef = value => ({ current: value });
+  Object.assign(h.mocks['react-native'], { ScrollView: 'ScrollView', useWindowDimensions: () => ({ width: 400, height: 800 }) });
+  h.mocks['react-native-reanimated'] = { ...require('./native-ui-fixture.cjs').fixtureModule('react-native-reanimated'), default: { View: 'AnimatedView', createAnimatedComponent: component => component } };
+  h.mocks['expo-keep-awake'] = { useKeepAwake: () => {} };
+  h.mocks['@/components/step-timer'] = { StepTimer: 'StepTimer' };
   h.mocks['@/components/ui/core'].Chip = 'Chip';
   h.mocks['expo-router'].useLocalSearchParams = () => ({ id: 'one' });
   h.mocks['@/utils/cooking-session'] = cookingUtils;
   h.mocks['@/providers/backend-recipes-provider'].useBackendCookingSession = () => ({ session: progress, update: change => { progress = change(progress); } });
   const { BackendCookingScreen } = loadTsx('src/screens/backend-cooking-screen.tsx', h.mocks);
-  return { ...h, renderDetail: h.render, render: () => expand(BackendCookingScreen()), start: () => effects.at(-1)(), progress: () => progress };
+  return { ...h, renderDetail: h.render, render: () => { hook = 0; return expand(BackendCookingScreen()); }, start: () => effects.at(-1)(), progress: () => progress };
 }
 
 test('backend Cooking orders English steps and durations, shows every read-only checklist status, and completes without stock writes', () => {
@@ -437,19 +469,23 @@ test('backend Cooking orders English steps and durations, shows every read-only 
     const node = suggestion('one', { missing: [food('missing')], expired: [food('expired')], short: [{ ...food('short'), missingAmount: '1.000', unit: 'GRAM' }], unknown: [food('unknown')], assumedStaples: [food('salt')] });
     h.set({ detail: { id: 'one', status: 'ready', recipe, suggestion: node } });
     let tree = h.render(); h.start(); assert.equal(h.counts().get, 1);
-    assert.equal(nodes(tree, 'Screen')[0].props.rtl, language === 'ar');
+    assert(nodes(tree, 'View').some(n => n.props.style?.direction === (language === 'ar' ? 'rtl' : 'ltr')));
+    const segments = () => nodes(tree, 'Pressable').filter(n => n.props.testID === 'cook-progress-segment');
+    assert.equal(segments().length, 2);
+    assert.equal(nodes(tree, 'StepTimer')[0].props.minutes, 5, 'the current timed step offers a timer');
+    nodes(tree, 'Pressable').find(n => n.props.accessibilityRole === 'tab' && !n.props.accessibilityState.selected).props.onPress(); tree = h.render();
     for (const key of ['ENOUGH', 'MISSING', 'EXPIRED', 'UNKNOWN', 'ASSUMED', 'optional']) assert(JSON.stringify(tree).includes(messages[language][key]));
     assert(JSON.stringify(tree).includes(language === 'en' ? 'Short by 1 g' : 'ينقصك'));
+    nodes(tree, 'Pressable').find(n => n.props.accessibilityRole === 'tab' && !n.props.accessibilityState.selected).props.onPress(); tree = h.render();
     assert(nodes(tree, 'AppText').some(n => n.props.children === 'First English step.' && n.props.accessibilityLiveRegion === 'polite' && n.props.dir === 'ltr'));
     assert(nodes(tree, 'AppText').some(n => n.props.children === (language === 'en' ? '5 min' : '\u20665\u2069 دقيقة')));
-    assert.equal(nodes(tree, 'Chip')[0].props.selected, true);
+    assert.equal(segments()[0].props.accessibilityState.selected, true);
     assert.equal(nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].previous).props.disabled, true);
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].next).props.onPress(); tree = h.render();
     assert(nodes(tree, 'AppText').some(n => n.props.children === 'Second English step.' && n.props.accessibilityLiveRegion === 'polite'));
-    assert(!nodes(tree, 'SectionHeader').some(n => n.props.title === messages[language].ingredients));
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].previous).props.onPress();
     assert.equal(h.progress().current, 0); tree = h.render();
-    nodes(tree, 'Chip')[1].props.onPress(); tree = h.render();
+    segments()[1].props.onPress(); tree = h.render();
     nodes(tree, 'Button').find(n => n.props.label === cookingMessages[language].finish).props.onPress(); tree = h.render();
     assert.equal(h.progress().finished, true);
     nodes(tree, 'Button').find(n => n.props.label === cookedItMessages[language].yes).props.onPress();
@@ -506,6 +542,7 @@ test('Home recipe ideas show four ranked backend cards, metadata, coverage, expi
   h.mocks['react-native'].ScrollView = 'ScrollView';
   h.mocks['@/i18n/home'] = require('../src/i18n/home.ts');
   h.mocks['@/i18n/recipes'] = require('../src/i18n/recipes.ts');
+  h.mocks['@/components/recipe-card'] = recipeCardModule(h.mocks);
   const { BackendHomeRecipeIdeas } = loadTsx('src/screens/backend-home-recipe-ideas.tsx', h.mocks);
   h.set({ nodes: Array.from({ length: 6 }, (_, i) => suggestion(`backend-${i}`, { expiringSoon: [{ ...food(), arabicName: 'طماطم', expiryDay: '2026-06-03' }] })) });
   for (const language of ['en', 'ar']) {
@@ -519,7 +556,7 @@ test('Home recipe ideas show four ranked backend cards, metadata, coverage, expi
     assert(nodes(tree, 'AppText').filter(n => n.props.children === 'Recipe backend-0').every(n => n.props.dir === 'ltr'));
     nodes(tree, 'Pressable')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/recipes/[id]', params: { id: 'backend-0' } });
     nodes(tree, 'Button')[0].props.onPress(); assert.deepEqual(h.pushed.at(-1), { pathname: '/feature', params: { feature: 'recipes' } });
-    effects.at(-1)();
+    effects.splice(0).forEach(effect => effect()); // this render's effects, whatever order components register them in
   }
   assert.equal(h.counts().refresh, 2);
 });
@@ -529,6 +566,7 @@ test('Home recipe ideas signed-out, empty, quiet loading/error/retry states neve
   h.mocks.react.useEffect = effect => effects.push(effect);
   h.mocks['react-native'].ScrollView = 'ScrollView';
   h.mocks['@/i18n/home'] = require('../src/i18n/home.ts'); h.mocks['@/i18n/recipes'] = require('../src/i18n/recipes.ts');
+  h.mocks['@/components/recipe-card'] = recipeCardModule(h.mocks);
   const { BackendHomeRecipeIdeas } = loadTsx('src/screens/backend-home-recipe-ideas.tsx', h.mocks);
   for (const language of ['en', 'ar']) {
     h.language(language); const t = messages[language];
@@ -586,7 +624,8 @@ test('Cooking hook masks a changed identity immediately and provider clears prog
   let user = { id: 'a' }, revision = 1; const effects = [];
   const store = new BackendRecipesStore(() => assert.fail('No network needed for Cooking progress'));
   const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
-    react: { createContext: () => ({ Provider: 'Context' }), useContext: () => store, useState: () => [store],
+    '@/services/connectivity': { connectivity: { isOffline: () => false } }, '@/services/offline-cache': { offlineCache: {} },
+    react: { useRef: value => ({ current: value }), createContext: () => ({ Provider: 'Context' }), useContext: () => store, useState: () => [store],
       useEffect: effect => effects.push(effect), useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
     '@react-native-async-storage/async-storage': {}, '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes },
     '@/repositories/graphql-recipe-repository': {}, '@/services/inventory-feature': { isBackendInventoryEnabled: () => true },
@@ -613,7 +652,8 @@ test('Home initial ensure and provider inventory effects share one request, then
   let calls = 0; const effects = [];
   const store = new BackendRecipesStore(() => ({ list: async () => { calls++; return readPage(); } }));
   const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
-    react: { createContext: () => ({ Provider: 'RecipesContext' }), useContext: () => store,
+    '@/services/connectivity': { connectivity: { isOffline: () => false } }, '@/services/offline-cache': { offlineCache: {} },
+    react: { useRef: value => ({ current: value }), createContext: () => ({ Provider: 'RecipesContext' }), useContext: () => store,
       useState: () => [store], useEffect: effect => effects.push(effect), useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
     '@react-native-async-storage/async-storage': {},
     '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes }, '@/repositories/graphql-recipe-repository': {},
@@ -635,7 +675,8 @@ test('recipes provider masks account/household changes before effects and flag o
   let auth = { user: { id: 'user' }, busy: false, ready: true, error: null }, revision = 1, householdRevision = 1, enabled = true;
   const store = new BackendRecipesStore(() => ({ list: async () => readPage() })); store.setOwner('user:1:1'); await store.refresh();
   const hooks = loadTsx('src/providers/backend-recipes-provider.tsx', {
-    react: { createContext: () => ({}), useContext: () => store, useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
+    '@/services/connectivity': { connectivity: { isOffline: () => false } }, '@/services/offline-cache': { offlineCache: {} },
+    react: { useRef: value => ({ current: value }), createContext: () => ({}), useContext: () => store, useSyncExternalStore: (_s, get) => get(), useCallback: cb => cb },
     '@react-native-async-storage/async-storage': {},
     '@/repositories/backend-recipes-store': { BackendRecipesStore, visibleRecipes }, '@/repositories/graphql-recipe-repository': {},
     '@/services/inventory-feature': { isBackendInventoryEnabled: () => enabled },

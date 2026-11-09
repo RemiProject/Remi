@@ -4,7 +4,7 @@ import { Ctx } from '@/platform/tenancy/ctx.decorator.js';
 import { GqlAuthGuard } from '@/platform/tenancy/gql-auth.guard.js';
 import type { RequestContext } from '@/platform/tenancy/request-context.js';
 import { ProfileService } from '@/modules/profile/application/profile.service.js';
-import { AllergyInputType, HealthConditionCatalogType, MyProfileType, RemoveAllergyInputType, SafetyHistoryConnectionType, SetDietaryPreferencesInputType, SetGoalInputType, SetHealthConditionsInputType, UpdateProfileInputType, UserGoalType, UserProfileDataType } from './profile.types.js';
+import { AllergyInputType, HealthConditionCatalogType, MyProfileType, RemoveAllergyInputType, SafetyHistoryConnectionType, SetDietaryPreferencesInputType, SetGoalInputType, SetHealthConditionsInputType, UpdateProfileInputType, UserGoalType, UserProfileDataType, NutritionOverviewType, WeightEntryType } from './profile.types.js';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
@@ -13,6 +13,12 @@ export class ProfileResolver {
 
   @Query(() => MyProfileType)
   myProfile(@Ctx() ctx: RequestContext) { return this.profile.myProfile(ctx.userId); }
+
+  @Query(() => [WeightEntryType], { description: 'Recorded weights, oldest first (the latest `limit`, default 400)' })
+  weightHistory(@Ctx() ctx: RequestContext, @Args('limit', { type: () => Int, defaultValue: 400 }) limit: number) { return this.profile.weightHistory(ctx.userId, limit); }
+
+  @Query(() => NutritionOverviewType, { description: 'All-time nutrition averages over days with logged meals' })
+  nutritionOverview(@Ctx() ctx: RequestContext) { return this.profile.nutritionOverview(ctx.userId); }
 
   @Query(() => SafetyHistoryConnectionType)
   mySafetyHistory(@Ctx() ctx: RequestContext, @Args('first', { type: () => Int, defaultValue: 20 }) first: number, @Args('after', { type: () => String, nullable: true }) after?: string) {

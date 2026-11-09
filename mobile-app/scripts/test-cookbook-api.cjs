@@ -8,7 +8,7 @@ function loadApi({ send = async () => ({}), resolve = async () => ({ id: 'househ
   const exports = {};
   const auth = { getIdentityRevision: authRevision, authenticatedGraphql: send };
   const js = ts.transpileModule(fs.readFileSync(path.join(__dirname, '../src/services/kitchen-api.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  vm.runInNewContext(js, { exports, require: name => name.includes('async-storage') ? { default: {} } : name === './auth' ? { getAuth: () => auth } : name === './active-household-service' ? { resolveActiveHousehold: resolve, getActiveHouseholdRevision: householdRevision } : require(name), Uint8Array, Date, BigInt, Math, Number, String, Set, Error, crypto: globalThis.crypto });
+  vm.runInNewContext(js, { exports, require: name => name.includes('async-storage') ? { default: {} } : name === './auth' ? { getAuth: () => auth } : name === '@/domain/nutrition' ? require('../src/domain/nutrition.ts') : name === './active-household-service' ? { resolveActiveHousehold: resolve, getActiveHouseholdRevision: householdRevision } : require(name), Uint8Array, Date, BigInt, Math, Number, String, Set, Error, crypto: globalThis.crypto });
   return exports;
 }
 test('portion scaling uses exact thousandths and rejects zero or invalid portions', () => {

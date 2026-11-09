@@ -93,8 +93,8 @@ test('display names use Arabic aliases or canonical fallback, capitalize English
   const raw = { ...item, name: 'olive oil', arabicName: 'زيت زيتون' }, before = JSON.stringify(raw);
   assert.equal(backendView.backendFoodName(raw, 'ar'), 'زيت زيتون');
   assert.equal(backendView.backendFoodName(raw, 'en'), 'Olive oil');
-  assert.equal(backendView.backendFoodName({ ...raw, arabicName: undefined }, 'ar'), 'olive oil');
-  assert.equal(backendView.backendFoodName({ ...raw, arabicName: '  ' }, 'ar'), 'olive oil');
+  assert.equal(backendView.backendFoodName({ ...raw, arabicName: undefined }, 'ar'), 'زيت زيتون');
+  assert.equal(backendView.backendFoodName({ ...raw, arabicName: '  ' }, 'ar'), 'زيت زيتون');
   assert.equal(backendKitchenView([raw], 'زيت', 'all', 'name', false, '2026-06-01', 'ar')[0], raw);
   assert.equal(JSON.stringify(raw), before);
 });
@@ -169,7 +169,7 @@ function uiHarness() {
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
     if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: 'InventoryMetadataEditor' };
     if (id === 'react-native') return { ActivityIndicator: 'ActivityIndicator', View: 'View' };
-    if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText', 'ActionRow', 'Button', 'Card', 'Chip', 'EmptyState', 'PageHeader', 'Screen', 'SearchField', 'SectionHeader'].map(name => [name, name])), uiStyles: {} };
+    if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText', 'ActionRow', 'Button', 'Card', 'Chip', 'EmptyState', 'PageHeader', 'Screen', 'SearchField', 'SectionHeader', 'TextTabs'].map(name => [name, name])), uiStyles: {} };
     if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ ...state, dismissAdded, retry: () => { retryCount++; }, loadDetail: id => details.push(id) }) };
     if (id === '@/providers/inventory-provider') return { useInventory: () => local };
     if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
@@ -286,7 +286,7 @@ test('backend Home reuses the original screen, supplies display-only names, and 
   assert(tree.props.backend.deviceNotice);
 });
 
-function homeLayoutHarness(backend, language = 'en') {
+function homeLayoutHarness(backend, language = 'en', homePlan = { upcoming: [], onList: [] }) {
   const slots = [], routes = []; let cursor = 0;
   const exported = {};
   const code = ts.transpileModule(fs.readFileSync('src/screens/home-screen.tsx', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -296,24 +296,42 @@ function homeLayoutHarness(backend, language = 'en') {
     if (id === 'expo-router') return { useFocusEffect: () => {}, router: { navigate: p => routes.push(p), push: p => routes.push(p) } };
     if (id === 'expo-image') return { Image: 'Image' };
     if (id === 'react-native') return { Pressable: 'Pressable', ScrollView: 'ScrollView', View: 'View' };
+    if (id === '@/components/brand') return { Brand: 'Brand' };
+    if (id === '@/components/recipe-card') return { ...Object.fromEntries(['RecipeArt', 'RecipeCard', 'RecipeGrid', 'RecipeTabs'].map(n => [n, n])), useGridCardWidth: () => 180,
+      recipeTabs: () => [{ key: 'all', label: 'All' }], filterRecipes: recipes => [...recipes], recipeMinutes: recipe => (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0) };
+    if (id === '@/theme/tokens') return { spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } };
     if (id === '@/components/ui/core') return { ...Object.fromEntries(['AppText','Button','Card','Screen','SearchField','SectionHeader'].map(n => [n,n])), uiStyles: {} };
     if (id === '@/components/ui/icon') return { Icon: 'Icon' };
     if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
     if (id === '@/providers/auth-provider') return { useAuth: () => ({ user: kitchen.status === 'signed-out' ? null : { id: 'a' } }) };
     if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => kitchen };
     if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {}, mode: 'light' }) };
-    if (id === './connected-ui') return { DataNotice: 'DataNotice', useKitchenData: () => ({ data: { recipes: [{ id: 'real', name: 'Tomato pasta', servings: 2, prepTimeMin: 5, cookTimeMin: 10 }], plans: [] }, loading: false, reload: async () => {} }) };
+    if (id === './connected-ui') return { DataNotice: 'DataNotice', Feedback: 'Feedback', useAction: () => ({ busy: false, message: null, run: async action => { await action(); return true; } }), useKitchenData: () => ({ data: { recipes: [{ id: 'real', name: 'Tomato pasta', servings: 2, prepTimeMin: 5, cookTimeMin: 10 }], ...homePlan }, loading: false, reload: async () => {} }) };
     if (id === './backend-home-recipe-ideas') return { BackendHomeRecipeIdeas: 'BackendRecipeIdeas' };
     if (id === '@/components/app-skeleton') return { AppSkeleton: 'AppSkeleton' };
     if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
     if (id === '@/data/cookbook-content') return { getCookbookContent: () => undefined };
-    if (id === '@/services/kitchen-api') return { todayKey: () => '2026-06-02' };
+    if (id === '@/services/kitchen-api') return { todayKey: () => '2026-06-02', shiftDay: (date, days) => { const value = new Date(`${date}T12:00:00`); value.setDate(value.getDate() + days); return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`; } };
+    if (id === '@/services/plan-shopping') return { addPlannedMealsToShopping: async stock => { homePlan.stockSeen = stock; return { meals: 1, added: [{}, {}] }; } };
     if (id.startsWith('@/')) return require('../src/' + id.slice(2) + '.ts');
     return require(id);
   }, exported);
   const nodes = (n, type) => Array.isArray(n) ? n.flatMap(x => nodes(x, type)) : !n || typeof n !== 'object' ? [] : [...(n.type === type ? [n] : []), ...nodes(n.props?.children, type)];
   return { render: () => { cursor = 0; return exported.default(); }, nodes, routes };
 }
+test('Home passes saved recipe photos to cards in English and Arabic', () => {
+  for (const language of ['en', 'ar']) {
+    const photo = 'https://example.com/saved-dish.jpg';
+    const h = homeLayoutHarness({ items: [], status: 'ready', today: '2026-06-02' }, language, {
+      upcoming: [], onList: [], recipes: [{ id: 'saved', householdId: 'house', name: 'Family dish', imageUrl: photo, servings: 2, prepTimeMin: 5, cookTimeMin: 10 }],
+    });
+    h.nodes(h.render(), 'RecipeTabs')[0].props.onChange('mine');
+    const card = h.nodes(h.render(), 'RecipeCard').find(node => node.props.id === 'saved');
+    assert.equal(card.props.image, photo);
+    card.props.onPress();
+    assert.equal(h.routes.at(-1).params.id, 'saved');
+  }
+});
 test('cookbook Home presents one sign-in action and no household content when signed out in EN/AR', () => {
   for (const lang of ['en','ar']) {
     const h = homeLayoutHarness(undefined, lang), tree = h.render();
@@ -325,16 +343,27 @@ test('cookbook Home presents one sign-in action and no household content when si
 test('cookbook Home preserves pantry priorities, ranked backend ideas, recipes and the meal plan', () => {
   const h = homeLayoutHarness({ items: [item], status: 'ready', today: '2026-06-02' }), tree = h.render();
   assert.equal(h.nodes(tree, 'BackendRecipeIdeas').length, 1);
-  for (const text of ['Use first', "Today's plan"]) assert(h.nodes(tree,'AppText').some(n => n.props.children === text) || h.nodes(tree,'SectionHeader').some(n => n.props.title === text));
+  for (const text of ['Use first', 'Upcoming meals']) assert(h.nodes(tree,'AppText').some(n => n.props.children === text) || h.nodes(tree,'SectionHeader').some(n => n.props.title === text));
   h.nodes(tree,'Button').find(n => n.props.label === 'Plan a meal').props.onPress(); assert.equal(h.routes.at(-1), '/plan');
   assert.equal(h.nodes(tree, 'BackendRecipeIdeas')[0].props.title, 'Tonight, sorted.');
+  assert.ok(!h.nodes(tree, 'SectionHeader').some(n => n.props.title === 'In your shopping list'));
+});
+test('cookbook Home lists upcoming meals with day labels, offers to shop for them and shows recipes already on the list', async () => {
+  const homePlan = { upcoming: [{ id: 'm1', recipeId: 'r1', recipeName: 'Chickpea stew', mealDate: '2026-06-02', mealType: 'DINNER', servings: '2.00' }, { id: 'm2', recipeId: 'r2', recipeName: 'Shakshuka', mealDate: '2026-06-03', mealType: 'BREAKFAST', servings: '4.00' }], onList: [{ id: 'r1', name: 'Chickpea stew', total: 3, onList: 2 }] };
+  const h = homeLayoutHarness({ items: [item], status: 'ready', today: '2026-06-02' }, 'en', homePlan), tree = h.render();
+  const labels = h.nodes(tree, 'Pressable').map(n => n.props.accessibilityLabel);
+  assert.ok(labels.includes('Chickpea stew. Today · Dinner · 2 servings')); assert.ok(labels.includes('Shakshuka. Tomorrow · Breakfast · 4 servings'));
+  assert.ok(labels.includes('Chickpea stew. 2 of 3 ingredients on your list'));
+  await h.nodes(tree, 'Button').find(n => n.props.label === 'Add ingredients to shopping list').props.onPress();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(homePlan.stockSeen.length, 1); assert.equal(homePlan.stockSeen[0].foodId, item.foodId);
 });
 test('cookbook Home searches live food and catalogue recipes without showing unrelated suggestions', () => {
   const h = homeLayoutHarness({ items:[item],status:'ready',today:'2026-06-02' });
   h.nodes(h.render(),'SearchField')[0].props.onChangeText('tomato'); const tree=h.render();
   assert.equal(h.nodes(tree,'BackendRecipeIdeas').length,0);
   assert(h.nodes(tree,'Button').some(n => n.props.label.startsWith('Backend tomato')));
-  assert(h.nodes(tree,'Pressable').some(n => n.props.accessibilityLabel === 'Tomato pasta'));
+  assert(h.nodes(tree,'RecipeCard').some(n => n.props.name === 'Tomato pasta'));
 });
 
 test('signed-out/loading/empty/error/retry states are clear in English and Arabic', () => {
@@ -356,14 +385,15 @@ test('unsupported labels remain visible; food details load from get, expose stoc
   h.set({ items: [{ ...item, readOnly: true, unitId: null, storageId: null, backendUnit: 'TABLESPOON', backendStorageLocation: 'COUNTER' }] });
   const row = h.nodes(h.render(), 'ActionRow')[0];
   assert.equal(row.props.subtitle, '1.25 tbsp · Counter');
-  assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'Counter'));
+  // Storage places are tabs now; the unsupported one still shows by its backend name.
+  assert(h.nodes(h.render(), 'TextTabs')[0].props.tabs.some(tab => tab.label === 'Counter'));
   assert.equal(row.props.trailing, undefined); // Shared ActionRow owns chevrons.
   h.language('ar');
   const arabic = h.nodes(h.render(), 'ActionRow')[0];
   assert.equal(arabic.props.subtitle, '\u20661.25\u2069 م.ك · على سطح العمل');
   assert.equal(arabic.props.subtitleDirection, 'rtl');
   assert.equal(arabic.props.trailing, undefined);
-  assert(h.nodes(h.render(), 'Chip').some(node => node.props.label === 'على سطح العمل'));
+  assert(h.nodes(h.render(), 'TextTabs')[0].props.tabs.some(tab => tab.label === 'على سطح العمل'));
   h.language('en');
   h.render('BackendFoodDetailScreen'); h.effects.at(-1)(); assert.deepEqual(h.details, [item.id]);
   h.set({ detail: { id: item.id, status: 'ready', item } });

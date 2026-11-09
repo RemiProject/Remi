@@ -3,6 +3,28 @@ import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsInt, IsOptional, IsStrin
 import { Type } from 'class-transformer';
 import { DecimalScalar } from '@/platform/graphql/scalars.js';
 
+@ObjectType()
+export class WeightEntryType {
+  @Field(() => Date) measuredAt!: Date;
+  @Field(() => DecimalScalar) weightKg!: string;
+}
+
+/** All-time nutrition from the daily totals: days with at least one meal, and averages over those days only. */
+@ObjectType()
+export class NutritionOverviewType {
+  @Field(() => String, { nullable: true }) firstDate!: string | null;
+  @Field(() => String, { nullable: true }) lastDate!: string | null;
+  @Field(() => Int) daysLogged!: number;
+  @Field(() => Int) mealCount!: number;
+  @Field(() => DecimalScalar) avgCalories!: string;
+  @Field(() => DecimalScalar) avgProteinG!: string;
+  @Field(() => DecimalScalar) avgCarbsG!: string;
+  @Field(() => DecimalScalar) avgFatG!: string;
+  @Field(() => DecimalScalar) avgFiberG!: string;
+  @Field(() => DecimalScalar) avgSugarG!: string;
+  @Field(() => DecimalScalar) avgSodiumMg!: string;
+}
+
 export enum GenderType { MALE = 'MALE', FEMALE = 'FEMALE', OTHER = 'OTHER', PREFER_NOT_TO_SAY = 'PREFER_NOT_TO_SAY' }
 export enum ActivityLevelType { SEDENTARY = 'SEDENTARY', LIGHT = 'LIGHT', MODERATE = 'MODERATE', ACTIVE = 'ACTIVE', VERY_ACTIVE = 'VERY_ACTIVE' }
 export enum GoalTypeEnum { LOSE_WEIGHT = 'LOSE_WEIGHT', GAIN_MUSCLE = 'GAIN_MUSCLE', MAINTAIN = 'MAINTAIN', CUSTOM = 'CUSTOM' }

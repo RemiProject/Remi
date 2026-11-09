@@ -1,0 +1,58 @@
+[
+  {
+    "slug": "tomato-pasta",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-ac1ebdb5-33b4-458a-abe6-032af75a4122.png",
+    "bundledPath": "mobile-app/assets/cookbook/tomato-pasta.jpg",
+    "sha256": "25724cebb56244044029080790919e0d9ec256a17a60cc5e1b56940b74145cd3",
+    "bytes": 338827
+  },
+  {
+    "slug": "shakshuka",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-d0db60c7-69e8-4052-b069-ba38486c7a24.png",
+    "bundledPath": "mobile-app/assets/cookbook/shakshuka.jpg",
+    "sha256": "8191893c38f604832a360d4adc14f228278a109a5ddee7838c71c321fcb8d8e6",
+    "bytes": 404269
+  },
+  {
+    "slug": "lentil-soup",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-c2904eb4-48fb-4581-826a-d8e33abf1ace.png",
+    "bundledPath": "mobile-app/assets/cookbook/lentil-soup.jpg",
+    "sha256": "3b5c4f1e6ebfc58721e3eed6cf99b45dc6ae78527492763b1f64f2e844e9b03f",
+    "bytes": 307575
+  },
+  {
+    "slug": "chickpea-salad",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-1c8a89ca-5415-4ceb-8e6f-cbf814eff791.png",
+    "bundledPath": "mobile-app/assets/cookbook/chickpea-salad.jpg",
+    "sha256": "fc157deb955aeb5353c4bc8bae73142a1f7d5a8be58758f7bb4662c84b8ea65a",
+    "bytes": 435909
+  },
+  {
+    "slug": "overnight-oats",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-dc2c1adf-373e-46f9-8ea0-a9cb4e8afcc9.png",
+    "bundledPath": "mobile-app/assets/cookbook/overnight-oats.jpg",
+    "sha256": "74888cd553f2511e87f6681c146bb73dad5bd47a14cad6cc34d7f8fa7bdf6dc9",
+    "bytes": 285701
+  },
+  {
+    "slug": "spinach-frittata",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-d7b59825-ed68-40c2-8ec6-422d448edfee.png",
+    "bundledPath": "mobile-app/assets/cookbook/spinach-frittata.jpg",
+    "sha256": "3064f9e11be664a10e5e0efdbe8f3c20b37e78101ef8e410991d71d187a1b872",
+    "bytes": 450631
+  },
+  {
+    "slug": "hummus-wrap",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-1db8adc4-a7e8-4574-98d1-bba878810bab.png",
+    "bundledPath": "mobile-app/assets/cookbook/hummus-wrap.jpg",
+    "sha256": "b7511d3d7046168ff7bbba348f1d405775bacc91adcd43681d803169370bc421",
+    "bytes": 363231
+  },
+  {
+    "slug": "ful-medames",
+    "originalPath": "/Users/macbook/.codex/generated_images/01a19e85-cb22-7f40-828b-27978dad46f9/exec-44848d4e-37e5-4372-a4ef-b6097e32a530.png",
+    "bundledPath": "mobile-app/assets/cookbook/ful-medames.jpg",
+    "sha256": "6f9b63065a30c75b41b812347e55c83dcab44c2385626cf5ebbb6dab03a0ea0f",
+    "bytes": 367900
+  }
+]

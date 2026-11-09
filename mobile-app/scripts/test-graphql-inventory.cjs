@@ -40,6 +40,7 @@ async function harness({ pages = [page()], detail = { ...batch('batch'), transac
   };
   const backendUrl = 'https://api.example.invalid';
   const client = createBackendClient(backendUrl, async (_url, init) => {
+    if (String(_url).endsWith('/health/live')) return Response.json({ status: 'ok' });
     const call = { ...JSON.parse(init.body), headers: init.headers };
     calls.push(call);
     let data;
@@ -112,9 +113,10 @@ test('list excludes all zero formats, retains exact positive quantities and omit
   assert.equal(result.length, 1);
   assert.deepEqual(result[0], {
     id: 'positive', foodId: 'tomato', name: 'Tomato', quantity: '0.001', unitId: 'kg', storageId: 'refrigerator',
-    backendUnit: 'KILOGRAM', backendStorageLocation: 'FRIDGE', readOnly: false, expirationDate: null, version: 2,
+    backendUnit: 'KILOGRAM', backendStorageLocation: 'FRIDGE', readOnly: false, expirationDate: null, expiryEstimated: false, purchaseDate: null, version: 2,
   });
-  for (const field of ['notes', 'photo', 'photoRef', 'categoryId', 'purchaseDate', 'createdAt', 'updatedAt']) assert.equal(Object.hasOwn(result[0], field), false);
+  for (const field of ['notes', 'photo', 'photoRef', 'categoryId', 'createdAt', 'updatedAt']) assert.equal(Object.hasOwn(result[0], field), false);
+  assert.equal(result[0].purchaseDate, null); // passed through from the backend, never invented
 });
 
 for (const unit of ['TABLESPOON', 'TEASPOON']) {
@@ -127,7 +129,13 @@ for (const unit of ['TABLESPOON', 'TEASPOON']) {
     assert.equal(item.storageId, 'refrigerator');
   });
 }
-for (const storageLocation of ['COUNTER', 'OTHER']) {
+test('Counter storage maps to an editable place', async () => {
+  const h = await harness({ pages: [page([batch('counter', { storageLocation: 'COUNTER' })])] });
+  const [item] = await h.repo.list();
+  assert.equal(item.storageId, 'counter');
+  assert.equal(item.readOnly, false);
+});
+for (const storageLocation of ['OTHER']) {
   test(`unsupported storage ${storageLocation} is kept as read-only with its backend value`, async () => {
     const h = await harness({ pages: [page([batch('unsupported', { storageLocation })])] });
     const [item] = await h.repo.list();

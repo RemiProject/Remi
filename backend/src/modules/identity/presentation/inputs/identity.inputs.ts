@@ -16,6 +16,11 @@ export class RegisterInput {
 }
 
 @InputType()
+export class DeleteAccountInput {
+  @Field({ description: 'The current password, to confirm it is really the account holder' }) @IsString() @IsNotEmpty() @MaxLength(128) password!: string;
+}
+
+@InputType()
 export class LoginInput {
   @Field({ nullable: true, description: 'Email or username' }) @IsOptional() @IsString() @IsNotEmpty() @MaxLength(254) identifier?: string;
   @Field({ nullable: true, deprecationReason: 'Use identifier for email or username login.' }) @IsOptional() @IsEmail() email?: string;

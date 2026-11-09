@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BackendRecipesStore, visibleRecipes } from '@/repositories/backend-recipes-store';
 import { createGraphqlRecipeRepository } from '@/repositories/graphql-recipe-repository';
@@ -8,6 +8,8 @@ import { getAuth } from '@/services/auth';
 import { initialCookingSession, type CookingSession } from '@/utils/cooking-session';
 import { useAuth } from './auth-provider';
 import { useBackendKitchen } from './backend-kitchen-provider';
+import { connectivity } from '@/services/connectivity';
+import { offlineCache } from '@/services/offline-cache';
 
 const Context = createContext<BackendRecipesStore | null>(null);
 function ownerKey(auth: ReturnType<typeof useAuth>) {
@@ -28,8 +30,27 @@ function Enabled({ children }: PropsWithChildren) {
   const auth = useAuth();
   const kitchen = useBackendKitchen();
   const owner = ownerKey(auth);
-  const [store] = useState(() => new BackendRecipesStore(() => createGraphqlRecipeRepository(getAuth(), AsyncStorage)!));
-  useEffect(() => { store.setOwner(owner); }, [store, owner]);
+  const userRef = useRef<string | null>(null);
+  const [store] = useState(() => new BackendRecipesStore(() => {
+    const repository = createGraphqlRecipeRepository(getAuth(), AsyncStorage)!;
+    const userId = userRef.current;
+    return {
+      ...repository,
+      // The first page of suggestions is kept for offline reading; later pages need the server.
+      async list(after = null) {
+        try {
+          const page = await repository.list(after);
+          if (!after && userId) offlineCache.write(userId, 'suggestions', page);
+          return page;
+        } catch (error) {
+          const saved = !after && userId && connectivity.isOffline() ? await offlineCache.read<Awaited<ReturnType<typeof repository.list>>>(userId, 'suggestions') : null;
+          if (!saved) throw error;
+          return { ...saved, hasNextPage: false };
+        }
+      },
+    };
+  }));
+  useEffect(() => { userRef.current = auth.user?.id ?? null; store.setOwner(owner); }, [store, owner, auth.user?.id]);
   const identity = cookingIdentity(auth);
   useEffect(() => { store.setCookingIdentity(identity); }, [store, identity]);
   const inventoryKey = inventorySignature(owner, kitchen);

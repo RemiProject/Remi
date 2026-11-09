@@ -37,7 +37,7 @@ export const foodEntryMessages = {
     invalidError: 'The food details are invalid. Review the form before saving.', missingError: 'This item no longer exists. Return to Kitchen.',
     loadingError: 'Inventory must finish loading successfully before changes can be saved.',
     purchased: 'Purchased', expires: 'Expiration', notEntered: 'Not entered',
-    safety: 'Check the food and label before use. Dates are entered by you, not assessed by Remy.',
+    safety: 'Check the food and label before use. Dates are entered by you, not assessed by Remi.',
     delete: 'Delete food', deleting: 'Deleting…', deleteTitle: 'Delete this food?',
     deleteBody: 'It will be removed from your saved inventory. This cannot be undone.', keep: 'Keep food', thisFood: 'This food',
   },

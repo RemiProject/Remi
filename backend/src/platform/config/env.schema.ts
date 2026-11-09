@@ -67,6 +67,12 @@ export const envSchema = z
     FCM_CLIENT_EMAIL: optionalString,
     FCM_PRIVATE_KEY: optionalString,
     FCM_TOKEN_URI: z.string().url().default('https://oauth2.googleapis.com/token'),
+    // iOS devices: Apple Push Notification service with a token-based (.p8) key.
+    APNS_KEY_ID: optionalString,
+    APNS_TEAM_ID: optionalString,
+    APNS_PRIVATE_KEY: optionalString,
+    APNS_TOPIC: z.string().default('com.remi.cookbook.independent'),
+    APNS_SANDBOX: bool.default(false),
 
     GRAPHQL_DEPTH_LIMIT: z.coerce.number().int().positive().default(7),
     GRAPHQL_COMPLEXITY_LIMIT: z.coerce.number().int().positive().default(2000),
@@ -81,6 +87,9 @@ export const envSchema = z
   .refine((e) => !e.SMTP_HOST || !!e.MAIL_FROM, { message: 'MAIL_FROM is required when SMTP_HOST is set', path: ['MAIL_FROM'] })
   .refine((e) => [e.FCM_PROJECT_ID, e.FCM_CLIENT_EMAIL, e.FCM_PRIVATE_KEY].every((v) => !v) || [e.FCM_PROJECT_ID, e.FCM_CLIENT_EMAIL, e.FCM_PRIVATE_KEY].every(Boolean), {
     message: 'FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY must be configured together', path: ['FCM_PROJECT_ID'],
+  })
+  .refine((e) => [e.APNS_KEY_ID, e.APNS_TEAM_ID, e.APNS_PRIVATE_KEY].every((v) => !v) || [e.APNS_KEY_ID, e.APNS_TEAM_ID, e.APNS_PRIVATE_KEY].every(Boolean), {
+    message: 'APNS_KEY_ID, APNS_TEAM_ID, and APNS_PRIVATE_KEY must be configured together', path: ['APNS_KEY_ID'],
   })
   .refine((e) => !e.METRICS_ENABLED || (e.METRICS_TOKEN?.length ?? 0) >= 32, {
     message: 'METRICS_TOKEN must contain at least 32 characters when METRICS_ENABLED is true', path: ['METRICS_TOKEN'],

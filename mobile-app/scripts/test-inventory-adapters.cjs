@@ -35,11 +35,11 @@ for (const [mobile, backend] of [['refrigerator', 'FRIDGE'], ['freezer', 'FREEZE
   });
 }
 
-test('counter and other storage are explicitly unsupported on mobile', () => {
-  for (const input of ['COUNTER', 'OTHER']) {
-    assert.deepEqual(toMobileStorage(input), { supported: false, input, reason: 'UNSUPPORTED_STORAGE' });
-  }
-  assert.equal(storageOptions.length, 3);
+test('counter round-trips; other storage stays explicitly unsupported on mobile', () => {
+  assert.deepEqual(toMobileStorage('COUNTER'), { supported: true, value: 'counter' });
+  assert.deepEqual(toBackendStorage('counter'), { supported: true, value: 'COUNTER' });
+  assert.deepEqual(toMobileStorage('OTHER'), { supported: false, input: 'OTHER', reason: 'UNSUPPORTED_STORAGE' });
+  assert.equal(storageOptions.length, 4);
   assert.equal(Object.keys(BackendStorageLocation).length, 5);
 });
 
