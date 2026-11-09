@@ -31,6 +31,7 @@ const symbols = {
   settings: { ios: 'gearshape', android: 'settings', web: 'settings' },
   contact: { ios: 'envelope', android: 'mail', web: 'mail' },
   info: { ios: 'info.circle', android: 'info', web: 'info' },
+  list: { ios: 'list.bullet', android: 'list', web: 'list' },
 } as const;
 export type IconName = keyof typeof symbols;
 

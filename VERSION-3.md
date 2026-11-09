@@ -320,6 +320,15 @@ Steps for the owner of the Apple and hosting accounts: [`docs/release.md`](docs/
 - **Safer link import:** the server connects only to the address it checked, so a site that changes its DNS answer can't point it at a private network.
 - **Release setup:** version 3.0.0, permission prompts that name Remi and explain receipts, `eas.json`, and build switches for teams without push or App Groups (`REMI_NO_PUSH`, `REMI_NO_SHARE_EXTENSION`).
 
+### 23. Feel and the Nutrition page (`version-3-ui`)
+Details: [`docs/feel-and-nutrition.md`](docs/feel-and-nutrition.md).
+
+- **Haptics and sound:** one cue per action (select, tick, pop, success, remove, error), with Sounds and Haptics switches in Settings → Feel. The five sounds are synthesized by `scripts/make-sounds.py`, follow the silent switch and mix with music.
+- **Motion:** chips press in, the tab dot settles, shopping items check off at once with a springy circle and rows close the gap when they leave, action messages fade up. All of it is skipped under Reduce Motion.
+- **Nutrition page** (More → Nutrition, or Health → Dashboard): Today, 7 days, 30 days and All time; calories against the goal with a per-day or per-month chart, the macro split, habits (days logged, streak, fibre, sugar, sodium), a daily log table, and weight, BMI and goal. English and Arabic (the chart mirrors), light and dark.
+- **Server:** `weightHistory` and `nutritionOverview` queries.
+- **Checked:** on the iOS Simulator in English light and Arabic dark with an account that has one logged day. A 30-day test account was seeded, but the screens were not viewed with it (signing it in on a second simulator was not possible here).
+
 ## Design archive
 
 `Design/` keeps each version's colour board, `palette.json`, fonts, logo, photography and screenshots (version 1, 2 and 3). Rebuild the boards with `python3 Design/tools/make_color_boards.py`.

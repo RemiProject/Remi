@@ -12,6 +12,7 @@ Start with [`VERSION-3.md`](../VERSION-3.md) for the current version: one sectio
 | [account-setup/](account-setup/README.md) | Creating a Remi account on an iPhone, step by step with screenshots |
 | [recipe-import.md](recipe-import.md) | Saving a recipe from a link: page parsing, ingredient lines, catalogue matching and My recipes |
 | [ui-spacing.md](ui-spacing.md) | The spacing and motion pass: rules, before and after per screen |
+| [feel-and-nutrition.md](feel-and-nutrition.md) | Haptics, sounds and motion, and the Nutrition dashboard page |
 | [release.md](release.md) | Publishing: what is done in code, hosting, email, Apple account steps, App Store listing and privacy answers |
 | [privacy-policy.md](privacy-policy.md), [terms.md](terms.md) | The privacy policy and terms the app shows (generated from `mobile-app/src/data/legal.ts`) |
 | [phone-testing.md](phone-testing.md) | Building and installing on an iPhone against a local API, stress-test results, and bugs found on the phone |

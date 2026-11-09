@@ -10,6 +10,7 @@ What version 3 added, beyond the redesign:
 - **Receipt scanning:** a receipt photo is read line by line and matched to the catalogue. Bags, fees and household goods are left out, and the confirmed foods go into the kitchen in one step. See [docs/receipt-scanning.md](docs/receipt-scanning.md).
 - **Probable expiry dates:** fresh produce gets a purchase day and an expiry estimate from USDA FoodKeeper averages. See [docs/shelf-life.md](docs/shelf-life.md).
 - **Saving recipes from links:** paste a recipe link and Remi structures it under My recipes. See [docs/recipe-import.md](docs/recipe-import.md).
+- **Feel and nutrition:** haptics, soft sounds and fluid motion on every action, and a Nutrition page with daily, weekly, monthly and all-time dashboards. See [docs/feel-and-nutrition.md](docs/feel-and-nutrition.md).
 - **Publishing:** account deletion, privacy policy and terms, push reminders, offline reading and the remaining account steps for the App Store are in [docs/release.md](docs/release.md).
 - **Phone testing:** iPhone install, a stress test and the fixes it led to are in [docs/phone-testing.md](docs/phone-testing.md). Creating an account is in [docs/account-setup/](docs/account-setup/README.md).
 

@@ -715,6 +715,20 @@ enum NotificationType {
   SAFETY_REVIEW
 }
 
+type NutritionOverviewType {
+  avgCalories: Decimal!
+  avgCarbsG: Decimal!
+  avgFatG: Decimal!
+  avgFiberG: Decimal!
+  avgProteinG: Decimal!
+  avgSodiumMg: Decimal!
+  avgSugarG: Decimal!
+  daysLogged: Int!
+  firstDate: String
+  lastDate: String
+  mealCount: Int!
+}
+
 type NutritionProfile {
   caloriesPer100g: Decimal!
   carbsG: Decimal!
@@ -893,6 +907,9 @@ type Query {
   notificationBadge: NotificationBadgeType!
   notificationPreferences: [NotificationPreferenceType!]!
   notifications(after: String, first: Int! = 20): NotificationConnectionType!
+
+  """All-time nutrition averages over days with logged meals"""
+  nutritionOverview: NutritionOverviewType!
   predictions(after: String, first: Int! = 20, type: PredictionType!): PredictionConnectionType!
   previewRecipeImport(url: String!): RecipeImportPreviewType!
 
@@ -908,6 +925,9 @@ type Query {
   search(first: Int! = 10, query: String!, types: [SearchDocumentType!]): [SearchResult!]!
   shoppingLists: [ShoppingListType!]!
   stockForecast(foodId: ID!): [FoodDepletionPredictionType!]!
+
+  """Recorded weights, oldest first (the latest `limit`, default 400)"""
+  weightHistory(limit: Int! = 400): [WeightEntryType!]!
 }
 
 type ReceiptFoodOptionType {
@@ -1533,4 +1553,9 @@ type UserProfileDataType {
   gender: Gender
   heightCm: Decimal
   weightKg: Decimal
+}
+
+type WeightEntryType {
+  measuredAt: DateTime!
+  weightKg: Decimal!
 }

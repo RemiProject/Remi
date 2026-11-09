@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui/icon';
 import { useRemyTheme } from '@/theme/provider';
 import { useLanguage } from '@/providers/language-provider';
 import { radii } from '@/theme/tokens';
+import { feedback } from '@/services/feedback';
 
 const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
@@ -19,11 +20,12 @@ export function StepTimer({ minutes }: { minutes: number }) {
     if (!running) return;
     const tick = () => {
       const next = Math.max(0, Math.ceil((endAt.current - Date.now()) / 1000)); setLeft(next);
-      if (next === 0) { setRunning(false); Vibration.vibrate([0, 400, 200, 400]); }
+      if (next === 0) { setRunning(false); Vibration.vibrate([0, 400, 200, 400]); feedback.success(); }
     };
     const id = setInterval(tick, 250); return () => clearInterval(id);
   }, [running]);
   const toggle = () => {
+    feedback.select();
     if (running) { setRunning(false); return; }
     const from = left === 0 ? total : left; setLeft(from); endAt.current = Date.now() + from * 1000; setRunning(true);
   };

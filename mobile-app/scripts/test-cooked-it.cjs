@@ -132,7 +132,7 @@ function nodes(tree, type) {
 function formUi(store, language = 'en') {
   const effects = [], routes = [], slots = [], element = (type, props, key) => ({ type, props, key });
   let cursor = 0;
-  const mocks = {
+  const mocks = { '@/services/feedback': require('./native-ui-fixture.cjs').fixtureModule('@/services/feedback'),
     react: { useEffect: effect => effects.push(effect), useState: initial => { const index = cursor++; if (!(index in slots)) slots[index] = initial; return [slots[index], value => { slots[index] = value; }]; }, useSyncExternalStore: (_s, get) => get() },
     'react/jsx-runtime': { jsx: element, jsxs: element },
     'expo-router': { router: { push: route => routes.push(route), replace: route => routes.push(route) }, useLocalSearchParams: () => ({ id: 'recipe' }) },

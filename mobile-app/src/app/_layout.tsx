@@ -1,5 +1,6 @@
 import { StartupGate } from '@/components/startup-gate';
 import { OfflineBanner } from '@/components/offline-banner';
+import { feedbackSettings } from '@/services/feedback';
 import { ShoppingProvider } from '@/providers/shopping-provider';
 import { PlannerProvider } from '@/providers/planner-provider';
 import { OnboardingProvider } from '@/providers/onboarding-provider';
@@ -13,6 +14,9 @@ import { LanguageProvider } from '@/providers/language-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { BackendKitchenProvider } from '@/providers/backend-kitchen-provider';
 import { BackendRecipesProvider } from '@/providers/backend-recipes-provider';
+
+// The saved Sounds and Haptics choices, read once at launch.
+void feedbackSettings.restore();
 
 function Navigation() {
   const { colors, mode } = useRemyTheme();

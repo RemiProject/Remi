@@ -6,6 +6,7 @@ import { forgetNutritionGoal } from '@/components/nutrition-panel';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { View } from 'react-native';
+import { router } from 'expo-router';
 import { AppText, Button, Card, Chip, SectionHeader, uiStyles } from '@/components/ui/core';
 import { FormField } from '@/components/ui/form-field';
 import { addFoodQuantity } from '@/services/backend-add-food';
@@ -38,7 +39,7 @@ function HealthContent({ embedded }: { embedded: boolean }) {
     pending.current = null; setLogging(false);
   };
   return <ConnectedScreen title={copy('Food & wellbeing', 'الغذاء والصحة')} back={!embedded}><DataNotice {...state} /><Feedback message={action.message} />
-    <SectionHeader title={copy('Your nutrition', 'تغذيتك')} />
+    <SectionHeader title={copy('Your nutrition', 'تغذيتك')} action={copy('Dashboard', 'لوحة المتابعة')} onPress={() => router.push('/nutrition')} />
     {state.data && <NutritionToday days={state.data.dailyNutrition} today={day} calorieTarget={profile?.goal?.calorieTarget ?? null} proteinTarget={profile?.goal?.proteinTargetG ?? null} language={language} />}
     <AppText variant="caption" muted>{copy('Totals come from meals you log or cook here, using USDA values per ingredient. Foods without data are left out, never estimated.', 'الإجماليات من الوجبات التي تسجلها أو تطبخها هنا، بقيم USDA لكل مكوّن. الأطعمة بلا بيانات لا تُحسب ولا تُقدّر.')}</AppText>
     <Button label={copy('Log food eaten away', 'تسجيل طعام أُكل خارج المنزل')} icon="add" variant="secondary" onPress={() => { setLogging(!logging); setSelected(null); pending.current = null; }} />

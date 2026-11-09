@@ -19,6 +19,7 @@ import { backendRecipeMessages } from '@/i18n/backend-recipes';
 import { recipeFoodName, recipeIngredientStatus, recipeNumber, recipeQuantity } from '@/utils/backend-recipe-view';
 import { advanceCooking, selectCookingStep } from '@/utils/cooking-session';
 import { radii, spacing } from '@/theme/tokens';
+import { feedback } from '@/services/feedback';
 
 // Mob-style cook mode: one step per page, segmented progress, ingredients one tap away, screen kept on.
 export function BackendCookingScreen() {
@@ -43,7 +44,7 @@ export function BackendCookingScreen() {
   const review = () => router.replace({ pathname: '/recipes/[id]', params: { id } });
   const browse = () => router.replace({ pathname: '/feature', params: { feature: 'recipes' } });
   const retry = () => { if (!owner) void state.refresh(); else void state.loadDetail(id); };
-  const go = (index: number) => update(session => selectCookingStep(session, index, steps.length));
+  const go = (index: number) => { feedback.select(); update(session => selectCookingStep(session, index, steps.length)); };
   const duration = (minutes: number) => `${recipeNumber(minutes, language)} ${r.minutes}`;
   const exit = <Button label={t.exit} variant="text" icon="back" rtl={rtl} onPress={review} />;
 

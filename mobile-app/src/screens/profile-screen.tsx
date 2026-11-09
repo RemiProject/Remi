@@ -9,6 +9,7 @@ import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { authMessages } from '@/i18n/auth';
 import { isBackendInventoryEnabled } from '@/services/inventory-feature';
+import { feedback } from '@/services/feedback';
 
 export default function ProfileScreen() {
   const auth = useAuth();
@@ -47,7 +48,8 @@ function DeleteAccount({ t, busy, onDelete }: { t: Record<string, string>; busy:
   const confirm = () => Alert.alert(t.deleteSureTitle, t.deleteSureBody, [
     { text: t.deleteCancel, style: 'cancel' },
     { text: t.deleteAction, style: 'destructive', onPress: () => { void onDelete(password).then(key => {
-      if (key) { setError(t[key] ?? t.connectionError); return; }
+      if (key) { feedback.error(); setError(t[key] ?? t.connectionError); return; }
+      feedback.remove();
       router.replace('/');
     }); } },
   ]);

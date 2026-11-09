@@ -19,6 +19,7 @@ import { BackendStockActionsStore } from '@/services/backend-stock-actions';
 import { backendUnitLabel, displayInventoryQuantity, inventoryNumberLabel } from '@/utils/backend-kitchen-view';
 import { useRemyTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
+import { feedback } from '@/services/feedback';
 
 export function BackendStockActions({ item }: { item: InventoryReadItem }) {
   const { language } = useLanguage();
@@ -26,7 +27,7 @@ export function BackendStockActions({ item }: { item: InventoryReadItem }) {
   const { colors } = useRemyTheme();
   const { refreshStock, showUpdated } = useBackendKitchen();
   const [store] = useState(() => new BackendStockActionsStore(getAuth(), AsyncStorage, item,
-    () => refreshStock(item.id), zero => { showUpdated(); if (zero) router.replace('/kitchen'); }));
+    () => refreshStock(item.id), zero => { feedback.success(); showUpdated(); if (zero) router.replace('/kitchen'); }));
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
   useEffect(() => { store.activate(); return () => store.dispose(); }, [store]);
   const busy = state.saving, locked = busy || state.refreshPending;

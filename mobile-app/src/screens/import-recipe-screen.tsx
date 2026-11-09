@@ -14,6 +14,7 @@ import { radii, spacing } from '@/theme/tokens';
 import { firstUrl, linkedByDefault, saveInput, textDir, type RecipeImportPreview } from '@/domain/recipe-import';
 import { previewRecipeImport, saveImportedRecipe } from '@/services/recipe-import-api';
 import { IntakeShell, intakeError } from './intake-shell';
+import { feedback } from '@/services/feedback';
 
 const copy = {
   en: {
@@ -95,8 +96,9 @@ function ImportBody() {
     setBusy('saving'); setError('');
     try {
       const recipe = await saveImportedRecipe(saveInput(preview, { name, servings, linked }));
+      feedback.success();
       router.replace({ pathname: '/recipes/[id]', params: { id: recipe.id } });
-    } catch (failure) { setError(intakeError(failure)); setBusy(''); }
+    } catch (failure) { feedback.error(); setError(intakeError(failure)); setBusy(''); }
   };
   const toggle = (index: number) => setLinked(current => { const next = new Set(current); if (next.has(index)) next.delete(index); else next.add(index); return next; });
   const enter = reduced ? undefined : FadeInDown.duration(260);

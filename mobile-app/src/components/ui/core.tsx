@@ -3,12 +3,14 @@ import { I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInp
 import { useRemyTheme } from '@/theme/provider';
 import { useRemyFonts } from '@/theme/fonts';
 import { layout, radii, spacing, typography } from '@/theme/tokens';
-import Animated, { useAnimatedStyle, useSharedValue, useReducedMotion, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { cubicBezier, useAnimatedStyle, useSharedValue, useReducedMotion, withTiming, Easing } from 'react-native-reanimated';
 import { useLanguage } from '@/providers/language-provider';
 import { Icon, type IconName } from './icon';
+import { feedback } from '../../services/feedback';
 
 type TextVariant = 'title' | 'heading' | 'body' | 'caption' | 'label' | 'brand';
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 const ScreenDirection = createContext<boolean | undefined>(undefined);
 export const ScreenDirectionProvider = ScreenDirection.Provider;
 export function AppText({ variant = 'body', muted = false, style, dir, ...props }: TextProps & { variant?: TextVariant; muted?: boolean; dir?: 'rtl' | 'ltr' }) {
@@ -76,12 +78,17 @@ export function Badge({ label, tone = 'info' }: { label: string; tone?: 'info' |
 export function Chip({ label, selected, onPress, disabled = false }: { label: string; selected: boolean; onPress: () => void; disabled?: boolean }) {
   const { colors } = useRemyTheme();
   const [focused, setFocused] = useState(false);
-  return <Pressable accessibilityRole="button" accessibilityState={{ selected, disabled }} disabled={disabled} onPress={onPress}
+  const [pressed, setPressed] = useState(false);
+  const reduced = useReducedMotion();
+  // Press feedback on press-in as a CSS transition; the selection tick lands with the change it causes.
+  return <AnimatedPressable accessibilityRole="button" accessibilityState={{ selected, disabled }} disabled={disabled} onPress={() => { feedback.select(); onPress(); }}
+    onPressIn={() => setPressed(true)} onPressOut={() => setPressed(false)} pressRetentionOffset={16}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-    style={({ pressed }) => [styles.chip, { backgroundColor: disabled ? colors.disabledSurface : pressed ? colors.pressedSurface : selected ? colors.selectedSurface : colors.surface,
-      borderColor: focused ? colors.focusBorder : selected ? colors.selectedBorder : colors.border, borderWidth: focused ? 3 : 1.5 }]}>
+    style={[styles.chip, { backgroundColor: disabled ? colors.disabledSurface : pressed ? colors.pressedSurface : selected ? colors.selectedSurface : colors.surface,
+      borderColor: focused ? colors.focusBorder : selected ? colors.selectedBorder : colors.border, borderWidth: focused ? 3 : 1.5,
+      transform: [{ scale: pressed && !reduced ? 0.96 : 1 }], transitionProperty: 'transform', transitionDuration: '120ms', transitionTimingFunction: EASE_OUT }]}>
     <AppText variant="label" style={{ color: disabled ? colors.disabledText : selected ? colors.selectedText : colors.textSecondary, flexShrink: 1 }}>{label}</AppText>
-  </Pressable>;
+  </AnimatedPressable>;
 }
 export function SearchField({ onFocus, onBlur, style, ...props }: TextInputProps) {
   const { colors } = useRemyTheme();
@@ -125,9 +132,11 @@ export function TextTabs({ tabs, value, onChange, rtl }: { tabs: readonly { key:
   const { colors } = useRemyTheme();
   return <ScrollView horizontal showsHorizontalScrollIndicator={false} accessibilityRole="tablist" style={{ marginHorizontal: -20, direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ paddingHorizontal: 20, gap: 20 }}>
     {tabs.map(tab => { const selected = tab.key === value;
-      return <Pressable key={tab.key} accessibilityRole="tab" accessibilityState={{ selected }} onPress={() => onChange(tab.key)} hitSlop={6}
+      return <Pressable key={tab.key} accessibilityRole="tab" accessibilityState={{ selected }} onPress={() => { if (!selected) feedback.select(); onChange(tab.key); }} hitSlop={6}
         style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: selected ? colors.accent : 'transparent' }} />
+        {/* Tabs switch too often to animate; only the 6 pt dot settles in, in 150 ms. */}
+        <Animated.View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent, opacity: selected ? 1 : 0, transform: [{ scale: selected ? 1 : 0.4 }],
+          transitionProperty: ['opacity', 'transform'], transitionDuration: '150ms', transitionTimingFunction: EASE_OUT }} />
         <AppText variant={selected ? 'label' : 'body'} style={{ color: selected ? colors.text : colors.textSecondary }}>{tab.label}</AppText>
       </Pressable>; })}
   </ScrollView>;

@@ -5,6 +5,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { Icon } from '@/components/ui/icon';
+import Animated, { Easing, FadeOut, LinearTransition, cubicBezier, useReducedMotion } from 'react-native-reanimated';
+import { feedback } from '@/services/feedback';
 import { useRemyTheme } from '@/theme/provider';
 import { formatAmount } from '@/domain/plan-shopping';
 import { AppText, Button, Card, Chip, EmptyState, SectionHeader, SearchField, TextTabs, uiStyles } from '@/components/ui/core';
@@ -14,6 +16,8 @@ import { kitchenRequest, loadShopping, operationKey, searchFoods,  type CatalogF
 import { addPlannedMealsToShopping, loadFoodAisles } from '@/services/plan-shopping';
 import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
 import { ConnectedScreen, DataNotice, Feedback, useAction, useCopy, useKitchenData, useKitchenIdentity } from './connected-ui';
+
+const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 
 export function ConnectedShoppingScreen() { const identity = useKitchenIdentity(); return <ShoppingContent key={identity} />; }
 function ShoppingContent() {
@@ -38,18 +42,32 @@ function ShoppingContent() {
   });
   const other = copy('Other', 'أخرى');
   // Compact Mob-style rows: tap the row to tick it off, one card per list or aisle.
-  const toggle = (item: ShoppingItem) => { void action.run(() => kitchenRequest('mutation CheckShopping($input: UpdateShoppingItemInputType!) { updateShoppingListItem(input: $input) { id status } }', { input: { id: item.id, status: item.status === 'PURCHASED' ? 'NEEDED' : 'PURCHASED' } })); };
-  const itemRow = (item: ShoppingItem, index: number) => { const done = item.status === 'PURCHASED'; const amount = `${formatAmount(item.quantity)} ${localizedUnit(item.unit, language)}`;
-    return <View key={item.id} style={[uiStyles.row, { minHeight: 56, borderTopWidth: index ? 1 : 0, borderColor: colors.divider }]}>
+  // The tick shows at once (with its haptic and sound); the server catches up, and a failure puts it back.
+  const [ticked, setTicked] = useState<Record<string, string>>({});
+  const reduced = useReducedMotion();
+  const statusOf = (item: ShoppingItem) => ticked[item.id] ?? item.status;
+  const toggle = (item: ShoppingItem) => {
+    const next = statusOf(item) === 'PURCHASED' ? 'NEEDED' : 'PURCHASED';
+    if (next === 'PURCHASED') feedback.tick(); else feedback.select();
+    setTicked(current => ({ ...current, [item.id]: next }));
+    void action.run(() => kitchenRequest('mutation CheckShopping($input: UpdateShoppingItemInputType!) { updateShoppingListItem(input: $input) { id status } }', { input: { id: item.id, status: next } }))
+      .finally(() => setTicked(current => { const rest = { ...current }; delete rest[item.id]; return rest; }));
+  };
+  const itemRow = (item: ShoppingItem, index: number) => { const done = statusOf(item) === 'PURCHASED'; const amount = `${formatAmount(item.quantity)} ${localizedUnit(item.unit, language)}`;
+    return <Animated.View key={item.id} layout={reduced ? undefined : LinearTransition.duration(220).easing(Easing.bezier(0.23, 1, 0.32, 1))} exiting={reduced ? undefined : FadeOut.duration(150)} style={[uiStyles.row, { minHeight: 56, borderTopWidth: index ? 1 : 0, borderColor: colors.divider }]}>
       <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: done, disabled: action.busy }} accessibilityLabel={`${foodName(item.foodName, language)}, ${amount}`} disabled={action.busy} onPress={() => toggle(item)}
         style={({ pressed }) => [uiStyles.row, uiStyles.grow, { paddingVertical: 10, opacity: pressed ? 0.7 : 1 }]}>
-        <View style={{ width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center', borderColor: done ? colors.primary : colors.inputBorder, backgroundColor: done ? colors.primary : 'transparent' }}>{done && <Icon name="check" size={16} color={colors.onPrimary} />}</View>
+        <Animated.View style={{ width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center', borderColor: done ? colors.primary : colors.inputBorder, backgroundColor: done ? colors.primary : 'transparent',
+          transitionProperty: ['backgroundColor', 'borderColor'], transitionDuration: '160ms', transitionTimingFunction: EASE_OUT }}>
+          <Animated.View style={{ opacity: done ? 1 : 0, transform: [{ scale: done || reduced ? 1 : 0.5 }], transitionProperty: ['opacity', 'transform'], transitionDuration: '180ms', transitionTimingFunction: EASE_OUT }}>
+            <Icon name="check" size={16} color={colors.onPrimary} /></Animated.View>
+        </Animated.View>
         <AppText variant="label" style={[uiStyles.grow, done && { color: colors.textSecondary, textDecorationLine: 'line-through' }]}>{foodName(item.foodName, language)}</AppText>
         <AppText style={{ color: colors.textSecondary }}>{amount}</AppText>
       </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={`${copy('Remove', 'إزالة')} ${foodName(item.foodName, language)}`} disabled={action.busy} hitSlop={8} onPress={() => { void action.run(() => kitchenRequest('mutation RemoveShopping($id: ID!) { removeShoppingItem(id: $id) }', { id: item.id })); }}
+      <Pressable accessibilityRole="button" accessibilityLabel={`${copy('Remove', 'إزالة')} ${foodName(item.foodName, language)}`} disabled={action.busy} hitSlop={8} onPress={() => { void action.run(() => kitchenRequest('mutation RemoveShopping($id: ID!) { removeShoppingItem(id: $id) }', { id: item.id }), undefined, 'remove'); }}
         style={({ pressed }) => ({ paddingVertical: 10, paddingHorizontal: 4, opacity: pressed ? 0.6 : 1 })}><AppText variant="caption" style={{ color: colors.destructive }}>{copy('Remove', 'إزالة')}</AppText></Pressable>
-    </View>; };
+    </Animated.View>; };
   const rows = (items: ShoppingItem[]) => items.length ? <Card style={{ gap: 0, paddingVertical: 4 }}>{items.map(itemRow)}</Card> : null;
   const byAisle = (items: ShoppingItem[]) => [...items.reduce((groups, item) => { const aisle = aisles.get(item.foodId) ?? other; groups.set(aisle, [...(groups.get(aisle) ?? []), item]); return groups; }, new Map<string, ShoppingItem[]>())]
     .sort(([a], [b]) => a === other ? 1 : b === other ? -1 : a.localeCompare(b));
@@ -74,7 +92,7 @@ function ShoppingContent() {
       </View>
     </View>
     <DataNotice {...state} /><Feedback message={action.message} /><Feedback message={weekNote} />
-    {editing && <Card><FormField label={copy('List name', 'اسم القائمة')} value={listName} onChangeText={setListName} /><FormField label={copy('Find a food', 'ابحث عن طعام')} value={search} onChangeText={value => { setSearch(value); setFood(null); }} /><Button label={copy('Search catalogue', 'بحث في قائمة الأطعمة')} variant="secondary" disabled={action.busy || !search.trim()} onPress={() => { void action.run(async () => { setFoods(await searchFoods(search.trim())); }); }} />{foods.map(value => <Chip key={value.id} label={`${foodName(value.name, language)} · ${localizedUnit(value.defaultUnit, language)}`} selected={food?.id === value.id} onPress={() => setFood(value)} />)}{food && <AppText>{copy('Selected', 'المحدد')}: {foodName(food.name, language)}</AppText>}<FormField label={`${copy('Quantity', 'الكمية')} (${food ? localizedUnit(food.defaultUnit, language) : '…'})`} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" /><Button label={copy('Save item', 'حفظ العنصر')} disabled={action.busy} onPress={() => { void action.run(save, copy('Added to your list.', 'أُضيف إلى قائمتك.')); }} /><Button label={copy('Cancel', 'إلغاء')} variant="text" onPress={() => setEditing(false)} /></Card>}
+    {editing && <Card><FormField label={copy('List name', 'اسم القائمة')} value={listName} onChangeText={setListName} /><FormField label={copy('Find a food', 'ابحث عن طعام')} value={search} onChangeText={value => { setSearch(value); setFood(null); }} /><Button label={copy('Search catalogue', 'بحث في قائمة الأطعمة')} variant="secondary" disabled={action.busy || !search.trim()} onPress={() => { void action.run(async () => { setFoods(await searchFoods(search.trim())); }); }} />{foods.map(value => <Chip key={value.id} label={`${foodName(value.name, language)} · ${localizedUnit(value.defaultUnit, language)}`} selected={food?.id === value.id} onPress={() => setFood(value)} />)}{food && <AppText>{copy('Selected', 'المحدد')}: {foodName(food.name, language)}</AppText>}<FormField label={`${copy('Quantity', 'الكمية')} (${food ? localizedUnit(food.defaultUnit, language) : '…'})`} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" /><Button label={copy('Save item', 'حفظ العنصر')} disabled={action.busy} onPress={() => { void action.run(save, copy('Added to your list.', 'أُضيف إلى قائمتك.'), 'pop'); }} /><Button label={copy('Cancel', 'إلغاء')} variant="text" onPress={() => setEditing(false)} /></Card>}
     <SearchField value={query} onChangeText={setQuery} placeholder={copy('Search your list', 'ابحث في قائمتك')} /><View style={[uiStyles.row, { justifyContent: 'space-between' }]}>
       <View style={uiStyles.grow}><TextTabs tabs={[{ key: 'NEEDED', label: copy('To buy', 'للشراء') }, { key: 'ALL', label: copy('All items', 'كل العناصر') }]} value={filter} onChange={key => setFilter(key as 'NEEDED' | 'ALL')} rtl={language === 'ar'} /></View>
       <Button label={view === 'list' ? copy('By aisle', 'حسب القسم') : copy('As a list', 'كقائمة')} variant="text" onPress={() => setView(view === 'list' ? 'aisle' : 'list')} />

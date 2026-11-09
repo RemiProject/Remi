@@ -19,6 +19,7 @@ import { radii, spacing } from '@/theme/tokens';
 import LocalReceiptScreen from './receipt-screen';
 import { isBackendInventoryEnabled } from '@/services/inventory-feature';
 import { IntakeShell, intakeError } from './intake-shell';
+import { feedback } from '@/services/feedback';
 
 type Language = 'en' | 'ar';
 // The app edits these three; room temperature is Pantry.
@@ -84,6 +85,7 @@ function ReceiptBody() {
     // Foods still waiting for an amount stay on screen; the next add is a new request.
     const rest = lines.filter(line => !keys.includes(line.key));
     if (missing.length) { key.current = newKey(); setLines(rest); setAddedSoFar(count => count + done.added); setNotice(t.addedSome(done.added, missing.length)); return; }
+    feedback.success();
     setPhase({ name: 'done', added: addedSoFar + done.added, replayed: done.replayed });
   });
   const restart = () => { setAddedSoFar(0); setPhase({ name: 'capture' }); setLines([]); setPhotoRef(undefined); setTyped(''); setShowTyped(false); setNotice(''); setError(''); };

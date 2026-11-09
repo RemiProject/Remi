@@ -25,6 +25,7 @@ import { displayInventoryQuantity } from '@/utils/backend-kitchen-view';
 import { stockTotal } from '@/services/backend-stock-actions';
 import { spacing } from '@/theme/tokens';
 import type { BackendUnit } from '@/domain/backend-inventory';
+import { feedback } from '@/services/feedback';
 
 export default function CookedItRoute() {
   return isBackendInventoryEnabled() ? <EnabledCookedItScreen /> : <Off />;
@@ -117,6 +118,6 @@ export function MealForm({ store }: { store: CookedMealStore }) {
     {error && !rowError && <AppText dir={dir} accessibilityRole="alert">{topError}</AppText>}
     <Button label={state.saving ? t.saving : state.refreshPending ? r.retry : t.confirm}
       disabled={state.saving || state.rows.some(row => row.checked && row.status === 'UNKNOWN' && !row.amount.trim())}
-      onPress={() => { void store.submit(); }} />
+      onPress={() => { void store.submit().then(saved => (saved ? feedback.success : feedback.error)()); }} />
   </>;
 }

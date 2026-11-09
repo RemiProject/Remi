@@ -1,7 +1,6 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { View } from 'react-native';
 import { AppText, Button, Card, EmptyState, PageHeader, Screen } from '@/components/ui/core';
 import { useAuth } from '@/providers/auth-provider';
 import { useLanguage } from '@/providers/language-provider';
@@ -10,6 +9,8 @@ import { getActiveHouseholdRevision, subscribeHouseholdSelection } from '@/servi
 import { errorMessage } from '@/services/kitchen-api';
 import { connectivity } from '@/services/connectivity';
 import { offlineCache } from '@/services/offline-cache';
+import { feedback } from '@/services/feedback';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export function useKitchenIdentity() {
   const { user } = useAuth(); const auth = getAuth();
@@ -56,12 +57,19 @@ export function DataNotice({ loading, error, reload }: { loading: boolean; error
 }
 export function useAction(reload?: () => Promise<void>) {
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string | null>(null); const lock = useRef(false);
-  const run = async (action: () => Promise<unknown>, success?: string) => {
+  /** `cue` is the haptic and sound on success; with none, a success message still gets the success cue. */
+  const run = async (action: () => Promise<unknown>, success?: string, cue?: 'success' | 'pop' | 'remove' | 'tick') => {
     if (lock.current) return false; lock.current = true; setBusy(true); setMessage(null); const revision = getAuth().getIdentityRevision();
-    try { await action(); if (revision !== getAuth().getIdentityRevision()) return false; await reload?.(); setMessage(success ?? null); return true; }
-    catch (error) { if (revision === getAuth().getIdentityRevision()) setMessage(errorMessage(error)); return false; }
+    try {
+      await action(); if (revision !== getAuth().getIdentityRevision()) return false;
+      if (cue) feedback[cue](); else if (success) feedback.success();
+      await reload?.(); setMessage(success ?? null); return true;
+    }
+    catch (error) { if (revision === getAuth().getIdentityRevision()) { feedback.error(); setMessage(errorMessage(error)); } return false; }
     finally { lock.current = false; setBusy(false); }
   };
   return { busy, message, run, clear: () => setMessage(null) };
 }
-export function Feedback({ message }: { message: string | null }) { return message ? <View><AppText accessibilityLiveRegion="polite">{message}</AppText></View> : null; }
+export function Feedback({ message }: { message: string | null }) {
+  return message ? <Animated.View key={message} entering={FadeInDown.duration(200)}><AppText accessibilityLiveRegion="polite">{message}</AppText></Animated.View> : null;
+}

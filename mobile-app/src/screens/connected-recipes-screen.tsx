@@ -13,6 +13,7 @@ import { useCallback, useRef, useState } from 'react';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Alert, Linking, Pressable, View } from 'react-native';
 import { archiveRecipe } from '@/services/recipe-import-api';
+import { feedback } from '@/services/feedback';
 import { textDir } from '@/domain/recipe-import';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useReducedMotion, useSharedValue } from 'react-native-reanimated';
@@ -99,7 +100,7 @@ function RecipeContent({ id }: { id: string }) {
   const lines = recipe.ingredientLines ?? [];
   const remove = () => Alert.alert(copy('Remove from My recipes?', 'إزالة من وصفاتي؟'), copy('The recipe is removed for everyone in your household.', 'ستُزال الوصفة لكل أفراد أسرتك.'), [
     { text: copy('Cancel', 'إلغاء'), style: 'cancel' },
-    { text: copy('Remove', 'إزالة'), style: 'destructive', onPress: () => { void action.run(async () => { await archiveRecipe(recipe.id); router.back(); }); } }]);
+    { text: copy('Remove', 'إزالة'), style: 'destructive', onPress: () => { void action.run(async () => { await archiveRecipe(recipe.id); router.back(); }, undefined, 'remove'); } }]);
   const difficulty = ({ EASY: copy('Easy', 'سهلة'), MEDIUM: copy('Medium', 'متوسطة'), HARD: copy('Hard', 'صعبة') } as Record<string, string>)[recipe.difficulty] ?? recipe.difficulty.toLowerCase();
   const stats: { icon: IconName; value: string; label: string }[] = [
     { icon: 'clock', value: minutes === null ? '—' : String(minutes), label: copy('min', 'دقيقة') },
@@ -117,9 +118,9 @@ function RecipeContent({ id }: { id: string }) {
           <View style={[uiStyles.grow, { gap: 4 }]}><AppText variant="title" accessibilityRole="header" dir={rtl ? 'rtl' : 'ltr'} style={{ fontSize: 28, lineHeight: 33 }}>{recipeName(recipe.name, language)}</AppText>
             {(recipe.cuisineName || recipe.sourceName) && <AppText muted>{recipe.cuisineName ? catalogLabel(recipe.cuisineName, language) : copy(`From ${recipe.sourceName}`, `من ${recipe.sourceName}`)}</AppText>}</View>
           <View style={[uiStyles.row, { gap: 8, paddingTop: 2 }]}>
-            <RoundButton label="−" accessibilityLabel={copy('Fewer servings', 'حصص أقل')} disabled={count <= 1} onPress={() => setServings(count - 1)} />
+            <RoundButton label="−" accessibilityLabel={copy('Fewer servings', 'حصص أقل')} disabled={count <= 1} onPress={() => { feedback.select(); setServings(count - 1); }} />
             <View accessible accessibilityLabel={copy(`${count} servings`, `${count} حصص`)} style={{ alignItems: 'center', minWidth: 28 }}><AppText variant="heading" accessibilityLiveRegion="polite">{count}</AppText><AppText variant="caption" muted style={{ fontSize: 11, lineHeight: 13 }}>{copy('serv.', 'حصص')}</AppText></View>
-            <RoundButton label="+" accessibilityLabel={copy('More servings', 'حصص أكثر')} disabled={count >= 20} onPress={() => setServings(count + 1)} />
+            <RoundButton label="+" accessibilityLabel={copy('More servings', 'حصص أكثر')} disabled={count >= 20} onPress={() => { feedback.select(); setServings(count + 1); }} />
           </View>
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
