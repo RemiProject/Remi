@@ -29,7 +29,7 @@ export default function TabLayout() {
         style={({ pressed }) => ({ width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent, opacity: pressed ? 0.85 : 1, boxShadow: `0 6px 16px ${colors.shadow}` })}>
         <Icon name="add" size={28} color={colors.onAccent} />
       </Pressable></View>
-      <TabTrigger name="nutrition" href="/nutrition" asChild><TabButton icon="rings">{ar ? 'التغذية' : 'Nutrition'}</TabButton></TabTrigger>
+      <TabTrigger name="nutrition" href="/nutrition" asChild><TabButton icon="nutrition">{ar ? 'التغذية' : 'Nutrition'}</TabButton></TabTrigger>
       <TabTrigger name="more" href="/more" asChild><TabButton icon="more">{ar ? 'المزيد' : 'More'}</TabButton></TabTrigger>
     </TabList>
   </Tabs></SafeAreaView>;
