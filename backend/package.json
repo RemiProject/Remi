@@ -17,6 +17,7 @@
     "db:generate": "prisma generate",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --configLoader native",
+    "test:integration:email-verification": "node --env-file-if-exists=.env node_modules/vitest/vitest.mjs run --configLoader native --config vitest.email-verification.config.ts",
     "test:integration:phase5": "pnpm run build && node --env-file-if-exists=.env scripts/verify-phase5.mjs",
     "test:integration:phase6": "pnpm run build && node --env-file-if-exists=.env scripts/verify-phase6.mjs",
     "test:integration:phase7": "pnpm run build && node --env-file-if-exists=.env scripts/verify-phase7.mjs",

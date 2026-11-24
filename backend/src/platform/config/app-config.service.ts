@@ -1,10 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { parseEnv, type Env } from './env.schema.js';
 
 /** Typed, validated access to the environment. The app refuses to boot when the env is invalid. */
 @Injectable()
-export class AppConfigService {
+export class AppConfigService implements OnModuleInit {
   readonly env: Env = parseEnv(process.env);
+  private warnedAboutEmailCodes = false;
+
+  onModuleInit(): void {
+    if (!this.env.EMAIL_VERIFICATION_CODE_SECRET && !this.warnedAboutEmailCodes) {
+      this.warnedAboutEmailCodes = true;
+      new Logger(AppConfigService.name).warn('EMAIL_VERIFICATION_CODE_SECRET is missing: email verification codes are disabled; existing link verification remains available.');
+    }
+  }
 
   get isProduction(): boolean {
     return this.env.NODE_ENV === 'production';
