@@ -14,7 +14,7 @@ export type CodeIssueResult = { status: 'issued'; challenge: EmailVerificationCo
 
 const invalidCode = () => new DomainError('INVALID_EMAIL_VERIFICATION_CODE', 'The verification code is invalid or expired.', 422);
 
-/** Foundation only: intentionally not wired into registration, resolvers or mail until step 2. */
+/** Issuance and verification share an account lock; email delivery never holds a database transaction. */
 @Injectable()
 export class EmailVerificationCodeService {
   constructor(
@@ -30,6 +30,28 @@ export class EmailVerificationCodeService {
   private get secret(): Buffer | null {
     const value = this.config.env.EMAIL_VERIFICATION_CODE_SECRET;
     return value ? Buffer.from(value, 'base64url') : null;
+  }
+
+  requireEnabled(): void {
+    if (!this.secret) throw invalidCode();
+  }
+
+  async invalidateWithinTransaction(tx: Tx, userId: string): Promise<void> {
+    await this.repository.lockAccount(tx, userId);
+    await this.repository.invalidateOpen(tx, userId, this.now());
+  }
+
+  /** Re-check immediately before SMTP handoff. Never send an obsolete code from a durable payload. */
+  async codeForEmail(challengeId: string): Promise<string | undefined> {
+    const secret = this.secret;
+    if (!secret) return undefined;
+    const row = await this.repository.findById(this.transactions.db, challengeId);
+    if (!row || row.usedAt || row.invalidatedAt || row.expiresAt <= this.now() || row.failedAttempts >= policy.maxWrongAttempts) return undefined;
+    const account = await this.users.findById(this.transactions.db, row.userId);
+    if (!account || account.emailVerifiedAt) return undefined;
+    const code = deriveEmailVerificationCode(secret, row.userId, row.id);
+    // Secret rotation must not email a newly derived code which differs from the stored challenge.
+    return matchesEmailVerificationCode(secret, row.userId, row.id, code, row.codeHash) ? code : undefined;
   }
 
   issue(userId: string): Promise<CodeIssueResult> {

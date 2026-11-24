@@ -18,6 +18,8 @@ import { ResetPasswordCommand } from '@/modules/identity/application/commands/re
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
 import { GetMeQuery } from '@/modules/identity/application/queries/get-me/get-me.query.js';
 import { DeleteAccountCommand } from '@/modules/identity/application/commands/delete-account/delete-account.command.js';
+import { RequestEmailVerificationCodeCommand } from '@/modules/identity/application/commands/request-email-verification-code/request-email-verification-code.command.js';
+import { VerifyEmailCodeCommand } from '@/modules/identity/application/commands/verify-email-code/verify-email-code.command.js';
 import {
   DeleteAccountInput,
   LoginInput,
@@ -27,6 +29,8 @@ import {
   RequestPasswordResetInput,
   ResetPasswordInput,
   TokenInput,
+  RequestEmailVerificationCodeInput,
+  VerifyEmailCodeInput,
 } from '@/modules/identity/presentation/inputs/identity.inputs.js';
 import { AuthTokensType, MeType, RegisterResultType } from '@/modules/identity/presentation/types/identity.types.js';
 
@@ -89,6 +93,20 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async verifyEmail(@Args('input') i: TokenInput) {
     await this.commandBus.execute(new VerifyEmailCommand(i.token));
+    return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => Boolean, { description: 'Public verification-code resend. Unknown, verified and account-limited emails all return true. Codes must be configured.' })
+  async requestEmailVerificationCode(@Args('input') i: RequestEmailVerificationCodeInput) {
+    await this.commandBus.execute(new RequestEmailVerificationCodeCommand(i.email));
+    return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => Boolean, { description: 'Public email verification by code. Invalid, expired, used or unknown-email challenges share one generic error.' })
+  async verifyEmailCode(@Args('input') i: VerifyEmailCodeInput) {
+    await this.commandBus.execute(new VerifyEmailCodeCommand(i.email, i.code));
     return true;
   }
 

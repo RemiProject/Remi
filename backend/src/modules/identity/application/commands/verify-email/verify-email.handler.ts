@@ -7,6 +7,7 @@ import { USER_REPOSITORY, type UserRepository } from '@/modules/identity/domain/
 import { InvalidTokenError } from '@/modules/identity/domain/services/identity.errors.js';
 import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
 import { VerifyEmailCommand } from './verify-email.command.js';
+import { EmailVerificationCodeService } from '@/modules/identity/application/services/email-verification-code.service.js';
 
 @CommandHandler(VerifyEmailCommand)
 export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
@@ -15,6 +16,7 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
     private readonly eventBus: EventBus,
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     @Inject(TOKEN_REPOSITORY) private readonly tokens: TokenRepository,
+    private readonly codes: EmailVerificationCodeService,
   ) {}
 
   async execute({ token }: VerifyEmailCommand): Promise<{ verified: true }> {
@@ -22,6 +24,7 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
       const consumed = await this.tokens.consumeByHash(tx, hashToken(token), 'EMAIL_VERIFY');
       if (!consumed?.userId) throw new InvalidTokenError();
       await this.users.markEmailVerified(tx, consumed.userId);
+      await this.codes.invalidateWithinTransaction(tx, consumed.userId);
       return consumed.userId;
     });
     this.eventBus.publish(new EmailVerifiedEvent(userId));

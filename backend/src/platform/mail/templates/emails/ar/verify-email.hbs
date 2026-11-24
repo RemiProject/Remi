@@ -1,3 +1,5 @@
 {{!-- subject: فعّل بريدك الإلكتروني في AI Kitchen --}}
-<p>أهلًا {{name}}،</p><p>اضغط على الزر لتفعيل بريدك. الرابط صالح لمدة {{expiresInHours}} ساعة.</p>{{> button url=verifyUrl label="تفعيل البريد"}}
-{{!-- footer: لو ما سجّلتش في AI Kitchen تجاهل الرسالة. --}}
+<p>مرحبًا {{name}}،</p>
+{{#if code}}<p>أدخل رمز التحقق التالي في Remi:</p><p dir="ltr" data-verification-code="{{code}}" style="font-size:28px;font-weight:bold;letter-spacing:6px">{{code}}</p><p>الرمز صالح لمدة 15 دقيقة. لا تشاركه مع أي شخص.</p>{{/if}}
+<p>يمكنك أيضًا التحقق من بريدك الإلكتروني عبر هذا الرابط. الرابط صالح لمدة {{expiresInHours}} ساعة.</p>{{> button url=verifyUrl label="تفعيل البريد"}}
+{{!-- footer: إذا لم تنشئ حسابًا في AI Kitchen، فتجاهل هذه الرسالة. --}}

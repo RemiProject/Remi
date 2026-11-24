@@ -22,6 +22,10 @@ export class PrismaEmailVerificationCodeRepository implements EmailVerificationC
     return tx.emailVerificationCode.findFirst({ where: { userId, usedAt: null, invalidatedAt: null } });
   }
 
+  findById(tx: Tx, id: string) {
+    return tx.emailVerificationCode.findUnique({ where: { id } });
+  }
+
   recentCodes(tx: Tx, userId: string, since: Date) {
     return tx.emailVerificationCode.findMany({ where: { userId, createdAt: { gt: since } }, select: { id: true, codeHash: true } });
   }

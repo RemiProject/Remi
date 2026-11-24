@@ -13,6 +13,9 @@ import { deriveEmailVerificationCode } from '@/modules/identity/domain/services/
 import { VerifyEmailHandler } from '@/modules/identity/application/commands/verify-email/verify-email.handler.js';
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
 import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
+import { ValidationPipe } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 
 // Every run owns a NEW database, never DATABASE_URL or a pre-existing shared test database.
 const databaseName = `remi_email_code_test_${randomBytes(8).toString('hex')}`;
@@ -23,6 +26,9 @@ let prisma: PrismaService;
 let transactions: TransactionRunner;
 let config: AppConfigService;
 let databaseCreated = false;
+let app: INestApplication;
+let apiUrl: string;
+let apiConfig: AppConfigService;
 const repository = new PrismaEmailVerificationCodeRepository();
 const users = new PrismaUserRepository();
 const genericError = { code: 'INVALID_EMAIL_VERIFICATION_CODE', message: 'The verification code is invalid or expired.' };
@@ -48,14 +54,48 @@ beforeAll(async () => {
   prisma = new PrismaService(config);
   await prisma.$connect();
   transactions = new TransactionRunner(prisma);
+  // Load the actual compiled module so Nest uses emitted DI metadata, exactly as the production API does.
+  const { AppModule } = await import('../../dist/app.module.js');
+  const { AppConfigService: CompiledConfig } = await import('../../dist/platform/config/app-config.service.js');
+  const { PrismaService: CompiledPrisma } = await import('../../dist/platform/db/prisma.service.js');
+  apiConfig = Object.assign(Object.create(CompiledConfig.prototype), { env: {
+    ...config.env, NODE_ENV: 'test', GRAPHQL_EMIT_SCHEMA: true, ENABLE_OUTBOX_POLLER: false, RUN_BACKGROUND_JOBS: false,
+    S3_AUTO_CREATE_BUCKET: false, LOG_LEVEL: 'silent', MAIL_TEMPLATES_DIR: `${process.cwd()}/src/platform/mail/templates/emails`,
+  } });
+  const module = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(CompiledConfig).useValue(apiConfig)
+    .overrideProvider(CompiledPrisma).useValue(prisma).compile();
+  app = module.createNestApplication({ logger: false });
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  await app.listen(0, '127.0.0.1');
+  apiUrl = `${await app.getUrl()}/graphql`;
 });
 
 afterAll(async () => {
+  await app?.close();
   await prisma?.$disconnect();
   await fixtures?.end();
   if (databaseCreated) await admin.query(`DROP DATABASE "${databaseName}"`);
   await admin?.end();
 });
+
+async function gql(query: string, variables: Record<string, unknown> = {}) {
+  const response = await fetch(apiUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query, variables }) });
+  return response.json() as Promise<{ data?: Record<string, any>; errors?: Array<{ message: string; extensions: { code: string } }> }>;
+}
+
+const requestCode = (email: string) => gql('mutation($input:RequestEmailVerificationCodeInput!){requestEmailVerificationCode(input:$input)}', { input: { email } });
+const verifyCode = (email: string, code: string) => gql('mutation($input:VerifyEmailCodeInput!){verifyEmailCode(input:$input)}', { input: { email, code } });
+
+async function register(languageCode = 'en') {
+  const suffix = randomBytes(8).toString('hex');
+  const email = `${suffix}@api-code.invalid`;
+  const result = await gql('mutation($input:RegisterInput!){register(input:$input){userId}}', { input: {
+    email, username: `code_${suffix}`, name: 'Code Test', phoneNumber: '+201012345678', password: 'IntegrationOnly123!', languageCode,
+  } });
+  expect(result.errors).toBeUndefined();
+  return { id: result.data!.register.userId as string, email };
+}
 
 async function user() {
   const id = randomUUID();
@@ -176,8 +216,77 @@ describe('email codes in a dedicated migrated database', () => {
     const token = randomBytes(32).toString('base64url'); const tokenId = randomUUID();
     await fixtures.query(`INSERT INTO "Token" (id,"userId",purpose,"tokenHash","expiresAt") VALUES ($1,$2,'EMAIL_VERIFY',$3,now()+interval '24 hours')`, [tokenId, id, hashToken(token)]);
     h.advance(60_000); await issue(h.service, id);
-    const handler = new VerifyEmailHandler(transactions, { publish: vi.fn() } as any, users, new PrismaTokenRepository());
+    const handler = new VerifyEmailHandler(transactions, { publish: vi.fn() } as any, users, new PrismaTokenRepository(), h.service);
     expect(await handler.execute(new VerifyEmailCommand(token))).toEqual({ verified: true });
     await expect(h.service.verify(id, '000000')).rejects.toMatchObject(genericError);
+  });
+});
+
+describe('public API and mail on the real Nest GraphQL schema', () => {
+  it.each(['en', 'ar'])('registration atomically creates a challenge, link token and safe outbox payload (%s)', async lang => {
+    const account = await register(lang);
+    const rows = await fixtures.query(`SELECT c.id, c."codeHash", t."tokenHash", o.payload FROM "EmailVerificationCode" c
+      JOIN "Token" t ON t."userId"=c."userId" AND t.purpose='EMAIL_VERIFY'
+      JOIN "OutboxEvent" o ON o.payload->>'tokenId'=t.id::text WHERE c."userId"=$1`, [account.id]);
+    expect(rows.rows).toHaveLength(1);
+    const row = rows.rows[0];
+    expect(row.payload.codeChallengeId).toBe(row.id); expect(row.payload.lang).toBe(lang);
+    expect(row.payload).not.toHaveProperty('code'); expect(row.payload).not.toHaveProperty('codeHash');
+    expect(row.payload.verifyUrl).toContain('/verify-email?token=');
+  });
+
+  it('public resend shares registration cooldown, suppresses unknown email, and replaces the old code after 60 seconds', async () => {
+    const account = await register();
+    const initial = (await fixtures.query('SELECT * FROM "EmailVerificationCode" WHERE "userId"=$1', [account.id])).rows[0];
+    const oldCode = deriveEmailVerificationCode(secret, account.id, initial.id);
+    expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
+    expect((await requestCode('absent@api-code.invalid')).data?.requestEmailVerificationCode).toBe(true);
+    expect((await fixtures.query('SELECT count(*)::int AS n FROM "EmailVerificationCode" WHERE "userId"=$1', [account.id])).rows[0].n).toBe(1);
+    await fixtures.query(`UPDATE "EmailVerificationCode" SET "createdAt"="createdAt"-interval '61 seconds',"expiresAt"="expiresAt"-interval '61 seconds' WHERE id=$1`, [initial.id]);
+    expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
+    const next = (await fixtures.query('SELECT * FROM "EmailVerificationCode" WHERE "userId"=$1 AND "invalidatedAt" IS NULL', [account.id])).rows[0];
+    expect(next.id).not.toBe(initial.id);
+    expect((await verifyCode(account.email, oldCode)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
+    const code = deriveEmailVerificationCode(secret, account.id, next.id);
+    expect((await verifyCode(account.email, code)).data?.verifyEmailCode).toBe(true);
+    expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
+    expect((await verifyCode(account.email, code)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
+  });
+
+  it('unknown, wrong and expired verification cases have identical public errors', async () => {
+    const account = await register();
+    const row = (await fixtures.query('SELECT * FROM "EmailVerificationCode" WHERE "userId"=$1', [account.id])).rows[0];
+    const code = deriveEmailVerificationCode(secret, account.id, row.id);
+    const absent = await verifyCode('absent@api-code.invalid', '123456');
+    const incorrect = await verifyCode(account.email, wrong(code));
+    await fixtures.query(`UPDATE "EmailVerificationCode" SET "createdAt"=now()-interval '16 minutes',"expiresAt"=now()-interval '1 minute' WHERE id=$1`, [row.id]);
+    const expired = await verifyCode(account.email, code);
+    const error = (result: Awaited<ReturnType<typeof gql>>) => ({ message: result.errors?.[0].message, code: result.errors?.[0].extensions.code });
+    expect(error(absent)).toEqual(genericError); expect(error(incorrect)).toEqual(genericError); expect(error(expired)).toEqual(genericError);
+  });
+
+  it('keeps disabled-feature registration link-only and returns the generic code API error without account lookup disclosure', async () => {
+    const saved = apiConfig.env.EMAIL_VERIFICATION_CODE_SECRET;
+    apiConfig.env.EMAIL_VERIFICATION_CODE_SECRET = undefined;
+    try {
+      const account = await register();
+      const outbox = (await fixtures.query('SELECT payload FROM "OutboxEvent" WHERE payload->>\'to\'=$1', [account.email])).rows[0].payload;
+      expect(outbox.codeChallengeId).toBeUndefined(); expect(outbox.verifyUrl).toContain('token=');
+      for (const email of [account.email, 'absent@api-code.invalid']) {
+        expect((await requestCode(email)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
+      }
+      expect((await verifyCode(account.email, '123456')).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
+    } finally { apiConfig.env.EMAIL_VERIFICATION_CODE_SECRET = saved; }
+  });
+
+  it('retains the actual auth IP throttle on both public mutations', async () => {
+    const limit = Number(process.env.THROTTLE_AUTH_LIMIT ?? 10);
+    let resendThrottled = false; let verifyThrottled = false;
+    for (let i = 0; i <= limit; i++) {
+      resendThrottled ||= (await requestCode('absent@api-code.invalid')).errors?.[0].extensions.code === 'TOO_MANY_REQUESTS';
+      verifyThrottled ||= (await verifyCode('absent@api-code.invalid', '123456')).errors?.[0].extensions.code === 'TOO_MANY_REQUESTS';
+      if (resendThrottled && verifyThrottled) break;
+    }
+    expect(resendThrottled).toBe(true); expect(verifyThrottled).toBe(true);
   });
 });

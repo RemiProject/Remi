@@ -19,6 +19,7 @@ import { OneTimeTokenService } from '@/modules/identity/application/services/one
 import { RegisterCommand } from './register.command.js';
 import { assertStrongPassword, normalizeUsername, isValidUsername, isSupportedMobile } from '@/modules/identity/domain/services/registration-policy.js';
 import { DomainError } from '@/shared/domain-error.js';
+import { EmailVerificationCodeService } from '@/modules/identity/application/services/email-verification-code.service.js';
 
 @CommandHandler(RegisterCommand)
 export class RegisterHandler implements ICommandHandler<RegisterCommand> {
@@ -33,6 +34,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     @Inject(TOKEN_REPOSITORY) private readonly tokenRepo: TokenRepository,
     @Inject(PASSWORD_HASHER) private readonly hasher: PasswordHasherPort,
+    private readonly codes: EmailVerificationCodeService,
   ) {}
 
   async execute(cmd: RegisterCommand): Promise<{ userId: string }> {
@@ -58,6 +60,8 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
           id: userId, email, username, phoneNumber: cmd.phoneNumber, passwordHash, name: cmd.name.trim(), timezone,
           countryId: refs.countryId, localeId: refs.localeId, preferredLanguageId: refs.languageId,
         });
+        const code = await this.codes.issueWithinTransaction(tx, userId);
+        if (code.status !== 'issued' && code.status !== 'disabled') throw new DomainError('INVALID_EMAIL_VERIFICATION_CODE', 'The verification code is invalid or expired.', 422);
         await this.tokenRepo.insert(tx, issued.row);
         await this.outbox.publish(tx, {
           topic: OutboxTopics.EmailVerifyRequested,
@@ -69,6 +73,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
             lang: refs.languageCode,
             verifyUrl: this.links.verifyEmail(issued.raw),
             expiresInHours: this.config.env.EMAIL_VERIFY_TTL_HOURS,
+            ...(code.status === 'issued' ? { codeChallengeId: code.challenge.id } : {}),
           },
         });
       }, { userId });

@@ -16,6 +16,7 @@ export interface EmailVerificationCodeRepository {
   lockAccount(tx: Tx, userId: string): Promise<{ emailVerifiedAt: Date | null; deletedAt: Date | null } | null>;
   issuanceHistory(tx: Tx, userId: string, now: Date, windowMs: number): Promise<{ lastIssuedAt: Date | null; count: number }>;
   findOpen(tx: Tx, userId: string): Promise<EmailVerificationCodeRecord | null>;
+  findById(tx: Tx, id: string): Promise<EmailVerificationCodeRecord | null>;
   recentCodes(tx: Tx, userId: string, since: Date): Promise<Array<{ id: string; codeHash: string }>>;
   invalidateOpen(tx: Tx, userId: string, now: Date): Promise<void>;
   insert(tx: Tx, row: EmailVerificationCodeRecord): Promise<void>;
