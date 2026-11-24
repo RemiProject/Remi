@@ -1,11 +1,15 @@
+import { useState } from 'react';
+import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Button, Card, PageHeader, Screen } from '@/components/ui/core';
+import { FormField } from '@/components/ui/form-field';
 import { useAuth } from '@/providers/auth-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { authMessages } from '@/i18n/auth';
 import { isBackendInventoryEnabled } from '@/services/inventory-feature';
+import { feedback } from '@/services/feedback';
 
 export default function ProfileScreen() {
   const auth = useAuth();
@@ -31,5 +35,30 @@ export default function ProfileScreen() {
     </Card>}
     {auth.user && <Card><Button label={rtl ? 'الأسرة والدعوات' : 'Household & invitations'} icon="community" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'community' } })} /><Button label={rtl ? 'التغذية والتفضيلات' : 'Nutrition & preferences'} icon="health" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'health' } })} /></Card>}
     <AppText muted>{isBackendInventoryEnabled() ? t.backendKitchen : t.local}</AppText>
+    {auth.user && <DeleteAccount t={t} busy={auth.busy} onDelete={auth.deleteAccount} />}
   </Screen></SafeAreaView>;
+}
+
+/** Closed by default: one quiet text button, then the password and a last native confirmation (App Store guideline 5.1.1(v)). */
+function DeleteAccount({ t, busy, onDelete }: { t: Record<string, string>; busy: boolean; onDelete: (password: string) => Promise<string | null> }) {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  if (!open) return <Button label={t.deleteAccount} variant="dangerText" onPress={() => setOpen(true)} />;
+  const confirm = () => Alert.alert(t.deleteSureTitle, t.deleteSureBody, [
+    { text: t.deleteCancel, style: 'cancel' },
+    { text: t.deleteAction, style: 'destructive', onPress: () => { void onDelete(password).then(key => {
+      if (key) { feedback.error(); setError(t[key] ?? t.connectionError); return; }
+      feedback.remove();
+      router.replace('/');
+    }); } },
+  ]);
+  return <Card>
+    <AppText variant="heading">{t.deleteAccount}</AppText>
+    <AppText muted>{t.deleteIntro}</AppText>
+    <FormField label={t.deleteConfirmPassword} value={password} onChangeText={value => { setPassword(value); setError(null); }} secureTextEntry
+      autoCapitalize="none" autoComplete="current-password" textContentType="password" error={error ?? undefined} inputDirection="ltr" />
+    <Button label={busy ? t.wait : t.deleteAction} variant="destructive" disabled={busy || !password} onPress={confirm} />
+    <Button label={t.deleteCancel} variant="text" disabled={busy} onPress={() => { setOpen(false); setPassword(''); setError(null); }} />
+  </Card>;
 }

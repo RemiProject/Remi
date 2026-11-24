@@ -117,7 +117,7 @@ test('chooser, create/edit, details and deletion UI react to the shared language
     const choices = nodes(chooser());
     assert.equal(choices.find((node) => node.type === 'Screen').props.rtl, rtl);
     assert.ok(choices.some((node) => node.props?.label === t.manual));
-    const photoActions=nodes(choices.find(node=>node.type==='FoodPhotoField').props.Actions({takePhoto(){},choosePhoto(){},busy:false}));assert.deepEqual([...photoActions,...choices].filter((node) => node.type === 'ActionRow').map((node) => [node.props.title, node.props.disabled, node.props.rtl]), [[t.camera, false, rtl], [t.gallery, false, rtl], [t.receipt, false, rtl]]);
+    const photoActions=nodes(choices.find(node=>node.type==='FoodPhotoField').props.Actions({takePhoto(){},choosePhoto(){},busy:false}));assert.deepEqual([...photoActions,...choices].filter((node) => node.type === 'ActionRow').map((node) => [node.props.title, node.props.disabled, node.props.rtl]), [[t.camera, false, rtl], [t.gallery, false, rtl], [t.receipt, false, rtl], [rtl ? 'حفظ وصفة من رابط' : 'Save a recipe from a link', false, rtl]]);
     for (const itemId of [undefined, item.id]) {
       const formElement = nodes(form({ itemId })).find((node) => typeof node.type === 'function');
       const fields = nodes(formElement.type(formElement.props));

@@ -8,6 +8,7 @@ export function authErrorKey(error: unknown): string {
   if (codes.includes('INVALID_OR_EXPIRED_TOKEN')) return 'resetExpired';
   if (codes.includes('EMAIL_NOT_VERIFIED')) return 'verifyFirst';
   if (codes.includes('INVALID_CREDENTIALS')) return 'credentials';
+  if (codes.includes('INVALID_PASSWORD')) return 'deletePassword';
   if (codes.includes('EMAIL_ALREADY_REGISTERED')) return 'alreadyRegistered';
   if (codes.includes('INVALID_TIMEZONE')) return 'timezoneInvalid';
   if (codes.includes('REFERENCE_NOT_FOUND')) return 'referencesError';

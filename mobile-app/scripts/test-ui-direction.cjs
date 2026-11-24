@@ -32,6 +32,7 @@ function fixture(language = 'ar') {
       if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ owner: 'user', status: 'ready', items: [item, spoon, pieces], today: '2026-10-31', detail: { id: details.id, status: 'ready', item: details }, loadDetail: () => {} }) };
       if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: () => null };
       if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
+      if (id === '@/data/food-images') return { recipeImages: {}, ingredientImages: {}, sourcedImageCredits: [] };
       if (id === '@/components/backend-stock-actions') return { BackendStockActions: () => null };
       if (id === '@/components/appearance-controls') return { AppearanceControls: () => null };
       if (id === './home-screen') return { __esModule: true, default: () => null };
@@ -62,7 +63,7 @@ function fixture(language = 'ar') {
   const stock = load('i18n/backend-stock-actions.ts').stockActionMessages[language];
   const number = load('utils/backend-kitchen-view.ts').inventoryNumberLabel;
   parts.push(wrap('insufficient', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.AppText, { dir: language === 'ar' ? 'rtl' : undefined }, stock.insufficient(`${number('1.25', language)} ${language === 'ar' ? 'كغ' : 'kg'}`)))));
-  parts.push(wrap('legacy-row', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.ActionRow, { title: 'Remy Chat', rtl: language === 'ar', onPress: () => {} }))));
+  parts.push(wrap('legacy-row', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.ActionRow, { title: 'Remi Chat', rtl: language === 'ar', onPress: () => {} }))));
   parts.push(wrap('more', React.createElement(load('screens/more-screen.tsx').default)));
   const html = renderToStaticMarkup(React.createElement(React.Fragment, null, ...parts));
   return { html: `<!doctype html><html dir="ltr"><head><meta charset="utf-8"><style>${native.StyleSheet.getSheet().textContent}</style></head><body>${html}</body></html>`, load, native };
@@ -81,7 +82,7 @@ test('real React Native Web markup gives Arabic inventory paragraphs an explicit
 });
 test('English inventory labels and paragraphs stay unchanged', () => {
   const { html, load } = fixture('en');
-  for (const line of ['0.75 kg · Pantry', '2 pieces · Refrigerator', '2 tbsp · Counter', 'Days until expiration: 29']) assert(html.includes(line), line);
+  for (const line of ['0.75 kg · Pantry', '2 pieces · Refrigerator', '2 tbsp · Counter', '29 days left']) assert(html.includes(line), line);
   assert.equal(load('utils/backend-kitchen-view.ts').backendQuantityLabel({ quantity: '1.250', unitId: 'kg' }, 'en'), '1.25 kg');
 });
 test('explicit paragraph direction is opt-in; shared text without it keeps the existing default', () => {

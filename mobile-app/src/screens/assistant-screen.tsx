@@ -1,3 +1,4 @@
+import { recipeName } from '@/i18n/recipe-names';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { Linking, View } from 'react-native';
@@ -56,7 +57,7 @@ function AssistantBody() {
     <FormField label={ar ? 'سؤالك عن المطبخ' : 'Your kitchen question'} value={question} onChangeText={setQuestion} editable={!busy} onSubmitEditing={() => setAsked(question.trim())} />
     <Button label={busy ? (ar ? 'جارٍ تحميل المطبخ…' : 'Loading your kitchen…') : (ar ? 'اسأل المساعد' : 'Ask helper')} disabled={busy || !question.trim() || !!error} onPress={() => setAsked(question.trim())} />
     {error !== '' && <Card><AppText accessibilityRole="alert">{error}</AppText><Button label={ar ? 'إعادة المحاولة' : 'Retry'} onPress={refresh} /></Card>}
-    {result && !error && <Card><AppText accessibilityLiveRegion="polite">{result.text}</AppText>{result.recipes.map(({ recipe, matches, total }) => <View key={recipe.id} style={{ gap: 8 }}><AppText variant="heading">{recipe.name}</AppText><AppText muted>{matches} / {total} {ar ? 'مكونات مطلوبة موجودة بالاسم' : 'required ingredients present by name'}</AppText><Button label={ar ? 'عرض الوصفة' : 'View recipe'} variant="secondary" onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} /></View>)}</Card>}
+    {result && !error && <Card><AppText accessibilityLiveRegion="polite">{result.text}</AppText>{result.recipes.map(({ recipe, matches, total }) => <View key={recipe.id} style={{ gap: 8 }}><AppText variant="heading">{recipeName(recipe.name, language)}</AppText><AppText muted>{matches} / {total} {ar ? 'مكونات مطلوبة موجودة بالاسم' : 'required ingredients present by name'}</AppText><Button label={ar ? 'عرض الوصفة' : 'View recipe'} variant="secondary" onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} /></View>)}</Card>}
     <Button label={ar ? 'تحديث بيانات المطبخ' : 'Refresh kitchen data'} disabled={busy} variant="text" onPress={refresh} />
     <Button label={ar ? 'إرشادات سلامة الطعام من USDA' : 'USDA food-safety guidance'} variant="text" onPress={() => { void Linking.openURL('https://www.foodsafety.gov/food-safety-charts/cold-food-storage-charts').catch(failure => setError(intakeError(failure))); }} />
   </>;

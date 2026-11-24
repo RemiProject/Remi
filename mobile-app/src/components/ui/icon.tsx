@@ -31,6 +31,11 @@ const symbols = {
   settings: { ios: 'gearshape', android: 'settings', web: 'settings' },
   contact: { ios: 'envelope', android: 'mail', web: 'mail' },
   info: { ios: 'info.circle', android: 'info', web: 'info' },
+  list: { ios: 'list.bullet', android: 'list', web: 'list' },
+  rings: { ios: 'circle.circle', android: 'track_changes', web: 'track_changes' },
+  nutrition: { ios: 'carrot', android: 'nutrition', web: 'nutrition' },
+  flame: { ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' },
+  award: { ios: 'medal.fill', android: 'military_tech', web: 'military_tech' },
 } as const;
 export type IconName = keyof typeof symbols;
 

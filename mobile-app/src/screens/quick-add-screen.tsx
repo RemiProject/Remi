@@ -14,5 +14,8 @@ export default function QuickAddScreen() {
       <ActionRow title={ar ? 'إضافة عنصر تحتاجه' : 'Add a needed item'} subtitle={ar ? 'اختر الطعام والكمية لقائمة الأسرة.' : 'Choose food and quantity for your household shopping list.'} icon="shopping" rtl={ar} divider onPress={() => router.replace({ pathname: '/feature', params: { feature: 'shopping', add: '1' } })} />
       <ActionRow title={ar ? 'كتابة قائمة سريعة' : 'Write a quick list'} subtitle={ar ? 'عنصر في كل سطر. تُحفظ على هذا الجهاز.' : 'One item per line. Saved on this device.'} icon="manual" rtl={ar} divider onPress={() => router.replace('/quick-shopping')} />
     </Card>
+    <Card style={{ padding: 0, gap: 0 }}>
+      <ActionRow title={ar ? 'حفظ وصفة من رابط' : 'Save a recipe from a link'} subtitle={ar ? 'الصق رابط وصفة، ويحفظها ريمي في وصفاتي.' : 'Paste a recipe link and Remi keeps it in My recipes.'} icon="recipe" rtl={ar} onPress={() => router.replace('/import-recipe')} />
+    </Card>
   </Screen></SafeAreaView>;
 }

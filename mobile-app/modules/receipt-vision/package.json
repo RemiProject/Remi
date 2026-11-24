@@ -1,0 +1,6 @@
+{
+  "name": "receipt-vision",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Apple Vision text recognition that keeps each line's position, so receipt rows can be rebuilt."
+}

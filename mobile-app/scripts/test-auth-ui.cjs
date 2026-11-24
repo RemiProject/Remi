@@ -35,7 +35,7 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
   };
   // Transpiled hooks are called as standalone functions.
   react.useRef = initial => { const [value] = react.useState(() => ({ current: initial })); return value; };
-  const mocks = {
+  const mocks = { '@/services/feedback': require('./native-ui-fixture.cjs').fixtureModule('@/services/feedback'),
     react, 'react/jsx-runtime': { jsx: element, jsxs: element },
     'react-native': { View: 'View', Pressable: 'Pressable', KeyboardAvoidingView: 'KeyboardAvoidingView', Platform: { OS: 'ios' } },
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },

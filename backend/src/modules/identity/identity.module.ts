@@ -1,3 +1,4 @@
+import { DeleteAccountHandler } from './application/commands/delete-account/delete-account.handler.js';
 import { Module } from '@nestjs/common';
 import { AcceptInvitationHandler } from './application/commands/accept-invitation/accept-invitation.handler.js';
 import { CreateHouseholdHandler } from './application/commands/create-household/create-household.handler.js';
@@ -65,6 +66,7 @@ const CommandHandlers = [
   LeaveHouseholdHandler,
   TransferOwnershipHandler,
   RequestEmailVerificationHandler,
+  DeleteAccountHandler,
 ];
 const QueryHandlers = [
   GetMeHandler,

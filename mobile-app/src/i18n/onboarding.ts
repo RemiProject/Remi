@@ -1,0 +1,28 @@
+export const onboardingMessages = {
+  en: {
+    back: 'Back', skip: 'Skip', next: 'Continue', start: 'Get started', saving: 'Setting up…', progress: 'Step {n} of {total}',
+    welcomeTitle: 'Plan your week in a minute', welcomeBody: 'Tell Remi who you cook for and pick a few recipes. Remi plans your week and writes your shopping list, leaving out food you already have in Kitchen.', welcomeTime: 'Takes about a minute.',
+    householdTitle: 'How many people do you cook for?', householdBody: 'Each planned meal is sized for this many servings.', people: 'people', person: 'person',
+    dietTitle: 'Any dietary needs?', dietBody: 'Saved to your profile and used to keep recipe suggestions safe for you. Leave empty if none apply.',
+    VEGETARIAN: 'Vegetarian', VEGAN: 'Vegan', HALAL: 'Halal', GLUTEN_FREE: 'Gluten-free', DAIRY_FREE: 'Dairy-free',
+    goalsTitle: 'What matters most this week?', goalsBody: 'Pick up to 2.',
+    quick: 'Quick meals', healthy: 'Eating healthier', budget: 'Saving money', family: 'Family-friendly',
+    recipesTitle: 'Pick recipes for your week', recipesBody: 'Each one goes on its own day as dinner, starting today. Pick up to 7.', recipesLoading: 'Loading recipes…', recipesNeeded: 'Pick at least one recipe to continue.', minutes: 'min', selected: 'Selected',
+    doneTitle: 'Your week is ready', doneBody: 'Your meals are in your plan and the ingredients are on your shopping list.', mealsPlanned: '{n} meals planned from today', mealPlanned: '1 meal planned for today', itemsAdded: '{n} items added to your shopping list', itemAdded: '1 item added to your shopping list', nothingAdded: 'Everything you need is already on your list or in Kitchen.',
+    openList: 'See shopping list', goHome: 'Go to Home',
+    error: 'Could not save your setup. Nothing was lost. Try again.', retry: 'Try again',
+  },
+  ar: {
+    back: 'رجوع', skip: 'تخطٍّ', next: 'متابعة', start: 'ابدأ', saving: 'جارٍ الإعداد…', progress: 'الخطوة {n} من {total}',
+    welcomeTitle: 'خطط لأسبوعك في دقيقة', welcomeBody: 'أخبر ريمي لمن تطبخ واختر بعض الوصفات. يخطط ريمي وجباتك ويكتب قائمة التسوق، دون ما لديك في المطبخ.', welcomeTime: 'يستغرق نحو دقيقة.',
+    householdTitle: 'لكم شخصاً تطبخ؟', householdBody: 'تُحضَّر كل وجبة مخططة لهذا العدد من الحصص.', people: 'أشخاص', person: 'شخص',
+    dietTitle: 'هل لديك احتياجات غذائية؟', dietBody: 'تُحفظ في ملفك وتُستخدم لتكون اقتراحات الوصفات آمنة لك. اتركها فارغة إن لم ينطبق شيء.',
+    VEGETARIAN: 'نباتي', VEGAN: 'نباتي صرف', HALAL: 'حلال', GLUTEN_FREE: 'خالٍ من الغلوتين', DAIRY_FREE: 'خالٍ من الألبان',
+    goalsTitle: 'ما الأهم هذا الأسبوع؟', goalsBody: 'اختر حتى خيارين.',
+    quick: 'وجبات سريعة', healthy: 'أكل صحي أكثر', budget: 'توفير المال', family: 'مناسب للعائلة',
+    recipesTitle: 'اختر وصفات لأسبوعك', recipesBody: 'توضع كل وصفة عشاءً في يوم مستقل بدءاً من اليوم. اختر حتى 7.', recipesLoading: 'جارٍ تحميل الوصفات…', recipesNeeded: 'اختر وصفة واحدة على الأقل للمتابعة.', minutes: 'دقيقة', selected: 'محدد',
+    doneTitle: 'أسبوعك جاهز', doneBody: 'وجباتك في المخطط ومكوناتها في قائمة التسوق.', mealsPlanned: 'الوجبات المخططة بدءاً من اليوم: {n}', mealPlanned: 'الوجبات المخططة بدءاً من اليوم: 1', itemsAdded: 'العناصر المضافة إلى قائمة التسوق: {n}', itemAdded: 'العناصر المضافة إلى قائمة التسوق: 1', nothingAdded: 'كل ما تحتاجه موجود في قائمتك أو في المطبخ.',
+    openList: 'عرض قائمة التسوق', goHome: 'الذهاب إلى الرئيسية',
+    error: 'تعذر حفظ الإعداد. لم يُفقد شيء. حاول مرة أخرى.', retry: 'حاول مجددًا',
+  },
+} as const;

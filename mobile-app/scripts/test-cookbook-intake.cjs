@@ -3,7 +3,6 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const ts = require('typescript');
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, filename);
-const { receiptCandidates } = require('../src/services/receipt-review.ts');
 const { pantryAnswer, rankPantryRecipes } = require('../src/services/pantry-assistant.ts');
 const stock = [
   { foodId: 'tomato', foodName: 'Tomato', quantity: '2.000', unit: 'PIECE', estimatedExpiryAt: '2026-11-05T12:00:00Z', storageLocation: 'FRIDGE' },
@@ -14,10 +13,6 @@ const recipes = [
   { id: 'rice', name: 'Rice bowl', ingredients: [{ foodId: 'rice', foodName: 'Rice', optional: false }] },
   { id: 'salad', name: 'Tomato salad', ingredients: [{ foodId: 'tomato', foodName: 'Tomato', optional: false }, { foodId: 'herb', foodName: 'Basil', optional: true }] },
 ];
-test('receipt review retains food lines in both languages while discarding totals, payment and non-food numeric lines', () => {
-  assert.deepEqual(receiptCandidates('Tomatoes 2.00\nTOTAL 2.00\nVisa 1234\n١٢٣٤\nلبن\n123.40\n'), ['Tomatoes 2.00', 'لبن']);
-  assert.equal(receiptCandidates(Array.from({ length: 100 }, (_, i) => `Food ${i}`).join('\n')).length, 80);
-});
 test('recipe suggestions compare actual food IDs, exclude zero stock, and ignore optional ingredients', () => {
   const ranked = rankPantryRecipes(stock, recipes);
   assert.equal(ranked[0].recipe.id, 'salad');

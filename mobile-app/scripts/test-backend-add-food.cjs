@@ -277,7 +277,7 @@ test('English/Arabic form has only supported units/storage, no notes/photos; oth
   for (const language of ['en', 'ar']) {
     const h = uiHarness({ language }), tree = h.render(), f = foodEntryMessages[language], t = backendAddFoodMessages[language];
     const chips = h.nodes(tree, 'Chip');
-    assert.equal(chips.length, 9);
+    assert.equal(chips.length, 10); // 6 units, 4 storage places
     assert.equal(h.nodes(tree, 'FormField').length, 4);
     assert(h.nodes(tree, 'FormField').every(n => ![f.notes, f.notesOptional, f.photo].includes(n.props.label)));
     const methods = h.nodes(tree, 'Button').filter(n => n.props.label.endsWith(t.comingSoon));

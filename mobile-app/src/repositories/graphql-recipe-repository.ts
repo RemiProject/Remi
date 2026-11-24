@@ -6,9 +6,10 @@ import { getActiveHouseholdRevision, resolveActiveHousehold, type ActiveHousehol
 import type { createAuthService } from '../services/auth-service';
 import { isBackendInventoryEnabled } from '../services/inventory-feature';
 import { loadCachedCatalogArabicNames } from '../services/inventory-catalog-names';
+import { nutritionFields } from '../domain/nutrition';
 
 type Auth = Pick<ReturnType<typeof createAuthService>, 'authenticatedGraphql' | 'getIdentityContext' | 'getIdentityRevision'>;
-const summary = 'id name description servings prepTimeMin cookTimeMin difficulty cuisineId cuisineName';
+const summary = `id name description servings prepTimeMin cookTimeMin difficulty cuisineId cuisineName ${nutritionFields}`;
 // Fetch aliases through the existing deduplicated catalog loader rather than deeply nesting
 // aliases inside every explanation list (which exceeds the API's query-complexity budget).
 export const recipeReadOperations = {

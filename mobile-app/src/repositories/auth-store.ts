@@ -1,7 +1,7 @@
 import type { createAuthService, CurrentUser, LoginInput } from '../services/auth-service';
 import { authErrorKey, isSignedOutError } from '../services/auth-validation';
 
-type Service = Pick<ReturnType<typeof createAuthService>, 'login' | 'me' | 'logout'>;
+type Service = Pick<ReturnType<typeof createAuthService>, 'login' | 'me' | 'logout' | 'deleteAccount'>;
 interface Snapshot { user: CurrentUser | null; busy: boolean; ready: boolean; error: string | null }
 export class AuthStore {
   private snapshot: Snapshot = { user: null, busy: false, ready: false, error: null };
@@ -40,6 +40,14 @@ export class AuthStore {
     this.publish({ busy: true, error: null });
     try { await this.service().logout(); this.publish({ user: null, ready: true }); }
     catch { this.publish({ user: null, ready: true, error: 'logoutError' }); }
+    finally { this.publish({ busy: false }); }
+  };
+  /** Resolves to null when the account is gone, otherwise to the message key for what went wrong (the person stays signed in). */
+  deleteAccount = async (password: string): Promise<string | null> => {
+    if (this.snapshot.busy) return 'wait';
+    this.publish({ busy: true, error: null });
+    try { await this.service().deleteAccount(password); this.publish({ user: null, ready: true }); return null; }
+    catch (error) { return authErrorKey(error); }
     finally { this.publish({ busy: false }); }
   };
 }

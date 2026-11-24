@@ -9,7 +9,7 @@ export const unitOptions = [
 ] as const;
 export const storageOptions = [
   { id: 'refrigerator', label: 'Refrigerator' }, { id: 'freezer', label: 'Freezer' },
-  { id: 'pantry', label: 'Pantry' },
+  { id: 'pantry', label: 'Pantry' }, { id: 'counter', label: 'Counter' },
 ] as const;
 export type CategoryId = (typeof categoryOptions)[number]['id'];
 export type UnitId = (typeof unitOptions)[number]['id'];

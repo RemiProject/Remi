@@ -105,6 +105,11 @@ export default function AuthScreen({ signup = false }: { signup?: boolean }) {
       {!signup && <View style={{ alignItems: language === 'ar' ? 'flex-start' : 'flex-end', marginTop: -8 }}><AuthLink label={t.forgotPassword} disabled={disabled} onPress={() => router.push('/forgot-password')} /></View>}
       {(error || (!signup && auth.error)) && <AuthNotice>{t[error ?? auth.error!]}</AuthNotice>}
       <AuthAction label={busy || auth.busy ? t.wait : signup ? t.signup : t.login} disabled={disabled} busy={busy || auth.busy} onPress={() => { void submit(); }} />
+      {signup && <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', columnGap: 6 }}>
+        <AppText muted style={{ fontSize: 13 }}>{t.agree}</AppText>
+        <AuthLink label={t.terms} disabled={disabled} onPress={() => router.push({ pathname: '/legal', params: { doc: 'terms' } })} />
+        <AuthLink label={t.privacy} disabled={disabled} onPress={() => router.push({ pathname: '/legal', params: { doc: 'privacy' } })} />
+      </View>}
       {!signup && <AuthSocial />}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', columnGap: 6 }}>
         <AppText muted style={{ fontSize: 13 }}>{signup ? t.haveAccount : t.newHere}</AppText>
