@@ -19,7 +19,7 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
   const states = [], effects = [], routes = [];
   let cursor = 0;
   const auth = snapshot || { user: null, ready: true, busy: false, error: null,
-    login: async () => true, logout: async () => {}, restore: async () => {} };
+    loginWithResult: async () => ({ ok: true }), logout: async () => {}, restore: async () => {} };
   const element = (type, props) => ({ type, props });
   const react = {
     useState(initial) {
@@ -51,6 +51,8 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
     '@/services/auth-form': authForm,
     '@/services/inventory-feature': { isBackendInventoryEnabled: () => backendInventory },
     './profile-screen': { __esModule: true, default: 'ProfileScreen' },
+    './email-verification-screen': { EmailVerificationFlow: 'EmailVerificationFlow' },
+    '@/i18n/email-verification': require('../src/i18n/email-verification.ts'),
   };
   function load(path) {
     const exports = {};
@@ -74,37 +76,38 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
 test('login validates, masks password, prevents duplicate requests, clears password and returns to Profile', async () => {
   let calls = 0, complete;
   const h = screenHarness();
-  h.auth.login = async input => { calls++; assert.deepEqual(input, { identifier: user.email, password: valid.password }); return new Promise(r => { complete = r; }); };
+  h.auth.loginWithResult = async input => { calls++; assert.deepEqual(input, { identifier: user.email, password: valid.password }); return new Promise(r => { complete = r; }); };
   h.press('login'); await tick(); assert.equal(calls, 0);
   assert.ok(h.render().some(n => n.props.error === authMessages.en.identifierInvalid));
   h.fill(valid);
   assert.equal(h.render().find(n => n.props.label === authMessages.en.password).props.password, true);
   h.press('login'); h.press('wait'); assert.equal(calls, 1);
   assert.ok(h.render().find(n => n.type === 'Button' && n.props.label === authMessages.en.wait).props.disabled);
-  complete(true); await tick();
+  complete({ ok: true }); await tick();
   assert.deepEqual(h.routes, [{ pathname: '/feature', params: { feature: 'profile' } }]);
   assert.equal(h.render().find(n => n.props.label === authMessages.en.password).props.value, '');
 });
 
 test('failed login stays on form and shows verification guidance without raw backend errors', async () => {
   const h = screenHarness();
-  h.auth.login = async () => { h.auth.error = 'verifyFirst'; return false; };
+  h.auth.loginWithResult = async () => { h.auth.error = 'verifyFirst'; return { ok: false, reason: 'failed', error: 'verifyFirst' }; };
   h.fill(valid); h.press('login'); await tick();
   assert.equal(h.routes.length, 0);
   assert.ok(h.render().some(n => n.props.children === authMessages.en.verifyFirst));
   assert.equal(h.render().find(n => n.props.label === authMessages.en.password).props.value, '');
 });
 
-test('signup validates six fields, hides locale/timezone and registers without logging in', async () => {
+test('signup validates six fields, hides locale/timezone and registers, then shows verification without logging in', async () => {
   let input, loginCalls = 0;
   const h = screenHarness({ signup: true, service: { register: async value => { input = value; return { userId: user.id }; } } });
-  h.auth.login = async () => { loginCalls++; };
+  h.auth.loginWithResult = async () => { loginCalls++; return { ok: true }; };
   h.render(); h.flush(); await tick();
   h.press('signup'); assert.equal(input, undefined);
   h.fill(valid); h.press('signup'); await tick();
   assert.deepEqual(input, { name: valid.name, username: valid.username, email: valid.email, password: valid.password, phoneNumber: '+201012345678', languageCode: 'en' }); assert.equal(loginCalls, 0);
-  assert.ok(h.render().some(n => n.props.children === authMessages.en.registered));
-  h.press('login'); assert.deepEqual(h.routes, ['/login']);
+  const flow = h.render().find(n => n.type === 'EmailVerificationFlow');
+  assert.deepEqual(flow.props.start, { origin: 'signup', email: valid.email }); assert.deepEqual(h.routes, []);
+  assert.equal(flow.props.takePassword(), valid.password); assert.equal(flow.props.takePassword(), null, 'handed over once');
 });
 
 test('signup handles duplicate usernames with friendly guidance', async () => {
