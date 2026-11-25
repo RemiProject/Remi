@@ -41,9 +41,42 @@ country from the mobile prefix, timezone to Africa/Cairo or Asia/Riyadh, and loc
 to the existing ar-EG or en-US reference for the chosen language. Existing callers
 may still pass explicit country, locale and timezone. New registrations now need
 username and phone; legacy accounts keep email login and nullable new DB fields.
-Registration shows a success message and a separate login action without creating
-a session. Login errors include clear email-verification guidance. Email verification
-link handling, household selection, and feature sync remain outside this change.
+`register` itself never creates a session; signup continues straight to the code
+screen described below. Email verification link handling in the app, household
+selection, and feature sync remain outside this change.
+
+### Email verification code
+
+`email-verification-screen.tsx` asks for the 6-digit code from the verification email.
+It has three entry points:
+
+- **Sign-up** shows it in place on `/signup`, with the registered email. After a correct
+  code it logs in with the sign-up password and opens Profile. If that login fails, it
+  shows success and a login button.
+- **Refused login** (`EMAIL_NOT_VERIFIED`, from `loginWithResult`) opens
+  `/verify-email-code`. The email is prefilled when the person logged in with an email
+  and asked for when they used a username. After a correct code they log in again.
+- **Profile** has a **Verify email** button while the email is unverified. It uses the
+  account's email, reloads `me` after success and returns to Profile.
+
+The sign-up password is held in one ref of the mounted signup screen, handed over once
+to log in, and cleared on success, cancel and unmount. It never enters route params,
+storage or logs. The password of a refused login is not kept. The refused-login route
+does carry the email as a parameter, so it is visible in the address bar on web.
+
+`createEmailVerificationService(getBackend())` sends the public
+`requestEmailVerificationCode` and `verifyEmailCode` mutations without a session and
+returns `invalidCode`, `rateLimited`, `network` or `error` on failure. A successful
+request means only that the server accepted it: the answer is the same for unknown,
+verified and rate-limited accounts. Arabic-Indic and Persian digits are accepted.
+The resend wait is 60 seconds from an absolute deadline, so it stays right after
+backgrounding. `AuthStore.login` still returns a boolean; `loginWithResult` also says why.
+
+The backend needs migration 0035 and `EMAIL_VERIFICATION_CODE_SECRET`; see the
+[backend setup](../backend/README.md#required-for-email-verification-codes).
+
+### Password reset and social sign-in
+
 `/forgot-password` requests a reset email; `/reset-password?token=...` completes it
 and removes the token from the current URL after success. Configure backend
 `WEB_BASE_URL` to the actual hosted web origin for emailed links to reach these

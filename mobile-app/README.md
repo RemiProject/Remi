@@ -19,7 +19,8 @@ First prepare the backend in a separate terminal, following [backend setup](../b
 The backend needs its own configured `.env` (database URL/password and JWT secrets);
 "no env vars" here means no **mobile** overrides, not an unconfigured backend.
 On a first checkout only, copy `backend/.env.example` to `backend/.env` and fill in
-its required values; do not overwrite an existing configuration.
+its required values; do not overwrite an existing configuration. To use the in-app
+email code, also set `EMAIL_VERIFICATION_CODE_SECRET` there.
 
 From `backend/` on Windows:
 
@@ -163,29 +164,30 @@ A real logout/expired session shows the sign-in state and clears household rows.
 1. Open Kitchen → **Sign in** → **Create account**. Fill in name, username, email,
    supported mobile number, password and confirmation. Use a unique test email;
    Mailpit captures it locally, so it need not be a real mailbox.
-2. Open `http://localhost:8025` and find the message to that address. Registration
-   sends a **link token**, not a six-digit code. Copy the `token` query parameter
-   from the verification URL; do not rely on opening the link, because its target
-   `WEB_BASE_URL` may be `localhost:5173` and mobile has no `/verify-email` route.
-3. At `http://localhost:3000/graphql`, run the public mutation below with the token
-   in the query variables. `verifyEmail: true` confirms success.
+2. The app goes straight to the code screen. Open `http://localhost:8025`, find the
+   newest message to that address and copy its **6-digit code**. Do not rely on opening
+   the link in that message: its target `WEB_BASE_URL` may be `localhost:5173`, and
+   mobile has no `/verify-email` route.
+3. Enter the code and choose **Verify email**. The app then logs in by itself and opens
+   Profile. The code is valid for 15 minutes, and after 5 wrong attempts it stops working.
+   **Resend code** becomes available after 60 seconds; only the newest code works.
+   Do not bypass verification in the database.
+4. The first Kitchen resolution creates **My Kitchen** only when there are no
+   memberships; existing households are reused.
 
-   ```graphql
-   mutation VerifyLocalEmail($token: String!) {
-     verifyEmail(input: { token: $token })
-   }
-   ```
+If you left the code screen before verifying, there are two ways back:
 
-   Variables: `{ "token": "<token copied from Mailpit>" }`.
-   If it expired, log in where the local policy permits it and call the authenticated
-   `mutation { requestEmailVerification }`, then use the newest message. Otherwise
-   register a new test account. Do not bypass verification in the database.
-4. Sign in in the mobile app. Its first Kitchen resolution creates **My Kitchen**
-   only when there are no memberships; existing households are reused.
+- **Log in.** When the backend requires verification
+  (`EMAIL_VERIFICATION_REQUIRED=true`), a refused login opens the code screen. The email
+  is prefilled if you logged in with it, and asked for if you used a username. Choose
+  **Send code** if the first code has expired, then log in again after verifying.
+- **Profile.** The local default (`EMAIL_VERIFICATION_REQUIRED=false`) lets an
+  unverified account log in. Choose **Verify email** in Profile. Verify the account for
+  this walkthrough and the seed script.
 
-Local backend defaults may allow an unverified account to log in
-(`EMAIL_VERIFICATION_REQUIRED=false`), but verify the account for this walkthrough
-and the seed script. No in-app email verification flow exists yet.
+If the message contains only a link, the backend has no `EMAIL_VERIFICATION_CODE_SECRET`
+and the code screen cannot be used. See
+[backend setup](../backend/README.md#required-for-email-verification-codes).
 
 ## Seed sample food
 

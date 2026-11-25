@@ -49,7 +49,7 @@ For example, use `pnpm.cmd run typecheck`, `pnpm.cmd run lint`, and
 
 ## Run — option 1: app on your machine, infrastructure in Docker (best for development)
 ```bash
-cp .env.example .env              # set POSTGRES_PASSWORD, DATABASE_URL (same password), JWT secrets (>= 32 chars)
+cp .env.example .env              # set POSTGRES_PASSWORD, DATABASE_URL (same password), JWT secrets (>= 32 chars), EMAIL_VERIFICATION_CODE_SECRET (see below)
 pnpm install
 pnpm docker:infra                 # starts db + s3 + mailpit
 pnpm migrate && pnpm seed         # SQL migrations + reference seed (both safe to re-run)
@@ -58,6 +58,18 @@ pnpm db:generate                  # prisma generate -> src/generated (needs inte
 pnpm start:dev                    # http://localhost:3000/graphql
 ```
 Mailpit (every email the app sends): http://localhost:8025 · S3 (SeaweedFS): http://localhost:8333 · Postgres: `127.0.0.1:5432`.
+
+### Required for email verification codes
+Every developer needs both of these, on a new checkout and when updating an existing one:
+
+1. **Run migration `0035_email_verification_codes.sql`** with `pnpm migrate`, then `pnpm db:generate` (Docker's `migrate` service applies the migration in option 2). Without its table, verifying by link fails, and once the secret is set, registration fails too.
+2. **Add `EMAIL_VERIFICATION_CODE_SECRET` to `backend/.env`.** `.env.example` leaves it empty. Generate your own value and restart the API:
+   ```bash
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+   ```
+   Without it, the API still starts in development, but emails are link-only and the app's code screen cannot be used: it can send no codes and rejects every code.
+
+See [Email verification codes](#email-verification-codes) for how the codes work.
 
 ## Run — option 2: everything in Docker (db + s3 + mailpit + migrate + api)
 ```bash
