@@ -143,6 +143,48 @@ test('auth store restores, logs in, clears state on logout failure, and can retr
   await store.restore(); assert.equal(store.getSnapshot().error, null);
 });
 
+test('structured login reports why it failed while boolean login and the published state stay the same', async () => {
+  const { BackendError } = require('../src/services/backend-core.ts');
+  const rejecting = error => new AuthStore(() => ({ login: async () => { throw error; }, me: async () => user }));
+  for (const [error, reason, key] of [
+    [new BackendError('Please verify your email first', undefined, ['EMAIL_NOT_VERIFIED']), 'emailNotVerified', 'verifyFirst'],
+    [new BackendError('Invalid credentials', undefined, ['INVALID_CREDENTIALS']), 'failed', 'credentials'],
+    [new BackendError('Too many', undefined, ['TOO_MANY_REQUESTS']), 'failed', 'rateLimit'],
+    [new BackendError('Backend request failed.'), 'failed', 'connectionError'],
+    [{ code: 'STORAGE' }, 'failed', 'storageError'],
+  ]) {
+    const structured = rejecting(error), boolean = rejecting(error);
+    assert.deepEqual(await structured.loginWithResult(valid), { ok: false, reason, error: key });
+    assert.equal(await boolean.login(valid), false);
+    assert.deepEqual(structured.getSnapshot(), { user: null, busy: false, ready: true, error: key });
+    assert.deepEqual(boolean.getSnapshot(), structured.getSnapshot());
+  }
+  const ok = new AuthStore(() => ({ login: async () => {}, me: async () => user }));
+  assert.deepEqual(await ok.loginWithResult(valid), { ok: true });
+  assert.deepEqual(ok.getSnapshot(), { user, busy: false, ready: true, error: null });
+});
+
+test('a login while another is running sends nothing and neither form changes state', async () => {
+  let finish, calls = 0;
+  const store = new AuthStore(() => ({ login: () => { calls++; return new Promise(resolve => { finish = resolve; }); }, me: async () => user }));
+  const first = store.loginWithResult(valid);
+  const busy = store.getSnapshot();
+  assert.deepEqual(await store.loginWithResult(valid), { ok: false, reason: 'busy' });
+  assert.equal(await store.login(valid), false);
+  assert.equal(store.getSnapshot(), busy);
+  finish();
+  assert.deepEqual(await first, { ok: true });
+  assert.equal(calls, 1);
+});
+
+test('login stays usable when detached, as screens receive it, and useAuth exposes both forms', async () => {
+  const { login, loginWithResult } = new AuthStore(() => ({ login: async () => {}, me: async () => user }));
+  assert.equal(await login(valid), true);
+  assert.deepEqual(await loginWithResult(valid), { ok: true });
+  const provider = fs.readFileSync('src/providers/auth-provider.tsx', 'utf8');
+  assert.match(provider, /login: store\.login, loginWithResult: store\.loginWithResult/);
+});
+
 test('signup validation enforces strength, confirmation, username and mobile formats', () => {
   assert.deepEqual(authForm.validateAuthDraft(valid, true, 'EG'), {});
   for (const [field, value] of Object.entries({ name: ' ', password: 'short', email: 'invalid', username: '1bad', phoneNumber: '123', confirmPassword: 'mismatch' })) {
