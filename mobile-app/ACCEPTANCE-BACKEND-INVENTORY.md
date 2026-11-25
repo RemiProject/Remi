@@ -120,9 +120,11 @@ restoration; true logout/expired-session behavior is unchanged.
 
 ## Remaining known gaps
 
-- **Email verification has no in-app flow.** Mailpit link tokens must be submitted
-  through `verifyEmail`; opening the default localhost:5173 link does not provide
-  a working mobile verification route. No six-digit-code flow is available.
+- **The verification link has no mobile route.** Email verification now has an in-app
+  6-digit code flow (after sign-up, after a refused login, and from Profile), so a
+  Mailpit link token no longer has to be submitted through `verifyEmail`. Opening the
+  default localhost:5173 link still does not lead to a mobile screen. The code needs
+  `EMAIL_VERIFICATION_CODE_SECRET` on the backend; see [README](README.md#create-and-verify-a-local-test-account).
 - **Editing date/storage/name and true batch delete/archive need backend support.**
   Edit remains disabled. Added by mistake is a ledger adjustment to zero, not deletion.
 - **Local-items import is not built.** Existing AsyncStorage inventory is retained

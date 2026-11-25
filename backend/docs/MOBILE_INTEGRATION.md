@@ -26,6 +26,13 @@ Generate client types from `schema.graphql` (Flutter: `graphql_codegen` / `ferry
 
 Email flows: `verifyEmail(token)`, `requestEmailVerification` (resend, logged-in), `requestPasswordReset(email)` (always returns `true`), `resetPassword(token, newPassword)`. Tokens arrive by email as deep links built from `WEB_BASE_URL`.
 
+Email verification by 6-digit code (both public, no session):
+
+- `requestEmailVerificationCode(input: { email: String! })` returns `true` for every validly formed email, whether or not an email was sent. Codes are limited per account: one per 60 seconds and 10 in 24 hours, shared with registration and `requestEmailVerification`. Requests over the limit send nothing.
+- `verifyEmailCode(input: { email: String!, code: String! })` returns `true`. Send `code` as six ASCII digits in a string, so leading zeros are kept. Every failure returns `INVALID_EMAIL_VERIFICATION_CODE`: a wrong, expired, used or replaced code, an unknown email, or an already verified account. A code lasts 15 minutes and allows 5 wrong attempts.
+
+Both are throttled per client (`TOO_MANY_REQUESTS`), and a malformed email returns `BAD_REQUEST`. They need `EMAIL_VERIFICATION_CODE_SECRET` on the server; without it, emails contain only the link and every code is rejected.
+
 ## 3. Household context
 
 Almost every operation works inside one household.
