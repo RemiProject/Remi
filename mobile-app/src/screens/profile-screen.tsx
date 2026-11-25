@@ -8,6 +8,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { authMessages } from '@/i18n/auth';
+import { emailVerificationMessages } from '@/i18n/email-verification';
 import { isBackendInventoryEnabled } from '@/services/inventory-feature';
 import { feedback } from '@/services/feedback';
 
@@ -23,6 +24,7 @@ export default function ProfileScreen() {
     {!auth.ready ? <AppText>{t.restoring}</AppText> : auth.user ? <Card>
       <AppText variant="heading">{auth.user.name}</AppText><AppText>{auth.user.email}</AppText>
       <AppText muted>{auth.user.emailVerifiedAt ? t.signedIn : t.verificationPending}</AppText>
+      {!auth.user.emailVerifiedAt && <Button label={emailVerificationMessages[language].verify} variant="secondary" disabled={auth.busy} onPress={() => router.push('/verify-email-code')} />}
       <Button label={auth.busy ? t.wait : t.logout} disabled={auth.busy} onPress={() => { void auth.logout(); }} />
     </Card> : <Card>
       <AppText>{t.intro}</AppText>

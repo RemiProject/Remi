@@ -28,5 +28,5 @@ export function useAuth() {
   const store = useContext(Context);
   if (!store) throw new Error('useAuth requires AuthProvider');
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
-  return { ...snapshot, login: store.login, logout: store.logout, deleteAccount: store.deleteAccount, restore: store.restore };
+  return { ...snapshot, login: store.login, loginWithResult: store.loginWithResult, logout: store.logout, deleteAccount: store.deleteAccount, restore: store.restore };
 }

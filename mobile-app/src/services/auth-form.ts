@@ -6,6 +6,7 @@ export type PhoneCountry = (typeof phoneCountries)[number]['code'];
 export interface AuthDraft { name: string; username: string; email: string; phoneNumber: string; password: string; confirmPassword: string; identifier: string }
 export const emptyAuthDraft: AuthDraft = { name: '', username: '', email: '', phoneNumber: '', password: '', confirmPassword: '', identifier: '' };
 export const passwordRules = (value: string) => ({ length: value.length >= 8 && value.length <= 128, uppercase: /[A-Z]/.test(value), number: /[0-9]/.test(value), special: /[\p{P}\p{S}]/u.test(value) });
+export const isEmailAddress = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && value.trim().length <= 254;
 export function normalizePhone(value: string, countryCode: PhoneCountry) {
   const country = phoneCountries.find(entry => entry.code === countryCode)!;
   const cleaned = value.replace(/[\s()\-]/g, '');
@@ -23,7 +24,7 @@ export function validateAuthDraft(draft: AuthDraft, signup: boolean, country: Ph
   }
   if (!draft.name.trim() || draft.name.trim().length > 100) errors.name = 'nameInvalid';
   if (!/^[A-Za-z][A-Za-z0-9_]{2,29}$/.test(draft.username.trim())) errors.username = 'usernameInvalid';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim()) || draft.email.trim().length > 254) errors.email = 'emailInvalid';
+  if (!isEmailAddress(draft.email)) errors.email = 'emailInvalid';
   if (!normalizePhone(draft.phoneNumber, country)) errors.phoneNumber = 'phoneInvalid';
   if (!Object.values(passwordRules(draft.password)).every(Boolean)) errors.password = 'passwordSignup';
   if (draft.confirmPassword !== draft.password || !draft.confirmPassword) errors.confirmPassword = 'passwordMismatch';

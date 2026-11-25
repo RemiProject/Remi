@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, View, type TextInputInstance } from 'react-native';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/core';
@@ -8,8 +8,9 @@ import { useLanguage } from '@/providers/language-provider';
 import { useRemyTheme } from '@/theme/provider';
 import { getAuth } from '@/services/auth';
 import { authErrorKey } from '@/services/auth-validation';
-import { emptyAuthDraft, normalizePhone, passwordRules, phoneCountries, validateAuthDraft, type AuthDraft, type PhoneCountry } from '@/services/auth-form';
+import { emptyAuthDraft, isEmailAddress, normalizePhone, passwordRules, phoneCountries, validateAuthDraft, type AuthDraft, type PhoneCountry } from '@/services/auth-form';
 import { authMessages } from '@/i18n/auth';
+import { EmailVerificationFlow } from './email-verification-screen';
 import ProfileScreen from './profile-screen';
 
 export default function AuthScreen({ signup = false }: { signup?: boolean }) {
@@ -23,8 +24,15 @@ export default function AuthScreen({ signup = false }: { signup?: boolean }) {
   const [errors, setErrors] = useState<Partial<Record<keyof AuthDraft, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [registered, setRegistered] = useState(false);
+  const [verifying, setVerifying] = useState<string | null>(null);
   const submitting = useRef(false);
+  // Only here, only between registering and verifying, so a new account can sign in without typing it again.
+  const signupPassword = useRef<string | null>(null);
+  const unmounted = useRef(false);
+  useEffect(() => {
+    unmounted.current = false;
+    return () => { unmounted.current = true; signupPassword.current = null; };
+  }, []);
   const inputs = useRef<Partial<Record<keyof AuthDraft, TextInputInstance | null>>>({});
   const country = phoneCountries.find(entry => entry.code === countryCode)!;
   function change(field: keyof AuthDraft, value: string) {
@@ -43,9 +51,16 @@ export default function AuthScreen({ signup = false }: { signup?: boolean }) {
       if (signup) {
         await getAuth().register({ name: draft.name.trim(), username: draft.username.trim().toLowerCase(), email: draft.email.trim(),
           phoneNumber: normalizePhone(draft.phoneNumber, countryCode), password: draft.password, languageCode: language });
-        setRegistered(true);
-      } else if (await auth.login({ identifier: draft.identifier.trim(), password: draft.password })) {
-        router.replace({ pathname: '/feature', params: { feature: 'profile' } });
+        if (unmounted.current) return;
+        signupPassword.current = draft.password;
+        setVerifying(draft.email.trim());
+      } else {
+        const identifier = draft.identifier.trim();
+        const result = await auth.loginWithResult({ identifier, password: draft.password });
+        if (result.ok) router.replace({ pathname: '/feature', params: { feature: 'profile' } });
+        else if (result.reason === 'emailNotVerified' && !unmounted.current) {
+          router.push(isEmailAddress(identifier) ? { pathname: '/verify-email-code', params: { email: identifier } } : '/verify-email-code');
+        }
       }
     } catch (e) { setError(authErrorKey(e)); }
     finally {
@@ -54,6 +69,10 @@ export default function AuthScreen({ signup = false }: { signup?: boolean }) {
     }
   }
   const disabled = busy || auth.busy || !auth.ready;
+  // Before the signed-in check: signing in is the flow's last step and it leaves this screen itself.
+  if (verifying !== null) return <EmailVerificationFlow start={{ origin: 'signup', email: verifying }}
+    takePassword={() => { const password = signupPassword.current; signupPassword.current = null; return password; }}
+    onCancel={() => { signupPassword.current = null; router.dismissTo('/login'); }} />;
   if (auth.user) return <ProfileScreen />;
   const field = (key: keyof AuthDraft, options: { password?: boolean; placeholder?: string; maxLength?: number } = {}) =>
     <AuthInput key={key} label={t[key]} value={draft[key]} error={errors[key] ? t[errors[key]!] : undefined}
@@ -70,9 +89,7 @@ export default function AuthScreen({ signup = false }: { signup?: boolean }) {
   const rules = passwordRules(draft.password);
   return <AuthShell title={signup ? t.signupTitle : t.loginTitle} subtitle={signup ? t.signupIntro : t.intro}
     onBack={() => { if (busy) return; if (router.canGoBack()) router.back(); else router.replace({ pathname: '/feature', params: { feature: 'profile' } }); }}>
-    {!auth.ready ? <AppText>{t.restoring}</AppText> : registered ? <>
-      <AuthNotice success>{t.registered}</AuthNotice><AuthAction label={t.login} onPress={() => router.replace('/login')} />
-    </> : <>
+    {!auth.ready ? <AppText>{t.restoring}</AppText> : <>
       {signup ? <>
         {field('name', { maxLength: 100, placeholder: t.namePlaceholder })}
         {field('username', { maxLength: 30, placeholder: t.usernamePlaceholder })}

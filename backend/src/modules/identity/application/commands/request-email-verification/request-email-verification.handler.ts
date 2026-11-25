@@ -10,6 +10,7 @@ import { UserNotFoundError } from '@/modules/identity/domain/services/identity.e
 import { LinkBuilder } from '@/modules/identity/application/services/link-builder.js';
 import { OneTimeTokenService } from '@/modules/identity/application/services/one-time-token.service.js';
 import { RequestEmailVerificationCommand } from './request-email-verification.command.js';
+import { EmailVerificationCodeService } from '@/modules/identity/application/services/email-verification-code.service.js';
 
 /** Re-sends the verification email for the logged-in user. Already verified = no-op. */
 @CommandHandler(RequestEmailVerificationCommand)
@@ -22,6 +23,7 @@ export class RequestEmailVerificationHandler implements ICommandHandler<RequestE
     private readonly config: AppConfigService,
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     @Inject(TOKEN_REPOSITORY) private readonly tokenRepo: TokenRepository,
+    private readonly codes: EmailVerificationCodeService,
   ) {}
 
   async execute({ userId }: RequestEmailVerificationCommand): Promise<{ accepted: true }> {
@@ -29,8 +31,10 @@ export class RequestEmailVerificationHandler implements ICommandHandler<RequestE
     if (!user) throw new UserNotFoundError();
     if (user.emailVerifiedAt) return { accepted: true };
 
-    const issued = this.tokens.issue('EMAIL_VERIFY', user.id);
     await this.tx.run(async (tx) => {
+      const code = await this.codes.issueWithinTransaction(tx, user.id);
+      if (code.status !== 'issued' && code.status !== 'disabled') return;
+      const issued = this.tokens.issue('EMAIL_VERIFY', user.id);
       await this.tokenRepo.insert(tx, issued.row);
       await this.outbox.publish(tx, {
         topic: OutboxTopics.EmailVerifyRequested,
@@ -42,6 +46,7 @@ export class RequestEmailVerificationHandler implements ICommandHandler<RequestE
           lang: user.languageCode,
           verifyUrl: this.links.verifyEmail(issued.raw),
           expiresInHours: this.config.env.EMAIL_VERIFY_TTL_HOURS,
+          ...(code.status === 'issued' ? { codeChallengeId: code.challenge.id } : {}),
         },
       });
     }, { userId: user.id });

@@ -17,6 +17,10 @@ export function authErrorKey(error: unknown): string {
   if (codes.includes('BAD_REQUEST')) return 'validationError';
   return 'connectionError';
 }
+export function isEmailNotVerifiedError(error: unknown) {
+  const e = error as { code?: string; codes?: string[] } | null;
+  return (e?.codes ?? [e?.code]).includes('EMAIL_NOT_VERIFIED');
+}
 export function isSignedOutError(error: unknown) {
   const e = error as { code?: string; codes?: string[]; status?: number } | null;
   return e?.code === 'NO_SESSION' || e?.codes?.some(c => ['INVALID_REFRESH_TOKEN', 'UNAUTHENTICATED'].includes(c)) || e?.status === 401;

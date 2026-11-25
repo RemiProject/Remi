@@ -4,6 +4,7 @@ import { MailService } from '@/platform/mail/mail.service.js';
 import { OutboxHandler, type OutboxHandlerPort, type OutboxMessage } from '@/platform/outbox/outbox-handler.decorator.js';
 import { OutboxTopics } from '@/modules/identity/domain/outbox-topics.js';
 import { TOKEN_REPOSITORY, type TokenRepository } from '@/modules/identity/domain/ports/token.repository.js';
+import { EmailVerificationCodeService } from '@/modules/identity/application/services/email-verification-code.service.js';
 
 @Injectable()
 @OutboxHandler(OutboxTopics.EmailVerifyRequested)
@@ -12,11 +13,13 @@ export class SendVerificationEmailHandler implements OutboxHandlerPort {
     private readonly mail: MailService,
     private readonly tx: TransactionRunner,
     @Inject(TOKEN_REPOSITORY) private readonly tokens: TokenRepository,
+    private readonly codes: EmailVerificationCodeService,
   ) {}
 
   async handle({ payload: p }: OutboxMessage): Promise<void> {
     // Idempotent: a retry never emails someone whose token is already used or expired.
     if (!(await this.tokens.isUsable(this.tx.db, p.tokenId))) return;
-    await this.mail.send({ to: p.to, template: 'verify-email', lang: p.lang, vars: { name: p.name, verifyUrl: p.verifyUrl, expiresInHours: p.expiresInHours } });
+    const code = p.codeChallengeId ? await this.codes.codeForEmail(p.codeChallengeId) : undefined;
+    await this.mail.send({ to: p.to, template: 'verify-email', lang: p.lang, vars: { name: p.name, verifyUrl: p.verifyUrl, expiresInHours: p.expiresInHours, code } });
   }
 }

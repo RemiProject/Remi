@@ -615,6 +615,11 @@ type Mutation {
   requestEmailVerification: Boolean!
 
   """
+  Public verification-code resend. Always true for a validly formed email: unknown, verified and account-limited emails are indistinguishable.
+  """
+  requestEmailVerificationCode(input: RequestEmailVerificationCodeInput!): Boolean!
+
+  """
   Step 1 of 2: get a presigned PUT URL, upload the bytes, then call confirmImageUpload.
   """
   requestImageUpload(input: RequestImageUploadInput!): ImageUploadTicketType!
@@ -641,6 +646,11 @@ type Mutation {
   updateShoppingList(input: UpdateShoppingListInputType!): ShoppingListType!
   updateShoppingListItem(input: UpdateShoppingItemInputType!): ShoppingListItemType!
   verifyEmail(input: TokenInput!): Boolean!
+
+  """
+  Public email verification by code. Invalid, expired, used or unknown-email challenges share one generic error.
+  """
+  verifyEmailCode(input: VerifyEmailCodeInput!): Boolean!
 }
 
 type MyHousehold {
@@ -1243,6 +1253,10 @@ input RemoveMemberInput {
   userId: String!
 }
 
+input RequestEmailVerificationCodeInput {
+  email: String!
+}
+
 input RequestImageUploadInput {
   """One of IMAGE_ALLOWED_MIME, e.g. image/jpeg"""
   mimeType: String!
@@ -1553,6 +1567,12 @@ type UserProfileDataType {
   gender: Gender
   heightCm: Decimal
   weightKg: Decimal
+}
+
+input VerifyEmailCodeInput {
+  """Six ASCII digits, including any leading zero."""
+  code: String!
+  email: String!
 }
 
 type WeightEntryType {

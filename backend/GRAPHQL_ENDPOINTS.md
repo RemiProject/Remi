@@ -78,6 +78,9 @@ Example variables:
 - [`logout`](#logout) · mutation · auth  
 - [`logoutAll`](#logoutall) · mutation · auth  
 - [`verifyEmail`](#verifyemail) · mutation · public  
+- [`requestEmailVerificationCode`](#requestemailverificationcode) · mutation · public  
+- [`verifyEmailCode`](#verifyemailcode) · mutation · public  
+- [`requestEmailVerification`](#requestemailverification) · mutation · auth  
 - [`requestPasswordReset`](#requestpasswordreset) · mutation · public  
 - [`resetPassword`](#resetpassword) · mutation · public  
 - [`me`](#me) · query · auth  
@@ -378,7 +381,7 @@ query {
 
 **Mutation · Public** · throttled
 
-Creates a user. Returns `userId`. Email verification may be required depending on `EMAIL_VERIFICATION_REQUIRED`.
+Creates a user. Returns `userId`. Email verification may be required depending on `EMAIL_VERIFICATION_REQUIRED`. The verification email contains a link and, when `EMAIL_VERIFICATION_CODE_SECRET` is configured, a 6-digit code.
 
 ```graphql
 mutation {
@@ -494,7 +497,7 @@ Headers: `Authorization: Bearer <accessToken>`
 
 **Mutation · Public** · throttled
 
-Consumes a one-time email-verify token from the verification link.
+Consumes a one-time email-verify token from the verification link. Success also invalidates any open verification code.
 
 ```graphql
 mutation {
@@ -503,6 +506,61 @@ mutation {
   })
 }
 ```
+
+---
+
+### `requestEmailVerificationCode`
+
+**Mutation · Public** · throttled
+
+Emails a new 6-digit code and verification link. Returns `true` for every validly formed email, whether the account is unknown, already verified, or over its limit, so it does not reveal which emails exist. A malformed email is a validation error, and the IP throttle returns `TOO_MANY_REQUESTS`.
+
+```graphql
+mutation {
+  requestEmailVerificationCode(input: {
+    email: "ali@example.com"
+  })
+}
+```
+
+- Registration, this mutation and `requestEmailVerification` share one per-account limit: a 60-second cooldown and at most 10 codes in 24 hours. Requests over the limit send nothing.
+- A new code replaces the previous one.
+- Without `EMAIL_VERIFICATION_CODE_SECRET` this mutation still returns `true` but sends nothing; the verification link remains available.
+
+---
+
+### `verifyEmailCode`
+
+**Mutation · Public** · throttled
+
+Verifies the email with the 6-digit code. Send `code` as a string to keep leading zeros.
+
+```graphql
+mutation {
+  verifyEmailCode(input: {
+    email: "ali@example.com"
+    code: "012345"
+  })
+}
+```
+
+A code is valid for 15 minutes, works once, and is invalidated after 5 wrong attempts. Every failure (wrong, expired, used or replaced code, unknown email, already verified account, or codes not configured) returns the same `INVALID_EMAIL_VERIFICATION_CODE` error.
+
+---
+
+### `requestEmailVerification`
+
+**Mutation · Auth** · throttled
+
+Re-sends the verification email to the logged-in user. No-op (`true`) when already verified or over the shared limit above. Without `EMAIL_VERIFICATION_CODE_SECRET` it sends a link-only email.
+
+```graphql
+mutation {
+  requestEmailVerification
+}
+```
+
+Headers: `Authorization: Bearer <accessToken>`
 
 ---
 
@@ -833,7 +891,7 @@ type FoodCategory { id: ID! code: String! name: String! }
 ```text
 1. countries / locales / languages   → fill registration form
 2. register
-3. verifyEmail (if required)
+3. verifyEmailCode or verifyEmail (if required; requestEmailVerificationCode to resend)
 4. login                             → store accessToken + refreshToken
 5. createHousehold                   → store householdId
 6. myHouseholds / me                 → with Authorization

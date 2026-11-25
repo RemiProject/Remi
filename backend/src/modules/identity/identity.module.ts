@@ -1,5 +1,10 @@
 import { DeleteAccountHandler } from './application/commands/delete-account/delete-account.handler.js';
 import { Module } from '@nestjs/common';
+import { RequestEmailVerificationCodeHandler } from './application/commands/request-email-verification-code/request-email-verification-code.handler.js';
+import { VerifyEmailCodeHandler } from './application/commands/verify-email-code/verify-email-code.handler.js';
+import { EmailVerificationCodeService } from './application/services/email-verification-code.service.js';
+import { EMAIL_VERIFICATION_CODE_REPOSITORY } from './domain/ports/email-verification-code.repository.js';
+import { PrismaEmailVerificationCodeRepository } from './infrastructure/repositories/prisma-email-verification-code.repository.js';
 import { AcceptInvitationHandler } from './application/commands/accept-invitation/accept-invitation.handler.js';
 import { CreateHouseholdHandler } from './application/commands/create-household/create-household.handler.js';
 import { InviteMemberHandler } from './application/commands/invite-member/invite-member.handler.js';
@@ -50,6 +55,8 @@ import { HouseholdResolver } from './presentation/resolvers/household.resolver.j
 import { InvitationResolver } from './presentation/resolvers/invitation.resolver.js';
 
 const CommandHandlers = [
+  RequestEmailVerificationCodeHandler,
+  VerifyEmailCodeHandler,
   RegisterHandler,
   LoginHandler,
   RefreshAccessTokenHandler,
@@ -91,6 +98,8 @@ const OutboxHandlers = [
     ...EventHandlers,
     ...OutboxHandlers,
     OneTimeTokenService,
+    EmailVerificationCodeService,
+    { provide: EMAIL_VERIFICATION_CODE_REPOSITORY, useClass: PrismaEmailVerificationCodeRepository },
     LinkBuilder,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
     { provide: TOKEN_REPOSITORY, useClass: PrismaTokenRepository },

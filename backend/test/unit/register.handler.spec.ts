@@ -18,8 +18,9 @@ function setup(refs: any = { countryId: 'c', localeId: 'l', languageId: 'g', lan
     users: { create: vi.fn(async () => undefined), findByUsername: vi.fn(async () => null) },
     tokenRepo: { insert: vi.fn(async () => undefined) },
     hasher: { hash: vi.fn(async () => 'HASH'), verify: vi.fn() },
+    codes: { issueWithinTransaction: vi.fn(async () => ({ status: 'disabled' })) },
   };
-  const handler = new RegisterHandler(deps.tx as any, deps.queryBus as any, deps.eventBus as any, deps.outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config, deps.users as any, deps.tokenRepo as any, deps.hasher as any);
+  const handler = new RegisterHandler(deps.tx as any, deps.queryBus as any, deps.eventBus as any, deps.outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config, deps.users as any, deps.tokenRepo as any, deps.hasher as any, deps.codes as any);
   return { handler, deps };
 }
 const cmd = (over: Partial<RegisterCommand> = {}) => Object.assign(new RegisterCommand(' Ahmed@Mail.com ', 'Secret-123!', 'Ahmed', 'EG', 'ar-EG', 'Africa/Cairo', undefined, 'ahmed_test', '+201012345678'), over);
@@ -67,6 +68,26 @@ describe('RegisterHandler', () => {
     const url: string = (deps.outbox.publish.mock.calls as any[])[0][1].payload.verifyUrl;
     expect(url).not.toContain(row.tokenHash);
     expect(JSON.stringify(row)).not.toContain(decodeURIComponent(url.split('token=')[1]!));
+  });
+
+  it('queues only the code challenge ID alongside the link in the registration transaction', async () => {
+    const { handler, deps } = setup();
+    deps.codes.issueWithinTransaction.mockResolvedValueOnce({ status: 'issued', challenge: { id: 'challenge-id' } } as any);
+    const { userId } = await handler.execute(cmd());
+    expect(deps.codes.issueWithinTransaction).toHaveBeenCalledWith({}, userId);
+    const payload = (deps.outbox.publish.mock.calls as any[])[0][1].payload;
+    expect(payload.codeChallengeId).toBe('challenge-id');
+    expect(payload).not.toHaveProperty('code'); expect(payload).not.toHaveProperty('codeHash');
+  });
+
+  it.each(['disabled', 'not-eligible', 'cooldown', 'daily-cap'])('still registers with a link-only email when code issuance returns %s', async status => {
+    const { handler, deps } = setup();
+    deps.codes.issueWithinTransaction.mockResolvedValueOnce({ status });
+    await expect(handler.execute(cmd())).resolves.toEqual({ userId: expect.any(String) });
+    expect(deps.users.create).toHaveBeenCalledTimes(1); expect(deps.tokenRepo.insert).toHaveBeenCalledTimes(1);
+    const payload = (deps.outbox.publish.mock.calls as any[])[0][1].payload;
+    expect(payload.verifyUrl).toContain('/verify-email?token='); expect(payload).not.toHaveProperty('codeChallengeId');
+    expect(deps.eventBus.publish).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid timezone and unknown references before touching the DB', async () => {

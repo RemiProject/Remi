@@ -1,3 +1,5 @@
 {{!-- subject: Verify your AI Kitchen email --}}
-<p>Hi {{name}},</p><p>Click the button to verify your email. The link is valid for {{expiresInHours}} hours.</p>{{> button url=verifyUrl label="Verify email"}}
+<p>Hi {{name}},</p>
+{{#if code}}<p>Enter this verification code in Remi:</p><p dir="ltr" data-verification-code="{{code}}" style="font-size:28px;font-weight:bold;letter-spacing:6px">{{code}}</p><p>The code is valid for 15 minutes. Never share it.</p>{{/if}}
+<p>You can also verify your email using this link. The link is valid for {{expiresInHours}} hours.</p>{{> button url=verifyUrl label="Verify email"}}
 {{!-- footer: If you did not sign up for AI Kitchen, ignore this email. --}}

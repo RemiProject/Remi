@@ -49,7 +49,7 @@ For example, use `pnpm.cmd run typecheck`, `pnpm.cmd run lint`, and
 
 ## Run — option 1: app on your machine, infrastructure in Docker (best for development)
 ```bash
-cp .env.example .env              # set POSTGRES_PASSWORD, DATABASE_URL (same password), JWT secrets (>= 32 chars)
+cp .env.example .env              # set POSTGRES_PASSWORD, DATABASE_URL (same password), JWT secrets (>= 32 chars), EMAIL_VERIFICATION_CODE_SECRET (see below)
 pnpm install
 pnpm docker:infra                 # starts db + s3 + mailpit
 pnpm migrate && pnpm seed         # SQL migrations + reference seed (both safe to re-run)
@@ -58,6 +58,18 @@ pnpm db:generate                  # prisma generate -> src/generated (needs inte
 pnpm start:dev                    # http://localhost:3000/graphql
 ```
 Mailpit (every email the app sends): http://localhost:8025 · S3 (SeaweedFS): http://localhost:8333 · Postgres: `127.0.0.1:5432`.
+
+### Required for email verification codes
+Every developer needs both of these, on a new checkout and when updating an existing one:
+
+1. **Run migration `0035_email_verification_codes.sql`** with `pnpm migrate`, then `pnpm db:generate` (Docker's `migrate` service applies the migration in option 2). Without its table, verifying by link fails, and once the secret is set, registration fails too.
+2. **Add `EMAIL_VERIFICATION_CODE_SECRET` to `backend/.env`.** `.env.example` leaves it empty. Generate your own value and restart the API:
+   ```bash
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+   ```
+   Without it, the API still starts in development, but emails are link-only and the app's code screen cannot be used: it can send no codes and rejects every code.
+
+See [Email verification codes](#email-verification-codes) for how the codes work.
 
 ## Run — option 2: everything in Docker (db + s3 + mailpit + migrate + api)
 ```bash
@@ -118,6 +130,7 @@ SQL files in `prisma/migrations` are the source of truth; Prisma is only the que
 | Lint | `pnpm lint` · auto-fix: `pnpm lint:fix` |
 | Type-check | `pnpm typecheck` |
 | Unit tests | `pnpm test` · watch: `pnpm test:watch` |
+| Email verification code integration tests (after `pnpm build`; creates and drops its own database) | `pnpm test:integration:email-verification` |
 | Production build (prisma generate + nest build + alias rewrite) | `pnpm build` then `pnpm start` |
 
 ### ESLint rules worth knowing
@@ -153,10 +166,20 @@ config (zod) · db (Prisma adapter-pg, `TransactionRunner` with 40001/40P01 retr
 
 ## Phase 1 (identity)
 Tables: Country, Language, Locale, Cuisine, FoodCategory, User, Household, HouseholdMember, HouseholdInvitation, Token, Session.
-Commands: register, login, refreshAccessToken, verifyEmail, requestPasswordReset, resetPassword, createHousehold, inviteMember, acceptInvitation, revokeInvitation, removeMember, leaveHousehold.
+Commands: register, login, refreshAccessToken, verifyEmail, requestEmailVerification, requestEmailVerificationCode, verifyEmailCode, requestPasswordReset, resetPassword, createHousehold, inviteMember, acceptInvitation, revokeInvitation, removeMember, leaveHousehold.
 Queries: me, myHouseholds, householdMembers, householdInvitations, countries/languages/locales/cuisines/foodCategories.
 
 Household-scoped operations need headers `Authorization: Bearer <access>` and `x-household-id: <uuid>`.
+
+### Email verification codes
+Verification emails contain a link (24 h by default) and a 6-digit code (15 minutes, single use, 5 wrong attempts). Registration and both resend mutations share a 60-second cooldown and a cap of 10 codes per account in 24 hours. Codes are never stored: the database keeps a keyed hash, the outbox payload keeps only the challenge ID, and the mail worker re-derives the code just before sending. If the code was used, replaced or expired by then, the email contains only the link. Verifying by link invalidates any open code.
+
+`EMAIL_VERIFICATION_CODE_SECRET` is the key: canonical base64url of at least 32 random bytes. It is **required in production**; the app refuses to start without it. In development and test it is optional: when empty, emails are link-only, `requestEmailVerificationCode` returns `true` without sending, and `verifyEmailCode` always returns the generic error. Use the same value for the API and the worker. Changing it invalidates open codes; links keep working. Generate one with:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+```
+Keep it in `.env` or a secret manager, never in source control or logs.
 
 ## Phase 2 (catalog)
 Tables: Currency, Food, FoodAlias, NutritionProfile, FoodSubstitution, Product, ProductSource. The `foods(search, first, after)` query searches canonical names and localized aliases with an ID cursor. `UnitConverter` uses exact decimal arithmetic, the versioned cup/tablespoon constants, and half-up rounding to three decimal places. `pnpm seed:catalog` loads a starter list; nutrition values are intentionally left empty until a trusted source is selected.

@@ -33,6 +33,18 @@ export class TokenInput {
 }
 
 @InputType()
+export class RequestEmailVerificationCodeInput {
+  @Field() @IsEmail() @MaxLength(254) email!: string;
+}
+
+@InputType()
+export class VerifyEmailCodeInput {
+  @Field() @IsEmail() @MaxLength(254) email!: string;
+  // Semantic validation belongs to the service so all invalid code states share one error.
+  @Field({ description: 'Six ASCII digits, including any leading zero.' }) @IsString() @MaxLength(256) code!: string;
+}
+
+@InputType()
 export class RefreshAccessTokenInput {
   @Field() @IsString() @IsNotEmpty() @MaxLength(256) refreshToken!: string;
 }
