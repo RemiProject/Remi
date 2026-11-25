@@ -41,7 +41,7 @@ describe('public verification commands and GraphQL boundary', () => {
 
   it.each([null, user, { ...user, emailVerifiedAt: new Date() }])('returns the same acceptance for unknown/known/verified users', async found => {
     const users = { findByEmail: vi.fn(async () => found) };
-    const codes = { requireEnabled: vi.fn() };
+    const codes = { isEnabled: true };
     const commands = { execute: vi.fn(async () => ({ accepted: true })) };
     const handler = new RequestEmailVerificationCodeHandler({ db: {} } as any, codes as any, commands as any, users as any);
     expect(await handler.execute(new RequestEmailVerificationCodeCommand(' PERSON@Example.Invalid '))).toEqual({ accepted: true });
@@ -50,7 +50,7 @@ describe('public verification commands and GraphQL boundary', () => {
   });
 
   it('does not reveal an account deleted between lookup and resend', async () => {
-    const handler = new RequestEmailVerificationCodeHandler({ db: {} } as any, { requireEnabled() {} } as any,
+    const handler = new RequestEmailVerificationCodeHandler({ db: {} } as any, { isEnabled: true } as any,
       { execute: async () => { throw new UserNotFoundError(); } } as any, { findByEmail: async () => user } as any);
     expect(await handler.execute(new RequestEmailVerificationCodeCommand(user.email))).toEqual({ accepted: true });
   });
@@ -68,12 +68,14 @@ describe('public verification commands and GraphQL boundary', () => {
     }
   });
 
-  it('fails both public operations before account lookup when the feature is disabled', async () => {
+  it('accepts resend without sending, and rejects verify, before account lookup when the feature is disabled', async () => {
     const users = { findByEmail: vi.fn() };
-    const codes = { requireEnabled: () => { throw new Error('generic'); } };
-    const resend = new RequestEmailVerificationCodeHandler({} as any, codes as any, {} as any, users as any);
+    const commands = { execute: vi.fn() };
+    const codes = { isEnabled: false, requireEnabled: () => { throw new Error('generic'); } };
+    const resend = new RequestEmailVerificationCodeHandler({} as any, codes as any, commands as any, users as any);
     const verify = new VerifyEmailCodeHandler({} as any, codes as any, {} as any, users as any);
-    await expect(resend.execute(new RequestEmailVerificationCodeCommand(user.email))).rejects.toThrow('generic');
+    expect(await resend.execute(new RequestEmailVerificationCodeCommand(user.email))).toEqual({ accepted: true });
+    expect(commands.execute).not.toHaveBeenCalled();
     await expect(verify.execute(new VerifyEmailCodeCommand(user.email, '123456'))).rejects.toThrow('generic');
     expect(users.findByEmail).not.toHaveBeenCalled();
   });
@@ -137,10 +139,11 @@ describe('verification email transactions and compatibility', () => {
     const renderer = new TemplateRenderer(fakeConfig({ MAIL_TEMPLATES_DIR: `${process.cwd()}/src/platform/mail/templates/emails` }));
     await renderer.onModuleInit();
     const vars = { name: 'Test', code: '012345', verifyUrl: 'https://example.invalid/verify-email?token=legacy', expiresInHours: 24 };
-    const html = renderer.render('verify-email', lang, vars).html;
-    expect(html).toContain('data-verification-code="012345"'); expect(html).toContain('dir="ltr"'); expect(html).toContain('token=legacy'); expect(html).toContain('15');
-    const legacy = renderer.render('verify-email', lang, { ...vars, code: undefined }).html;
-    expect(legacy).not.toContain('data-verification-code'); expect(legacy).toContain('token=legacy');
+    // Handlebars escapes '=' in attributes; mail clients decode it back.
+    const html = renderer.render('verify-email', lang, vars).html.replaceAll('&#x3D;', '=');
+    expect(html).toContain('data-verification-code="012345"'); expect(html).toContain('dir="ltr"'); expect(html).toContain(`href="${vars.verifyUrl}"`); expect(html).toContain('15');
+    const legacy = renderer.render('verify-email', lang, { ...vars, code: undefined }).html.replaceAll('&#x3D;', '=');
+    expect(legacy).not.toContain('data-verification-code'); expect(legacy).toContain(`href="${vars.verifyUrl}"`);
     expect(readFileSync(`src/platform/mail/templates/emails/${lang}/verify-email.hbs`, 'utf8')).toContain('{{#if code}}');
   });
 });

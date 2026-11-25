@@ -60,8 +60,8 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
           id: userId, email, username, phoneNumber: cmd.phoneNumber, passwordHash, name: cmd.name.trim(), timezone,
           countryId: refs.countryId, localeId: refs.localeId, preferredLanguageId: refs.languageId,
         });
+        // Any status other than 'issued' falls back to a link-only email; it never blocks registration.
         const code = await this.codes.issueWithinTransaction(tx, userId);
-        if (code.status !== 'issued' && code.status !== 'disabled') throw new DomainError('INVALID_EMAIL_VERIFICATION_CODE', 'The verification code is invalid or expired.', 422);
         await this.tokenRepo.insert(tx, issued.row);
         await this.outbox.publish(tx, {
           topic: OutboxTopics.EmailVerifyRequested,

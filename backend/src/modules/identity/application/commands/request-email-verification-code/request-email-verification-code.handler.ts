@@ -17,8 +17,10 @@ export class RequestEmailVerificationCodeHandler implements ICommandHandler<Requ
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
   ) {}
 
+  /** Always answers "accepted": never reveal whether the email exists, is verified or is rate limited. */
   async execute({ email }: RequestEmailVerificationCodeCommand): Promise<{ accepted: true }> {
-    this.codes.requireEnabled();
+    // Without codes there is no per-account cooldown, so this unauthenticated path must not send link-only mail.
+    if (!this.codes.isEnabled) return { accepted: true };
     const user = await this.users.findByEmail(this.transactions.db, normalizeEmail(email));
     if (user) {
       try { await this.commands.execute(new RequestEmailVerificationCommand(user.id)); }

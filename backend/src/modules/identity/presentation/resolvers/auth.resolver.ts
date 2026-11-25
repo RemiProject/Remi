@@ -97,7 +97,7 @@ export class AuthResolver {
   }
 
   @Throttle(AUTH_THROTTLE)
-  @Mutation(() => Boolean, { description: 'Public verification-code resend. Unknown, verified and account-limited emails all return true. Codes must be configured.' })
+  @Mutation(() => Boolean, { description: 'Public verification-code resend. Always true for a validly formed email: unknown, verified and account-limited emails are indistinguishable.' })
   async requestEmailVerificationCode(@Args('input') i: RequestEmailVerificationCodeInput) {
     await this.commandBus.execute(new RequestEmailVerificationCodeCommand(i.email));
     return true;

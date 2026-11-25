@@ -32,8 +32,10 @@ export class EmailVerificationCodeService {
     return value ? Buffer.from(value, 'base64url') : null;
   }
 
+  get isEnabled(): boolean { return this.secret !== null; }
+
   requireEnabled(): void {
-    if (!this.secret) throw invalidCode();
+    if (!this.isEnabled) throw invalidCode();
   }
 
   async invalidateWithinTransaction(tx: Tx, userId: string): Promise<void> {

@@ -12,6 +12,10 @@ import { EmailVerificationCodeService } from '@/modules/identity/application/ser
 import { deriveEmailVerificationCode } from '@/modules/identity/domain/services/email-verification-code.js';
 import { VerifyEmailHandler } from '@/modules/identity/application/commands/verify-email/verify-email.handler.js';
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
+import { RequestEmailVerificationHandler } from '@/modules/identity/application/commands/request-email-verification/request-email-verification.handler.js';
+import { RequestEmailVerificationCommand } from '@/modules/identity/application/commands/request-email-verification/request-email-verification.command.js';
+import { LinkBuilder } from '@/modules/identity/application/services/link-builder.js';
+import { OneTimeTokenService } from '@/modules/identity/application/services/one-time-token.service.js';
 import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
 import { ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -59,7 +63,7 @@ beforeAll(async () => {
   const { AppConfigService: CompiledConfig } = await import('../../dist/platform/config/app-config.service.js');
   const { PrismaService: CompiledPrisma } = await import('../../dist/platform/db/prisma.service.js');
   apiConfig = Object.assign(Object.create(CompiledConfig.prototype), { env: {
-    ...config.env, NODE_ENV: 'test', GRAPHQL_EMIT_SCHEMA: true, ENABLE_OUTBOX_POLLER: false, RUN_BACKGROUND_JOBS: false,
+    ...config.env, NODE_ENV: 'test', EMAIL_VERIFICATION_REQUIRED: false, GRAPHQL_EMIT_SCHEMA: true, ENABLE_OUTBOX_POLLER: false, RUN_BACKGROUND_JOBS: false,
     S3_AUTO_CREATE_BUCKET: false, LOG_LEVEL: 'silent', MAIL_TEMPLATES_DIR: `${process.cwd()}/src/platform/mail/templates/emails`,
   } });
   const module = await Test.createTestingModule({ imports: [AppModule] })
@@ -79,8 +83,8 @@ afterAll(async () => {
   await admin?.end();
 });
 
-async function gql(query: string, variables: Record<string, unknown> = {}) {
-  const response = await fetch(apiUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query, variables }) });
+async function gql(query: string, variables: Record<string, unknown> = {}, accessToken?: string) {
+  const response = await fetch(apiUrl, { method: 'POST', headers: { 'content-type': 'application/json', ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}) }, body: JSON.stringify({ query, variables }) });
   return response.json() as Promise<{ data?: Record<string, any>; errors?: Array<{ message: string; extensions: { code: string } }> }>;
 }
 
@@ -215,10 +219,49 @@ describe('email codes in a dedicated migrated database', () => {
     const id = await user(); const h = clocked(); await issue(h.service, id);
     const token = randomBytes(32).toString('base64url'); const tokenId = randomUUID();
     await fixtures.query(`INSERT INTO "Token" (id,"userId",purpose,"tokenHash","expiresAt") VALUES ($1,$2,'EMAIL_VERIFY',$3,now()+interval '24 hours')`, [tokenId, id, hashToken(token)]);
-    h.advance(60_000); await issue(h.service, id);
+    h.advance(60_000); const open = await issue(h.service, id);
     const handler = new VerifyEmailHandler(transactions, { publish: vi.fn() } as any, users, new PrismaTokenRepository(), h.service);
     expect(await handler.execute(new VerifyEmailCommand(token))).toEqual({ verified: true });
-    await expect(h.service.verify(id, '000000')).rejects.toMatchObject(genericError);
+    expect((await fixtures.query('SELECT "invalidatedAt" FROM "EmailVerificationCode" WHERE id=$1', [open.row.id])).rows[0].invalidatedAt).not.toBeNull();
+    await expect(h.service.verify(id, open.code)).rejects.toMatchObject(genericError);
+  });
+
+  it('gives the mail worker only a live code: never superseded, used, expired, exhausted, rotated, unknown or already verified', async () => {
+    const id = await user(); const h = clocked(); const old = await issue(h.service, id);
+    expect(await h.service.codeForEmail(old.row.id)).toBe(old.code);
+    h.advance(60_000); const next = await issue(h.service, id);
+    expect(await h.service.codeForEmail(old.row.id)).toBeUndefined();
+    expect(await h.service.codeForEmail(next.row.id)).toBe(next.code);
+    const rotatedConfig = { env: { ...config.env, EMAIL_VERIFICATION_CODE_SECRET: randomBytes(32).toString('base64url') } } as AppConfigService;
+    expect(await new EmailVerificationCodeService(rotatedConfig, transactions, repository, users).codeForEmail(next.row.id)).toBeUndefined();
+    const disabledConfig = { env: { ...config.env, EMAIL_VERIFICATION_CODE_SECRET: undefined } } as AppConfigService;
+    expect(await new EmailVerificationCodeService(disabledConfig, transactions, repository, users).codeForEmail(next.row.id)).toBeUndefined();
+    h.advance(899_999); expect(await h.service.codeForEmail(next.row.id)).toBe(next.code);
+    h.advance(1); expect(await h.service.codeForEmail(next.row.id)).toBeUndefined();
+
+    const exhausted = await issue(h.service, id);
+    for (let i = 0; i < 5; i++) await expect(h.service.verify(id, wrong(exhausted.code))).rejects.toMatchObject(genericError);
+    expect(await h.service.codeForEmail(exhausted.row.id)).toBeUndefined();
+    h.advance(60_000); const used = await issue(h.service, id);
+    expect(await h.service.verify(id, used.code)).toBe(true);
+    expect(await h.service.codeForEmail(used.row.id)).toBeUndefined();
+    expect(await h.service.codeForEmail(randomUUID())).toBeUndefined();
+
+    const linked = await user(); const fresh = clocked(); const open = await issue(fresh.service, linked);
+    await fixtures.query('UPDATE "User" SET "emailVerifiedAt"=now() WHERE id=$1', [linked]);
+    expect(await fresh.service.codeForEmail(open.row.id)).toBeUndefined();
+  });
+
+  it('rolls back the code and link token when the outbox write of a resend fails', async () => {
+    const id = await user(); const { service } = clocked();
+    const outbox = { publish: async () => { throw new Error('test outbox failure'); } };
+    const handler = new RequestEmailVerificationHandler(transactions, outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config,
+      users, new PrismaTokenRepository(), service);
+    await expect(handler.execute(new RequestEmailVerificationCommand(id))).rejects.toThrow('test outbox failure');
+    const counts = await fixtures.query(`SELECT (SELECT count(*)::int FROM "EmailVerificationCode" WHERE "userId"=$1) AS codes,
+      (SELECT count(*)::int FROM "Token" WHERE "userId"=$1) AS tokens`, [id]);
+    expect(counts.rows[0]).toEqual({ codes: 0, tokens: 0 });
+    await issue(service, id); // A failed send consumes no cooldown.
   });
 });
 
@@ -253,6 +296,29 @@ describe('public API and mail on the real Nest GraphQL schema', () => {
     expect((await verifyCode(account.email, code)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
   });
 
+  it('authenticated resend shares the cooldown and the daily cap with registration and public resend', async () => {
+    const account = await register();
+    const login = await gql('mutation($input:LoginInput!){login(input:$input){accessToken}}', { input: { email: account.email, password: 'IntegrationOnly123!' } });
+    expect(login.errors).toBeUndefined();
+    const resend = () => gql('mutation{requestEmailVerification}', {}, login.data!.login.accessToken);
+    const counts = async () => (await fixtures.query(`SELECT (SELECT count(*)::int FROM "EmailVerificationCode" WHERE "userId"=$1) AS codes,
+      (SELECT count(*)::int FROM "OutboxEvent" WHERE payload->>'to'=$2) AS mails`, [account.id, account.email])).rows[0];
+    const age = () => fixtures.query(`UPDATE "EmailVerificationCode" SET "createdAt"="createdAt"-interval '61 seconds',"expiresAt"="expiresAt"-interval '61 seconds' WHERE "userId"=$1`, [account.id]);
+    expect((await resend()).data?.requestEmailVerification).toBe(true); // within registration cooldown
+    expect(await counts()).toEqual({ codes: 1, mails: 1 });
+    await age();
+    expect((await resend()).data?.requestEmailVerification).toBe(true);
+    expect(await counts()).toEqual({ codes: 2, mails: 2 });
+    expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true); // within authenticated-resend cooldown
+    expect(await counts()).toEqual({ codes: 2, mails: 2 });
+    await age();
+    await fixtures.query(`INSERT INTO "EmailVerificationCode" (id,"userId","codeHash","createdAt","expiresAt","invalidatedAt")
+      SELECT gen_random_uuid(),$1,repeat('0',64),now()-interval '1 hour',now()-interval '45 minutes',now()-interval '50 minutes' FROM generate_series(1,8)`, [account.id]);
+    expect((await resend()).data?.requestEmailVerification).toBe(true);
+    expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
+    expect(await counts()).toEqual({ codes: 10, mails: 2 });
+  });
+
   it('unknown, wrong and expired verification cases have identical public errors', async () => {
     const account = await register();
     const row = (await fixtures.query('SELECT * FROM "EmailVerificationCode" WHERE "userId"=$1', [account.id])).rows[0];
@@ -265,7 +331,7 @@ describe('public API and mail on the real Nest GraphQL schema', () => {
     expect(error(absent)).toEqual(genericError); expect(error(incorrect)).toEqual(genericError); expect(error(expired)).toEqual(genericError);
   });
 
-  it('keeps disabled-feature registration link-only and returns the generic code API error without account lookup disclosure', async () => {
+  it('keeps disabled-feature registration link-only, accepts resend without sending, and rejects verify with the generic error', async () => {
     const saved = apiConfig.env.EMAIL_VERIFICATION_CODE_SECRET;
     apiConfig.env.EMAIL_VERIFICATION_CODE_SECRET = undefined;
     try {
@@ -273,8 +339,9 @@ describe('public API and mail on the real Nest GraphQL schema', () => {
       const outbox = (await fixtures.query('SELECT payload FROM "OutboxEvent" WHERE payload->>\'to\'=$1', [account.email])).rows[0].payload;
       expect(outbox.codeChallengeId).toBeUndefined(); expect(outbox.verifyUrl).toContain('token=');
       for (const email of [account.email, 'absent@api-code.invalid']) {
-        expect((await requestCode(email)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
+        expect((await requestCode(email)).data?.requestEmailVerificationCode).toBe(true);
       }
+      expect((await fixtures.query(`SELECT count(*)::int AS n FROM "OutboxEvent" WHERE payload->>'to'=$1`, [account.email])).rows[0].n).toBe(1);
       expect((await verifyCode(account.email, '123456')).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
     } finally { apiConfig.env.EMAIL_VERIFICATION_CODE_SECRET = saved; }
   });

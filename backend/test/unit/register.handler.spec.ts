@@ -80,6 +80,16 @@ describe('RegisterHandler', () => {
     expect(payload).not.toHaveProperty('code'); expect(payload).not.toHaveProperty('codeHash');
   });
 
+  it.each(['disabled', 'not-eligible', 'cooldown', 'daily-cap'])('still registers with a link-only email when code issuance returns %s', async status => {
+    const { handler, deps } = setup();
+    deps.codes.issueWithinTransaction.mockResolvedValueOnce({ status });
+    await expect(handler.execute(cmd())).resolves.toEqual({ userId: expect.any(String) });
+    expect(deps.users.create).toHaveBeenCalledTimes(1); expect(deps.tokenRepo.insert).toHaveBeenCalledTimes(1);
+    const payload = (deps.outbox.publish.mock.calls as any[])[0][1].payload;
+    expect(payload.verifyUrl).toContain('/verify-email?token='); expect(payload).not.toHaveProperty('codeChallengeId');
+    expect(deps.eventBus.publish).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects invalid timezone and unknown references before touching the DB', async () => {
     await expect(setup().handler.execute(cmd({ timezone: 'Mars/Base' }))).rejects.toBeInstanceOf(InvalidTimezoneError);
     const { handler, deps } = setup(null);

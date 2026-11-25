@@ -615,7 +615,7 @@ type Mutation {
   requestEmailVerification: Boolean!
 
   """
-  Public verification-code resend. Unknown, verified and account-limited emails all return true. Codes must be configured.
+  Public verification-code resend. Always true for a validly formed email: unknown, verified and account-limited emails are indistinguishable.
   """
   requestEmailVerificationCode(input: RequestEmailVerificationCodeInput!): Boolean!
 
