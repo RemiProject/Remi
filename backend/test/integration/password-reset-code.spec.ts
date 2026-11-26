@@ -1,0 +1,274 @@
+import { execFileSync } from 'node:child_process';
+import { randomBytes, randomUUID } from 'node:crypto';
+import pg from 'pg';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { AppConfigService } from '@/platform/config/app-config.service.js';
+import { PrismaService } from '@/platform/db/prisma.service.js';
+import { TransactionRunner } from '@/platform/db/transaction-runner.js';
+import { PrismaPasswordResetCodeRepository } from '@/modules/identity/infrastructure/repositories/prisma-password-reset-code.repository.js';
+import { PrismaEmailVerificationCodeRepository } from '@/modules/identity/infrastructure/repositories/prisma-email-verification-code.repository.js';
+import { PrismaUserRepository } from '@/modules/identity/infrastructure/repositories/prisma-user.repository.js';
+import { PrismaTokenRepository } from '@/modules/identity/infrastructure/repositories/prisma-token.repository.js';
+import { PasswordResetCodeService } from '@/modules/identity/application/services/password-reset-code.service.js';
+import { EmailVerificationCodeService } from '@/modules/identity/application/services/email-verification-code.service.js';
+import { OneTimeTokenService } from '@/modules/identity/application/services/one-time-token.service.js';
+import { passwordResetCodePolicy as policy } from '@/modules/identity/application/services/password-reset-code.config.js';
+import { deriveOneTimeCode } from '@/modules/identity/domain/services/one-time-code.js';
+import { deriveEmailVerificationCode } from '@/modules/identity/domain/services/email-verification-code.js';
+import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
+
+// Every run owns a NEW database, never DATABASE_URL or a pre-existing shared test database.
+const databaseName = `remi_reset_code_test_${randomBytes(8).toString('hex')}`;
+const secret = randomBytes(32);
+let admin: pg.Pool;
+let fixtures: pg.Pool;
+let prisma: PrismaService;
+let transactions: TransactionRunner;
+let config: AppConfigService;
+let databaseCreated = false;
+const repository = new PrismaPasswordResetCodeRepository();
+const users = new PrismaUserRepository();
+const tokenRepository = new PrismaTokenRepository();
+const genericError = { code: 'INVALID_PASSWORD_RESET_CODE', message: 'The reset code is invalid or expired.' };
+
+beforeAll(async () => {
+  const source = process.env.DATABASE_URL_MIGRATOR || process.env.DATABASE_URL;
+  if (!source || process.env.NODE_ENV === 'production') throw new Error('Local migration credentials are required for the disposable integration database.');
+  const url = new URL(source);
+  if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) throw new Error('Integration tests require a loopback PostgreSQL host.');
+  admin = new pg.Pool({ connectionString: source, max: 1 });
+  if (!/^remi_reset_code_test_[a-f0-9]{16}$/.test(databaseName)) throw new Error('Unsafe test database name.');
+  await admin.query(`CREATE DATABASE "${databaseName}"`);
+  databaseCreated = true;
+  url.pathname = `/${databaseName}`;
+  const dedicatedUrl = url.toString();
+  const env = { ...process.env, DATABASE_URL: dedicatedUrl, DATABASE_URL_MIGRATOR: dedicatedUrl };
+  execFileSync(process.execPath, ['scripts/migrate.mjs'], { env, stdio: 'pipe', timeout: 90_000 });
+  execFileSync(process.execPath, ['node_modules/tsx/dist/cli.mjs', 'prisma/seed/reference.seed.ts'], { env, stdio: 'pipe', timeout: 30_000 });
+  fixtures = new pg.Pool({ connectionString: dedicatedUrl });
+  // Exercise repository writes with the actual non-superuser API role, not the migration role.
+  url.searchParams.set('options', '-c role=kitchen_runtime');
+  config = { env: { ...new AppConfigService().env, DATABASE_URL: url.toString(), EMAIL_VERIFICATION_CODE_SECRET: secret.toString('base64url') } } as AppConfigService;
+  prisma = new PrismaService(config);
+  await prisma.$connect();
+  transactions = new TransactionRunner(prisma);
+});
+
+afterAll(async () => {
+  await prisma?.$disconnect();
+  await fixtures?.end();
+  if (databaseCreated) await admin.query(`DROP DATABASE "${databaseName}"`);
+  await admin?.end();
+});
+
+async function user() {
+  const id = randomUUID();
+  const email = `${id}@reset-test.invalid`;
+  await fixtures.query(`INSERT INTO "User" (id,email,"passwordHash",name,"countryId","localeId","preferredLanguageId",timezone)
+    SELECT $1,$2,'integration-only','Reset Test',c.id,l.id,g.id,'UTC' FROM "Country" c,"Locale" l,"Language" g
+    WHERE c.code='EG' AND l.code='en-US' AND g.code='en'`, [id, email]);
+  return { id, email };
+}
+
+function clocked(now = new Date(), serviceConfig = config, tokens = tokenRepository) {
+  let clock = now;
+  const service = new PasswordResetCodeService(serviceConfig, transactions, new OneTimeTokenService(serviceConfig), repository, users, tokens);
+  vi.spyOn(service as any, 'now').mockImplementation(() => new Date(clock));
+  return { service, advance: (ms: number) => { clock = new Date(clock.getTime() + ms); }, now: () => clock };
+}
+const linkOnlyConfig = () => ({ env: { ...config.env, EMAIL_VERIFICATION_CODE_SECRET: undefined } } as AppConfigService);
+
+async function issue(service: PasswordResetCodeService, id: string) {
+  const result = await service.issue(id);
+  expect(result.status).toBe('issued');
+  if (result.status !== 'issued') throw new Error('Expected an issued challenge');
+  return { row: result.challenge, code: deriveOneTimeCode('password-reset', secret, id, result.challenge.id) };
+}
+const wrong = (code: string) => code === '000000' ? '000001' : '000000';
+const row = async (id: string) => (await fixtures.query('SELECT * FROM "PasswordResetCode" WHERE id=$1', [id])).rows[0];
+
+describe('password reset codes in a dedicated migrated database', () => {
+  it('migration 0036 is applied with kitchen_runtime grants, no PUBLIC access and no timestamp defaults', async () => {
+    expect((await fixtures.query(`SELECT 1 FROM "_migrations" WHERE name='0036_password_reset_codes.sql'`)).rowCount).toBe(1);
+    expect((await prisma.$queryRaw<Array<{ role: string }>>`SELECT current_user AS role`)[0].role).toBe('kitchen_runtime');
+    const defaults = await fixtures.query(`SELECT column_default FROM information_schema.columns WHERE table_name='PasswordResetCode' AND column_name IN ('createdAt','expiresAt')`);
+    expect(defaults.rows).toHaveLength(2); expect(defaults.rows.every(r => r.column_default === null)).toBe(true);
+    expect((await fixtures.query(`SELECT has_table_privilege('kitchen_runtime','"PasswordResetCode"','SELECT,INSERT,UPDATE,DELETE') AS ok`)).rows[0].ok).toBe(true);
+    expect((await fixtures.query(`SELECT count(*)::int AS n FROM pg_class c, LATERAL aclexplode(c.relacl) a WHERE c.relname='PasswordResetCode' AND a.grantee=0`)).rows[0].n).toBe(0);
+  });
+
+  it('enforces the hash format, the link-only rule, the timestamp checks and one open coded row per user', async () => {
+    const { id } = await user(); const { service } = clocked(); const { row: issued } = await issue(service, id);
+    const insert = (values: { codeHash?: string | null; failedAttempts?: number; usedAt?: Date | null }) => fixtures.query(
+      `INSERT INTO "PasswordResetCode" (id,"userId","codeHash","createdAt","expiresAt","failedAttempts","usedAt","invalidatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,now())`,
+      [randomUUID(), id, values.codeHash ?? null, issued.createdAt, issued.expiresAt, values.failedAttempts ?? 0, values.usedAt ?? null]);
+    await expect(insert({ codeHash: 'NOT-HEX' })).rejects.toMatchObject({ code: '23514' });
+    await expect(insert({ codeHash: null, failedAttempts: 1 })).rejects.toMatchObject({ code: '23514' });
+    await expect(insert({ codeHash: null, usedAt: issued.createdAt })).rejects.toMatchObject({ code: '23514' });
+    await expect(fixtures.query('UPDATE "PasswordResetCode" SET "expiresAt"="createdAt" WHERE id=$1', [issued.id])).rejects.toMatchObject({ code: '23514' });
+    await expect(fixtures.query('UPDATE "PasswordResetCode" SET "failedAttempts"=6 WHERE id=$1', [issued.id])).rejects.toMatchObject({ code: '23514' });
+    await expect(fixtures.query(`INSERT INTO "PasswordResetCode" (id,"userId","codeHash","createdAt","expiresAt") VALUES ($1,$2,$3,$4,$5)`,
+      [randomUUID(), id, issued.codeHash, issued.createdAt, issued.expiresAt])).rejects.toMatchObject({ code: '23505' });
+    // Open link-only rows never collide with the open coded row.
+    await fixtures.query(`INSERT INTO "PasswordResetCode" (id,"userId","codeHash","createdAt","expiresAt") VALUES ($1,$2,NULL,$3,$4),($5,$2,NULL,$3,$4)`,
+      [randomUUID(), id, issued.createdAt, issued.expiresAt, randomUUID()]);
+    const stored = await row(issued.id);
+    expect(stored.codeHash).toMatch(/^[a-f0-9]{64}$/); expect(stored).not.toHaveProperty('code');
+    expect(stored.expiresAt.getTime() - stored.createdAt.getTime()).toBe(policy.lifetimeMs);
+  });
+
+  it('deleting a user removes their reset codes', async () => {
+    const { id } = await user(); const { service } = clocked(); const { row: issued } = await issue(service, id);
+    await fixtures.query('DELETE FROM "User" WHERE id=$1', [id]);
+    expect(await row(issued.id)).toBeUndefined();
+  });
+
+  it('exchanges a correct code for a 10-minute PASSWORD_RESET token that works exactly once', async () => {
+    const { id, email } = await user(); const h = clocked(); const { row: issued, code } = await issue(h.service, id);
+    const { resetToken, expiresAt } = await h.service.exchange(email.toUpperCase(), code);
+    expect(expiresAt.getTime() - h.now().getTime()).toBe(policy.resetTokenLifetimeMs);
+    expect((await row(issued.id)).usedAt).not.toBeNull();
+    const token = (await fixtures.query('SELECT * FROM "Token" WHERE "tokenHash"=$1', [hashToken(resetToken)])).rows[0];
+    expect(token).toMatchObject({ userId: id, purpose: 'PASSWORD_RESET', usedAt: null });
+    expect(token.expiresAt.getTime()).toBe(expiresAt.getTime());
+    expect(await transactions.run(tx => tokenRepository.consumeByHash(tx, hashToken(resetToken), 'PASSWORD_RESET'))).toMatchObject({ userId: id });
+    expect(await transactions.run(tx => tokenRepository.consumeByHash(tx, hashToken(resetToken), 'PASSWORD_RESET'))).toBeNull();
+    await expect(h.service.exchange(email, code)).rejects.toMatchObject(genericError);
+  });
+
+  it('commits wrong attempts; five failures kill even the correct code', async () => {
+    const { id, email } = await user(); const { service } = clocked(); const { row: issued, code } = await issue(service, id);
+    for (let i = 1; i <= 5; i++) {
+      await expect(service.exchange(email, wrong(code))).rejects.toMatchObject(genericError);
+      expect((await row(issued.id)).failedAttempts).toBe(i);
+    }
+    await expect(service.exchange(email, code)).rejects.toMatchObject(genericError);
+    expect((await row(issued.id)).invalidatedAt).not.toBeNull();
+  });
+
+  it('enforces the cooldown, replaces the old code, and rejects at exactly 15 minutes', async () => {
+    const { id, email } = await user(); const h = clocked(); const old = await issue(h.service, id);
+    h.advance(59_999); expect(await h.service.issue(id)).toEqual({ status: 'cooldown' });
+    h.advance(1); const next = await issue(h.service, id);
+    await expect(h.service.exchange(email, old.code)).rejects.toMatchObject(genericError);
+    h.advance(policy.lifetimeMs); await expect(h.service.exchange(email, next.code)).rejects.toMatchObject(genericError);
+  });
+
+  it('caps reset emails at 5 per rolling 24 hours, shared by link-only and coded emails', async () => {
+    const { id } = await user(); const start = new Date();
+    const linkOnly = clocked(start, linkOnlyConfig()); const coded = clocked(start);
+    for (let i = 0; i < 3; i++) {
+      const result = await linkOnly.service.issue(id); expect(result.status).toBe('link-only');
+      linkOnly.advance(60_000); coded.advance(60_000);
+    }
+    for (let i = 0; i < 2; i++) { await issue(coded.service, id); coded.advance(60_000); linkOnly.advance(60_000); }
+    expect(await coded.service.issue(id)).toEqual({ status: 'daily-cap' });
+    expect(await linkOnly.service.issue(id)).toEqual({ status: 'daily-cap' });
+    expect((await fixtures.query('SELECT count(*) FILTER (WHERE "codeHash" IS NULL)::int AS links, count(*)::int AS total FROM "PasswordResetCode" WHERE "userId"=$1', [id])).rows[0]).toEqual({ links: 3, total: 5 });
+    coded.advance(policy.dailyWindowMs - 5 * 60_000 - 1); expect(await coded.service.issue(id)).toEqual({ status: 'daily-cap' });
+    coded.advance(1); await issue(coded.service, id);
+  });
+
+  it('locks the account after 10 failures across codes, refuses the correct code, then lifts after the window', async () => {
+    const { id, email } = await user(); const h = clocked();
+    for (const failures of [5, 5]) {
+      const { code } = await issue(h.service, id);
+      for (let i = 0; i < failures; i++) await expect(h.service.exchange(email, wrong(code))).rejects.toMatchObject(genericError);
+      h.advance(60_000);
+    }
+    const locked = await issue(h.service, id);
+    expect(await h.service.codeForEmail(locked.row.id)).toBeUndefined();
+    await expect(h.service.exchange(email, locked.code)).rejects.toMatchObject(genericError);
+    expect((await row(locked.row.id))).toMatchObject({ failedAttempts: 0, usedAt: null });
+    h.advance(policy.dailyWindowMs + policy.lifetimeMs);
+    const fresh = await issue(h.service, id);
+    expect(await h.service.codeForEmail(fresh.row.id)).toBe(fresh.code);
+    expect((await h.service.exchange(email, fresh.code)).resetToken).toBeTruthy();
+  });
+
+  it('serializes simultaneous requests into one issuance', async () => {
+    const { id } = await user(); const { service } = clocked();
+    const results = await Promise.all(Array.from({ length: 12 }, () => service.issue(id)));
+    expect(results.filter(r => r.status === 'issued')).toHaveLength(1);
+    expect(results.filter(r => r.status === 'cooldown')).toHaveLength(11);
+  });
+
+  it('serializes concurrent wrong attempts at five', async () => {
+    const { id, email } = await user(); const { service } = clocked(); const { row: issued, code } = await issue(service, id);
+    const results = await Promise.allSettled(Array.from({ length: 10 }, () => service.exchange(email, wrong(code))));
+    expect(results.every(r => r.status === 'rejected' && r.reason.code === genericError.code)).toBe(true);
+    expect((await row(issued.id)).failedAttempts).toBe(5);
+  });
+
+  it('gives just one reset token to concurrent correct exchanges', async () => {
+    const { id, email } = await user(); const { service } = clocked(); const { code } = await issue(service, id);
+    const results = await Promise.allSettled(Array.from({ length: 8 }, () => service.exchange(email, code)));
+    expect(results.filter(r => r.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter(r => r.status === 'rejected' && r.reason.code === genericError.code)).toHaveLength(7);
+    expect((await fixtures.query(`SELECT count(*)::int AS n FROM "Token" WHERE "userId"=$1 AND purpose='PASSWORD_RESET'`, [id])).rows[0].n).toBe(1);
+  });
+
+  it('rolls back the code consumption when the reset token cannot be written', async () => {
+    const { id, email } = await user(); const { row: issued, code } = await issue(clocked().service, id);
+    const broken = { ...tokenRepository, insert: async () => { throw new Error('test token failure'); } } as any;
+    await expect(clocked(new Date(), config, broken).service.exchange(email, code)).rejects.toThrow('test token failure');
+    expect((await row(issued.id)).usedAt).toBeNull();
+    expect((await clocked().service.exchange(email, code)).resetToken).toBeTruthy();
+  });
+
+  it('keeps reset codes and verification codes apart for the same account', async () => {
+    const { id, email } = await user();
+    const verification = new EmailVerificationCodeService(config, transactions, new PrismaEmailVerificationCodeRepository(), users);
+    const verificationResult = await verification.issue(id);
+    expect(verificationResult.status).toBe('issued');
+    if (verificationResult.status !== 'issued') return;
+    const verificationCode = deriveEmailVerificationCode(secret, id, verificationResult.challenge.id);
+    const { service } = clocked(); const reset = await issue(service, id);
+    if (verificationCode !== reset.code) await expect(service.exchange(email, verificationCode)).rejects.toMatchObject(genericError);
+    expect(await verification.verify(id, verificationCode)).toBe(true); // the verification code still works for its own purpose
+    expect((await service.exchange(email, reset.code)).resetToken).toBeTruthy();
+  });
+
+  it('does not mix accounts, and refuses unknown and deleted accounts with the same error', async () => {
+    const a = await user(); const b = await user(); const { service } = clocked(); const { code } = await issue(service, a.id);
+    await expect(service.exchange(b.email, code)).rejects.toMatchObject(genericError);
+    await expect(service.exchange('nobody@reset-test.invalid', code)).rejects.toMatchObject(genericError);
+    await fixtures.query('UPDATE "User" SET "deletedAt"=now() WHERE id=$1', [a.id]);
+    await expect(service.exchange(a.email, code)).rejects.toMatchObject(genericError);
+    expect(await service.issue(a.id)).toEqual({ status: 'not-eligible' });
+  });
+
+  it('gives the mail worker only a live code: never replaced, used, expired, exhausted, rotated, link-only or unknown', async () => {
+    const { id, email } = await user(); const h = clocked(); const old = await issue(h.service, id);
+    expect(await h.service.codeForEmail(old.row.id)).toBe(old.code);
+    h.advance(60_000); const next = await issue(h.service, id);
+    expect(await h.service.codeForEmail(old.row.id)).toBeUndefined();
+    const rotated = { env: { ...config.env, EMAIL_VERIFICATION_CODE_SECRET: randomBytes(32).toString('base64url') } } as AppConfigService;
+    expect(await clocked(h.now(), rotated).service.codeForEmail(next.row.id)).toBeUndefined();
+    expect(await clocked(h.now(), linkOnlyConfig()).service.codeForEmail(next.row.id)).toBeUndefined();
+    h.advance(policy.lifetimeMs - 1); expect(await h.service.codeForEmail(next.row.id)).toBe(next.code);
+    h.advance(1); expect(await h.service.codeForEmail(next.row.id)).toBeUndefined();
+    const exhausted = await issue(h.service, id);
+    for (let i = 0; i < 5; i++) await expect(h.service.exchange(email, wrong(exhausted.code))).rejects.toMatchObject(genericError);
+    expect(await h.service.codeForEmail(exhausted.row.id)).toBeUndefined();
+    h.advance(60_000); const used = await issue(h.service, id);
+    await h.service.exchange(email, used.code);
+    expect(await h.service.codeForEmail(used.row.id)).toBeUndefined();
+    h.advance(60_000);
+    const linkOnly = await clocked(h.now(), linkOnlyConfig()).service.issue(id);
+    expect(linkOnly.status).toBe('link-only');
+    if (linkOnly.status === 'link-only') expect(await h.service.codeForEmail(linkOnly.challenge.id)).toBeUndefined();
+    expect(await h.service.codeForEmail(randomUUID())).toBeUndefined();
+  });
+
+  it('invalidateAll kills every open row of the account and leaves other accounts alone', async () => {
+    const a = await user(); const b = await user(); const h = clocked();
+    const codeA = await issue(h.service, a.id); const codeB = await issue(h.service, b.id);
+    await fixtures.query(`INSERT INTO "PasswordResetCode" (id,"userId","codeHash","createdAt","expiresAt") VALUES ($1,$2,NULL,$3,$4)`,
+      [randomUUID(), a.id, codeA.row.createdAt, codeA.row.expiresAt]);
+    await transactions.run(tx => h.service.invalidateAllWithinTransaction(tx, a.id));
+    expect((await fixtures.query('SELECT count(*)::int AS n FROM "PasswordResetCode" WHERE "userId"=$1 AND "invalidatedAt" IS NULL', [a.id])).rows[0].n).toBe(0);
+    await expect(h.service.exchange(a.email, codeA.code)).rejects.toMatchObject(genericError);
+    expect((await h.service.exchange(b.email, codeB.code)).resetToken).toBeTruthy();
+  });
+});

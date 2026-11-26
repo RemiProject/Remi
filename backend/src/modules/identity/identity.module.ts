@@ -4,6 +4,9 @@ import { RequestEmailVerificationCodeHandler } from './application/commands/requ
 import { VerifyEmailCodeHandler } from './application/commands/verify-email-code/verify-email-code.handler.js';
 import { EmailVerificationCodeService } from './application/services/email-verification-code.service.js';
 import { EMAIL_VERIFICATION_CODE_REPOSITORY } from './domain/ports/email-verification-code.repository.js';
+import { PasswordResetCodeService } from './application/services/password-reset-code.service.js';
+import { PASSWORD_RESET_CODE_REPOSITORY } from './domain/ports/password-reset-code.repository.js';
+import { PrismaPasswordResetCodeRepository } from './infrastructure/repositories/prisma-password-reset-code.repository.js';
 import { PrismaEmailVerificationCodeRepository } from './infrastructure/repositories/prisma-email-verification-code.repository.js';
 import { AcceptInvitationHandler } from './application/commands/accept-invitation/accept-invitation.handler.js';
 import { CreateHouseholdHandler } from './application/commands/create-household/create-household.handler.js';
@@ -100,6 +103,8 @@ const OutboxHandlers = [
     OneTimeTokenService,
     EmailVerificationCodeService,
     { provide: EMAIL_VERIFICATION_CODE_REPOSITORY, useClass: PrismaEmailVerificationCodeRepository },
+    PasswordResetCodeService,
+    { provide: PASSWORD_RESET_CODE_REPOSITORY, useClass: PrismaPasswordResetCodeRepository },
     LinkBuilder,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
     { provide: TOKEN_REPOSITORY, useClass: PrismaTokenRepository },
