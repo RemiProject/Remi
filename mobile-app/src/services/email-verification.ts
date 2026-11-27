@@ -14,7 +14,8 @@ export type VerifyCodeFailure = RequestCodeFailure | 'invalidCode';
 export type RequestCodeResult = { ok: true } | { ok: false; reason: RequestCodeFailure };
 export type VerifyCodeResult = { ok: true } | { ok: false; reason: VerifyCodeFailure };
 
-function failure(error: unknown): RequestCodeFailure {
+/** Shared with services/password-reset.ts. */
+export function failure(error: unknown): RequestCodeFailure {
   if (!(error instanceof BackendError)) return 'error';
   if (error.codes.includes('TOO_MANY_REQUESTS') || error.status === 429) return 'rateLimited';
   // Unreachable server (no HTTP status or a 5xx), as in auth-service.

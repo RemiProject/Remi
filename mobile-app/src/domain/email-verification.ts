@@ -10,6 +10,9 @@ export function normalizeEmailCode(text: string): string {
     .replace(/[\s؜​-‏‪-‮⁦-⁩]/g, '');
 }
 
+/** What a code field keeps while typing or pasting: ASCII digits only, at most six. */
+export const toCodeInput = (text: string) => normalizeEmailCode(text).replace(/[^0-9]/g, '').slice(0, EMAIL_CODE_LENGTH);
+
 /** The code to send, always a string so leading zeros survive; null unless it is exactly six digits. */
 export function parseEmailCode(text: string): string | null {
   const code = normalizeEmailCode(text);
