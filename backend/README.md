@@ -59,17 +59,17 @@ pnpm start:dev                    # http://localhost:3000/graphql
 ```
 Mailpit (every email the app sends): http://localhost:8025 · S3 (SeaweedFS): http://localhost:8333 · Postgres: `127.0.0.1:5432`.
 
-### Required for email verification codes
+### Required for email verification and password reset codes
 Every developer needs both of these, on a new checkout and when updating an existing one:
 
-1. **Run migration `0035_email_verification_codes.sql`** with `pnpm migrate`, then `pnpm db:generate` (Docker's `migrate` service applies the migration in option 2). Without its table, verifying by link fails, and once the secret is set, registration fails too.
+1. **Run migrations `0035_email_verification_codes.sql` and `0036_password_reset_codes.sql`** with `pnpm migrate`, then `pnpm db:generate` (Docker's `migrate` service applies the migrations in option 2). Without the 0035 table, verifying by link fails, and once the secret is set, registration fails too. Without the 0036 table, password reset emails are not sent and `resetPassword` fails.
 2. **Add `EMAIL_VERIFICATION_CODE_SECRET` to `backend/.env`.** `.env.example` leaves it empty. Generate your own value and restart the API:
    ```bash
    node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
    ```
-   Without it, the API still starts in development, but emails are link-only and the app's code screen cannot be used: it can send no codes and rejects every code.
+   Without it, the API still starts in development, but emails are link-only and the app's code screens cannot be used: they can send no codes and reject every code. Password reset codes use the same secret.
 
-See [Email verification codes](#email-verification-codes) for how the codes work.
+See [Email verification codes](#email-verification-codes) and [Password reset codes](#password-reset-codes) for how the codes work.
 
 ## Run — option 2: everything in Docker (db + s3 + mailpit + migrate + api)
 ```bash
@@ -130,7 +130,8 @@ SQL files in `prisma/migrations` are the source of truth; Prisma is only the que
 | Lint | `pnpm lint` · auto-fix: `pnpm lint:fix` |
 | Type-check | `pnpm typecheck` |
 | Unit tests | `pnpm test` · watch: `pnpm test:watch` |
-| Email verification code integration tests (after `pnpm build`; creates and drops its own database) | `pnpm test:integration:email-verification` |
+| Email verification code integration tests (builds first; creates and drops its own database) | `pnpm test:integration:email-verification` |
+| Password reset code integration tests (builds first; creates and drops its own database) | `pnpm test:integration:password-reset` |
 | Production build (prisma generate + nest build + alias rewrite) | `pnpm build` then `pnpm start` |
 
 ### ESLint rules worth knowing
@@ -166,7 +167,7 @@ config (zod) · db (Prisma adapter-pg, `TransactionRunner` with 40001/40P01 retr
 
 ## Phase 1 (identity)
 Tables: Country, Language, Locale, Cuisine, FoodCategory, User, Household, HouseholdMember, HouseholdInvitation, Token, Session.
-Commands: register, login, refreshAccessToken, verifyEmail, requestEmailVerification, requestEmailVerificationCode, verifyEmailCode, requestPasswordReset, resetPassword, createHousehold, inviteMember, acceptInvitation, revokeInvitation, removeMember, leaveHousehold.
+Commands: register, login, refreshAccessToken, verifyEmail, requestEmailVerification, requestEmailVerificationCode, verifyEmailCode, requestPasswordReset, verifyPasswordResetCode, resetPassword, createHousehold, inviteMember, acceptInvitation, revokeInvitation, removeMember, leaveHousehold.
 Queries: me, myHouseholds, householdMembers, householdInvitations, countries/languages/locales/cuisines/foodCategories.
 
 Household-scoped operations need headers `Authorization: Bearer <access>` and `x-household-id: <uuid>`.
@@ -180,6 +181,15 @@ Verification emails contain a link (24 h by default) and a 6-digit code (15 minu
 node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
 ```
 Keep it in `.env` or a secret manager, never in source control or logs.
+
+### Password reset codes
+Forgot password works with the same kind of 6-digit code: `requestPasswordReset` → an email with a code and a link → `verifyPasswordResetCode` exchanges the code for a single-use reset token (10 minutes) → the existing `resetPassword` takes that token or the link's token. The mobile app then logs in with the new password.
+
+- **Equal work for every email.** `requestPasswordReset` writes only an `auth.password_reset_lookup` outbox row with the normalized email, so known and unknown emails take the same path and time. The lookup worker finds the account, applies the limits, issues the link token and the code, queues the existing reset email with only the challenge ID, and then blanks the email in the lookup row, so no address stays in the outbox.
+- **Limits.** A code is valid for 15 minutes and allows 5 wrong attempts. Reset emails, links and codes together, have a 60-second cooldown and a cap of 5 per account in 24 hours (`PasswordResetCode` keeps one row per email; a link-only email has no code hash). After 10 wrong attempts in 24 hours across all of an account's codes, every code is refused and new emails carry only the link, until those attempts are older than 24 hours.
+- **Codes.** As for verification: a keyed hash in the database, re-derived by the mail worker just before sending, and a link-only email when the code was used, replaced or expired, the account is locked, or the secret is missing. The HMAC uses separate purpose labels, so a verification code can never work as a reset code.
+- **One error.** Every code failure, including unknown and malformed emails and malformed codes, returns `INVALID_PASSWORD_RESET_CODE` after comparable work. Malformed codes are not counted.
+- **After a reset.** `resetPassword` revokes every session, invalidates all other open reset links, reset tokens and reset codes of the account, marks the email as verified, invalidates any open verification code, and queues the "your password was changed" email.
 
 ## Phase 2 (catalog)
 Tables: Currency, Food, FoodAlias, NutritionProfile, FoodSubstitution, Product, ProductSource. The `foods(search, first, after)` query searches canonical names and localized aliases with an ID cursor. `UnitConverter` uses exact decimal arithmetic, the versioned cup/tablespoon constants, and half-up rounding to three decimal places. `pnpm seed:catalog` loads a starter list; nutrition values are intentionally left empty until a trusted source is selected.

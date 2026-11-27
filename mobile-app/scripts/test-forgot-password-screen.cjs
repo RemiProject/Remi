@@ -338,5 +338,5 @@ test('the login screen\'s "Forgot password?" opens /forgot-password, which is th
   await h.press(authMessages.en.forgotPassword);
   assert.deepEqual(h.routes, [['push', '/forgot-password']]);
   assert.match(fs.readFileSync('src/app/forgot-password.tsx', 'utf8'), /export \{ default \} from '@\/screens\/forgot-password-screen'/);
-  assert.match(fs.readFileSync('src/app/reset-password.tsx', 'utf8'), /<PasswordResetScreen reset \/>/);
+  assert.match(fs.readFileSync('src/app/reset-password.tsx', 'utf8'), /export \{ default \} from '@\/screens\/password-reset-screen'/);
 });

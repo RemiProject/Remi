@@ -185,9 +185,14 @@ If you left the code screen before verifying, there are two ways back:
   unverified account log in. Choose **Verify email** in Profile. Verify the account for
   this walkthrough and the seed script.
 
+To test a forgotten password, choose **Forgot password?** on login, enter the account's
+email, enter the 6-digit code from the newest Mailpit message, and choose a new password.
+The app then logs in with it. The reset code is valid for 15 minutes; a new email can be
+requested after 60 seconds, at most 5 in 24 hours.
+
 If the message contains only a link, the backend has no `EMAIL_VERIFICATION_CODE_SECRET`
-and the code screen cannot be used. See
-[backend setup](../backend/README.md#required-for-email-verification-codes).
+and the code screens cannot be used. See
+[backend setup](../backend/README.md#required-for-email-verification-and-password-reset-codes).
 
 ## Seed sample food
 

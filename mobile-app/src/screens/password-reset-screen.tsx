@@ -8,12 +8,12 @@ import { passwordRules } from '@/services/auth-form';
 import { authErrorKey } from '@/services/auth-validation';
 import { useAuth } from '@/providers/auth-provider';
 
-export default function PasswordResetScreen({ reset = false }: { reset?: boolean }) {
+/** /reset-password?token=...: completes a reset from the emailed link. The code flow is forgot-password-screen.tsx. */
+export default function PasswordResetScreen() {
   const { language } = useLanguage();
   const t = authMessages[language];
   const auth = useAuth();
   const { token } = useLocalSearchParams<{ token?: string }>();
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [busy, setBusy] = useState(false);
@@ -22,33 +22,25 @@ export default function PasswordResetScreen({ reset = false }: { reset?: boolean
   const pending = useRef(false);
   async function submit() {
     if (pending.current) return;
-    if (!reset && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 254)) { setError('emailInvalid'); return; }
-    if (reset) {
-      if (!token || Array.isArray(token)) { setError('resetExpired'); return; }
-      if (!Object.values(passwordRules(password)).every(Boolean)) { setError('passwordSignup'); return; }
-      if (password !== confirmation) { setError('passwordMismatch'); return; }
-    }
+    if (!token || Array.isArray(token)) { setError('resetExpired'); return; }
+    if (!Object.values(passwordRules(password)).every(Boolean)) { setError('passwordSignup'); return; }
+    if (password !== confirmation) { setError('passwordMismatch'); return; }
     pending.current = true; setBusy(true); setError(null);
     try {
-      if (reset) {
-        await getAuth().resetPassword(token!, password);
-        await auth.restore();
-      }
-      else await getAuth().requestPasswordReset(email.trim());
+      await getAuth().resetPassword(token, password);
+      await auth.restore();
       setDone(true);
-      if (reset) router.setParams({ token: undefined });
+      router.setParams({ token: undefined });
     } catch (e) { setError(authErrorKey(e)); }
     finally { setPassword(''); setConfirmation(''); setBusy(false); pending.current = false; }
   }
-  return <AuthShell title={reset ? t.resetTitle : t.forgotTitle} subtitle={reset ? t.resetIntro : t.forgotIntro} onBack={() => router.replace('/login')}>
-    {done ? <><AuthNotice success>{reset ? t.resetDone : t.resetSent}</AuthNotice><AuthAction label={t.login} onPress={() => router.replace('/login')} /></> : <>
-      {reset ? <>
-        <AuthInput label={t.password} value={password} password editable={!busy} autoComplete="new-password" maxLength={128} onChangeText={setPassword} />
-        <AuthInput label={t.confirmPassword} value={confirmation} password editable={!busy} autoComplete="new-password" maxLength={128} onChangeText={setConfirmation} />
-      </> : <AuthInput label={t.email} value={email} editable={!busy} autoCapitalize="none" autoComplete="email" keyboardType="email-address" maxLength={254} placeholder="you@example.com" onChangeText={setEmail} />}
+  return <AuthShell title={t.resetTitle} subtitle={t.resetIntro} onBack={() => router.replace('/login')}>
+    {done ? <><AuthNotice success>{t.resetDone}</AuthNotice><AuthAction label={t.login} onPress={() => router.replace('/login')} /></> : <>
+      <AuthInput label={t.password} value={password} password editable={!busy} autoComplete="new-password" maxLength={128} onChangeText={setPassword} />
+      <AuthInput label={t.confirmPassword} value={confirmation} password editable={!busy} autoComplete="new-password" maxLength={128} onChangeText={setConfirmation} />
       {error && <AuthNotice>{t[error]}</AuthNotice>}
-      <AuthAction label={busy ? t.wait : reset ? t.resetAction : t.sendReset} disabled={busy} busy={busy} onPress={() => { void submit(); }} />
-      {reset && <AuthLink label={t.forgotPassword} onPress={() => router.replace('/forgot-password')} />}
+      <AuthAction label={busy ? t.wait : t.resetAction} disabled={busy} busy={busy} onPress={() => { void submit(); }} />
+      <AuthLink label={t.forgotPassword} onPress={() => router.replace('/forgot-password')} />
     </>}
   </AuthShell>;
 }

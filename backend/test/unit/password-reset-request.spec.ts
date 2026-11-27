@@ -143,6 +143,21 @@ describe('reset password email templates', () => {
     expect(linkOnly).toContain(`href="${vars.resetUrl}"`);
   });
 
+  it('writes the Arabic "password changed" email in Modern Standard Arabic with the same variables, and leaves English as it was', async () => {
+    const renderer = await render();
+    const vars = { name: 'Test', changedAt: '2026-11-27T12:00:00.000Z', supportEmail: 'support@example.invalid' };
+    const ar = renderer.render('password-changed', 'ar', vars);
+    expect(ar.subject).toBe('تم تغيير كلمة المرور');
+    for (const value of Object.values(vars)) expect(ar.html).toContain(value);
+    expect(ar.html).toContain('إذا لم تقم بذلك، فتواصل معنا فورًا على support@example.invalid');
+    expect(ar.html).toContain('رسالة أمان تلقائية.');
+    expect(ar.html).toContain('dir="rtl"');
+    for (const colloquial of ['كلمة السر', 'لو ', 'ما عملتش', 'ده', 'أهلًا']) expect(`${ar.subject} ${ar.html}`).not.toContain(colloquial);
+    const en = renderer.render('password-changed', 'en', vars);
+    expect(en.subject).toBe('Your password was changed');
+    expect(en.html).toContain('If this was not you, contact us right away at support@example.invalid.');
+  });
+
   it('writes the Arabic email in Modern Standard Arabic, with the app’s word for password', async () => {
     const renderer = await render();
     const { subject, html } = renderer.render('reset-password', 'ar', vars);

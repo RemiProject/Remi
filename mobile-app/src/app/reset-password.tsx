@@ -1,2 +1,1 @@
-import PasswordResetScreen from '@/screens/password-reset-screen';
-export default function ResetPassword() { return <PasswordResetScreen reset />; }
+export { default } from '@/screens/password-reset-screen';

@@ -28,7 +28,7 @@ function harness() {
     '@/providers/language-provider': { useLanguage: () => ({ language: 'en' }) },
     '@/providers/auth-provider': { useAuth: () => ({ restore: async () => {} }) },
     '@/i18n/auth': { authMessages }, '@/services/auth-form': { passwordRules }, '@/services/auth-validation': { authErrorKey },
-    '@/services/auth': { getAuth: () => ({ requestPasswordReset: async email => requests.push({ email }), resetPassword: async (token, password) => requests.push({ token, password }) }) },
+    '@/services/auth': { getAuth: () => ({ resetPassword: async (token, password) => requests.push({ token, password }) }) },
     'expo-router': { useLocalSearchParams: () => ({ token }), router: { replace: r => routes.push(r), setParams: () => { token = undefined; } } },
   };
   function load(file) {
@@ -66,20 +66,9 @@ test('responsive shell scrolls, avoids keyboard, constrains desktop width, and s
   assert.ok(social.every(n => n.props.disabled && n.props.accessibilityState.disabled));
 });
 
-test('forgot password validates email and shows a non-enumerating success message', async () => {
-  const h = harness(), Screen = h.load('src/screens/password-reset-screen.tsx').default;
-  const render = () => h.render(Screen);
-  render().find(n => n.type === 'AuthAction').props.onPress(); await new Promise(r => setImmediate(r));
-  assert.equal(h.requests.length, 0);
-  render().find(n => n.type === 'AuthInput').props.onChangeText('test@example.invalid');
-  render().find(n => n.type === 'AuthAction').props.onPress(); await new Promise(r => setImmediate(r));
-  assert.deepEqual(h.requests, [{ email: 'test@example.invalid' }]);
-  assert.ok(render().some(n => n.props.children === authMessages.en.resetSent));
-});
-
 test('reset password enforces confirmation and submits only the token and new password', async () => {
   const h = harness(), Screen = h.load('src/screens/password-reset-screen.tsx').default;
-  const render = () => h.render(Screen, { reset: true });
+  const render = () => h.render(Screen);
   render().find(n => n.props.label === authMessages.en.password).props.onChangeText('Strong123!');
   render().find(n => n.props.label === authMessages.en.confirmPassword).props.onChangeText('mismatch');
   render().find(n => n.type === 'AuthAction').props.onPress(); await new Promise(r => setImmediate(r));
