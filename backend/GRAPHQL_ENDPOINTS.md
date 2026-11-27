@@ -514,7 +514,7 @@ mutation {
 
 **Mutation · Public** · throttled
 
-Emails a new 6-digit code and verification link. Returns `true` for every validly formed email, whether the account is unknown, already verified, or over its limit, so it does not reveal which emails exist. A malformed email is a validation error, and the IP throttle returns `TOO_MANY_REQUESTS`.
+Emails a new 6-digit code and verification link. Returns `true` for every validly formed email, whether the account is unknown, already verified, or over its limit, and does the same work for every email: the request only queues a lookup, and a worker finds the account and sends the email a few seconds later. So neither the answer nor its timing reveals which emails exist. A malformed email is a validation error, and the IP throttle returns `TOO_MANY_REQUESTS`.
 
 ```graphql
 mutation {
