@@ -1,1 +1,1 @@
-export { default } from '@/screens/password-reset-screen';
+export { default } from '@/screens/forgot-password-screen';

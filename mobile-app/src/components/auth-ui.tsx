@@ -32,7 +32,7 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
   </SafeAreaView>;
 }
 
-export function AuthInput({ label, error, password = false, code = false, inputRef, ...props }: TextInputProps & { label: string; error?: string; password?: boolean; /** A one-time code: large digits, left to right in every language. */ code?: boolean; inputRef?: Ref<TextInputInstance> }) {
+export function AuthInput({ label, error, password = false, code = false, ltr = false, inputRef, ...props }: TextInputProps & { label: string; error?: string; password?: boolean; /** A one-time code: large digits, left to right in every language. */ code?: boolean; /** Text that always reads left to right, such as an email address. */ ltr?: boolean; inputRef?: Ref<TextInputInstance> }) {
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const { language } = useLanguage();
@@ -48,6 +48,7 @@ export function AuthInput({ label, error, password = false, code = false, inputR
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{ flex: 1, minWidth: 0, minHeight: 52, paddingHorizontal: 14, paddingVertical: 12,
           fontFamily: fonts.body, color: colors.text, fontSize: 16, textAlign: language === 'ar' ? 'right' : 'left',
+          ...(ltr ? { direction: 'ltr', writingDirection: 'ltr', textAlign: 'left' } as const : {}),
           ...(code ? { direction: 'ltr', writingDirection: 'ltr', textAlign: 'center', fontSize: 24, letterSpacing: 8, fontVariant: ['tabular-nums'] } as const : {}) }} />
       {password && <Pressable accessibilityRole="button" accessibilityLabel={visible ? t.hidePassword : t.showPassword}
         accessibilityState={{ expanded: visible }} onPress={() => setVisible(value => !value)}
