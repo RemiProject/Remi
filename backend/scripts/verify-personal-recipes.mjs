@@ -21,7 +21,7 @@ const step = (message) => console.log(`  ✓ ${message}`);
 
 async function person(label) {
   const suffix = randomBytes(5).toString('hex');
-  const email = `${label}.${suffix}@example.test`, password = `Pr-${randomBytes(12).toString('base64url')}`;
+  const email = `${label}.${suffix}@example.test`, password = `Pr!A1-${randomBytes(12).toString('base64url')}`;
   const name = `${label[0].toUpperCase()}${label.slice(1)} ${suffix.slice(0, 4)}`;
   const { register } = await gql('mutation R($input: RegisterInput!) { register(input: $input) { userId } }', { input: { email, username: `${label}_${suffix}`, phoneNumber: `+2011${String(parseInt(suffix.slice(0, 6), 16)).padStart(8, '0')}`, password, name, timezone: 'Africa/Cairo', languageCode: 'ar' } });
   const token = (await gql('mutation L($input: LoginInput!) { login(input: $input) { accessToken } }', { input: { identifier: email, password } })).login.accessToken;
