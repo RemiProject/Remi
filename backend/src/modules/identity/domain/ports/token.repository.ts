@@ -10,4 +10,6 @@ export interface TokenRepository {
   consumeById(tx: Tx, id: string): Promise<boolean>;
   /** Used by email handlers to stay idempotent: don't send for a token that is already used / expired. */
   isUsable(db: Tx, id: string): Promise<boolean>;
+  /** Marks every open token of this purpose for the user as used. Returns how many. */
+  invalidateOpenForUser(tx: Tx, userId: string, purpose: TokenPurpose): Promise<number>;
 }

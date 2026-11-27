@@ -47,6 +47,7 @@ import { SendHouseholdInvitationEmailHandler } from './infrastructure/handlers/s
 import { SendPasswordChangedEmailHandler } from './infrastructure/handlers/send-password-changed-email.handler.js';
 import { SendPasswordResetEmailHandler } from './infrastructure/handlers/send-password-reset-email.handler.js';
 import { PasswordResetLookupHandler } from './infrastructure/handlers/password-reset-lookup.handler.js';
+import { VerifyPasswordResetCodeHandler } from './application/commands/verify-password-reset-code/verify-password-reset-code.handler.js';
 import { ProcessPasswordResetLookupHandler } from './application/commands/process-password-reset-lookup/process-password-reset-lookup.handler.js';
 import { SendVerificationEmailHandler } from './infrastructure/handlers/send-verification-email.handler.js';
 import { PrismaHouseholdInvitationRepository } from './infrastructure/repositories/prisma-household-invitation.repository.js';
@@ -70,6 +71,7 @@ const CommandHandlers = [
   VerifyEmailHandler,
   RequestPasswordResetHandler,
   ProcessPasswordResetLookupHandler,
+  VerifyPasswordResetCodeHandler,
   ResetPasswordHandler,
   CreateHouseholdHandler,
   InviteMemberHandler,

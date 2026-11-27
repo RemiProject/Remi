@@ -26,6 +26,8 @@ import { RequestPasswordResetCommand } from '@/modules/identity/application/comm
 import { ProcessPasswordResetLookupHandler } from '@/modules/identity/application/commands/process-password-reset-lookup/process-password-reset-lookup.handler.js';
 import { PasswordResetLookupHandler } from '@/modules/identity/infrastructure/handlers/password-reset-lookup.handler.js';
 import { SendPasswordResetEmailHandler } from '@/modules/identity/infrastructure/handlers/send-password-reset-email.handler.js';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 
 // Every run owns a NEW database, never DATABASE_URL or a pre-existing shared test database.
 const databaseName = `remi_reset_code_test_${randomBytes(8).toString('hex')}`;
@@ -36,6 +38,9 @@ let prisma: PrismaService;
 let transactions: TransactionRunner;
 let config: AppConfigService;
 let databaseCreated = false;
+let app: INestApplication;
+let apiUrl: string;
+let savedThrottleLimit: string | undefined;
 const repository = new PrismaPasswordResetCodeRepository();
 const users = new PrismaUserRepository();
 const tokenRepository = new PrismaTokenRepository();
@@ -62,9 +67,30 @@ beforeAll(async () => {
   prisma = new PrismaService(config);
   await prisma.$connect();
   transactions = new TransactionRunner(prisma);
+  // These tests call the public auth mutations many times from one address. The IP limit itself is covered by the
+  // email-verification suite and by unit tests of the throttle metadata; here it would only cut the flows short.
+  savedThrottleLimit = process.env.THROTTLE_AUTH_LIMIT;
+  process.env.THROTTLE_AUTH_LIMIT = '1000';
+  // Load the actual compiled module so Nest uses emitted DI metadata, exactly as the production API does.
+  const { AppModule } = await import('../../dist/app.module.js');
+  const { AppConfigService: CompiledConfig } = await import('../../dist/platform/config/app-config.service.js');
+  const { PrismaService: CompiledPrisma } = await import('../../dist/platform/db/prisma.service.js');
+  const apiConfig = Object.assign(Object.create(CompiledConfig.prototype), { env: {
+    ...config.env, NODE_ENV: 'test', EMAIL_VERIFICATION_REQUIRED: false, GRAPHQL_EMIT_SCHEMA: true, ENABLE_OUTBOX_POLLER: false, RUN_BACKGROUND_JOBS: false,
+    S3_AUTO_CREATE_BUCKET: false, LOG_LEVEL: 'silent', MAIL_TEMPLATES_DIR: `${process.cwd()}/src/platform/mail/templates/emails`,
+  } });
+  const module = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(CompiledConfig).useValue(apiConfig)
+    .overrideProvider(CompiledPrisma).useValue(prisma).compile();
+  app = module.createNestApplication({ logger: false });
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  await app.listen(0, '127.0.0.1');
+  apiUrl = `${await app.getUrl()}/graphql`;
 });
 
 afterAll(async () => {
+  await app?.close();
+  if (savedThrottleLimit === undefined) delete process.env.THROTTLE_AUTH_LIMIT; else process.env.THROTTLE_AUTH_LIMIT = savedThrottleLimit;
   await prisma?.$disconnect();
   await fixtures?.end();
   if (databaseCreated) await admin.query(`DROP DATABASE "${databaseName}"`);
@@ -427,5 +453,153 @@ describe('requesting a password reset through the outbox', () => {
     expect(message.html).toContain('dir="rtl"');
     expect(message.html).toMatch(/<p dir="ltr" data-reset-code="[0-9]{6}"/);
     expect(message.html).toContain('صالح لمدة 15 دقيقة');
+  });
+});
+
+type GqlResult = { data?: Record<string, any> | null; errors?: Array<{ message: string; extensions: { code: string; status?: number } }> };
+async function gql(query: string, variables: Record<string, unknown> = {}, accessToken?: string): Promise<GqlResult> {
+  const response = await fetch(apiUrl, { method: 'POST', headers: { 'content-type': 'application/json', ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}) }, body: JSON.stringify({ query, variables }) });
+  return response.json() as Promise<GqlResult>;
+}
+const api = {
+  register: (email: string, password: string) => gql('mutation($input:RegisterInput!){register(input:$input){userId}}', { input: {
+    email, username: `reset_${randomBytes(6).toString('hex')}`, name: 'Reset Test', phoneNumber: '+201012345678', password, languageCode: 'en' } }),
+  login: (email: string, password: string) => gql('mutation($input:LoginInput!){login(input:$input){accessToken}}', { input: { identifier: email, password } }),
+  me: (accessToken: string) => gql('{me{id emailVerifiedAt}}', {}, accessToken),
+  request: (email: string) => gql('mutation($input:RequestPasswordResetInput!){requestPasswordReset(input:$input)}', { input: { email } }),
+  verify: (email: unknown, code: unknown) => gql('mutation($input:VerifyPasswordResetCodeInput!){verifyPasswordResetCode(input:$input){resetToken expiresAt}}', { input: { email, code } }),
+  reset: (token: string, newPassword: string) => gql('mutation($input:ResetPasswordInput!){resetPassword(input:$input)}', { input: { token, newPassword } }),
+};
+const errorOf = (result: GqlResult) => ({ message: result.errors?.[0]?.message, code: result.errors?.[0]?.extensions.code, status: result.errors?.[0]?.extensions.status });
+const genericApiError = { ...genericError, status: 422 };
+const ageResetCodes = (userId: string) => fixtures.query(`UPDATE "PasswordResetCode" SET "createdAt"="createdAt"-interval '61 seconds',"expiresAt"="expiresAt"-interval '61 seconds' WHERE "userId"=$1`, [userId]);
+
+async function registered(oldPassword = 'OldPassword1!') {
+  const email = `${randomBytes(8).toString('hex')}@reset-api.invalid`;
+  const result = await api.register(email, oldPassword);
+  expect(result.errors).toBeUndefined();
+  return { id: result.data!.register.userId as string, email, oldPassword };
+}
+
+describe('verifyPasswordResetCode and resetPassword through the GraphQL API', () => {
+  it('request, code from the email, exchange, reset: the new password works, the old one and every other reset path stop working', async () => {
+    const account = await registered(); const pipeline = await resetPipeline();
+    const verificationCode = (await fixtures.query('SELECT id FROM "EmailVerificationCode" WHERE "userId"=$1 AND "usedAt" IS NULL AND "invalidatedAt" IS NULL', [account.id])).rows;
+    expect(verificationCode).toHaveLength(1); // from registration
+    const before = await api.login(account.email, account.oldPassword);
+    const session = before.data!.login.accessToken as string;
+    expect((await api.me(session)).data!.me.emailVerifiedAt).toBeNull();
+
+    // First email: its code is exchanged for a reset token.
+    expect((await api.request(account.email)).data?.requestPasswordReset).toBe(true);
+    await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    const exchanged = await api.verify(` ${account.email.toUpperCase()} `, pipeline.sent[0].code);
+    expect(exchanged.errors).toBeUndefined();
+    const { resetToken, expiresAt } = exchanged.data!.verifyPasswordResetCode;
+    expect(Math.abs(new Date(expiresAt).getTime() - Date.now() - policy.resetTokenLifetimeMs)).toBeLessThan(15_000);
+    const firstLink = new URL(linkFrom(pipeline.sent[0].html)!).searchParams.get('token')!;
+
+    // Second email after the cooldown: another link and an open code.
+    await ageResetCodes(account.id);
+    await api.request(account.email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(2);
+    const secondLink = new URL(linkFrom(pipeline.sent[1].html)!).searchParams.get('token')!;
+    const openCode = pipeline.sent[1].code!;
+
+    expect((await api.reset(resetToken, 'NewPassword2!')).data?.resetPassword).toBe(true);
+    // The reset token worked once only.
+    expect(errorOf(await api.reset(resetToken, 'AnotherPassword3!')).code).toBe('INVALID_OR_EXPIRED_TOKEN');
+    // Every other reset link and the open code stopped working.
+    for (const link of [firstLink, secondLink]) expect(errorOf(await api.reset(link, 'AnotherPassword3!')).code).toBe('INVALID_OR_EXPIRED_TOKEN');
+    expect(errorOf(await api.verify(account.email, openCode))).toEqual(genericApiError);
+    expect((await fixtures.query(`SELECT count(*)::int AS n FROM "Token" WHERE "userId"=$1 AND purpose='PASSWORD_RESET' AND "usedAt" IS NULL`, [account.id])).rows[0].n).toBe(0);
+    expect((await fixtures.query('SELECT count(*)::int AS n FROM "PasswordResetCode" WHERE "userId"=$1 AND "usedAt" IS NULL AND "invalidatedAt" IS NULL', [account.id])).rows[0].n).toBe(0);
+    // The new password works and the old one fails.
+    expect(errorOf(await api.login(account.email, account.oldPassword)).code).toBe('INVALID_CREDENTIALS');
+    const after = await api.login(account.email, 'NewPassword2!');
+    expect(after.errors).toBeUndefined();
+    // Existing behaviour kept: the old session is revoked and the password-changed email is queued.
+    expect(errorOf(await api.me(session)).code).toBe('UNAUTHENTICATED');
+    expect((await fixtures.query(`SELECT count(*)::int AS n FROM "OutboxEvent" WHERE topic='auth.password_changed' AND payload->>'to'=$1`, [account.email])).rows[0].n).toBe(1);
+    // The email is now verified, and the registration verification code no longer works.
+    expect((await api.me(after.data!.login.accessToken)).data!.me.emailVerifiedAt).not.toBeNull();
+    expect((await fixtures.query('SELECT "invalidatedAt" FROM "EmailVerificationCode" WHERE id=$1', [verificationCode[0].id])).rows[0].invalidatedAt).not.toBeNull();
+    const verifyEmail = await gql('mutation($input:VerifyEmailCodeInput!){verifyEmailCode(input:$input)}', { input: { email: account.email,
+      code: deriveEmailVerificationCode(secret, account.id, verificationCode[0].id) } });
+    expect(verifyEmail.errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
+  });
+
+  it('a reset link from the email still works on its own, with the same invalidation and verification', async () => {
+    const account = await registered(); const pipeline = await resetPipeline();
+    await api.request(account.email); await pipeline.drain();
+    const link = new URL(linkFrom(pipeline.sent[0].html)!).searchParams.get('token')!;
+    expect((await api.reset(link, 'LinkPassword4!')).data?.resetPassword).toBe(true);
+    expect(errorOf(await api.verify(account.email, pipeline.sent[0].code))).toEqual(genericApiError);
+    expect((await api.login(account.email, 'LinkPassword4!')).errors).toBeUndefined();
+    expect((await fixtures.query('SELECT "emailVerifiedAt" FROM "User" WHERE id=$1', [account.id])).rows[0].emailVerifiedAt).not.toBeNull();
+  });
+
+  it('keeps the original verification date when the email was already verified', async () => {
+    const account = await registered(); const pipeline = await resetPipeline();
+    await fixtures.query(`UPDATE "User" SET "emailVerifiedAt"='2026-01-01T00:00:00Z' WHERE id=$1`, [account.id]);
+    await api.request(account.email); await pipeline.drain();
+    const { resetToken } = (await api.verify(account.email, pipeline.sent[0].code)).data!.verifyPasswordResetCode;
+    expect((await api.reset(resetToken, 'NewPassword5!')).data?.resetPassword).toBe(true);
+    expect((await fixtures.query('SELECT "emailVerifiedAt" FROM "User" WHERE id=$1', [account.id])).rows[0].emailVerifiedAt.toISOString()).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('wrong, malformed and replaced codes and unknown or malformed emails give one identical error; malformed codes are not counted', async () => {
+    const account = await registered(); const pipeline = await resetPipeline();
+    await api.request(account.email); await pipeline.drain();
+    const code = pipeline.sent[0].code!;
+    const results = [
+      await api.verify(account.email, wrong(code)),
+      await api.verify(`${randomUUID()}@reset-api.invalid`, code),
+      await api.verify('not-an-email', code),
+      await api.verify('', code),
+      await api.verify(account.email, '12345'),
+      await api.verify(account.email, 'abcdef'),
+      await api.verify(account.email, `${code} `),
+      await api.verify(account.email, '1'.repeat(300)),
+    ];
+    for (const result of results) {
+      expect(result.data ?? null).toBeNull();
+      expect(errorOf(result)).toEqual(genericApiError);
+      expect(Object.keys(result.errors![0].extensions).sort()).toEqual(['code', 'status']);
+    }
+    const row = (await fixtures.query('SELECT "failedAttempts" FROM "PasswordResetCode" WHERE "userId"=$1', [account.id])).rows[0];
+    expect(row.failedAttempts).toBe(1); // only the well-formed wrong code counted
+    expect((await api.verify(account.email, code)).data?.verifyPasswordResetCode.resetToken).toBeTruthy();
+  });
+
+  it('the account lock applies through the mutation, and the lock-time email carries only the link', async () => {
+    const account = await registered(); const pipeline = await resetPipeline();
+    for (let round = 0; round < 2; round++) {
+      await api.request(account.email); await pipeline.drain();
+      const code = pipeline.sent.at(-1)!.code!;
+      for (let i = 0; i < 5; i++) expect(errorOf(await api.verify(account.email, wrong(code)))).toEqual(genericApiError);
+      await ageResetCodes(account.id);
+    }
+    // Locked: a fresh code is withheld from the email, and even the right code is refused without being counted.
+    await api.request(account.email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(3);
+    expect(pipeline.sent[2].code).toBeUndefined();
+    const open = (await fixtures.query('SELECT id FROM "PasswordResetCode" WHERE "userId"=$1 AND "usedAt" IS NULL AND "invalidatedAt" IS NULL', [account.id])).rows[0];
+    const rightCode = deriveOneTimeCode('password-reset', secret, account.id, open.id);
+    expect(errorOf(await api.verify(account.email, rightCode))).toEqual(genericApiError);
+    expect((await fixtures.query('SELECT "failedAttempts", "usedAt" FROM "PasswordResetCode" WHERE id=$1', [open.id])).rows[0]).toEqual({ failedAttempts: 0, usedAt: null });
+    // The link from that email still resets the password.
+    const link = new URL(linkFrom(pipeline.sent[2].html)!).searchParams.get('token')!;
+    expect((await api.reset(link, 'LockedPassword6!')).data?.resetPassword).toBe(true);
+  });
+
+  it('exposes the new mutation and type in the emitted schema without changing existing ones', async () => {
+    const schema = (await import('node:fs')).readFileSync('schema.graphql', 'utf8');
+    expect(schema).toContain('verifyPasswordResetCode(input: VerifyPasswordResetCodeInput!): PasswordResetToken!');
+    expect(schema).toMatch(/type PasswordResetToken \{[\s\S]*?expiresAt: DateTime![\s\S]*?resetToken: String![\s\S]*?\}/);
+    expect(schema).toMatch(/input VerifyPasswordResetCodeInput \{[\s\S]*?code: String![\s\S]*?email: String![\s\S]*?\}/);
+    expect(schema).toContain('resetPassword(input: ResetPasswordInput!): Boolean!');
+    expect(schema).toContain('requestPasswordReset(input: RequestPasswordResetInput!): Boolean!');
   });
 });

@@ -95,12 +95,15 @@ export class PasswordResetCodeService {
    */
   async exchange(email: string, code: string): Promise<{ resetToken: string; expiresAt: Date }> {
     const secret = this.secret;
-    const user = await this.users.findByEmail(this.transactions.db, normalizeEmail(email));
-    if (!secret || !user) {
-      // Comparable work for an unknown email or a missing secret: the same lookup, a transaction with the same
-      // row-lock query (matching no row), and an HMAC. Exact timing equality is not the aim; an obvious gap is.
+    const address = typeof email === 'string' ? normalizeEmail(email) : '';
+    const wellFormed = typeof code === 'string' && /^[0-9]{6}$/.test(code) && address.length > 0 && address.length <= 254;
+    const user = address.length > 0 && address.length <= 254 ? await this.users.findByEmail(this.transactions.db, address) : null;
+    if (!secret || !user || !wellFormed) {
+      // Comparable work for an unknown email, a malformed email or code, or a missing secret: a transaction with the
+      // same row-lock query (matching no row) and an HMAC. A malformed code never counts as a wrong attempt.
+      // Exact timing equality is not the aim; an obvious gap is.
       await this.transactions.run(tx => this.repository.lockAccount(tx, NO_ACCOUNT));
-      matches(secret ?? Buffer.alloc(32), NO_ACCOUNT, '', code, '0'.repeat(64));
+      matches(secret ?? Buffer.alloc(32), NO_ACCOUNT, '', typeof code === 'string' ? code : '', '0'.repeat(64));
       throw invalidCode();
     }
     const userId = user.id;

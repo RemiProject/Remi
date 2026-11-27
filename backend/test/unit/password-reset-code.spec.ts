@@ -201,6 +201,19 @@ describe('password reset code exchange', () => {
     }
   });
 
+  it('a malformed code or email gets the generic error through the dummy path and never counts as a wrong attempt', async () => {
+    const h = harness(); await h.service.issue('user'); const code = h.code();
+    for (const [address, candidate] of [[email, '12345'], [email, '1234567'], [email, '12a456'], [email, ` ${code}`], [email, '١٢٣٤٥٦'],
+      ['', code], [`${'a'.repeat(250)}@b.co`, code], [undefined, code], [email, undefined]] as Array<[any, any]>) {
+      h.transactions.run.mockClear(); h.repository.lockAccount.mockClear();
+      await expect(h.service.exchange(address, candidate)).rejects.toMatchObject(genericError);
+      expect(h.transactions.run).toHaveBeenCalledTimes(1);
+      expect(h.repository.lockAccount).toHaveBeenCalledWith(h.tx, '00000000-0000-0000-0000-000000000000');
+    }
+    expect(h.rows[0]).toMatchObject({ failedAttempts: 0, usedAt: null, invalidatedAt: null });
+    expect((await h.service.exchange(email, code)).resetToken).toBeTruthy();
+  });
+
   it('known and unknown emails, and a missing secret, all look up the email and open a transaction with a row lock', async () => {
     const work = async (h: ReturnType<typeof harness>, address: string, code: string) => {
       h.transactions.run.mockClear(); h.repository.lockAccount.mockClear(); h.users.findByEmail.mockClear();

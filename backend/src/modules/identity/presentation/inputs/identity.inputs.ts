@@ -60,6 +60,13 @@ export class RequestPasswordResetInput {
 }
 
 @InputType()
+export class VerifyPasswordResetCodeInput {
+  // No shape validation here: a malformed email or code gets the same generic error as a wrong one, from the service.
+  @Field() @IsString() email!: string;
+  @Field({ description: 'Six ASCII digits, including any leading zero.' }) @IsString() code!: string;
+}
+
+@InputType()
 export class ResetPasswordInput {
   @Field() @IsString() @IsNotEmpty() @MaxLength(256) token!: string;
   @Field() @IsString() @MinLength(8) @MaxLength(128) @Matches(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[\p{P}\p{S}])[\s\S]+$/u) newPassword!: string;

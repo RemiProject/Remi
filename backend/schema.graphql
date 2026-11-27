@@ -651,6 +651,11 @@ type Mutation {
   Public email verification by code. Invalid, expired, used or unknown-email challenges share one generic error.
   """
   verifyEmailCode(input: VerifyEmailCodeInput!): Boolean!
+
+  """
+  Public: exchanges a reset code from the email for a single-use resetPassword token valid for 10 minutes. Wrong, expired, used or malformed codes, unknown emails and locked accounts share one generic error.
+  """
+  verifyPasswordResetCode(input: VerifyPasswordResetCodeInput!): PasswordResetToken!
 }
 
 type MyHousehold {
@@ -751,6 +756,13 @@ type NutritionProfile {
 
   """Null when the source does not report it"""
   sugarG: Decimal
+}
+
+type PasswordResetToken {
+  expiresAt: DateTime!
+
+  """Single-use token for resetPassword."""
+  resetToken: String!
 }
 
 input PlanMealInputType {
@@ -1570,6 +1582,12 @@ type UserProfileDataType {
 }
 
 input VerifyEmailCodeInput {
+  """Six ASCII digits, including any leading zero."""
+  code: String!
+  email: String!
+}
+
+input VerifyPasswordResetCodeInput {
   """Six ASCII digits, including any leading zero."""
   code: String!
   email: String!
