@@ -11,7 +11,11 @@ import { RequestEmailVerificationCommand } from '@/modules/identity/application/
 import { VerifyEmailHandler } from '@/modules/identity/application/commands/verify-email/verify-email.handler.js';
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
 import { SendVerificationEmailHandler } from '@/modules/identity/infrastructure/handlers/send-verification-email.handler.js';
-import { UserNotFoundError } from '@/modules/identity/domain/services/identity.errors.js';
+import { ProcessEmailVerificationCodeLookupHandler } from '@/modules/identity/application/commands/process-email-verification-code-lookup/process-email-verification-code-lookup.handler.js';
+import { ProcessEmailVerificationCodeLookupCommand } from '@/modules/identity/application/commands/process-email-verification-code-lookup/process-email-verification-code-lookup.command.js';
+import { EmailVerificationCodeLookupHandler } from '@/modules/identity/infrastructure/handlers/email-verification-code-lookup.handler.js';
+import { VerificationEmailService } from '@/modules/identity/application/services/verification-email.service.js';
+import { OutboxTopics } from '@/modules/identity/domain/outbox-topics.js';
 import { EmailVerifiedEvent } from '@/modules/identity/domain/events/identity.events.js';
 import { LinkBuilder } from '@/modules/identity/application/services/link-builder.js';
 import { OneTimeTokenService } from '@/modules/identity/application/services/one-time-token.service.js';
@@ -39,20 +43,27 @@ describe('public verification commands and GraphQL boundary', () => {
     expect(validateSync(Object.assign(new VerifyEmailCodeInput(), { email: user.email, code: '0'.repeat(257) })).length).toBeGreaterThan(0);
   });
 
-  it.each([null, user, { ...user, emailVerifiedAt: new Date() }])('returns the same acceptance for unknown/known/verified users', async found => {
-    const users = { findByEmail: vi.fn(async () => found) };
-    const codes = { isEnabled: true };
-    const commands = { execute: vi.fn(async () => ({ accepted: true })) };
-    const handler = new RequestEmailVerificationCodeHandler({ db: {} } as any, codes as any, commands as any, users as any);
-    expect(await handler.execute(new RequestEmailVerificationCodeCommand(' PERSON@Example.Invalid '))).toEqual({ accepted: true });
-    expect(users.findByEmail).toHaveBeenCalledWith({}, user.email);
-    expect(commands.execute).toHaveBeenCalledTimes(found ? 1 : 0);
+  it.each(['person@example.invalid', 'nobody@example.invalid'])('writes only one lookup row with the normalized email, for any email (%s)', async email => {
+    const tx = fakeTx(); const outbox = { publish: vi.fn(async () => undefined) };
+    const handler = new RequestEmailVerificationCodeHandler(tx as any, outbox as any, { isEnabled: true } as any);
+    expect(await handler.execute(new RequestEmailVerificationCodeCommand(' ' + email.toUpperCase() + ' '))).toEqual({ accepted: true });
+    expect(tx.run).toHaveBeenCalledTimes(1);
+    expect(outbox.publish).toHaveBeenCalledTimes(1);
+    const [publishTx, event] = outbox.publish.mock.calls[0] as unknown as [unknown, { topic: string; dedupeKey: string; payload: Record<string, unknown> }];
+    expect(publishTx).toEqual({});
+    expect(event).toMatchObject({ topic: 'auth.email_verification_code_lookup', payload: { email } });
+    expect(event.dedupeKey).toMatch(/^[0-9a-f-]{36}$/);
   });
 
-  it('does not reveal an account deleted between lookup and resend', async () => {
-    const handler = new RequestEmailVerificationCodeHandler({ db: {} } as any, { isEnabled: true } as any,
-      { execute: async () => { throw new UserNotFoundError(); } } as any, { findByEmail: async () => user } as any);
-    expect(await handler.execute(new RequestEmailVerificationCodeCommand(user.email))).toEqual({ accepted: true });
+  it('the request cannot branch on the account: no user, token or code-issuing dependency, and a new key per request', async () => {
+    expect(RequestEmailVerificationCodeHandler.length).toBe(3);
+    const source = readFileSync('src/modules/identity/application/commands/request-email-verification-code/request-email-verification-code.handler.ts', 'utf8');
+    for (const forbidden of ['findByEmail', 'USER_REPOSITORY', 'TOKEN_REPOSITORY', 'issueWithinTransaction', 'CommandBus']) expect(source).not.toContain(forbidden);
+    const outbox = { publish: vi.fn(async () => undefined) };
+    const handler = new RequestEmailVerificationCodeHandler(fakeTx() as any, outbox as any, { isEnabled: true } as any);
+    await handler.execute(new RequestEmailVerificationCodeCommand(user.email));
+    await handler.execute(new RequestEmailVerificationCodeCommand(user.email));
+    expect(new Set(outbox.publish.mock.calls.map(call => (call as any[])[1].dedupeKey)).size).toBe(2);
   });
 
   it.each([null, user])('delegates verification to the generic-error policy and publishes only after success', async found => {
@@ -68,16 +79,74 @@ describe('public verification commands and GraphQL boundary', () => {
     }
   });
 
-  it('accepts resend without sending, and rejects verify, before account lookup when the feature is disabled', async () => {
+  it('accepts resend without writing anything, and rejects verify, before account lookup when the feature is disabled', async () => {
     const users = { findByEmail: vi.fn() };
-    const commands = { execute: vi.fn() };
+    const tx = fakeTx(); const outbox = { publish: vi.fn() };
     const codes = { isEnabled: false, requireEnabled: () => { throw new Error('generic'); } };
-    const resend = new RequestEmailVerificationCodeHandler({} as any, codes as any, commands as any, users as any);
+    const resend = new RequestEmailVerificationCodeHandler(tx as any, outbox as any, codes as any);
     const verify = new VerifyEmailCodeHandler({} as any, codes as any, {} as any, users as any);
     expect(await resend.execute(new RequestEmailVerificationCodeCommand(user.email))).toEqual({ accepted: true });
-    expect(commands.execute).not.toHaveBeenCalled();
+    expect(tx.run).not.toHaveBeenCalled(); expect(outbox.publish).not.toHaveBeenCalled();
     await expect(verify.execute(new VerifyEmailCodeCommand(user.email, '123456'))).rejects.toThrow('generic');
     expect(users.findByEmail).not.toHaveBeenCalled();
+  });
+});
+
+function lookupHarness(found: typeof user | null, status: string, enabled = true) {
+  const tx = fakeTx(); const outbox = { publish: vi.fn(), clearPayload: vi.fn() };
+  const config = fakeConfig(); const tokens = { insert: vi.fn() };
+  const codes = { isEnabled: enabled, issueWithinTransaction: vi.fn(async () => ({ status, challenge: { id: 'challenge-id' } })) };
+  const users = { findByEmail: vi.fn(async () => found) };
+  const emails = new VerificationEmailService(outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config, codes as any, tokens as any);
+  const handler = new ProcessEmailVerificationCodeLookupHandler(tx as any, outbox as any, codes as any, emails, users as any);
+  return { tx, outbox, tokens, codes, users, handler };
+}
+
+describe('public code request lookup worker', () => {
+  it('queues the verification email with the challenge ID for an unverified account and blanks the lookup row in the same transaction', async () => {
+    const h = lookupHarness(user, 'issued');
+    expect(await h.handler.execute(new ProcessEmailVerificationCodeLookupCommand(7n, ' PERSON@Example.Invalid '))).toEqual({ outcome: 'queued' });
+    expect(h.users.findByEmail).toHaveBeenCalledWith({}, user.email);
+    expect(h.codes.issueWithinTransaction).toHaveBeenCalledWith({}, user.id);
+    const [, event] = h.outbox.publish.mock.calls[0];
+    expect(event.topic).toBe(OutboxTopics.EmailVerifyRequested);
+    expect(event.payload).toMatchObject({ to: user.email, codeChallengeId: 'challenge-id' });
+    expect(event.payload).not.toHaveProperty('code');
+    expect(h.outbox.clearPayload).toHaveBeenCalledWith({}, 7n);
+    expect(h.tx.run).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['cooldown', 'daily-cap', 'not-eligible'])('sends nothing on %s, and still blanks the lookup row', async status => {
+    const h = lookupHarness(user, status);
+    expect(await h.handler.execute(new ProcessEmailVerificationCodeLookupCommand(7n, user.email))).toEqual({ outcome: 'not-sent' });
+    expect(h.outbox.publish).not.toHaveBeenCalled(); expect(h.tokens.insert).not.toHaveBeenCalled();
+    expect(h.outbox.clearPayload).toHaveBeenCalledWith({}, 7n);
+  });
+
+  it('sends nothing for an unknown or deleted email, a verified account, or a blanked row on retry', async () => {
+    const cases: Array<[typeof user | null, string]> = [[null, 'nobody@example.invalid'], [{ ...user, emailVerifiedAt: new Date() } as any, user.email], [user, '']];
+    for (const [found, email] of cases) {
+      const h = lookupHarness(found, 'issued');
+      expect(await h.handler.execute(new ProcessEmailVerificationCodeLookupCommand(7n, email))).toEqual({ outcome: 'not-sent' });
+      expect(h.codes.issueWithinTransaction).not.toHaveBeenCalled(); expect(h.outbox.publish).not.toHaveBeenCalled();
+      expect(h.outbox.clearPayload).toHaveBeenCalledWith({}, 7n);
+      if (!email) expect(h.users.findByEmail).not.toHaveBeenCalled();
+    }
+  });
+
+  it('never sends a link-only email from this public path, even if codes were disabled after the request', async () => {
+    const h = lookupHarness(user, 'disabled', false);
+    expect(await h.handler.execute(new ProcessEmailVerificationCodeLookupCommand(7n, user.email))).toEqual({ outcome: 'not-sent' });
+    expect(h.users.findByEmail).not.toHaveBeenCalled(); expect(h.outbox.publish).not.toHaveBeenCalled();
+    expect(h.outbox.clearPayload).toHaveBeenCalledWith({}, 7n);
+  });
+
+  it('the outbox handler passes the row ID and email, and treats a blanked payload as no email', async () => {
+    const commands = { execute: vi.fn(async () => ({ outcome: 'not-sent' })) };
+    const handler = new EmailVerificationCodeLookupHandler(commands as any);
+    await handler.handle({ id: 9n, payload: { email: user.email } } as any);
+    await handler.handle({ id: 9n, payload: {} } as any);
+    expect(commands.execute.mock.calls.map(([command]: any) => [command.lookupId, command.email])).toEqual([[9n, user.email], [9n, '']]);
   });
 });
 
@@ -86,8 +155,8 @@ describe('verification email transactions and compatibility', () => {
     const tx = fakeTx(); const config = fakeConfig();
     const outbox = { publish: vi.fn(async () => undefined) }; const tokens = { insert: vi.fn(async () => undefined) };
     const codes = { issueWithinTransaction: vi.fn(async () => ({ status, challenge: { id: 'challenge-id' } })) };
-    const handler = new RequestEmailVerificationHandler(tx as any, outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config,
-      { findById: async () => user } as any, tokens as any, codes as any);
+    const emails = new VerificationEmailService(outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config, codes as any, tokens as any);
+    const handler = new RequestEmailVerificationHandler(tx as any, { findById: async () => user } as any, emails);
     return { tx, outbox, tokens, codes, handler };
   }
 

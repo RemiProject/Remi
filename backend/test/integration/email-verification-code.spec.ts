@@ -15,6 +15,7 @@ import { VerifyEmailCommand } from '@/modules/identity/application/commands/veri
 import { RequestEmailVerificationHandler } from '@/modules/identity/application/commands/request-email-verification/request-email-verification.handler.js';
 import { RequestEmailVerificationCommand } from '@/modules/identity/application/commands/request-email-verification/request-email-verification.command.js';
 import { LinkBuilder } from '@/modules/identity/application/services/link-builder.js';
+import { VerificationEmailService } from '@/modules/identity/application/services/verification-email.service.js';
 import { OneTimeTokenService } from '@/modules/identity/application/services/one-time-token.service.js';
 import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
 import { ValidationPipe } from '@nestjs/common';
@@ -88,7 +89,22 @@ async function gql(query: string, variables: Record<string, unknown> = {}, acces
   return response.json() as Promise<{ data?: Record<string, any>; errors?: Array<{ message: string; extensions: { code: string } }> }>;
 }
 
-const requestCode = (email: string) => gql('mutation($input:RequestEmailVerificationCodeInput!){requestEmailVerificationCode(input:$input)}', { input: { email } });
+/** Runs the real lookup worker of the compiled app over pending lookup rows, as the API's outbox poller would. */
+async function drainLookups() {
+  const { OutboxPoller } = await import('../../dist/platform/outbox/outbox.poller.js');
+  const { EmailVerificationCodeLookupHandler } = await import('../../dist/modules/identity/infrastructure/handlers/email-verification-code-lookup.handler.js');
+  const handler = app.get(EmailVerificationCodeLookupHandler);
+  const poller = new OutboxPoller(prisma as any, { topics: () => ['auth.email_verification_code_lookup'], get: () => handler } as any, apiConfig as any);
+  for (let i = 0; i < 20 && await poller.tick() > 0; i++);
+}
+/** The request only queues a lookup; the email work happens in the worker, which this drains before returning. */
+const requestCode = async (email: string) => {
+  const result = await gql('mutation($input:RequestEmailVerificationCodeInput!){requestEmailVerificationCode(input:$input)}', { input: { email } });
+  await drainLookups();
+  return result;
+};
+const lookupRows = async () => (await fixtures.query(`SELECT payload, "processedAt" FROM "OutboxEvent" WHERE topic='auth.email_verification_code_lookup'`)).rows;
+const outboxMentions = async (text: string) => (await fixtures.query('SELECT count(*)::int AS n FROM "OutboxEvent" WHERE payload::text LIKE $1', [`%${text}%`])).rows[0].n;
 const verifyCode = (email: string, code: string) => gql('mutation($input:VerifyEmailCodeInput!){verifyEmailCode(input:$input)}', { input: { email, code } });
 
 async function register(languageCode = 'en') {
@@ -255,8 +271,8 @@ describe('email codes in a dedicated migrated database', () => {
   it('rolls back the code and link token when the outbox write of a resend fails', async () => {
     const id = await user(); const { service } = clocked();
     const outbox = { publish: async () => { throw new Error('test outbox failure'); } };
-    const handler = new RequestEmailVerificationHandler(transactions, outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config,
-      users, new PrismaTokenRepository(), service);
+    const emails = new VerificationEmailService(outbox as any, new OneTimeTokenService(config), new LinkBuilder(config), config, service, new PrismaTokenRepository());
+    const handler = new RequestEmailVerificationHandler(transactions, users, emails);
     await expect(handler.execute(new RequestEmailVerificationCommand(id))).rejects.toThrow('test outbox failure');
     const counts = await fixtures.query(`SELECT (SELECT count(*)::int FROM "EmailVerificationCode" WHERE "userId"=$1) AS codes,
       (SELECT count(*)::int FROM "Token" WHERE "userId"=$1) AS tokens`, [id]);
@@ -285,6 +301,9 @@ describe('public API and mail on the real Nest GraphQL schema', () => {
     expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
     expect((await requestCode('absent@api-code.invalid')).data?.requestEmailVerificationCode).toBe(true);
     expect((await fixtures.query('SELECT count(*)::int AS n FROM "EmailVerificationCode" WHERE "userId"=$1', [account.id])).rows[0].n).toBe(1);
+    // Both requests left only processed, blanked lookup rows: the unknown address is stored nowhere.
+    expect((await lookupRows()).every(row => row.processedAt !== null && Object.keys(row.payload).length === 0)).toBe(true);
+    expect(await outboxMentions('absent@api-code.invalid')).toBe(0);
     await fixtures.query(`UPDATE "EmailVerificationCode" SET "createdAt"="createdAt"-interval '61 seconds',"expiresAt"="expiresAt"-interval '61 seconds' WHERE id=$1`, [initial.id]);
     expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
     const next = (await fixtures.query('SELECT * FROM "EmailVerificationCode" WHERE "userId"=$1 AND "invalidatedAt" IS NULL', [account.id])).rows[0];
@@ -292,7 +311,10 @@ describe('public API and mail on the real Nest GraphQL schema', () => {
     expect((await verifyCode(account.email, oldCode)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
     const code = deriveEmailVerificationCode(secret, account.id, next.id);
     expect((await verifyCode(account.email, code)).data?.verifyEmailCode).toBe(true);
+    const mails = async () => (await fixtures.query(`SELECT count(*)::int AS n FROM "OutboxEvent" WHERE topic='auth.email_verify_requested' AND payload->>'to'=$1`, [account.email])).rows[0].n;
+    const mailsBefore = await mails();
     expect((await requestCode(account.email)).data?.requestEmailVerificationCode).toBe(true);
+    expect(await mails()).toBe(mailsBefore); // a verified account gets no email
     expect((await verifyCode(account.email, code)).errors?.[0].extensions.code).toBe('INVALID_EMAIL_VERIFICATION_CODE');
   });
 

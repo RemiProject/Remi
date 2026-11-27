@@ -47,6 +47,9 @@ import { SendHouseholdInvitationEmailHandler } from './infrastructure/handlers/s
 import { SendPasswordChangedEmailHandler } from './infrastructure/handlers/send-password-changed-email.handler.js';
 import { SendPasswordResetEmailHandler } from './infrastructure/handlers/send-password-reset-email.handler.js';
 import { PasswordResetLookupHandler } from './infrastructure/handlers/password-reset-lookup.handler.js';
+import { EmailVerificationCodeLookupHandler } from './infrastructure/handlers/email-verification-code-lookup.handler.js';
+import { ProcessEmailVerificationCodeLookupHandler } from './application/commands/process-email-verification-code-lookup/process-email-verification-code-lookup.handler.js';
+import { VerificationEmailService } from './application/services/verification-email.service.js';
 import { VerifyPasswordResetCodeHandler } from './application/commands/verify-password-reset-code/verify-password-reset-code.handler.js';
 import { ProcessPasswordResetLookupHandler } from './application/commands/process-password-reset-lookup/process-password-reset-lookup.handler.js';
 import { SendVerificationEmailHandler } from './infrastructure/handlers/send-verification-email.handler.js';
@@ -62,6 +65,7 @@ import { InvitationResolver } from './presentation/resolvers/invitation.resolver
 
 const CommandHandlers = [
   RequestEmailVerificationCodeHandler,
+  ProcessEmailVerificationCodeLookupHandler,
   VerifyEmailCodeHandler,
   RegisterHandler,
   LoginHandler,
@@ -96,6 +100,7 @@ const OutboxHandlers = [
   SendVerificationEmailHandler,
   SendPasswordResetEmailHandler,
   PasswordResetLookupHandler,
+  EmailVerificationCodeLookupHandler,
   SendPasswordChangedEmailHandler,
   SendHouseholdInvitationEmailHandler,
 ];
@@ -110,6 +115,7 @@ const OutboxHandlers = [
     EmailVerificationCodeService,
     { provide: EMAIL_VERIFICATION_CODE_REPOSITORY, useClass: PrismaEmailVerificationCodeRepository },
     PasswordResetCodeService,
+    VerificationEmailService,
     { provide: PASSWORD_RESET_CODE_REPOSITORY, useClass: PrismaPasswordResetCodeRepository },
     LinkBuilder,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
