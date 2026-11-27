@@ -9,6 +9,17 @@ This app uses **pnpm 10.34.8 only**, pinned in `package.json`. Use
 On Windows, use **`pnpm.cmd`** because PowerShell's script policy blocks the
 `pnpm.ps1` shim. On macOS/Linux, replace `pnpm.cmd` with `pnpm`.
 
+The repository's root `.gitattributes` checks text files out with LF on every OS.
+A Windows checkout made before it was added still has CRLF files on disk, so
+generated files such as `backend/schema.graphql` look changed. Refresh it once,
+from the repository root, after committing or stashing your work (`git reset --hard`
+discards uncommitted changes):
+
+```powershell
+git rm --cached -r -q .
+git reset --hard
+```
+
 ## Get started
 
 Backend inventory is **on by default**. A fresh checkout needs no mobile environment

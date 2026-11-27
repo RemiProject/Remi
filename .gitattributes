@@ -1,0 +1,20 @@
+# Store and check out text files with LF on every OS. Generated files (schema.graphql, docs/*.md from legal-docs.cjs)
+# are written with LF, so a CRLF checkout made them look changed on Windows.
+* text=auto eol=lf
+
+# Binary assets: never convert, never diff as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.wav binary
+*.mp3 binary
+*.mp4 binary
+*.pdf binary
+*.zip binary
