@@ -1,4 +1,5 @@
 import { recipeName, recipeNameMatches } from '@/i18n/recipe-names';
+import { useAuth } from '@/providers/auth-provider';
 import { recipeContent } from '@/i18n/recipe-content';
 import { catalogLabel, localizedUnit } from '@/i18n/catalog-labels';
 import { useLanguage } from '@/providers/language-provider';
@@ -65,7 +66,7 @@ export function ConnectedRecipeScreen() {
 }
 function RecipeContent({ id }: { id: string }) {
   const copy = useCopy(); const { colors } = useRemyTheme(); const state = useKitchenData(() => loadRecipe(id), `recipe:${id}`); const recipe = state.data; const [servings, setServings] = useState<number | null>(null);
-  const matches = useBackendRecipes(); const { owner, ensureDetail } = matches; const { language } = useLanguage(); const insets = useSafeAreaInsets();
+  const matches = useBackendRecipes(); const { owner, ensureDetail } = matches; const { language } = useLanguage(); const insets = useSafeAreaInsets(); const { user } = useAuth();
   const goal = useNutritionGoal(!!owner);
   const reduced = useReducedMotion();
   // Scroll drives the hero and the title bar on the UI thread; React never re-renders while scrolling.
@@ -116,7 +117,8 @@ function RecipeContent({ id }: { id: string }) {
         {matches.removedNotice?.recipeId === id && <AppText accessibilityLiveRegion="polite">{cookedItMessages[language].removed}</AppText>}
         <View style={[uiStyles.row, { alignItems: 'flex-start' }]}>
           <View style={[uiStyles.grow, { gap: 4 }]}><AppText variant="title" accessibilityRole="header" dir={rtl ? 'rtl' : 'ltr'} style={{ fontSize: 28, lineHeight: 33 }}>{recipeName(recipe.name, language)}</AppText>
-            {(recipe.cuisineName || recipe.sourceName) && <AppText muted>{recipe.cuisineName ? catalogLabel(recipe.cuisineName, language) : copy(`From ${recipe.sourceName}`, `من ${recipe.sourceName}`)}</AppText>}</View>
+            {(recipe.cuisineName || recipe.sourceName) && <AppText muted>{recipe.cuisineName ? catalogLabel(recipe.cuisineName, language) : copy(`From ${recipe.sourceName}`, `من ${recipe.sourceName}`)}</AppText>}
+            {recipe.createdByName && <AppText variant="caption" muted>{recipe.createdByUserId && recipe.createdByUserId === user?.id ? copy('Added by you', 'أضفتها أنت') : copy(`Added by ${recipe.createdByName}`, `أضافها ${recipe.createdByName}`)}</AppText>}</View>
           <View style={[uiStyles.row, { gap: 8, paddingTop: 2 }]}>
             <RoundButton label="−" accessibilityLabel={copy('Fewer servings', 'حصص أقل')} disabled={count <= 1} onPress={() => { feedback.select(); setServings(count - 1); }} />
             <View accessible accessibilityLabel={copy(`${count} servings`, `${count} حصص`)} style={{ alignItems: 'center', minWidth: 28 }}><AppText variant="heading" accessibilityLiveRegion="polite">{count}</AppText><AppText variant="caption" muted style={{ fontSize: 11, lineHeight: 13 }}>{copy('serv.', 'حصص')}</AppText></View>
