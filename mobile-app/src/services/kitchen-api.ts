@@ -7,7 +7,8 @@ export type Unit = 'GRAM' | 'KILOGRAM' | 'MILLILITER' | 'LITER' | 'PIECE' | 'CUP
 export type MealPeriod = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'OTHER';
 export interface CatalogFood { id: string; name: string; defaultUnit: Unit }
 export interface RecipeSummary { id: string; name: string; description: string | null; servings: number; prepTimeMin: number | null; cookTimeMin: number | null; difficulty: string; cuisineName?: string | null; nutrition?: RecipeNutrition | null;
-  /** Set for the household's own recipes (My recipes); null for the catalogue. */ householdId?: string | null; sourceName?: string | null; imageUrl?: string | null }
+  /** Set for the household's own recipes (My recipes); null for the catalogue. */ householdId?: string | null; sourceName?: string | null; imageUrl?: string | null;
+  /** Who added a household recipe; their recipes follow them into every household they join. */ createdByUserId?: string | null; createdByName?: string | null }
 export interface Recipe extends RecipeSummary { sourceUrl?: string | null; ingredientLines?: { position: number; text: string; foodId: string | null }[]; ingredients: { id: string; foodId: string; foodName: string; quantity: string; unit: Unit; optional: boolean }[]; steps: { id: string; stepNumber: number; instruction: string; durationMin: number | null }[] }
 export interface PlannedMeal { id: string; recipeId: string; recipeName: string; mealDate: string; mealType: MealPeriod; servings: string }
 export interface MealPlan { id: string; name: string; startDate: string; endDate: string; meals: PlannedMeal[] }
@@ -19,7 +20,7 @@ export interface Member { userId: string; name: string; email: string; role: 'OW
 export interface Invitation { id: string; email: string; role: string }
 export interface Notification { id: string; type: string; createdAt: string; readAt: string | null; foodId: string | null; inventoryItemId: string | null }
 export interface Preference { type: string; channel: string; isEnabled: boolean; quietHoursStart: string | null; quietHoursEnd: string | null }
-export const recipeFields = `id name description servings prepTimeMin cookTimeMin difficulty cuisineName householdId sourceName imageUrl ${nutritionFields}`;
+export const recipeFields = `id name description servings prepTimeMin cookTimeMin difficulty cuisineName householdId sourceName imageUrl createdByUserId createdByName ${nutritionFields}`;
 export const recipeDetailFields = `${recipeFields} sourceUrl ingredientLines { position text foodId } ingredients { id foodId foodName quantity unit optional } steps { id stepNumber instruction durationMin }`;
 export const recipeQuery = `query Cookbook($first: Int!, $after: String) { recipes(first: $first, after: $after) { nodes { ${recipeFields} } endCursor hasNextPage } }`;
 

@@ -22,7 +22,7 @@ export class RecipeImportResolver {
 
   @Mutation(() => RecipeType)
   saveImportedRecipe(@Ctx() ctx: RequestContext, @Args('input') input: SaveImportedRecipeInput) {
-    return this.imports.save(ctx.householdId!, input);
+    return this.imports.save(ctx.householdId!, ctx.userId, input);
   }
 
   @Mutation(() => Boolean)

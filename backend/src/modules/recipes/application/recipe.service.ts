@@ -18,11 +18,11 @@ export type CreateRecipeInput = {
 export class RecipeService {
   constructor(private readonly transactions: TransactionRunner) {}
 
-  async create(householdId: string, input: CreateRecipeInput) {
+  async create(householdId: string, userId: string, input: CreateRecipeInput) {
     if (input.ingredients.length > 100 || input.steps.length > 100) throw new DomainError('RECIPE_TOO_COMPLEX', 'A recipe can contain at most 100 ingredients and 100 steps.');
     const recipeId = newId();
     await this.transactions.run(async (tx) => {
-      await tx.$executeRaw`INSERT INTO "Recipe" ("id", "householdId", "cuisineId", "name", "description", "servings", "prepTimeMin", "cookTimeMin", "difficulty") VALUES (${recipeId}::uuid, ${householdId}::uuid, ${input.cuisineId ?? null}::uuid, ${input.name.trim()}, ${input.description?.trim() ?? null}, ${input.servings}, ${input.prepTimeMin ?? null}, ${input.cookTimeMin ?? null}, ${input.difficulty}::"RecipeDifficulty")`;
+      await tx.$executeRaw`INSERT INTO "Recipe" ("id", "householdId", "cuisineId", "name", "description", "servings", "prepTimeMin", "cookTimeMin", "difficulty", "createdByUserId") VALUES (${recipeId}::uuid, ${householdId}::uuid, ${input.cuisineId ?? null}::uuid, ${input.name.trim()}, ${input.description?.trim() ?? null}, ${input.servings}, ${input.prepTimeMin ?? null}, ${input.cookTimeMin ?? null}, ${input.difficulty}::"RecipeDifficulty", ${userId}::uuid)`;
       const foodIds = input.ingredients.map((item) => item.foodId);
       if (new Set(foodIds).size !== foodIds.length) throw new DomainError('DUPLICATE_RECIPE_FOOD', 'A food may appear only once in a recipe.');
       if (foodIds.length) {
@@ -44,8 +44,9 @@ export class RecipeService {
     const afterId = decodeCursor(after);
     return this.transactions.run(async (tx) => {
       const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl"
-        FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId"
+        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl",
+          r."createdByUserId", CASE WHEN au."deletedAt" IS NULL THEN au."name" ELSE r."createdByName" END AS "createdByName"
+        FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId" LEFT JOIN "User" au ON au."id" = r."createdByUserId"
         WHERE r."archivedAt" IS NULL AND (r."householdId" IS NULL OR r."householdId" = ${householdId}::uuid)
           AND (${afterId}::uuid IS NULL OR (r."createdAt", r."id") > (SELECT c."createdAt", c."id" FROM "Recipe" c WHERE c."id" = ${afterId}::uuid AND c."archivedAt" IS NULL AND (c."householdId" IS NULL OR c."householdId" = ${householdId}::uuid)))
         ORDER BY r."createdAt", r."id" LIMIT ${first + 1}`;
@@ -56,15 +57,17 @@ export class RecipeService {
     }, { householdId });
   }
 
-  /** The household's own recipes ("My recipes"), newest first. */
-  async listMine(householdId: string, first = 20, after?: string) {
+  /** The household's own recipes ("My recipes"), newest first. With createdByUserId, only the ones that person added. */
+  async listMine(householdId: string, first = 20, after?: string, createdByUserId?: string) {
     if (first < 1 || first > 50) throw new DomainError('INVALID_PAGE_SIZE', 'first must be between 1 and 50.');
     const afterId = decodeCursor(after);
     return this.transactions.run(async (tx) => {
       const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl"
-        FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId"
+        SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl",
+          r."createdByUserId", CASE WHEN au."deletedAt" IS NULL THEN au."name" ELSE r."createdByName" END AS "createdByName"
+        FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId" LEFT JOIN "User" au ON au."id" = r."createdByUserId"
         WHERE r."archivedAt" IS NULL AND r."householdId" = ${householdId}::uuid
+          AND (${createdByUserId ?? null}::uuid IS NULL OR r."createdByUserId" = ${createdByUserId ?? null}::uuid)
           AND (${afterId}::uuid IS NULL OR (r."createdAt", r."id") < (SELECT c."createdAt", c."id" FROM "Recipe" c WHERE c."id" = ${afterId}::uuid AND c."householdId" = ${householdId}::uuid))
         ORDER BY r."createdAt" DESC, r."id" DESC LIMIT ${first + 1}`;
       const hasNextPage = rows.length > first;
@@ -80,8 +83,9 @@ export class RecipeService {
 
   private async getInTransaction(tx: Tx, householdId: string, id: string) {
     const recipes = await tx.$queryRaw<Array<Record<string, unknown>>>`
-      SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl"
-      FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId"
+      SELECT r."id", r."householdId", r."cuisineId", c."name" AS "cuisineName", r."name", r."description", r."servings", r."prepTimeMin", r."cookTimeMin", r."difficulty"::text AS "difficulty", r."createdAt", r."sourceUrl", r."sourceName", r."imageUrl",
+          r."createdByUserId", CASE WHEN au."deletedAt" IS NULL THEN au."name" ELSE r."createdByName" END AS "createdByName"
+      FROM "Recipe" r LEFT JOIN "Cuisine" c ON c."id" = r."cuisineId" LEFT JOIN "User" au ON au."id" = r."createdByUserId"
       WHERE r."id" = ${id}::uuid AND r."archivedAt" IS NULL AND (r."householdId" IS NULL OR r."householdId" = ${householdId}::uuid)`;
     if (!recipes.length) throw new DomainError('RECIPE_NOT_FOUND', 'The recipe does not exist in this household.', 404);
     const ingredients = await tx.$queryRaw<Array<Record<string, unknown>>>`

@@ -83,6 +83,8 @@ export class RecipeSummaryType {
   @Field(() => String, { nullable: true, description: 'The page a saved recipe came from' }) sourceUrl!: string | null;
   @Field(() => String, { nullable: true }) sourceName!: string | null;
   @Field(() => String, { nullable: true }) imageUrl!: string | null;
+  @Field(() => ID, { nullable: true, description: 'Who added the recipe to a household (null for catalogue recipes). Compare with me.id for "added by you"' }) createdByUserId!: string | null;
+  @Field(() => String, { nullable: true, description: "The author's name. Kept after the author deletes their account" }) createdByName!: string | null;
 }
 
 @ObjectType()

@@ -497,6 +497,11 @@ model Recipe {
   sourceUrl        String?
   sourceName       String?
   imageUrl         String?
+  /// 0037: who added it; their recipes are copied into every household they join (originRecipeId = first of the chain)
+  createdByUserId  String?            @db.Uuid
+  /// 0037: the author's name, kept after they delete their account
+  createdByName    String?
+  originRecipeId   String?            @db.Uuid
   archivedAt       DateTime?          @db.Timestamptz(6)
   createdAt        DateTime           @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime           @default(now()) @db.Timestamptz(6)

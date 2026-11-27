@@ -21,13 +21,14 @@ export class RecipeResolver {
     return this.service.list(ctx.householdId!, first, after);
   }
 
-  @Query(() => RecipeConnectionType, { description: "The household's own recipes, newest first" })
+  @Query(() => RecipeConnectionType, { description: "The household's own recipes, newest first. A person's recipes follow them into every household they join" })
   myRecipes(
     @Ctx() ctx: RequestContext,
     @Args('first', { type: () => Int, defaultValue: 20 }) first: number,
     @Args('after', { type: () => String, nullable: true }) after?: string,
+    @Args('createdByMe', { type: () => Boolean, defaultValue: false, description: 'Only the recipes you added' }) createdByMe = false,
   ) {
-    return this.service.listMine(ctx.householdId!, first, after);
+    return this.service.listMine(ctx.householdId!, first, after, createdByMe ? ctx.userId : undefined);
   }
 
   @Query(() => RecipeType)
@@ -37,6 +38,6 @@ export class RecipeResolver {
 
   @Mutation(() => RecipeType)
   createRecipe(@Ctx() ctx: RequestContext, @Args('input') input: CreateRecipeInputType) {
-    return this.service.create(ctx.householdId!, input);
+    return this.service.create(ctx.householdId!, ctx.userId, input);
   }
 }

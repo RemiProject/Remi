@@ -35,11 +35,11 @@ export class RecipeImportService {
   }
 
   /** Saves the reviewed recipe as a household recipe. Lines with a food and an amount also count for nutrition and the kitchen. */
-  async save(householdId: string, input: SaveImportedRecipeInput) {
+  async save(householdId: string, userId: string, input: SaveImportedRecipeInput) {
     const recipeId = newId();
     await this.transactions.run(async tx => {
-      await tx.$executeRaw`INSERT INTO "Recipe" ("id", "householdId", "name", "description", "servings", "prepTimeMin", "cookTimeMin", "difficulty", "sourceUrl", "sourceName", "imageUrl")
-        VALUES (${recipeId}::uuid, ${householdId}::uuid, ${input.name.trim()}, ${input.description?.trim() || null}, ${input.servings}, ${input.prepTimeMin ?? null}, ${input.cookTimeMin ?? null}, 'MEDIUM'::"RecipeDifficulty", ${input.sourceUrl}, ${input.sourceName?.trim() || null}, ${input.imageUrl ?? null})`;
+      await tx.$executeRaw`INSERT INTO "Recipe" ("id", "householdId", "name", "description", "servings", "prepTimeMin", "cookTimeMin", "difficulty", "sourceUrl", "sourceName", "imageUrl", "createdByUserId")
+        VALUES (${recipeId}::uuid, ${householdId}::uuid, ${input.name.trim()}, ${input.description?.trim() || null}, ${input.servings}, ${input.prepTimeMin ?? null}, ${input.cookTimeMin ?? null}, 'MEDIUM'::"RecipeDifficulty", ${input.sourceUrl}, ${input.sourceName?.trim() || null}, ${input.imageUrl ?? null}, ${userId}::uuid)`;
       const foodIds = [...new Set(input.ingredients.map(i => i.foodId).filter((id): id is string => !!id))];
       if (foodIds.length) {
         const found = await tx.$queryRaw<Array<{ id: string }>>`SELECT "id" FROM "Food" WHERE "id" = ANY(${foodIds}::uuid[]) AND "archivedAt" IS NULL`;

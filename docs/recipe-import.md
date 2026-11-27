@@ -50,6 +50,16 @@ A host that changes its DNS answer between the check and the request is a known 
 - **Import screen (`/import-recipe`):** paste, or receive a shared page. Review the name, servings and which ingredients link to Remi's food list, then save.
 - **Where it appears:** a "My recipes" tab in the cookbook once one exists, plus "Save a recipe from a link" in the cookbook and in Quick add (the pink + button).
 
+## Whose recipe is it (migration 0037)
+
+- **The author's and the household's:** a saved or created recipe records who added it (`createdByUserId`). Everyone in the household sees and cooks it; the recipe page says "Added by you" or "Added by Sara".
+- **It follows its author:** joining or creating another household copies the person's recipes into it, so they have them on any phone and in any household. The old household keeps its own copy, so its meal plans and history are not touched.
+- **No duplicates, removals stick:** a household gets one copy per recipe (`originRecipeId`), even after leaving and rejoining. A recipe someone removed from a household is not brought back.
+- **Deleted accounts:** the recipes stay in the household under the author's name (`createdByName`); the rest of the account is anonymized as before.
+- **API:** `createdByUserId` and `createdByName` on every recipe; `myRecipes(createdByMe: true)` lists only your own.
+- **Older recipes:** recipes saved before 0037 have no recorded author, so they stay with their household only.
+- **Checks:** `backend/scripts/verify-personal-recipes-db.mjs` (the copy trigger as the API database role, with row-level security on) and `backend/scripts/verify-personal-recipes.mjs` (end to end through GraphQL, including account deletion). Both run in CI.
+
 ## Checks
 
 - **Backend tests** (`test/unit/recipe-page.spec.ts`, `safe-fetch.spec.ts`): JSON-LD shapes, durations, yields, English and Arabic ingredient lines, and the fetch guard.
