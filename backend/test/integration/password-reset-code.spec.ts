@@ -16,6 +16,16 @@ import { passwordResetCodePolicy as policy } from '@/modules/identity/applicatio
 import { deriveOneTimeCode } from '@/modules/identity/domain/services/one-time-code.js';
 import { deriveEmailVerificationCode } from '@/modules/identity/domain/services/email-verification-code.js';
 import { hashToken } from '@/modules/identity/domain/services/token-hash.js';
+import { OutboxPublisher } from '@/platform/outbox/outbox.publisher.js';
+import { OutboxPoller } from '@/platform/outbox/outbox.poller.js';
+import { TemplateRenderer } from '@/platform/mail/template-renderer.js';
+import { OutboxTopics } from '@/modules/identity/domain/outbox-topics.js';
+import { LinkBuilder } from '@/modules/identity/application/services/link-builder.js';
+import { RequestPasswordResetHandler } from '@/modules/identity/application/commands/request-password-reset/request-password-reset.handler.js';
+import { RequestPasswordResetCommand } from '@/modules/identity/application/commands/request-password-reset/request-password-reset.command.js';
+import { ProcessPasswordResetLookupHandler } from '@/modules/identity/application/commands/process-password-reset-lookup/process-password-reset-lookup.handler.js';
+import { PasswordResetLookupHandler } from '@/modules/identity/infrastructure/handlers/password-reset-lookup.handler.js';
+import { SendPasswordResetEmailHandler } from '@/modules/identity/infrastructure/handlers/send-password-reset-email.handler.js';
 
 // Every run owns a NEW database, never DATABASE_URL or a pre-existing shared test database.
 const databaseName = `remi_reset_code_test_${randomBytes(8).toString('hex')}`;
@@ -61,12 +71,12 @@ afterAll(async () => {
   await admin?.end();
 });
 
-async function user() {
+async function user(language = 'en') {
   const id = randomUUID();
   const email = `${id}@reset-test.invalid`;
   await fixtures.query(`INSERT INTO "User" (id,email,"passwordHash",name,"countryId","localeId","preferredLanguageId",timezone)
     SELECT $1,$2,'integration-only','Reset Test',c.id,l.id,g.id,'UTC' FROM "Country" c,"Locale" l,"Language" g
-    WHERE c.code='EG' AND l.code='en-US' AND g.code='en'`, [id, email]);
+    WHERE c.code='EG' AND l.code='en-US' AND g.code=$3`, [id, email, language]);
   return { id, email };
 }
 
@@ -270,5 +280,152 @@ describe('password reset codes in a dedicated migrated database', () => {
     expect((await fixtures.query('SELECT count(*)::int AS n FROM "PasswordResetCode" WHERE "userId"=$1 AND "invalidatedAt" IS NULL', [a.id])).rows[0].n).toBe(0);
     await expect(h.service.exchange(a.email, codeA.code)).rejects.toMatchObject(genericError);
     expect((await h.service.exchange(b.email, codeB.code)).resetToken).toBeTruthy();
+  });
+});
+
+/** The real request handler, outbox poller and both workers on this database. Mail is rendered with the real templates and captured. */
+async function resetPipeline(serviceConfig: AppConfigService = config) {
+  const outbox = new OutboxPublisher();
+  const codes = new PasswordResetCodeService(serviceConfig, transactions, new OneTimeTokenService(serviceConfig), repository, users, tokenRepository);
+  const renderer = new TemplateRenderer({ env: { ...serviceConfig.env, MAIL_TEMPLATES_DIR: `${process.cwd()}/src/platform/mail/templates/emails` } } as AppConfigService);
+  await renderer.onModuleInit();
+  const sent: Array<{ to: string; lang: string; subject: string; html: string; code?: string }> = [];
+  const mail = { send: async (input: { to: string; template: string; lang: string; vars: Record<string, unknown> }) => {
+    const { subject, html } = renderer.render(input.template, input.lang, input.vars);
+    // Handlebars escapes '=' in attributes; mail clients decode it back.
+    sent.push({ to: input.to, lang: input.lang, subject, html: html.replaceAll('&#x3D;', '='), code: input.vars.code as string | undefined });
+  } };
+  const lookup = new ProcessPasswordResetLookupHandler(transactions, outbox, new OneTimeTokenService(serviceConfig), new LinkBuilder(serviceConfig), serviceConfig, codes, users, tokenRepository);
+  const handlers = new Map<string, { handle: (message: any) => Promise<void> }>([
+    [OutboxTopics.PasswordResetLookup, new PasswordResetLookupHandler({ execute: (command: any) => lookup.execute(command) } as any)],
+    [OutboxTopics.PasswordResetRequested, new SendPasswordResetEmailHandler(mail as any, transactions, tokenRepository, codes)],
+  ]);
+  const poller = (topics: string[]) => new OutboxPoller(prisma, { topics: () => topics, get: (topic: string) => handlers.get(topic) } as any, serviceConfig);
+  const request = new RequestPasswordResetHandler(transactions, outbox);
+  return {
+    sent, codes,
+    request: (email: string) => request.execute(new RequestPasswordResetCommand(email)),
+    /** Runs the outbox until idle; `only` limits it to one topic. */
+    drain: async (only?: string) => {
+      const runner = poller(only ? [only] : [...handlers.keys()]);
+      for (let i = 0; i < 20 && await runner.tick() > 0; i++);
+    },
+  };
+}
+const lastOutboxId = async () => BigInt((await fixtures.query('SELECT coalesce(max(id), 0)::text AS id FROM "OutboxEvent"')).rows[0].id);
+const outboxSince = async (id: bigint) => (await fixtures.query('SELECT topic, payload, "processedAt" FROM "OutboxEvent" WHERE id > $1 ORDER BY id', [id.toString()])).rows;
+const linkFrom = (html: string) => /href="([^"]*\/reset-password\?token=[^"]+)"/.exec(html)?.[1];
+
+describe('requesting a password reset through the outbox', () => {
+  it('a known email gets one email with a valid code and link; the outbox never holds the code, and the lookup row loses the email', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline(); const before = await lastOutboxId();
+    expect(await pipeline.request(` ${email.toUpperCase()} `)).toEqual({ accepted: true });
+    expect(await outboxSince(before)).toEqual([expect.objectContaining({ topic: 'auth.password_reset_lookup', payload: { email }, processedAt: null })]);
+    await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    const [message] = pipeline.sent;
+    expect(message.to).toBe(email); expect(message.subject).toBe('Reset your password');
+    const challenge = (await fixtures.query('SELECT * FROM "PasswordResetCode" WHERE "userId"=$1', [id])).rows;
+    expect(challenge).toHaveLength(1);
+    const code = deriveOneTimeCode('password-reset', secret, id, challenge[0].id);
+    expect(message.code).toBe(code);
+    expect(message.html).toMatch(new RegExp(`<p dir="ltr" data-reset-code="${code}"[^>]*>${code}</p>`));
+    expect(message.html).toContain('valid for 15 minutes');
+    const link = linkFrom(message.html)!; expect(link).toBeTruthy();
+    const linkToken = new URL(link).searchParams.get('token')!;
+    expect((await fixtures.query('SELECT purpose, "usedAt" FROM "Token" WHERE "tokenHash"=$1', [hashToken(linkToken)])).rows[0]).toEqual({ purpose: 'PASSWORD_RESET', usedAt: null });
+    const rows = await outboxSince(before);
+    expect(rows.map(row => [row.topic, row.processedAt !== null])).toEqual([['auth.password_reset_lookup', true], ['auth.password_reset_requested', true]]);
+    expect(rows[0].payload).toEqual({});
+    expect(rows[1].payload.codeChallengeId).toBe(challenge[0].id);
+    expect(JSON.stringify(rows)).not.toContain(`"${code}"`);
+    // The emailed code works with the step 1 exchange.
+    expect((await pipeline.codes.exchange(email, code)).resetToken).toBeTruthy();
+  });
+
+  it('an unknown email gets no email and leaves only the blanked lookup row', async () => {
+    const pipeline = await resetPipeline(); const before = await lastOutboxId();
+    const email = `${randomUUID()}@reset-test.invalid`;
+    const counts = async () => (await fixtures.query('SELECT (SELECT count(*)::int FROM "PasswordResetCode") AS codes, (SELECT count(*)::int FROM "Token") AS tokens')).rows[0];
+    const start = await counts();
+    expect(await pipeline.request(email)).toEqual({ accepted: true });
+    await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(0);
+    const rows = await outboxSince(before);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ topic: 'auth.password_reset_lookup', payload: {} });
+    expect(rows[0].processedAt).not.toBeNull();
+    expect(await counts()).toEqual(start);
+    expect((await fixtures.query('SELECT count(*)::int AS n FROM "OutboxEvent" WHERE payload::text LIKE $1', [`%${email}%`])).rows[0].n).toBe(0);
+  });
+
+  it('a deleted account gets no email', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline();
+    await fixtures.query('UPDATE "User" SET "deletedAt"=now() WHERE id=$1', [id]);
+    await pipeline.request(email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(0);
+  });
+
+  it('requests within the 60-second cooldown send one email', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline();
+    await pipeline.request(email); await pipeline.request(email); await pipeline.request(email);
+    await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    expect((await fixtures.query('SELECT count(*)::int AS n FROM "PasswordResetCode" WHERE "userId"=$1', [id])).rows[0].n).toBe(1);
+  });
+
+  it('a sixth reset email in 24 hours is not sent, whether the earlier ones had codes or only links', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline();
+    await fixtures.query(`INSERT INTO "PasswordResetCode" (id,"userId","codeHash","createdAt","expiresAt","invalidatedAt")
+      SELECT gen_random_uuid(),$1,CASE WHEN n <= 2 THEN NULL ELSE repeat('0',64) END,now()-(n*interval '1 hour'),
+        now()-(n*interval '1 hour')+interval '15 minutes',now()-(n*interval '1 hour')+interval '1 minute'
+      FROM generate_series(1,5) n`, [id]);
+    await pipeline.request(email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(0);
+    expect((await fixtures.query('SELECT count(*)::int AS n FROM "Token" WHERE "userId"=$1', [id])).rows[0].n).toBe(0);
+  });
+
+  it('a locked account gets a link-only email', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline();
+    await fixtures.query(`INSERT INTO "PasswordResetCode" (id,"userId","codeHash","createdAt","expiresAt","failedAttempts","invalidatedAt")
+      SELECT gen_random_uuid(),$1,repeat('0',64),now()-(n*interval '1 hour'),now()-(n*interval '1 hour')+interval '15 minutes',5,
+        now()-(n*interval '1 hour')+interval '5 minutes'
+      FROM generate_series(1,2) n`, [id]);
+    await pipeline.request(email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    expect(pipeline.sent[0].code).toBeUndefined();
+    expect(pipeline.sent[0].html).not.toContain('data-reset-code');
+    expect(linkFrom(pipeline.sent[0].html)).toBeTruthy();
+  });
+
+  it('a code invalidated between queueing and sending goes out link-only', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline();
+    await pipeline.request(email);
+    await pipeline.drain(OutboxTopics.PasswordResetLookup); // queued with a challenge ID, not yet sent
+    await transactions.run(tx => pipeline.codes.invalidateAllWithinTransaction(tx, id));
+    await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    expect(pipeline.sent[0].code).toBeUndefined();
+    expect(linkFrom(pipeline.sent[0].html)).toBeTruthy();
+  });
+
+  it('without the code secret the email has the link only, and still counts toward the cooldown', async () => {
+    const { id, email } = await user(); const pipeline = await resetPipeline(linkOnlyConfig());
+    await pipeline.request(email); await pipeline.request(email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    expect(pipeline.sent[0].code).toBeUndefined();
+    expect(linkFrom(pipeline.sent[0].html)).toBeTruthy();
+    expect((await fixtures.query('SELECT "codeHash" FROM "PasswordResetCode" WHERE "userId"=$1', [id])).rows).toEqual([{ codeHash: null }]);
+  });
+
+  it('an Arabic account gets the Modern Standard Arabic email with the code left to right', async () => {
+    const { email } = await user('ar'); const pipeline = await resetPipeline();
+    await pipeline.request(email); await pipeline.drain();
+    expect(pipeline.sent).toHaveLength(1);
+    const [message] = pipeline.sent;
+    expect(message.lang).toBe('ar'); expect(message.subject).toBe('إعادة تعيين كلمة المرور');
+    expect(message.html).toContain('dir="rtl"');
+    expect(message.html).toMatch(/<p dir="ltr" data-reset-code="[0-9]{6}"/);
+    expect(message.html).toContain('صالح لمدة 15 دقيقة');
   });
 });

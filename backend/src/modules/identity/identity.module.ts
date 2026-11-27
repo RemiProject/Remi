@@ -46,6 +46,8 @@ import { JwtTokenSigner } from './infrastructure/adapters/jwt-token-signer.js';
 import { SendHouseholdInvitationEmailHandler } from './infrastructure/handlers/send-household-invitation-email.handler.js';
 import { SendPasswordChangedEmailHandler } from './infrastructure/handlers/send-password-changed-email.handler.js';
 import { SendPasswordResetEmailHandler } from './infrastructure/handlers/send-password-reset-email.handler.js';
+import { PasswordResetLookupHandler } from './infrastructure/handlers/password-reset-lookup.handler.js';
+import { ProcessPasswordResetLookupHandler } from './application/commands/process-password-reset-lookup/process-password-reset-lookup.handler.js';
 import { SendVerificationEmailHandler } from './infrastructure/handlers/send-verification-email.handler.js';
 import { PrismaHouseholdInvitationRepository } from './infrastructure/repositories/prisma-household-invitation.repository.js';
 import { PrismaHouseholdMemberRepository } from './infrastructure/repositories/prisma-household-member.repository.js';
@@ -67,6 +69,7 @@ const CommandHandlers = [
   LogoutAllHandler,
   VerifyEmailHandler,
   RequestPasswordResetHandler,
+  ProcessPasswordResetLookupHandler,
   ResetPasswordHandler,
   CreateHouseholdHandler,
   InviteMemberHandler,
@@ -90,6 +93,7 @@ const EventHandlers = [IdentityAuditEventsHandler];
 const OutboxHandlers = [
   SendVerificationEmailHandler,
   SendPasswordResetEmailHandler,
+  PasswordResetLookupHandler,
   SendPasswordChangedEmailHandler,
   SendHouseholdInvitationEmailHandler,
 ];
