@@ -30,6 +30,10 @@ export const envSchema = z
     ACCESS_TOKEN_TTL_MIN: z.coerce.number().int().positive().default(15),
     REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
     EMAIL_VERIFY_TTL_HOURS: z.coerce.number().int().positive().default(24),
+    EMAIL_VERIFICATION_CODE_SECRET: optionalString.refine(value => value === undefined || (
+      /^[A-Za-z0-9_-]+$/.test(value) && Buffer.from(value, 'base64url').length >= 32 &&
+      Buffer.from(value, 'base64url').toString('base64url') === value
+    ), { message: 'Must be canonical base64url encoding of at least 32 random bytes' }),
     PASSWORD_RESET_TTL_MIN: z.coerce.number().int().positive().default(30),
     INVITATION_TTL_DAYS: z.coerce.number().int().positive().default(7),
     EMAIL_VERIFICATION_REQUIRED: bool.default(false),
@@ -67,6 +71,12 @@ export const envSchema = z
     FCM_CLIENT_EMAIL: optionalString,
     FCM_PRIVATE_KEY: optionalString,
     FCM_TOKEN_URI: z.string().url().default('https://oauth2.googleapis.com/token'),
+    // iOS devices: Apple Push Notification service with a token-based (.p8) key.
+    APNS_KEY_ID: optionalString,
+    APNS_TEAM_ID: optionalString,
+    APNS_PRIVATE_KEY: optionalString,
+    APNS_TOPIC: z.string().default('com.remi.cookbook.independent'),
+    APNS_SANDBOX: bool.default(false),
 
     GRAPHQL_DEPTH_LIMIT: z.coerce.number().int().positive().default(7),
     GRAPHQL_COMPLEXITY_LIMIT: z.coerce.number().int().positive().default(2000),
@@ -79,8 +89,14 @@ export const envSchema = z
     THROTTLE_UPLOAD_LIMIT: z.coerce.number().int().positive().default(20),
   })
   .refine((e) => !e.SMTP_HOST || !!e.MAIL_FROM, { message: 'MAIL_FROM is required when SMTP_HOST is set', path: ['MAIL_FROM'] })
+  .refine((e) => e.NODE_ENV !== 'production' || !!e.EMAIL_VERIFICATION_CODE_SECRET, {
+    message: 'Email verification code secret is required in production', path: ['EMAIL_VERIFICATION_CODE_SECRET'],
+  })
   .refine((e) => [e.FCM_PROJECT_ID, e.FCM_CLIENT_EMAIL, e.FCM_PRIVATE_KEY].every((v) => !v) || [e.FCM_PROJECT_ID, e.FCM_CLIENT_EMAIL, e.FCM_PRIVATE_KEY].every(Boolean), {
     message: 'FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY must be configured together', path: ['FCM_PROJECT_ID'],
+  })
+  .refine((e) => [e.APNS_KEY_ID, e.APNS_TEAM_ID, e.APNS_PRIVATE_KEY].every((v) => !v) || [e.APNS_KEY_ID, e.APNS_TEAM_ID, e.APNS_PRIVATE_KEY].every(Boolean), {
+    message: 'APNS_KEY_ID, APNS_TEAM_ID, and APNS_PRIVATE_KEY must be configured together', path: ['APNS_KEY_ID'],
   })
   .refine((e) => !e.METRICS_ENABLED || (e.METRICS_TOKEN?.length ?? 0) >= 32, {
     message: 'METRICS_TOKEN must contain at least 32 characters when METRICS_ENABLED is true', path: ['METRICS_TOKEN'],

@@ -1,0 +1,29 @@
+{
+  "fill": {
+    "solid": "srgb:0.97255,0.89412,0.36078,1.00000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "chef.png",
+          "name": "chef"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

@@ -10,7 +10,7 @@ test('OCR uses managed images, Android paths, real output and releases resolved 
   const storage = { resolve: async () => 'file:///data/receipt%20one.jpg', release: uri => released.push(uri) };
   const result = await recognizeReceipt('photo_x.jpg', storage, { isSupported: true, extractTextFromImage: async uri => { input = uri; return ['Milk 2.99', 'TOTAL 2.99']; } }, 'android');
   assert.equal(input, '/data/receipt one.jpg');
-  assert.deepEqual(result, { status: 'success', text: 'Milk 2.99\nTOTAL 2.99' });
+  assert.deepEqual(result, { status: 'success', text: 'Milk 2.99\nTOTAL 2.99', rows: ['Milk 2.99', 'TOTAL 2.99'] });
   assert.equal(released.length, 1);
   assert.equal(receiptImageUri('file:///a.jpg', 'ios'), 'file:///a.jpg');
   assert.equal(receiptImageUri('content://photo/1', 'android'), 'content://photo/1');
@@ -21,7 +21,7 @@ test('OCR reports empty, missing, failure and unavailable without fabricated out
   const engine = { isSupported: true, extractTextFromImage: async () => ['  '] };
   assert.equal((await recognizeReceipt('x', storage, engine, 'ios')).status, 'empty');
   engine.extractTextFromImage = async () => { throw Error('native failure'); };
-  assert.deepEqual(await recognizeReceipt('x', storage, engine, 'ios'), { status: 'error', text: '' });
+  assert.deepEqual(await recognizeReceipt('x', storage, engine, 'ios'), { status: 'error', text: '', rows: [] });
   assert.equal(releases, 2);
   assert.equal((await recognizeReceipt('x', { ...storage, resolve: async () => null }, engine, 'ios')).status, 'error');
   assert.equal((await recognizeReceipt('x', storage, null, 'android')).status, 'unavailable');
@@ -77,4 +77,14 @@ test('actual review handlers retain edits, require explicit handoff and guard do
   refs.length = 0; states.length = 0; routes.length = 0;
   render().find(n => n.props?.label === receiptMessages.ar.cancel).props.onPress();
   assert.deepEqual(routes, ['back']);
+});
+test('Remi Vision rows join a name and its price printed on one row', async () => {
+  const storage = { resolve: async () => 'file:///r.jpg', release: () => {} };
+  const vision = { isSupported: true, recognize: async () => ({ width: 1000, height: 2000, lines: [
+    { text: '9.50', x: 0.8, y: 0.20, width: 0.1, height: 0.01 },
+    { text: 'LABNEH 500G', x: 0.1, y: 0.201, width: 0.3, height: 0.01 },
+    { text: 'TOTAL 9.50', x: 0.1, y: 0.25, width: 0.3, height: 0.01 },
+  ] }) };
+  const result = await recognizeReceipt('x', storage, null, 'ios', vision);
+  assert.deepEqual(result.rows, ['LABNEH 500G 9.50', 'TOTAL 9.50']);
 });

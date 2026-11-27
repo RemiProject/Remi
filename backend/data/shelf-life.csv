@@ -1,0 +1,135 @@
+# Fresh fruit and vegetables in the catalogue -> the USDA FoodKeeper row (data/foodkeeper-produce.psv) that covers them.
+# Only fresh, raw produce. Canned, dried, cooked, frozen and pickled foods are left out on purpose: FoodKeeper lists
+# them under other categories with different rules. Foods FoodKeeper doesn't cover (fig, quince, molokhia's Egyptian
+# cousins...) are left out rather than given a guessed figure. "note" records any judgement in the mapping.
+food,foodkeeper_id,note
+american grapes,261,
+apple,248,
+apricot,249,
+banana,251,
+blackberry,253,
+blueberry,254,
+cantaloupe,496,
+casaba melon,265,FoodKeeper groups casaba melon with papaya and mango
+cherimoya,255,
+cherry,483,
+sour cherries,483,
+clementine,256,
+coconut,258,fresh coconut
+desiccated coconut,257,shredded coconut
+cranberry,259,
+currant,253,
+date,260,
+medjool dates,260,
+dragon fruit,480,
+gooseberry,252,
+grapefruit,256,
+grapes,261,
+guava,262,
+honeydew melon,497,
+kiwi,263,
+lemon,256,
+lime,256,
+lychee,252,
+mandarin,256,listed as tangerine
+mango,265,
+navel orange,256,
+orange,256,
+tangerine,256,
+nectarine,266,
+papaya,265,
+passion fruit,265,
+peach,266,
+pear,266,
+plum,266,
+pineapple,267,
+plantain,268,
+pomegranate,269,
+prickly pear,479,
+raspberry,482,
+star fruit,478,
+strawberry,481,
+tamarind,304,
+watermelon,495,
+acorn squash,303,winter squash
+butternut squash,303,winter squash
+artichoke,270,
+arugula,678,
+asparagus,271,
+avocado,250,
+bamboo shoots,272,
+bean sprouts,549,
+beet greens,287,greens
+collard greens,287,greens
+dandelion greens,287,greens
+mustard greens,287,greens
+watercress,287,greens
+purslane,287,greens
+molokhia,287,fresh jute leaves; greens
+beetroot,274,
+bell pepper,296,
+green pepper,296,
+red bell pepper,296,
+yellow bell pepper,296,
+chili pepper,548,
+jalapeno pepper,548,
+broccoli,276,
+brussels sprouts,277,
+cabbage,278,
+red cabbage,278,
+savoy cabbage,278,
+chinese cabbage,278,napa cabbage
+carrot,279,
+parsnip,279,
+cauliflower,280,
+celery,281,
+chard,550,
+corn,282,corn on the cob
+white sweet corn,282,corn on the cob
+cucumber,283,
+dill,288,herbs
+eggplant,284,
+fresh basil,509,
+fresh chives,512,
+fresh coriander,506,cilantro
+fresh mint,507,
+fresh rosemary,511,
+fresh thyme,513,
+parsley,611,
+garlic,285,
+ginger,286,
+green beans,273,
+yellow wax beans,273,
+snow peas,273,
+peas,273,fresh peas in the pod
+green onion,295,
+spring onion,295,
+leek,289,
+egyptian leek,289,kurrat; leeks
+kale,423,
+kohlrabi,494,
+lettuce,290,iceberg and romaine
+iceberg lettuce,290,
+butterhead lettuce,291,leaf lettuce
+green leaf lettuce,291,leaf lettuce
+spinach,291,
+mushroom,292,
+oyster mushroom,292,
+portabella mushroom,292,
+shiitake mushroom,292,
+okra,293,
+onion,294,
+sweet onion,294,
+potato,297,
+red potato,297,
+russet potato,297,
+sweet potato,422,
+yam,422,
+pumpkin,298,
+radicchio,674,
+radish,299,
+rutabaga,301,
+taro,305,
+tomato,306,
+turnip,307,
+zucchini,547,

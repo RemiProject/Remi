@@ -78,7 +78,11 @@ Example variables:
 - [`logout`](#logout) · mutation · auth  
 - [`logoutAll`](#logoutall) · mutation · auth  
 - [`verifyEmail`](#verifyemail) · mutation · public  
+- [`requestEmailVerificationCode`](#requestemailverificationcode) · mutation · public  
+- [`verifyEmailCode`](#verifyemailcode) · mutation · public  
+- [`requestEmailVerification`](#requestemailverification) · mutation · auth  
 - [`requestPasswordReset`](#requestpasswordreset) · mutation · public  
+- [`verifyPasswordResetCode`](#verifypasswordresetcode) · mutation · public  
 - [`resetPassword`](#resetpassword) · mutation · public  
 - [`me`](#me) · query · auth  
 - [`acceptInvitation`](#acceptinvitation) · mutation · auth  
@@ -378,7 +382,7 @@ query {
 
 **Mutation · Public** · throttled
 
-Creates a user. Returns `userId`. Email verification may be required depending on `EMAIL_VERIFICATION_REQUIRED`.
+Creates a user. Returns `userId`. Email verification may be required depending on `EMAIL_VERIFICATION_REQUIRED`. The verification email contains a link and, when `EMAIL_VERIFICATION_CODE_SECRET` is configured, a 6-digit code.
 
 ```graphql
 mutation {
@@ -494,7 +498,7 @@ Headers: `Authorization: Bearer <accessToken>`
 
 **Mutation · Public** · throttled
 
-Consumes a one-time email-verify token from the verification link.
+Consumes a one-time email-verify token from the verification link. Success also invalidates any open verification code.
 
 ```graphql
 mutation {
@@ -506,11 +510,66 @@ mutation {
 
 ---
 
+### `requestEmailVerificationCode`
+
+**Mutation · Public** · throttled
+
+Emails a new 6-digit code and verification link. Returns `true` for every validly formed email, whether the account is unknown, already verified, or over its limit, so it does not reveal which emails exist. A malformed email is a validation error, and the IP throttle returns `TOO_MANY_REQUESTS`.
+
+```graphql
+mutation {
+  requestEmailVerificationCode(input: {
+    email: "ali@example.com"
+  })
+}
+```
+
+- Registration, this mutation and `requestEmailVerification` share one per-account limit: a 60-second cooldown and at most 10 codes in 24 hours. Requests over the limit send nothing.
+- A new code replaces the previous one.
+- Without `EMAIL_VERIFICATION_CODE_SECRET` this mutation still returns `true` but sends nothing; the verification link remains available.
+
+---
+
+### `verifyEmailCode`
+
+**Mutation · Public** · throttled
+
+Verifies the email with the 6-digit code. Send `code` as a string to keep leading zeros.
+
+```graphql
+mutation {
+  verifyEmailCode(input: {
+    email: "ali@example.com"
+    code: "012345"
+  })
+}
+```
+
+A code is valid for 15 minutes, works once, and is invalidated after 5 wrong attempts. Every failure (wrong, expired, used or replaced code, unknown email, already verified account, or codes not configured) returns the same `INVALID_EMAIL_VERIFICATION_CODE` error.
+
+---
+
+### `requestEmailVerification`
+
+**Mutation · Auth** · throttled
+
+Re-sends the verification email to the logged-in user. No-op (`true`) when already verified or over the shared limit above. Without `EMAIL_VERIFICATION_CODE_SECRET` it sends a link-only email.
+
+```graphql
+mutation {
+  requestEmailVerification
+}
+```
+
+Headers: `Authorization: Bearer <accessToken>`
+
+---
+
 ### `requestPasswordReset`
 
 **Mutation · Public** · throttled
 
-Sends a password-reset email if the address exists (always returns `true` — no user enumeration).
+Emails a 6-digit code and a reset link if the address has an account. Always returns `true`, and does the same work for every email: the request only queues a lookup, and a worker finds the account and sends the email a few seconds later. So neither the answer nor its timing reveals which emails exist. A malformed email is a validation error, and the IP throttle returns `TOO_MANY_REQUESTS`.
 
 ```graphql
 mutation {
@@ -520,22 +579,59 @@ mutation {
 }
 ```
 
+- Reset emails share one per-account limit, for links and codes alike: a 60-second cooldown and at most 5 emails in 24 hours. Requests over the limit, for unknown emails and for deleted accounts send nothing.
+- The code is valid for 15 minutes; the link for `PASSWORD_RESET_TTL_MIN` minutes (30 by default). A new email replaces the previous code.
+- Without `EMAIL_VERIFICATION_CODE_SECRET` the email contains only the link. The same happens while the account is locked (see `verifyPasswordResetCode`), or when the code was used, replaced or expired before the email went out.
+
+---
+
+### `verifyPasswordResetCode`
+
+**Mutation · Public** · throttled
+
+Exchanges the 6-digit code from the reset email for a single-use reset token, which `resetPassword` accepts. Send `code` as a string to keep leading zeros.
+
+```graphql
+mutation {
+  verifyPasswordResetCode(input: {
+    email: "ali@example.com"
+    code: "012345"
+  }) {
+    resetToken
+    expiresAt
+  }
+}
+```
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `resetToken` | String | single use, for `resetPassword` |
+| `expiresAt` | DateTime | 10 minutes after the exchange |
+
+A code works once and is invalidated after 5 wrong attempts. After 10 wrong attempts in 24 hours, across all of the account's codes, every code is refused until those attempts are older than 24 hours; reset links keep working. Every failure (wrong, expired, used or replaced code, unknown email, locked account, codes not configured, or a malformed email or code) returns the same `INVALID_PASSWORD_RESET_CODE` error. A malformed code is not counted as a wrong attempt.
+
 ---
 
 ### `resetPassword`
 
 **Mutation · Public** · throttled
 
-Consumes the reset token, sets the new password, and **revokes all sessions** for that user.
+Consumes the reset token (from the email link or from `verifyPasswordResetCode`), sets the new password, and **revokes all sessions** for that user. In the same transaction it also:
+
+- invalidates every other open reset link, reset token and reset code of the account;
+- marks the email as verified, if it was not yet, and invalidates any open email verification code;
+- queues the "your password was changed" email.
 
 ```graphql
 mutation {
   resetPassword(input: {
-    token: "<token-from-email-link>"
+    token: "<token-from-email-link-or-verifyPasswordResetCode>"
     newPassword: "NewSecret123!"
   })
 }
 ```
+
+An invalid, used or expired token returns `INVALID_OR_EXPIRED_TOKEN`. A weak password fails input validation (`BAD_REQUEST`) or returns `WEAK_PASSWORD`.
 
 ---
 
@@ -833,7 +929,7 @@ type FoodCategory { id: ID! code: String! name: String! }
 ```text
 1. countries / locales / languages   → fill registration form
 2. register
-3. verifyEmail (if required)
+3. verifyEmailCode or verifyEmail (if required; requestEmailVerificationCode to resend)
 4. login                             → store accessToken + refreshToken
 5. createHousehold                   → store householdId
 6. myHouseholds / me                 → with Authorization
@@ -1005,3 +1101,80 @@ query MyNotifications {
   myDevices { id platform appVersion lastSeenAt revokedAt }
 }
 ```
+
+## Version 3: nutrition, receipts and expiry estimates
+
+All operations below need `Authorization` and `x-household-id` headers, like the other household-scoped calls.
+
+### Recipe `nutrition`
+
+`recipes`, `recipe` and `recipeSuggestions` return `nutrition` per serving. It is computed from the required ingredients through the unit converter; optional ingredients are left out. Values are estimates from raw-ingredient USDA data. See `docs/nutrition.md`.
+
+```graphql
+query {
+  recipe(id: "…") {
+    name
+    nutrition { calories proteinG carbsG fatG fiberG sugarG sodiumMg countedIngredients totalIngredients incompleteNutrients }
+  }
+}
+```
+
+- **Field meanings:**
+  - `nutrition` is `null` when no ingredient could be counted.
+  - When `countedIngredients < totalIngredients`, the figures are lower bounds.
+  - `incompleteNutrients` lists `FIBER` or `SUGAR` when a counted ingredient has no reported value.
+
+### `matchReceiptItems`
+
+**Query · Household · throttled to 30 per minute**
+
+Matches cleaned receipt item names (at most 80) to catalogue foods. Matching uses trigram similarity against food names, English and Arabic aliases, and packaged product names. Results come back in the same order as the input. See `docs/receipt-scanning.md`.
+
+```graphql
+query ($names: [String!]!) {
+  matchReceiptItems(names: $names) {
+    query
+    confidence          # HIGH | MEDIUM | NONE
+    food { foodId name arabicName categoryCode categoryName defaultUnit gramsPerPiece storageLocation
+           keeps { counter fridge freezer ripensAtRoomTemp } score }
+    alternatives { foodId name storageLocation score }
+    inKitchen { quantity unit }
+  }
+}
+```
+
+- **`confidence`:** `HIGH` means the food name covers the line. `MEDIUM` is a suggestion the person confirms. `NONE` means no food is returned.
+- **`storageLocation`:** the suggested place, from USDA FoodKeeper figures when Remi has them, otherwise from the category.
+- **`keeps`:** average days the food keeps in each place. It is `null` for foods without shelf-life data.
+
+### `receiveReceipt`
+
+**Mutation · Household**
+
+Adds every confirmed line as a purchase batch (`PURCHASED` event, `PURCHASE_RECEIPT` movement) in one transaction.
+
+```graphql
+mutation ($input: ReceiveReceiptInput!) {
+  receiveReceipt(input: $input) { added replayed items { foodId inventoryItemId quantity unit } }
+}
+```
+
+```json
+{ "input": { "idempotencyKey": "receipt-7f3a", "purchaseDate": "2026-11-07",
+  "items": [{ "foodId": "…", "amount": "2", "unit": "LITER", "storageLocation": "FRIDGE" }] } }
+```
+
+- **Limits:** between 1 and 80 items.
+- **Idempotency:** each line is keyed `receipt:<idempotencyKey>:<index>`, so repeating the call adds nothing twice and returns `replayed: true`.
+- **Expiry:** leave `estimatedExpiryAt` out and the expiry is estimated (next section).
+
+### Expiry estimates on inventory
+
+- **On every add:** `InventoryItemType` now has `purchaseDate` and `expiryEstimated`. Adding stock (`addStock`, `receiveReceipt`, purchase-order receipts) without `estimatedExpiryAt` stores the purchase day (default today) and, for mapped fresh produce, a probable expiry.
+  - **The estimate:** the purchase day plus the average USDA FoodKeeper shelf life for the storage place. `expiryEstimated` is `true`.
+  - **No date:** there is no figure at room temperature for "when ripe" fruit, and none in the freezer when freezing isn't recommended.
+- **`updateInventoryMetadata`:**
+  - **Moving an estimated batch:** if the date sent is unchanged, it is re-estimated for the new place.
+  - **Sending a different date:** it is kept as the person's, and `expiryEstimated` becomes `false`.
+
+See `docs/shelf-life.md`.

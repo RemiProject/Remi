@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="11"/>
+      <feDisplacementMap in="SourceGraphic" scale="4.5"/>
+    </filter>
+    <marker id="arrowO" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L10,6 L1,11" fill="none" stroke="#E8731A" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+    <marker id="arrowB" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L10,6 L1,11" fill="none" stroke="#2F6FD6" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="900" fill="#fff"/>
+
+  <g filter="url(#rough)" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- the big pot -->
+    <ellipse cx="520" cy="470" rx="190" ry="42"/>
+    <path d="M330,470 L342,660 q8,40 178,42 q170,-2 178,-42 L710,470"/>
+    <path d="M330,500 q-50,-4 -54,24 q0,22 50,20"/>
+    <path d="M710,500 q50,-4 54,24 q0,22 -50,20"/>
+    <!-- food inside -->
+    <path d="M380,468 q30,-22 60,-6 q24,-20 54,-2 q30,-18 60,2 q26,-14 52,6" stroke-width="2.5"/>
+    <!-- steam -->
+    <path d="M430,410 q-16,-30 4,-56 q18,-26 0,-56" stroke-width="2.5"/>
+    <path d="M520,400 q-16,-30 4,-56 q18,-26 0,-60" stroke-width="2.5"/>
+    <path d="M600,410 q-14,-26 4,-50" stroke-width="2.5"/>
+
+    <!-- the ladle -->
+    <path d="M760,360 L930,300"/>
+    <path d="M930,300 q30,-8 46,14 q10,24 -18,40 q-30,10 -42,-14 q-4,-14 14,-40 Z"/>
+
+    <path d="M962,366 q-4,10 0,14 M978,362 q-2,8 2,12" stroke-width="2.5"/>
+    <!-- four bowls -->
+    <g>
+      <path d="M940,640 q60,70 120,0 Z"/><path d="M952,640 q48,-30 96,0" stroke-width="2.5"/>
+    </g>
+    <g>
+      <path d="M1100,640 q60,70 120,0 Z"/><path d="M1112,640 q48,-30 96,0" stroke-width="2.5"/>
+    </g>
+    <g>
+      <path d="M1260,640 q60,70 120,0 Z"/><path d="M1272,640 q48,-30 96,0" stroke-width="2.5"/>
+    </g>
+    <g>
+      <path d="M1420,640 q60,70 120,0 Z"/><path d="M1432,640 q48,-30 96,0" stroke-width="2.5"/>
+    </g>
+  </g>
+
+  <!-- Xiaohei standing on the pot rim, hauling the ladle -->
+  <g filter="url(#rough)">
+    <path d="M676,420 C664,374 676,330 712,326 C750,322 766,356 762,394 C760,420 748,434 716,436 C694,437 680,432 676,420 Z" fill="#111"/>
+    <circle cx="704" cy="362" r="6" fill="#fff"/>
+    <circle cx="730" cy="362" r="6" fill="#fff"/>
+    <g fill="none" stroke="#111" stroke-width="3" stroke-linecap="round">
+      <path d="M700,434 l-10,30 M730,434 l14,32"/>
+      <path d="M758,380 q16,-8 22,-26 M682,390 q30,10 84,-24"/>
+    </g>
+  </g>
+
+  <!-- orange: ladle -> each bowl -->
+  <g fill="none" stroke="#E8731A" stroke-width="3" stroke-linecap="round" stroke-dasharray="10 9" filter="url(#rough)">
+    <path d="M970,350 C990,420 1000,520 1000,600" marker-end="url(#arrowO)"/>
+    <path d="M980,348 C1080,380 1150,480 1160,600" marker-end="url(#arrowO)"/>
+    <path d="M985,344 C1150,340 1290,450 1320,600" marker-end="url(#arrowO)"/>
+    <path d="M988,338 C1240,300 1440,420 1480,600" marker-end="url(#arrowO)"/>
+  </g>
+
+  <!-- labels -->
+  <text x="430" y="610" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#111">chicken + rice</text>
+  <text x="1000" y="720" text-anchor="middle" font-family="Bradley Hand" font-weight="bold" font-size="28" fill="#111">you</text>
+  <text x="1160" y="720" text-anchor="middle" font-family="Bradley Hand" font-weight="bold" font-size="28" fill="#111">Amira</text>
+  <text x="1320" y="720" text-anchor="middle" font-family="Bradley Hand" font-weight="bold" font-size="28" fill="#111">Omar</text>
+  <text x="1480" y="720" text-anchor="middle" font-family="Bradley Hand" font-weight="bold" font-size="28" fill="#111">Laila</text>
+
+  <text x="1110" y="812" font-family="Bradley Hand" font-weight="bold" font-size="36" fill="#D93A2B">1 serving each</text>
+  <path d="M1100,822 q140,10 300,2" fill="none" stroke="#D93A2B" stroke-width="2.5" stroke-linecap="round" filter="url(#rough)"/>
+
+  <text x="1100" y="200" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#2F6FD6">nutrition counted</text>
+  <text x="1100" y="238" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#2F6FD6">per person</text>
+  <path d="M1240,250 q30,120 70,250" fill="none" stroke="#2F6FD6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowB)" filter="url(#rough)"/>
+</svg>

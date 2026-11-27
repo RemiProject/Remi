@@ -1,0 +1,631 @@
+[
+  {
+    "slug": "tomato-pasta",
+    "name": "Roasted tomato pasta",
+    "nameAr": "باستا بالطماطم المشوية",
+    "description": "Sweet roasted tomatoes, garlic and basil folded through warm pasta.",
+    "servings": 2,
+    "prepTimeMin": 5,
+    "cookTimeMin": 25,
+    "difficulty": "EASY",
+    "cuisine": "mediterranean",
+    "sourceUrl": "https://www.nhs.uk/healthier-families/recipes/perfect-pasta-and-tomato-sauce/",
+    "sourceLabel": "NHS Healthier Families",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "",
+    "tags": [
+      "Vegetarian",
+      "Dinner"
+    ],
+    "allergens": [
+      "Wheat / gluten"
+    ],
+    "ingredients": [
+      {
+        "food": "tomato",
+        "quantity": "400",
+        "unit": "GRAM"
+      },
+      {
+        "food": "pasta",
+        "quantity": "180",
+        "unit": "GRAM"
+      },
+      {
+        "food": "garlic",
+        "quantity": "6",
+        "unit": "GRAM"
+      },
+      {
+        "food": "olive oil",
+        "quantity": "15",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "fresh basil",
+        "quantity": "10",
+        "unit": "GRAM"
+      },
+      {
+        "food": "black pepper",
+        "quantity": "0.5",
+        "unit": "GRAM"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Wash the tomatoes and basil. Heat the oven to 200°C. Halve the tomatoes and finely chop the garlic.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Toss tomatoes and garlic with the oil and pepper in a roasting dish. Roast for 20–25 minutes, until softened and lightly browned.",
+        "durationMin": 20
+      },
+      {
+        "instruction": "Meanwhile, cook the pasta according to its packet instructions. Reserve a small cup of cooking water, then drain.",
+        "durationMin": 10
+      },
+      {
+        "instruction": "Crush the roasted tomatoes into a sauce. Toss with pasta and basil, adding a splash of the reserved water if needed. Serve hot.",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "slug": "shakshuka",
+    "name": "Tomato & spinach shakshuka",
+    "nameAr": "شكشوكة بالطماطم والسبانخ",
+    "description": "A one-pan tomato and pepper sauce with spinach and gently cooked eggs.",
+    "servings": 2,
+    "prepTimeMin": 10,
+    "cookTimeMin": 25,
+    "difficulty": "EASY",
+    "cuisine": "mediterranean",
+    "sourceUrl": "https://www.nhs.uk/healthier-families/recipes/shakshuka/",
+    "sourceLabel": "NHS Healthier Families",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "",
+    "tags": [
+      "Vegetarian",
+      "One pan",
+      "Breakfast"
+    ],
+    "allergens": [
+      "Egg"
+    ],
+    "ingredients": [
+      {
+        "food": "chicken egg",
+        "quantity": "4",
+        "unit": "PIECE"
+      },
+      {
+        "food": "tomato",
+        "quantity": "500",
+        "unit": "GRAM"
+      },
+      {
+        "food": "onion",
+        "quantity": "100",
+        "unit": "GRAM"
+      },
+      {
+        "food": "bell pepper",
+        "quantity": "120",
+        "unit": "GRAM"
+      },
+      {
+        "food": "spinach",
+        "quantity": "80",
+        "unit": "GRAM"
+      },
+      {
+        "food": "garlic",
+        "quantity": "6",
+        "unit": "GRAM"
+      },
+      {
+        "food": "olive oil",
+        "quantity": "10",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "cumin",
+        "quantity": "2",
+        "unit": "GRAM"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Wash the vegetables. Chop the tomatoes, onion and pepper; mince the garlic.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Heat oil in a wide lidded pan. Soften onion and pepper for 7 minutes, then add garlic and cumin for 1 minute.",
+        "durationMin": 8
+      },
+      {
+        "instruction": "Add tomatoes and simmer, stirring, for 12 minutes until thick. Stir in spinach until wilted.",
+        "durationMin": 12
+      },
+      {
+        "instruction": "Make four hollows and crack an egg into each. Cover and cook gently until whites and yolks are firm, about 8–12 minutes. Check eggs are fully cooked before serving.",
+        "durationMin": 10
+      }
+    ]
+  },
+  {
+    "slug": "lentil-soup",
+    "name": "Lemon & red lentil soup",
+    "nameAr": "شوربة عدس أحمر بالليمون",
+    "description": "A comforting golden soup with carrots, cumin and a bright squeeze of lemon.",
+    "servings": 4,
+    "prepTimeMin": 10,
+    "cookTimeMin": 25,
+    "difficulty": "EASY",
+    "cuisine": "egyptian",
+    "sourceUrl": "https://www.nutrition.gov/recipes/lentil-soup",
+    "sourceLabel": "Nutrition.gov / NIH",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "",
+    "tags": [
+      "Vegan",
+      "Soup",
+      "Batch cook"
+    ],
+    "allergens": [],
+    "ingredients": [
+      {
+        "food": "red lentils",
+        "quantity": "250",
+        "unit": "GRAM"
+      },
+      {
+        "food": "carrot",
+        "quantity": "180",
+        "unit": "GRAM"
+      },
+      {
+        "food": "onion",
+        "quantity": "100",
+        "unit": "GRAM"
+      },
+      {
+        "food": "garlic",
+        "quantity": "6",
+        "unit": "GRAM"
+      },
+      {
+        "food": "olive oil",
+        "quantity": "15",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "cumin",
+        "quantity": "2",
+        "unit": "GRAM"
+      },
+      {
+        "food": "lemon juice",
+        "quantity": "30",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "water",
+        "quantity": "1200",
+        "unit": "MILLILITER"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Rinse the lentils in a sieve. Wash and dice the carrots; peel and chop onion and garlic.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Warm oil in a saucepan. Cook onion and carrot for 5 minutes, then stir in garlic and cumin for 1 minute.",
+        "durationMin": 6
+      },
+      {
+        "instruction": "Add lentils and water. Bring to a boil, then simmer for 20–25 minutes until the lentils and carrots are soft; add water if too thick.",
+        "durationMin": 25
+      },
+      {
+        "instruction": "Let the soup stop bubbling before blending carefully, or leave it chunky. Add lemon juice and serve hot.",
+        "durationMin": 3
+      }
+    ]
+  },
+  {
+    "slug": "chickpea-salad",
+    "name": "Chickpea & feta salad",
+    "nameAr": "سلطة الحمص والفيتا",
+    "description": "Crunchy vegetables, chickpeas and feta with a simple lemon dressing.",
+    "servings": 2,
+    "prepTimeMin": 15,
+    "cookTimeMin": 0,
+    "difficulty": "EASY",
+    "cuisine": "mediterranean",
+    "sourceUrl": "https://www.nhs.uk/healthier-families/recipes/greek-salad/",
+    "sourceLabel": "NHS Healthier Families",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "",
+    "tags": [
+      "Vegetarian",
+      "No cook",
+      "Lunch"
+    ],
+    "allergens": [
+      "Milk"
+    ],
+    "ingredients": [
+      {
+        "food": "cooked chickpeas",
+        "quantity": "240",
+        "unit": "GRAM"
+      },
+      {
+        "food": "tomato",
+        "quantity": "200",
+        "unit": "GRAM"
+      },
+      {
+        "food": "cucumber",
+        "quantity": "180",
+        "unit": "GRAM"
+      },
+      {
+        "food": "onion",
+        "quantity": "40",
+        "unit": "GRAM"
+      },
+      {
+        "food": "feta cheese",
+        "quantity": "60",
+        "unit": "GRAM"
+      },
+      {
+        "food": "olive oil",
+        "quantity": "15",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "lemon juice",
+        "quantity": "20",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "parsley",
+        "quantity": "10",
+        "unit": "GRAM"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Use fully cooked chickpeas or drained canned chickpeas. Rinse and drain them. Wash all fresh vegetables and parsley.",
+        "durationMin": 3
+      },
+      {
+        "instruction": "Dice tomatoes and cucumber, thinly slice onion, and chop parsley.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Whisk lemon juice with olive oil. Toss with chickpeas and vegetables, then crumble feta over the bowl.",
+        "durationMin": 3
+      },
+      {
+        "instruction": "Serve promptly, or cover and refrigerate until needed. Keep chilled when taking it out for lunch.",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "slug": "overnight-oats",
+    "name": "Berry overnight oats",
+    "nameAr": "شوفان بالتوت لليوم التالي",
+    "description": "Creamy chilled oats topped with plain yogurt and fresh berries.",
+    "servings": 2,
+    "prepTimeMin": 10,
+    "cookTimeMin": 0,
+    "difficulty": "EASY",
+    "cuisine": "mediterranean",
+    "sourceUrl": "https://www.nhs.uk/healthier-families/recipes/easy-overnight-oats/",
+    "sourceLabel": "NHS Healthier Families",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "Chill for at least 6 hours or overnight.",
+    "tags": [
+      "Vegetarian",
+      "Breakfast",
+      "Make ahead"
+    ],
+    "allergens": [
+      "Milk",
+      "Oats — may contain gluten"
+    ],
+    "ingredients": [
+      {
+        "food": "oats",
+        "quantity": "100",
+        "unit": "GRAM"
+      },
+      {
+        "food": "low fat milk",
+        "quantity": "200",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "yogurt",
+        "quantity": "150",
+        "unit": "GRAM"
+      },
+      {
+        "food": "blueberry",
+        "quantity": "80",
+        "unit": "GRAM"
+      },
+      {
+        "food": "raspberry",
+        "quantity": "80",
+        "unit": "GRAM"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Stir oats, milk and half the yogurt in a clean covered container.",
+        "durationMin": 3
+      },
+      {
+        "instruction": "Refrigerate immediately for at least 6 hours or overnight. This waiting time is in addition to the preparation time.",
+        "durationMin": 0
+      },
+      {
+        "instruction": "Wash and drain fresh berries. If using frozen berries, follow the packet cooking or thawing instructions first.",
+        "durationMin": 3
+      },
+      {
+        "instruction": "Divide the chilled oats between two bowls. Add remaining yogurt and berries; keep any uneaten portion refrigerated.",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "slug": "spinach-frittata",
+    "name": "Spinach & potato frittata",
+    "nameAr": "فريتاتا بالسبانخ والبطاطس",
+    "description": "A golden oven-baked egg dish with tender potato, spinach and feta.",
+    "servings": 4,
+    "prepTimeMin": 15,
+    "cookTimeMin": 35,
+    "difficulty": "EASY",
+    "cuisine": "mediterranean",
+    "sourceUrl": "https://www.healthychildren.org/English/healthy-living/nutrition/chop-chop-magazine/Pages/Recipe-Baked-Vegetable-Frittata.aspx",
+    "sourceLabel": "American Academy of Pediatrics / ChopChop",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "",
+    "tags": [
+      "Vegetarian",
+      "Lunch",
+      "Batch cook"
+    ],
+    "allergens": [
+      "Egg",
+      "Milk"
+    ],
+    "ingredients": [
+      {
+        "food": "chicken egg",
+        "quantity": "6",
+        "unit": "PIECE"
+      },
+      {
+        "food": "potato",
+        "quantity": "250",
+        "unit": "GRAM"
+      },
+      {
+        "food": "spinach",
+        "quantity": "150",
+        "unit": "GRAM"
+      },
+      {
+        "food": "onion",
+        "quantity": "80",
+        "unit": "GRAM"
+      },
+      {
+        "food": "feta cheese",
+        "quantity": "60",
+        "unit": "GRAM"
+      },
+      {
+        "food": "olive oil",
+        "quantity": "15",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "black pepper",
+        "quantity": "0.5",
+        "unit": "GRAM"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Heat the oven to 180°C. Wash spinach and potatoes. Dice potatoes into 1 cm pieces; peel and slice onion.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Boil potatoes for 8–10 minutes until tender, then drain. Warm oil in a pan and soften onion; add spinach until wilted.",
+        "durationMin": 10
+      },
+      {
+        "instruction": "Whisk eggs and pepper in a bowl, then fold in potatoes, vegetables and crumbled feta. Transfer to an oiled baking dish.",
+        "durationMin": 4
+      },
+      {
+        "instruction": "Bake for 25–30 minutes until the middle is firm and reaches 74°C on a food thermometer. Rest briefly before slicing.",
+        "durationMin": 30
+      }
+    ]
+  },
+  {
+    "slug": "hummus-wrap",
+    "name": "Hummus & crunchy vegetable wraps",
+    "nameAr": "لفائف الحمص والخضار",
+    "description": "Soft flatbread filled with hummus and crisp, colourful vegetables.",
+    "servings": 2,
+    "prepTimeMin": 15,
+    "cookTimeMin": 0,
+    "difficulty": "EASY",
+    "cuisine": "mediterranean",
+    "sourceUrl": "https://www.nhs.uk/healthier-families/recipes/hummus-and-salad-wrap/",
+    "sourceLabel": "NHS Healthier Families",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "Use soft wholemeal flatbreads or wraps; check hummus labels for allergens.",
+    "tags": [
+      "Vegan",
+      "Lunch",
+      "No cook"
+    ],
+    "allergens": [
+      "Wheat / gluten",
+      "Sesame"
+    ],
+    "ingredients": [
+      {
+        "food": "whole wheat bread",
+        "quantity": "120",
+        "unit": "GRAM"
+      },
+      {
+        "food": "hummus",
+        "quantity": "100",
+        "unit": "GRAM"
+      },
+      {
+        "food": "carrot",
+        "quantity": "100",
+        "unit": "GRAM"
+      },
+      {
+        "food": "cucumber",
+        "quantity": "100",
+        "unit": "GRAM"
+      },
+      {
+        "food": "lettuce",
+        "quantity": "60",
+        "unit": "GRAM"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Use two soft wholemeal flatbreads or wraps, about 60 g each. Wash and dry the vegetables.",
+        "durationMin": 3
+      },
+      {
+        "instruction": "Grate the carrot, slice cucumber into thin sticks and shred lettuce.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Spread hummus over each flatbread, leaving a small border. Add vegetables in a narrow strip through the middle.",
+        "durationMin": 3
+      },
+      {
+        "instruction": "Fold in the sides and roll firmly. Cut in half to serve; cover and refrigerate if preparing ahead.",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "slug": "ful-medames",
+    "name": "Egyptian ful medames",
+    "nameAr": "فول مدمس مصري",
+    "description": "Warm cooked fava beans with tomato, cumin, lemon and a little tahini.",
+    "servings": 2,
+    "prepTimeMin": 10,
+    "cookTimeMin": 20,
+    "difficulty": "EASY",
+    "cuisine": "egyptian",
+    "sourceUrl": "https://www.bbcgoodfood.com/recipes/ful-medames",
+    "sourceLabel": "Good Food / Mitshel Ibrahim",
+    "adaptationNote": "Original Remi adaptation informed by the linked recipe. Ingredients, quantities and method differ; source nutrition values do not apply.",
+    "prepNote": "Fava beans can trigger favism in people with G6PD deficiency; choose a different recipe if affected.",
+    "tags": [
+      "Vegan",
+      "Egyptian",
+      "Breakfast"
+    ],
+    "allergens": [
+      "Sesame"
+    ],
+    "ingredients": [
+      {
+        "food": "ful medames",
+        "quantity": "400",
+        "unit": "GRAM"
+      },
+      {
+        "food": "tomato",
+        "quantity": "200",
+        "unit": "GRAM"
+      },
+      {
+        "food": "onion",
+        "quantity": "60",
+        "unit": "GRAM"
+      },
+      {
+        "food": "garlic",
+        "quantity": "6",
+        "unit": "GRAM"
+      },
+      {
+        "food": "olive oil",
+        "quantity": "15",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "cumin",
+        "quantity": "2",
+        "unit": "GRAM"
+      },
+      {
+        "food": "lemon juice",
+        "quantity": "20",
+        "unit": "MILLILITER"
+      },
+      {
+        "food": "tahini",
+        "quantity": "20",
+        "unit": "GRAM"
+      },
+      {
+        "food": "parsley",
+        "quantity": "10",
+        "unit": "GRAM"
+      },
+      {
+        "food": "water",
+        "quantity": "100",
+        "unit": "MILLILITER"
+      }
+    ],
+    "steps": [
+      {
+        "instruction": "Use plain, fully cooked or canned fava beans, not dried beans. Wash tomato and parsley; chop tomato, onion and garlic.",
+        "durationMin": 5
+      },
+      {
+        "instruction": "Heat oil in a saucepan. Soften onion for 5 minutes, then add garlic and cumin for 1 minute.",
+        "durationMin": 6
+      },
+      {
+        "instruction": "Add tomato, cooked beans and water. Simmer for 12–15 minutes until hot throughout, stirring and adding water if necessary.",
+        "durationMin": 15
+      },
+      {
+        "instruction": "Mash some of the beans with a spoon. Stir in tahini and lemon, and scatter chopped parsley over the top. Serve hot.",
+        "durationMin": 2
+      }
+    ]
+  }
+]

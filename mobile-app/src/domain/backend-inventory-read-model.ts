@@ -17,6 +17,9 @@ export interface InventoryReadItem {
   backendStorageLocation: BackendStorageLocation;
   readOnly: boolean;
   expirationDate: string | null;
+  /** The expiry is an estimate from shelf-life averages. */
+  expiryEstimated: boolean;
+  purchaseDate: string | null;
   version: number;
 }
 
@@ -52,6 +55,8 @@ export function mapInventoryReadItem(item: BackendInventoryItem, timezone: strin
     backendUnit: item.unit, backendStorageLocation: item.storageLocation,
     readOnly: !unit.supported || !storage.supported,
     expirationDate: inventoryExpiryDay(item.estimatedExpiryAt, timezone),
+    expiryEstimated: item.expiryEstimated === true && item.estimatedExpiryAt !== null,
+    purchaseDate: item.purchaseDate ?? null,
     version: item.version,
   };
 }

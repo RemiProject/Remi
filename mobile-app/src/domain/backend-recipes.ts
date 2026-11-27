@@ -1,10 +1,12 @@
 import type { BackendUnit, Decimal } from './backend-inventory';
+import type { RecipeNutrition } from './nutrition';
 
 export interface RecipeFood { foodId: string; foodName: string; arabicName?: string }
 export interface RecipeSummary {
   id: string; name: string; description: string | null; servings: number;
   prepTimeMin: number | null; cookTimeMin: number | null; difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   cuisineId: string | null; cuisineName: string | null;
+  nutrition?: RecipeNutrition | null;
 }
 export interface RecipeSuggestion {
   recipe: RecipeSummary; coverageRatio: number; haveCount: number; requiredCount: number; safetyWarnings: string[];

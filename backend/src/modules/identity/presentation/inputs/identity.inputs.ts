@@ -16,6 +16,11 @@ export class RegisterInput {
 }
 
 @InputType()
+export class DeleteAccountInput {
+  @Field({ description: 'The current password, to confirm it is really the account holder' }) @IsString() @IsNotEmpty() @MaxLength(128) password!: string;
+}
+
+@InputType()
 export class LoginInput {
   @Field({ nullable: true, description: 'Email or username' }) @IsOptional() @IsString() @IsNotEmpty() @MaxLength(254) identifier?: string;
   @Field({ nullable: true, deprecationReason: 'Use identifier for email or username login.' }) @IsOptional() @IsEmail() email?: string;
@@ -25,6 +30,18 @@ export class LoginInput {
 @InputType()
 export class TokenInput {
   @Field() @IsString() @IsNotEmpty() @MaxLength(256) token!: string;
+}
+
+@InputType()
+export class RequestEmailVerificationCodeInput {
+  @Field() @IsEmail() @MaxLength(254) email!: string;
+}
+
+@InputType()
+export class VerifyEmailCodeInput {
+  @Field() @IsEmail() @MaxLength(254) email!: string;
+  // Semantic validation belongs to the service so all invalid code states share one error.
+  @Field({ description: 'Six ASCII digits, including any leading zero.' }) @IsString() @MaxLength(256) code!: string;
 }
 
 @InputType()
@@ -40,6 +57,13 @@ export class LogoutInput {
 @InputType()
 export class RequestPasswordResetInput {
   @Field() @IsEmail() email!: string;
+}
+
+@InputType()
+export class VerifyPasswordResetCodeInput {
+  // No shape validation here: a malformed email or code gets the same generic error as a wrong one, from the service.
+  @Field() @IsString() email!: string;
+  @Field({ description: 'Six ASCII digits, including any leading zero.' }) @IsString() code!: string;
 }
 
 @InputType()

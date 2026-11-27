@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" scale="4.5"/>
+    </filter>
+    <marker id="arrowO" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="14" markerHeight="14" orient="auto">
+      <path d="M1,1 L10,6 L1,11" fill="none" stroke="#E8731A" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+    <marker id="arrowB" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L10,6 L1,11" fill="none" stroke="#2F6FD6" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="900" fill="#fff"/>
+
+  <g filter="url(#rough)" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- fridge body -->
+    <path d="M700,150 L1062,152 L1060,782 L702,780 Z"/>
+    <path d="M702,330 L1060,333"/>
+    <path d="M702,562 L1060,560"/>
+    <!-- open door -->
+    <path d="M700,150 L566,206 L568,728 L702,780"/>
+    <path d="M592,330 L690,312 M592,470 L690,462 M592,610 L690,612"/>
+    <path d="M610,312 l0,-38 l14,-10 l14,10 l0,38"/>
+    <path d="M650,462 l0,-46 q8,-8 16,0 l0,46"/>
+    <path d="M574,470 q-8,10 0,30" stroke-width="2.5"/>
+
+    <!-- freezer: drumstick + ice cubes -->
+    <path d="M770,250 q40,-50 90,-20 q30,30 -10,60 q-30,20 -55,-5 l-30,25 q-12,8 -16,-4 q-8,-10 6,-16 Z"/>
+    <path d="M920,262 l34,-6 l6,34 l-34,6 Z M968,282 l30,-4 l4,30 l-30,4 Z"/>
+    <path d="M990,190 l3,24 M980,202 l24,0 M983,193 l17,17 M1000,193 l-17,17" stroke="#2F6FD6" stroke-width="2.5"/>
+
+    <!-- fridge shelf: milk, eggs -->
+    <path d="M966,550 l0,-110 l20,-24 l40,0 l-4,134 Z M986,416 l0,134"/>
+    <path d="M990,470 l30,0" stroke-width="2"/>
+    <path d="M1000,548 m-60,0 a26,22 0 1,1 0.1,0 M940,548" />
+    <ellipse cx="928" cy="530" rx="18" ry="22"/>
+    <ellipse cx="896" cy="534" rx="17" ry="20"/>
+
+    <!-- tomato being stamped -->
+    <path d="M774,540 q-48,4 -46,-36 q4,-40 48,-40 q46,0 46,40 q0,34 -48,36 Z"/>
+    <path d="M762,466 q8,-12 14,0 q8,-10 14,2" stroke-width="2.5"/>
+
+    <!-- pantry: rice sack, lentil jar, oil -->
+    <path d="M760,760 q-34,-4 -30,-60 q4,-50 24,-74 l50,0 q22,26 24,74 q2,56 -30,60 Z"/>
+    <path d="M752,630 q20,8 44,0" stroke-width="2.5"/>
+    <path d="M870,760 l0,-92 q0,-12 12,-12 l48,0 q12,0 12,12 l0,92 Z M872,644 l68,0 l0,-14 l-68,0 Z"/>
+    <path d="M884,708 h6 M902,724 h6 M918,700 h6 M896,744 h6 M922,738 h6" stroke-width="4"/>
+    <path d="M990,760 l0,-100 q0,-14 10,-20 l0,-30 l16,0 l0,30 q10,6 10,20 l0,100 Z"/>
+
+    <!-- human hand handing a banana in -->
+    <path d="M60,520 q90,-10 150,-22 q30,-6 46,6 q12,10 -6,16 l-40,6 q50,0 66,10 q10,8 -4,14 l-60,6 q-60,10 -152,12"/>
+    <path d="M262,476 q50,-60 110,-50 q-30,8 -50,30 q-24,26 -60,30 Z"/>
+  </g>
+
+  <!-- Xiaohei inside the fridge, stamping -->
+  <g filter="url(#rough)">
+    <path d="M846,470 C836,430 846,392 878,388 C912,384 926,414 924,448 C922,472 912,486 884,488 C864,489 850,484 846,470 Z" fill="#111"/>
+    <circle cx="872" cy="420" r="6" fill="#fff"/>
+    <circle cx="896" cy="420" r="6" fill="#fff"/>
+    <g fill="none" stroke="#111" stroke-width="3" stroke-linecap="round">
+      <path d="M866,486 l-6,50 M900,486 l8,50"/>
+      <path d="M850,436 q-28,-30 -50,-30"/>
+      <path d="M922,446 q14,18 8,40" />
+      <!-- the stamp, just lifted off the tomato -->
+      <path d="M758,404 q0,-30 16,-34 q18,-2 18,34 Z" stroke-width="3.5"/>
+      <path d="M774,404 l0,20 M742,424 l64,0 l0,16 l-64,0 Z" stroke-width="3.5"/>
+      <path d="M736,452 l-10,6 M774,450 l0,8 M812,452 l10,6" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- stamp mark on the tomato (red) -->
+  <g filter="url(#rough)" fill="none" stroke="#D93A2B" stroke-width="2.5">
+    <path d="M744,480 l58,-4 l2,22 l-58,4 Z"/>
+  </g>
+  <text x="748" y="497" font-family="Bradley Hand" font-weight="bold" font-size="16" fill="#D93A2B" transform="rotate(-4 774 490)">EXP FRI</text>
+
+  <!-- orange main flow: hand -> fridge -->
+  <path d="M380,446 C470,390 560,380 720,450" fill="none" stroke="#E8731A" stroke-width="3.5" stroke-linecap="round" marker-end="url(#arrowO)" filter="url(#rough)"/>
+  <text x="400" y="372" font-family="Bradley Hand" font-weight="bold" font-size="38" fill="#E8731A">add food</text>
+
+  <!-- labels -->
+  <text x="1082" y="250" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#111">freezer</text>
+  <text x="1082" y="455" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#111">fridge</text>
+  <text x="1082" y="680" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#111">pantry</text>
+  <text x="626" y="120" font-family="Bradley Hand" font-weight="bold" font-size="32" fill="#D93A2B">every item gets a date</text>
+  <path d="M770,130 q10,120 4,230" fill="none" stroke="#D93A2B" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round"/>
+
+  <text x="1230" y="560" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#2F6FD6">12 foods,</text>
+  <text x="1230" y="598" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#2F6FD6">all remembered</text>
+  <path d="M1222,572 q-60,-10 -96,-40" fill="none" stroke="#2F6FD6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowB)"/>
+</svg>

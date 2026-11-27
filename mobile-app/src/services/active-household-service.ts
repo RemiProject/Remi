@@ -34,6 +34,28 @@ export class ActiveHouseholdError extends Error {
 // Share resolution across callers using the same auth instance, even if their
 // storage adapters differ. This is a client guard, not cross-device idempotency.
 const coordinators = new WeakMap<Auth, Coordinator>();
+const selectionListeners = new Set<() => void>();
+export function subscribeHouseholdSelection(listener: () => void) { selectionListeners.add(listener); return () => { selectionListeners.delete(listener); }; }
+
+export async function setActiveHousehold(auth: Auth, storage: ActiveHouseholdStorage, householdId: string): Promise<void> {
+  const identity = await auth.getIdentityContext();
+  const memberships = await loadMyHouseholds(auth);
+  assertIdentity(auth, identity);
+  if (!memberships.some(membership => membership.household.id === householdId)) throw new ActiveHouseholdError('You are not a member of this household.');
+  const coordinator = coordinatorFor(auth);
+  if (coordinator.pending) await coordinator.pending.catch(() => undefined);
+  assertIdentity(auth, identity);
+  let selection = coordinator.selections.get(storage);
+  if (!selection) { selection = { storage, queue: Promise.resolve() }; coordinator.selections.set(storage, selection); }
+  await enqueue(selection, async () => {
+    assertIdentity(auth, identity);
+    await storage.setItem(`remi.cookbook.active-household.v1:${JSON.stringify([identity.backendUrl, identity.userId])}`, householdId);
+    assertIdentity(auth, identity);
+  });
+  coordinator.activeContext = undefined;
+  coordinator.revision++;
+  selectionListeners.forEach(listener => listener());
+}
 
 function enqueue<T>(selection: SelectionStorage, work: () => Promise<T>): Promise<T> {
   const result = selection.queue.then(work);
@@ -64,7 +86,7 @@ function assertIdentity(auth: Auth, identity: Identity) {
 async function select(auth: Auth, selection: SelectionStorage): Promise<Resolution> {
   const identity = await auth.getIdentityContext();
   assertIdentity(auth, identity);
-  const key = `remy.active-household.v1:${JSON.stringify([identity.backendUrl, identity.userId])}`;
+  const key = `remi.cookbook.active-household.v1:${JSON.stringify([identity.backendUrl, identity.userId])}`;
   const savedId = await enqueue(selection, () => selection.storage.getItem(key));
   assertIdentity(auth, identity);
   const memberships = await loadMyHouseholds(auth);
@@ -106,7 +128,7 @@ export async function resolveActiveHousehold(auth: Auth, storage: ActiveHousehol
     }
     const { household, identity } = await coordinator.pending;
     assertIdentity(auth, identity);
-    const key = `remy.active-household.v1:${JSON.stringify([identity.backendUrl, identity.userId])}`;
+    const key = `remi.cookbook.active-household.v1:${JSON.stringify([identity.backendUrl, identity.userId])}`;
     await enqueue(selection, async () => {
       assertIdentity(auth, identity);
       await storage.setItem(key, household.id);

@@ -29,7 +29,7 @@ function SampleCookingScreen() {
   const exit = () => router.canGoBack() ? router.back() : browse();
   const valid = !!recipe && steps.length > 0;
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl} contentGap={spacing.lg}>
-    <PageHeader title={t.title} action={<Button label={t.exit} variant="text" icon="back" rtl={rtl} onPress={exit} />} />
+    <PageHeader title={t.title} back={<Button label={t.exit} variant="text" icon="back" rtl={rtl} onPress={exit} />} />
     {!valid ? <EmptyState title={t.missing} description={t.missingBody} action={t.choose} onPress={browse} /> : <>
       <AppText variant="heading">{recipeTitle(recipe.id, language)}</AppText>
       <AppText variant="caption" muted>{t.sample}</AppText>

@@ -13,7 +13,7 @@ const { myHouseholdsQuery } = require('../src/services/households-service.ts');
 const { resolveActiveHousehold, createHouseholdMutation, ActiveHouseholdError } = require('../src/services/active-household-service.ts');
 const household = id => ({ id, name: `Kitchen ${id}`, timezone: 'Africa/Cairo' });
 const member = id => ({ household: household(id), role: 'OWNER', joinedAt: '2026-01-01T00:00:00Z' });
-const key = (url, id) => `remy.active-household.v1:${JSON.stringify([url, id])}`;
+const key = (url, id) => `remi.cookbook.active-household.v1:${JSON.stringify([url, id])}`;
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 
 function memoryStorage() {
@@ -31,6 +31,7 @@ function harness({ memberships = [member('one')], backendUrl = 'https://api.exam
   let currentUser = userId;
   const calls = [];
   const client = createBackendClient(backendUrl, async (_url, init) => {
+    if (String(_url).endsWith('/health/live')) return Response.json({ status: 'ok' });
     const call = { ...JSON.parse(init.body), headers: init.headers };
     calls.push(call);
     let data;

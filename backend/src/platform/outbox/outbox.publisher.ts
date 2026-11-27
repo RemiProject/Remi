@@ -17,4 +17,9 @@ export class OutboxPublisher {
       VALUES (${event.topic}, ${event.dedupeKey}, ${event.householdId ?? null}::uuid, ${JSON.stringify(event.payload)}::jsonb)
       ON CONFLICT ("topic", "dedupeKey") WHERE "processedAt" IS NULL AND "deadLetteredAt" IS NULL DO NOTHING`;
   }
+
+  /** Replaces a row's payload with `{}`, for payloads that must not outlive their processing (personal data). */
+  async clearPayload(tx: Tx, id: bigint): Promise<void> {
+    await tx.$executeRaw`UPDATE "OutboxEvent" SET "payload" = '{}'::jsonb WHERE "id" = ${id}`;
+  }
 }

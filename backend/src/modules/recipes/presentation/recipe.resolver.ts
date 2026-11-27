@@ -21,6 +21,15 @@ export class RecipeResolver {
     return this.service.list(ctx.householdId!, first, after);
   }
 
+  @Query(() => RecipeConnectionType, { description: "The household's own recipes, newest first" })
+  myRecipes(
+    @Ctx() ctx: RequestContext,
+    @Args('first', { type: () => Int, defaultValue: 20 }) first: number,
+    @Args('after', { type: () => String, nullable: true }) after?: string,
+  ) {
+    return this.service.listMine(ctx.householdId!, first, after);
+  }
+
   @Query(() => RecipeType)
   recipe(@Ctx() ctx: RequestContext, @Args('id', { type: () => ID }) id: string) {
     return this.service.get(ctx.householdId!, id);

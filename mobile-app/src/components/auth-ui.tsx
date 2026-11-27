@@ -1,7 +1,8 @@
+import { Brand } from './brand';
 import { useState, type PropsWithChildren, type Ref } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText } from '@/components/ui/core';
+import { AppText, Button } from '@/components/ui/core';
 import { useRemyTheme } from '@/theme/provider';
 import { useRemyFonts } from '@/theme/fonts';
 import { useLanguage } from '@/providers/language-provider';
@@ -16,15 +17,11 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
       <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={{ flexGrow: 1, alignItems: 'center', padding: 20, paddingBottom: 36 }}>
         <View style={{ width: '100%', maxWidth: 460, gap: 24, direction: language === 'ar' ? 'rtl' : 'ltr' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <AuthLink label={`${language === 'ar' ? '→' : '←'}  ${t.back}`} onPress={onBack} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={{ width: 32, height: 32, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><AppText style={{ color: colors.onPrimary, fontWeight: '800', fontSize: 20 }}>r</AppText></View>
-              <AppText style={{ fontSize: 22, fontWeight: '800', letterSpacing: -0.8 }}>remy</AppText>
-            </View>
+            <Button label={t.back} icon="back" rtl={language === 'ar'} variant="text" onPress={onBack} />
+            <Brand kind="wordmark" height={30} />
           </View>
           <View style={{ gap: 10, paddingTop: 8 }}>
-            <AppText style={{ color: colors.primary, fontSize: 11, fontWeight: '700', letterSpacing: language === 'en' ? 2 : 0 }}>{t.authEyebrow}</AppText>
-            <AppText accessibilityRole="header" style={{ fontSize: 34, lineHeight: 41, fontWeight: '800', letterSpacing: -1, textAlign: language === 'ar' ? 'right' : 'left' }}>{title}</AppText>
+            <AppText variant="title" accessibilityRole="header" style={{ textAlign: language === 'ar' ? 'right' : 'left' }}>{title}</AppText>
             <AppText muted style={{ fontSize: 15, lineHeight: 23, textAlign: language === 'ar' ? 'right' : 'left' }}>{subtitle}</AppText>
           </View>
           <View style={{ padding: 20, borderRadius: 24, gap: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}>{children}</View>
@@ -35,7 +32,7 @@ export function AuthShell({ title, subtitle, onBack, children }: PropsWithChildr
   </SafeAreaView>;
 }
 
-export function AuthInput({ label, error, password = false, inputRef, ...props }: TextInputProps & { label: string; error?: string; password?: boolean; inputRef?: Ref<TextInputInstance> }) {
+export function AuthInput({ label, error, password = false, code = false, ltr = false, inputRef, ...props }: TextInputProps & { label: string; error?: string; password?: boolean; /** A one-time code: large digits, left to right in every language. */ code?: boolean; /** Text that always reads left to right, such as an email address. */ ltr?: boolean; inputRef?: Ref<TextInputInstance> }) {
   const { colors } = useRemyTheme();
   const fonts = useRemyFonts();
   const { language } = useLanguage();
@@ -50,7 +47,9 @@ export function AuthInput({ label, error, password = false, inputRef, ...props }
         secureTextEntry={password && !visible} placeholderTextColor={colors.placeholder} selectionColor={colors.primary}
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{ flex: 1, minWidth: 0, minHeight: 52, paddingHorizontal: 14, paddingVertical: 12,
-          fontFamily: fonts.body, color: colors.text, fontSize: 16, textAlign: language === 'ar' ? 'right' : 'left' }} />
+          fontFamily: fonts.body, color: colors.text, fontSize: 16, textAlign: language === 'ar' ? 'right' : 'left',
+          ...(ltr ? { direction: 'ltr', writingDirection: 'ltr', textAlign: 'left' } as const : {}),
+          ...(code ? { direction: 'ltr', writingDirection: 'ltr', textAlign: 'center', fontSize: 24, letterSpacing: 8, fontVariant: ['tabular-nums'] } as const : {}) }} />
       {password && <Pressable accessibilityRole="button" accessibilityLabel={visible ? t.hidePassword : t.showPassword}
         accessibilityState={{ expanded: visible }} onPress={() => setVisible(value => !value)}
         style={{ minWidth: 52, minHeight: 48, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' }}>

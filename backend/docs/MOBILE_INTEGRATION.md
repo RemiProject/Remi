@@ -26,6 +26,21 @@ Generate client types from `schema.graphql` (Flutter: `graphql_codegen` / `ferry
 
 Email flows: `verifyEmail(token)`, `requestEmailVerification` (resend, logged-in), `requestPasswordReset(email)` (always returns `true`), `resetPassword(token, newPassword)`. Tokens arrive by email as deep links built from `WEB_BASE_URL`.
 
+Email verification by 6-digit code (both public, no session):
+
+- `requestEmailVerificationCode(input: { email: String! })` returns `true` for every validly formed email, whether or not an email was sent. Codes are limited per account: one per 60 seconds and 10 in 24 hours, shared with registration and `requestEmailVerification`. Requests over the limit send nothing.
+- `verifyEmailCode(input: { email: String!, code: String! })` returns `true`. Send `code` as six ASCII digits in a string, so leading zeros are kept. Every failure returns `INVALID_EMAIL_VERIFICATION_CODE`: a wrong, expired, used or replaced code, an unknown email, or an already verified account. A code lasts 15 minutes and allows 5 wrong attempts.
+
+Both are throttled per client (`TOO_MANY_REQUESTS`), and a malformed email returns `BAD_REQUEST`. They need `EMAIL_VERIFICATION_CODE_SECRET` on the server; without it, emails contain only the link and every code is rejected.
+
+Password reset by 6-digit code (all public, no session):
+
+1. `requestPasswordReset(input: { email: String! })` always returns `true`. If the email has an account, a reset email with a code and a link arrives a few seconds later. Reset emails are limited per account, links and codes together: one per 60 seconds and 5 in 24 hours.
+2. `verifyPasswordResetCode(input: { email: String!, code: String! })` returns `{ resetToken, expiresAt }`: a single-use token, valid for 10 minutes. Every failure returns `INVALID_PASSWORD_RESET_CODE`: a wrong, expired, used, replaced or malformed code, an unknown or malformed email, or a locked account. A code lasts 15 minutes and allows 5 wrong attempts; after 10 wrong attempts in 24 hours the account refuses every code until those attempts are older than 24 hours.
+3. `resetPassword(input: { token, newPassword })` with that token. It revokes every session, so log in again with the new password. It also invalidates all other open reset links, tokens and codes, and marks the email as verified.
+
+All three are throttled per client. Codes need `EMAIL_VERIFICATION_CODE_SECRET` on the server; without it, reset emails contain only the link.
+
 ## 3. Household context
 
 Almost every operation works inside one household.
@@ -76,7 +91,7 @@ Everything else is a GraphQL error with a stable `extensions.code` (and `extensi
 | Category | Codes |
 |---|---|
 | Generic | `UNAUTHENTICATED` (refresh, see §2) · `FORBIDDEN` · `NOT_FOUND` · `CONFLICT` · `UNPROCESSABLE` · `BAD_REQUEST` (input validation) · `TOO_MANY_REQUESTS` (back off) · `INTERNAL` |
-| Auth | `INVALID_CREDENTIALS` · `EMAIL_NOT_VERIFIED` · `EMAIL_ALREADY_REGISTERED` · `INVALID_OR_EXPIRED_TOKEN` · `INVALID_REFRESH_TOKEN` · `INVALID_TIMEZONE` · `REFERENCE_NOT_FOUND` |
+| Auth | `INVALID_CREDENTIALS` · `EMAIL_NOT_VERIFIED` · `EMAIL_ALREADY_REGISTERED` · `INVALID_EMAIL_VERIFICATION_CODE` · `INVALID_PASSWORD_RESET_CODE` · `WEAK_PASSWORD` · `INVALID_OR_EXPIRED_TOKEN` · `INVALID_REFRESH_TOKEN` · `INVALID_TIMEZONE` · `REFERENCE_NOT_FOUND` |
 | Household | `NOT_HOUSEHOLD_MEMBER` · `NOT_HOUSEHOLD_OWNER` · `ALREADY_MEMBER` · `MEMBER_NOT_FOUND` · `CANNOT_REMOVE_OWNER` · `OWNER_CANNOT_LEAVE` · `CANNOT_TRANSFER_TO_SELF` · `INVITATION_*` |
 | Inventory & units | `INSUFFICIENT_STOCK` · `INVENTORY_CONFLICT` (retry) · `INVENTORY_ITEM_NOT_FOUND` · `UNIT_NOT_CONVERTIBLE` · `UNIT_CONVERSION_UNAVAILABLE` · `INVALID_QUANTITY` · `FOOD_NOT_FOUND` |
 | Idempotency | `INVALID_IDEMPOTENCY_KEY` · `IDEMPOTENCY_KEY_REUSED` |

@@ -1,0 +1,106 @@
+# USDA FSIS FoodKeeper, data version 128 (catalog.data.gov "FSIS - FoodKeeper Data", CC0). Product sheet rows for
+# Category_ID 18 (Produce: Fresh Fruits) and 19 (Produce: Fresh Vegetables), copied unchanged. Source file
+# https://www.fsis.usda.gov/shared/data/EN/foodkeeper.json, 631,732 bytes, SHA-256 037df0d301126acd8a48824506f04d49d8be1a1144b81fa69e4170228dc2e91a,
+# fetched 2026-11-08. DOP_* columns count from the date of purchase.
+ID|Category_ID|Name|Name_subtitle|Keywords|Pantry_Min|Pantry_Max|Pantry_Metric|DOP_Pantry_Min|DOP_Pantry_Max|DOP_Pantry_Metric|Refrigerate_Min|Refrigerate_Max|Refrigerate_Metric|DOP_Refrigerate_Min|DOP_Refrigerate_Max|DOP_Refrigerate_Metric|Freeze_Min|Freeze_Max|Freeze_Metric|DOP_Freeze_Min|DOP_Freeze_Max|DOP_Freeze_Metric
+248|18|Apples||Apples,apple||||3|3|Weeks||||4|6|Weeks|8|8|Months|||
+249|18|Apricots||Apricots,Apricot|||When Ripe||||2|5|Days||||||Not Recommended|||
+250|18|Avocados||Avocados,Avocado|||When Ripe||||3|4|Days||||||Not Recommended|||
+251|18|Bananas||Bananas,banana|||When Ripe||||3|3|Days||||2|3|Months|||
+252|18|Berries|cherries, goose berries, lychee|Berries,berry,cherries,cherry,goose berries,goose berry,lychee,gooseberries||||||||||7|7|Days|12|12|Months|||
+253|18|Berries|blackberries, boysenberries, currant|Berries,berry,blackberries,blackberry,boysenberries,boysenberry,currant||||||||||3|6|Days|12|12|Months|||
+254|18|Blueberries||Blueberries,blueberry,berries,berry||||||||||1|2|Weeks|8|12|Months|||
+255|18|Cherimoya||Cherimoya|||When Ripe||||4|4|Days||||10|12|Months|||
+256|18|Citrus fruit|lemon, lime, orange, grapefruit, tangerines, clementines|Citrus fruit,fruit,citrus,lemon,lime,orange,grape,grapefruit,tangerines,tangerine,clementines,clementine||||10|10|Days||||10|21|Days|||Not Recommended|||
+257|18|Coconut|shredded|Coconut,shredded||||1|1|Years|||||||1|1|Years|||
+258|18|Coconuts|fresh|Coconuts,Coconut,fresh||||1|1|Weeks||||2|3|Weeks|||Not Recommended|||
+259|18|Cranberries||Cranberries,cranberry||||||||||2|2|Months|12|12|Months|||
+260|18|Dates||Dates||||2|2|Months||||12|12|Months|1|2|Years|||
+261|18|Grapes||Grapes,grape||||1|1|Days||||1|1|Weeks|1|1|Months|||
+262|18|Guava||Guava|||When Ripe||||2|4|Days||||||Not Recommended|||
+263|18|Kiwi fruit||Kiwi fruit,kiwi,fruit|||When Ripe||||3|6|Days||||||Not Recommended|||
+264|18|Melons||Melons,melon|||When Ripe|||||||2|2|Weeks|1|1|Months|||
+265|18|Papaya, mango, feijoa, passionfruit, casaha melon||Papaya,mango,feijoa,passionfruit,casaha melon,melon,fruit,passion||||3|5|Days||||1|1|Weeks|6|8|Months|||
+266|18|Peaches, nectarines, plums, pears, sapote||Peaches,nectarines,plums,pears,sapote,peach,nectarine,plum,pear|||When Ripe||||3|5|Days||||2|2|Months|||
+267|18|Pineapple||Pineapple|||When Ripe||||5|7|Days||||10|12|Months|||
+268|18|Plantains||Plantains,plantain|||When Ripe||||3|5|Days||||10|12|Months|||
+269|18|Pomegranate||Pomegranate||||2|5|Days||||1|3|Months|10|12|Months|||
+270|19|Artichokes, whole||Artichokes,artichoke,whole||||1|2|Days||||1|2|Weeks|||Not Recommended|||
+271|19|Asparagus||Asparagus||||||||||3|4|Days||||5|5|Months
+272|19|Bamboo shoots||Bamboo shoots,bamboo,shoots,shoot||||||||||2|2|Weeks||||||
+273|19|Beans and peas|green, fava, lima, soybean, wax, snow, sugar snap|Beans,peas,green,fava,lima,soybean,wax,snow,sugar snap,sugar,pea,soya||||||||||3|5|Days||||8|8|Months
+274|19|Beets||Beets||||1|1|Days||||1|2|Weeks||||6|8|Months
+275|19|Bok choy||Bok choy||||||||||2|3|Days||||10|12|Months
+276|19|Broccoli and broccoli raab (rapini)||Broccoli,broccoli raab,rapini,raab||||||||||3|5|Days||||10|12|Months
+277|19|Brussels sprouts||Brussels sprouts,brussels,sprouts,sprout,brussel||||||||||3|5|Days||||10|12|Months
+278|19|Cabbage||Cabbage||||||||||1|2|Weeks||||10|12|Months
+279|19|Carrots, parsnips||Carrots,parsnips,carrot,parsnip||||||||||2|3|Weeks||||10|12|Months
+280|19|Cauliflower||Cauliflower||||||||||3|5|Days||||10|12|Months
+281|19|Celery||Celery||||||||||1|2|Weeks||||10|12|Months
+282|19|Corn on the cob||Corn,cob||||||||||1|2|Days||||8|8|Months
+283|19|Cucumbers||Cucumbers,cucumber||||||||||4|6|Days|||Not Recommended|||
+284|19|Eggplant||Eggplant,egg||||1|1|Days||||4|7|Days||||6|8|Months
+285|19|Garlic||Garlic||||1|1|Months||||3|14|Days||||1|1|Months
+286|19|Ginger root||Ginger root,ginger,root||||2|5|Days||||2|3|Weeks||||6|6|Months
+287|19|Greens||Greens,green||||||||||1|4|Days||||10|12|Months
+288|19|Herbs||Herbs,herb||||||||||7|10|Days||||1|2|Months
+289|19|Leeks||Leeks,leek||||||||||1|2|Weeks||||10|12|Months
+290|19|Lettuce|iceberg, romaine|Lettuce,iceberg,romaine||||||||||1|2|Weeks|||Not Recommended|||
+291|19|Lettuce|leaf, spinach|Lettuce,leaf,spinach||||||||||3|7|Days|||Not Recommended|||
+292|19|Mushrooms||Mushroom,mushrooms||||||||||3|7|Days||||10|12|Months
+293|19|Okra||Okra||||1|1|Days||||2|3|Days||||10|12|Months
+294|19|Onions|yellow, white, red, etc.|Onions,yellow,white,red,onion||||1|1|Months||||2|2|Months||||10|12|Months
+295|19|Onions|spring or green|Onions,spring,green,onion||||1|1|Months||||1|1|Weeks||||10|12|Months
+296|19|Peppers||Peppers,pepper||||||||||4|14|Days||||6|8|Months
+297|19|Potatoes||Potatoes,potato||||1|2|Months||||1|2|Weeks|10|12|Months|||
+298|19|Pumpkins||Pumpkins,pumpkin||||2|3|Months||||3|5|Months||||||
+299|19|Radishes||Radishes,radish||||||||||10|14|Days|||Not Recommended|||
+300|19|Rhubarb||Rhubarb||||||||||3|7|Days||||||
+301|19|Rutabagas||Rutabagas||||1|1|Weeks||||2|3|Weeks||||8|10|Months
+302|19|Squash|summer and zucchini|Squash,summer,zucchini||||1|5|Days||||4|5|Days||||10|12|Months
+303|19|Squash|winter|Squash,winter||||2|6|Weeks||||1|3|Months||||10|12|Months
+304|19|Tamarind||Tamarind||||1|3|Weeks||||6|6|Months|1|1|Years|||
+305|19|Taro||Taro||||7|7|Days||||2|3|Days||||||
+306|19|Tomatoes||Tomatoes,tomato|||When Ripe|||||||||||||2|2|Months
+307|19|Turnips||Turnips,turnip||||||||||2|2|Weeks||||8|10|Months
+308|19|Yuca/cassava||Yuca,cassava||||7|7|Days||||3|3|Days||||1|2|Months
+414|18|Kumquats||Kumquats|||When Ripe||||3|3|Weeks||||||Not Recommended|||
+415|19|Bagged greens|leaf, spinach, lettuce, etc.|Bagged greens,leaf,spinach,lettuce,bagged,greens,green|||||||3|5|Days||||||Not Recommended|||
+422|19|Yams/sweet potatoes||Yams,sweet potatoes,potatoes,potato,yam||||2|3|Weeks||||||||||||
+423|19|Kale||Kale||||||||||3|5|Days||||8|12|Months
+478|18|Star fruit||Star fruit,fruit,fruits|1|1|Weeks|||||||1|2|Weeks|10|12|Months|||
+479|18|Prickly pear ||Prickly pear,pear,pickle|2|5|Days|||||||1|2|Weeks|10|12|Months|||
+480|18|Pitaya/dragon fruit||Pitaya,dragon fruit,fruit,fruits|2|5|Days|||||||2|3|Weeks|10|12|Months|||
+481|18|Strawberries||Strawberries,strawberry||||||||||2|3|Days|8|12|Months|||
+482|18|Raspberries||Raspberries,raspberry||||||||||2|3|Days|8|12|Months|||
+483|18|Cherries||Cherries,cherry||||||||||2|3|Days|8|12|Months|||
+491|19|Baby carrots||Baby carrots, carrot,baby carrot||||4|4|Days||||4|4|Weeks|3|3|Months|||
+492|19|Jicama|fresh|Jicama,fresh||||4|4|Months||||2|3|Weeks||||||
+493|19|Kimchi||Kimchi||||||||||6|12|Months||||||
+494|19|Kohlrabi||Kohlrabi||||||||||1|1|Weeks|8|12|Months|||
+495|18|Watermelon||Watermelon||||1|2|Days||||3|4|Days|12|12|Months|||
+496|18|Cantaloupe||Cantaloupe||||2|4|Days||||5|15|Days|12|12|Months|||
+497|18|Honeydew||Honeydew||||2|7|Days||||3|4|Days|12|12|Months|||
+505|19|Lemongrass||Lemongrass||||||||||7|9|Days||||6|6|Months
+506|19|Cilantro||Cilantro|1|2|Weeks||||2|3|Weeks|||||||||
+507|19|Mint||Mint|1|2|Weeks||||2|3|Weeks|||||||||
+508|19|Basil|dried|Basil,dried|12|12|Months|||||||||||||||
+509|19|Basil|fresh|Basil,fresh|5|5|Days||||10|10|Days|||||||||
+510|19|Oregano||Oregano|1|2|Weeks||||2|3|Weeks|||||||||
+511|19|Rosemary||Rosemary|1|2|Weeks||||2|3|Weeks|||||||||
+512|19|Chives||Chives|1|2|Weeks||||2|3|Weeks|||||||||
+513|19|Thyme||Thyme|1|2|Weeks||||2|3|Weeks|||||||||
+547|19|Zucchini|fresh, whole|Zucchini,fresh, whole|||||||1|1|Weeks||||10|10|Months|||
+548|19|Hot peppers||Hot peppers,pepper||||||||||1|1|Weeks|9|9|Months|||
+549|19|Bean sprouts||Bean sprouts,bean,sprouts||||||||||5|10|Days||||||
+550|19|Swiss chard||Swiss chard,chard||||||||||1|2|Weeks||||||
+562|18|Applesauce|homemade|Applesauce,homemade|||||||3|3|Weeks||||8|12|Months|||
+570|19|Marinated vegetables|in oil|Marinated vegetables,vegetables,oil,vegetable|||||||3|4|Days|||||||||
+596|19|Spaghetti squash|whole|Spaghetti squash,squash,whole|2|2|Months||||1|2|Weeks|||||||||
+597|19|Spaghetti squash|cut|Spaghetti squash,squash,cut|||||||4|5|Days|||||||||
+600|19|Cherry tomatoes||Cherry, tomatoes,tomato|10|10|Days||||5|5|Days|||||||||
+611|19|Parsley|fresh|parsley|||||||2|3|Days||||3|4|Months|||
+640|19|Edamame|fresh|edamame,fresh,fresh edamame,soybeans,soybean|||||||4|5|Days|||||||||
+661|19|Celery root||celeriac,celery root,celery|||||||1|1|Weeks|||||||||
+674|19|Radicchio||radicchio|||||||2|3|Weeks|||||||||
+678|19|Arugula||arugula,greens,salad greens,salad|||||||3|7|Days|||||||||

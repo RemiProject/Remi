@@ -16,6 +16,7 @@ import { inventoryMessages } from '@/i18n/inventory';
 import { getAuth } from '@/services/auth';
 import { BackendAddFoodStore, catalogChoiceName } from '@/services/backend-add-food';
 import { isSignedOutError } from '@/services/auth-validation';
+import { feedback } from '@/services/feedback';
 
 export default function BackendAddFoodScreen() {
   const { user, busy, ready } = useAuth();
@@ -48,6 +49,7 @@ function BackendAddFoodForm() {
       setFinishing(true);
       await retry();
       store.assertIdentity();
+      feedback.success();
       showAdded();
       router.replace('/kitchen');
     } catch { setCompletionError(true); }

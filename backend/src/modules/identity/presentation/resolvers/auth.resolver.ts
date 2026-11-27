@@ -17,7 +17,12 @@ import { RequestPasswordResetCommand } from '@/modules/identity/application/comm
 import { ResetPasswordCommand } from '@/modules/identity/application/commands/reset-password/reset-password.command.js';
 import { VerifyEmailCommand } from '@/modules/identity/application/commands/verify-email/verify-email.command.js';
 import { GetMeQuery } from '@/modules/identity/application/queries/get-me/get-me.query.js';
+import { DeleteAccountCommand } from '@/modules/identity/application/commands/delete-account/delete-account.command.js';
+import { RequestEmailVerificationCodeCommand } from '@/modules/identity/application/commands/request-email-verification-code/request-email-verification-code.command.js';
+import { VerifyEmailCodeCommand } from '@/modules/identity/application/commands/verify-email-code/verify-email-code.command.js';
+import { VerifyPasswordResetCodeCommand } from '@/modules/identity/application/commands/verify-password-reset-code/verify-password-reset-code.command.js';
 import {
+  DeleteAccountInput,
   LoginInput,
   LogoutInput,
   RefreshAccessTokenInput,
@@ -25,8 +30,11 @@ import {
   RequestPasswordResetInput,
   ResetPasswordInput,
   TokenInput,
+  RequestEmailVerificationCodeInput,
+  VerifyEmailCodeInput,
+  VerifyPasswordResetCodeInput,
 } from '@/modules/identity/presentation/inputs/identity.inputs.js';
-import { AuthTokensType, MeType, RegisterResultType } from '@/modules/identity/presentation/types/identity.types.js';
+import { AuthTokensType, MeType, PasswordResetTokenType, RegisterResultType } from '@/modules/identity/presentation/types/identity.types.js';
 
 /** Resolvers only translate GraphQL <-> commands/queries. No business logic here. */
 @Resolver()
@@ -68,6 +76,14 @@ export class AuthResolver {
     return true;
   }
 
+  @Throttle(AUTH_THROTTLE)
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean, { description: 'Permanently delete the signed-in account. Owned households pass to the next member or close.' })
+  async deleteAccount(@Ctx() ctx: RequestContext, @Args('input') i: DeleteAccountInput) {
+    await this.commandBus.execute(new DeleteAccountCommand(ctx.userId, i.password));
+    return true;
+  }
+
   @UseGuards(GqlAuthGuard)
   @Mutation(() => Boolean, { description: 'Revoke every active session for the current user.' })
   async logoutAll(@Ctx() ctx: RequestContext) {
@@ -79,6 +95,20 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async verifyEmail(@Args('input') i: TokenInput) {
     await this.commandBus.execute(new VerifyEmailCommand(i.token));
+    return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => Boolean, { description: 'Public verification-code resend. Always true for a validly formed email: unknown, verified and account-limited emails are indistinguishable.' })
+  async requestEmailVerificationCode(@Args('input') i: RequestEmailVerificationCodeInput) {
+    await this.commandBus.execute(new RequestEmailVerificationCodeCommand(i.email));
+    return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => Boolean, { description: 'Public email verification by code. Invalid, expired, used or unknown-email challenges share one generic error.' })
+  async verifyEmailCode(@Args('input') i: VerifyEmailCodeInput) {
+    await this.commandBus.execute(new VerifyEmailCodeCommand(i.email, i.code));
     return true;
   }
 
@@ -95,6 +125,12 @@ export class AuthResolver {
   async requestPasswordReset(@Args('input') i: RequestPasswordResetInput) {
     await this.commandBus.execute(new RequestPasswordResetCommand(i.email));
     return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => PasswordResetTokenType, { description: 'Public: exchanges a reset code from the email for a single-use resetPassword token valid for 10 minutes. Wrong, expired, used or malformed codes, unknown emails and locked accounts share one generic error.' })
+  verifyPasswordResetCode(@Args('input') i: VerifyPasswordResetCodeInput) {
+    return this.commandBus.execute(new VerifyPasswordResetCodeCommand(i.email, i.code));
   }
 
   @Throttle(AUTH_THROTTLE)

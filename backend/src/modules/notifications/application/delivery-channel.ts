@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createSign } from 'node:crypto';
+import { connect } from 'node:http2';
 import { AppConfigService } from '@/platform/config/app-config.service.js';
 import { MailService } from '@/platform/mail/mail.service.js';
 
@@ -57,6 +58,7 @@ export class PushDeliveryChannel implements DeliveryChannel {
   constructor(private readonly config: AppConfigService) {}
 
   async send(delivery: NotificationDeliveryInput): Promise<void> {
+    if (delivery.pushToken && isApnsToken(delivery.pushToken)) return this.sendApns(delivery, delivery.pushToken);
     const { FCM_PROJECT_ID: projectId, FCM_CLIENT_EMAIL: clientEmail, FCM_PRIVATE_KEY: privateKey, FCM_TOKEN_URI: tokenUri } = this.config.env;
     if (!delivery.pushToken) throw new UnregisteredPushTokenError();
     if (!projectId || !clientEmail || !privateKey) throw new NotificationProviderUnavailableError('push_provider_not_configured');
@@ -78,6 +80,43 @@ export class PushDeliveryChannel implements DeliveryChannel {
     const body = await response.text();
     if (response.status === 404 && body.includes('UNREGISTERED')) throw new UnregisteredPushTokenError();
     throw new NotificationProviderUnavailableError(response.status === 429 || response.status >= 500 ? 'fcm_temporarily_unavailable' : 'fcm_rejected_request');
+  }
+
+  private apnsJwt?: { value: string; issuedAt: number };
+
+  /** iOS: APNs over HTTP/2 with a provider JWT (ES256), reused for 50 minutes as Apple asks. */
+  private async sendApns(delivery: NotificationDeliveryInput, token: string): Promise<void> {
+    const { APNS_KEY_ID: keyId, APNS_TEAM_ID: teamId, APNS_PRIVATE_KEY: privateKey, APNS_TOPIC: topic, APNS_SANDBOX: sandbox } = this.config.env;
+    if (!keyId || !teamId || !privateKey) throw new NotificationProviderUnavailableError('apns_not_configured');
+    const now = Math.floor(Date.now() / 1000);
+    if (!this.apnsJwt || now - this.apnsJwt.issuedAt > 3000) {
+      const unsigned = `${encodeBase64Url(JSON.stringify({ alg: 'ES256', kid: keyId }))}.${encodeBase64Url(JSON.stringify({ iss: teamId, iat: now }))}`;
+      const signature = createSign('SHA256').update(unsigned).sign({ key: privateKey.replace(/\\n/g, '\n'), dsaEncoding: 'ieee-p1363' }).toString('base64url');
+      this.apnsJwt = { value: `${unsigned}.${signature}`, issuedAt: now };
+    }
+    const language = delivery.language === 'ar' ? 'ar' : 'en';
+    const message = pushCopy[delivery.notificationType] ?? pushCopy.RECOMMENDATION_READY;
+    const payload = JSON.stringify({
+      aps: { alert: { title: message[language], body: language === 'ar' ? 'افتح التطبيق لعرض التفاصيل.' : 'Open the app to view details.' }, sound: 'default' },
+      notificationId: delivery.notificationId, householdId: delivery.householdId,
+    });
+    // shortcut: one HTTP/2 connection per message; keep a pooled session once volume reaches many pushes a second.
+    const { status, body } = await new Promise<{ status: number; body: string }>((resolve, reject) => {
+      const session = connect(sandbox ? 'https://api.sandbox.push.apple.com' : 'https://api.push.apple.com');
+      session.on('error', () => reject(new NotificationProviderUnavailableError('apns_temporarily_unavailable')));
+      const request = session.request({ ':method': 'POST', ':path': `/3/device/${token}`, authorization: `bearer ${this.apnsJwt!.value}`,
+        'apns-topic': topic, 'apns-push-type': 'alert', 'apns-priority': '10', 'content-type': 'application/json' });
+      let status = 0, body = '';
+      request.setTimeout(10_000, () => { request.close(); session.close(); reject(new NotificationProviderUnavailableError('apns_temporarily_unavailable')); });
+      request.on('response', (headers) => { status = Number(headers[':status']); });
+      request.setEncoding('utf8').on('data', (chunk: string) => { body += chunk; });
+      request.on('end', () => { session.close(); resolve({ status, body }); });
+      request.end(payload);
+    });
+    if (status === 200) return;
+    if (status === 410 || /BadDeviceToken|Unregistered|DeviceTokenNotForTopic/.test(body)) throw new UnregisteredPushTokenError();
+    if (status === 403 && body.includes('ExpiredProviderToken')) this.apnsJwt = undefined;
+    throw new NotificationProviderUnavailableError(status === 429 || status >= 500 ? 'apns_temporarily_unavailable' : 'apns_rejected_request');
   }
 
   private async getAccessToken(clientEmail: string, privateKey: string, tokenUri: string): Promise<string> {
@@ -102,5 +141,8 @@ export class PushDeliveryChannel implements DeliveryChannel {
     return result.access_token;
   }
 }
+
+/** APNs device tokens are 32 bytes written as 64 hex characters; FCM registration tokens are longer and not hex. */
+export const isApnsToken = (token: string) => /^[0-9a-f]{64}$/i.test(token);
 
 function encodeBase64Url(value: string): string { return Buffer.from(value).toString('base64url'); }

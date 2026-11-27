@@ -8,6 +8,7 @@ export function authErrorKey(error: unknown): string {
   if (codes.includes('INVALID_OR_EXPIRED_TOKEN')) return 'resetExpired';
   if (codes.includes('EMAIL_NOT_VERIFIED')) return 'verifyFirst';
   if (codes.includes('INVALID_CREDENTIALS')) return 'credentials';
+  if (codes.includes('INVALID_PASSWORD')) return 'deletePassword';
   if (codes.includes('EMAIL_ALREADY_REGISTERED')) return 'alreadyRegistered';
   if (codes.includes('INVALID_TIMEZONE')) return 'timezoneInvalid';
   if (codes.includes('REFERENCE_NOT_FOUND')) return 'referencesError';
@@ -15,6 +16,10 @@ export function authErrorKey(error: unknown): string {
   if (codes.includes('STORAGE')) return 'storageError';
   if (codes.includes('BAD_REQUEST')) return 'validationError';
   return 'connectionError';
+}
+export function isEmailNotVerifiedError(error: unknown) {
+  const e = error as { code?: string; codes?: string[] } | null;
+  return (e?.codes ?? [e?.code]).includes('EMAIL_NOT_VERIFIED');
 }
 export function isSignedOutError(error: unknown) {
   const e = error as { code?: string; codes?: string[]; status?: number } | null;

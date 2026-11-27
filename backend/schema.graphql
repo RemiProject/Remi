@@ -57,6 +57,24 @@ input ConfirmImageUploadInput {
   type: ImageType!
 }
 
+type CookbookFeedback {
+  createdAt: DateTime!
+  id: ID!
+  message: String!
+  subject: String!
+}
+
+type CookbookLeftover {
+  cookedOn: String!
+  id: ID!
+  name: String!
+  notes: String!
+  portions: Int!
+  status: String!
+  storage: String!
+  useBy: String
+}
+
 type Country {
   code: String!
   id: ID!
@@ -128,6 +146,11 @@ scalar DateTime
 
 """Arbitrary-precision decimal serialized as a string"""
 scalar Decimal
+
+input DeleteAccountInput {
+  """The current password, to confirm it is really the account holder"""
+  password: String!
+}
 
 enum DietaryPreference {
   DAIRY_FREE
@@ -269,6 +292,25 @@ type ImageUploadTicketType {
   uploadUrl: String!
 }
 
+input ImportedIngredientInput {
+  foodId: ID
+  optional: Boolean! = false
+  quantity: Decimal
+  text: String!
+  unit: Unit
+}
+
+type ImportedIngredientType {
+  alternatives: [ReceiptFoodOptionType!]!
+  confidence: ReceiptMatchConfidence!
+  food: ReceiptFoodOptionType
+  name: String!
+  optional: Boolean!
+  quantity: Decimal
+  text: String!
+  unit: Unit
+}
+
 type InsufficientStockType {
   available: Decimal!
   foodId: ID
@@ -290,9 +332,11 @@ type InventoryConnectionType {
 
 type InventoryItemDetailType {
   estimatedExpiryAt: DateTime
+  expiryEstimated: Boolean!
   foodId: ID!
   foodName: String!
   id: ID!
+  purchaseDate: LocalDate
   quantity: Decimal!
   storageLocation: StorageLocation!
   transactions: InventoryTransactionConnectionType!
@@ -302,13 +346,22 @@ type InventoryItemDetailType {
 
 type InventoryItemType {
   estimatedExpiryAt: DateTime
+  expiryEstimated: Boolean!
   foodId: ID!
   foodName: String!
   id: ID!
+  purchaseDate: LocalDate
   quantity: Decimal!
   storageLocation: StorageLocation!
   unit: Unit!
   version: Int!
+}
+
+input InventoryMetadataInput {
+  estimatedExpiryAt: DateTime
+  expectedVersion: Int!
+  inventoryItemId: ID!
+  storageLocation: StorageLocation!
 }
 
 type InventoryMovementType {
@@ -504,6 +557,7 @@ type Mutation {
   addStock(input: InventoryStockInput!): InventoryMutationResult!
   addToShoppingList(input: AddToShoppingListInputType!): ShoppingListItemType!
   adjustStock(input: InventoryAdjustmentInput!): InventoryMutationResult!
+  archiveRecipe(id: ID!): Boolean!
 
   """
   Step 2 of 2: validates the uploaded bytes and records the image. Idempotent per storageKey.
@@ -517,6 +571,11 @@ type Mutation {
   createPurchaseOrder(input: CreatePurchaseOrderInputType!): PurchaseOrderType!
   createRecipe(input: CreateRecipeInputType!): RecipeType!
   createShoppingList(input: CreateShoppingListInputType!): ShoppingListType!
+
+  """
+  Permanently delete the signed-in account. Owned households pass to the next member or close.
+  """
+  deleteAccount(input: DeleteAccountInput!): Boolean!
   deleteShoppingList(id: ID!): Boolean!
   discardStock(input: InventoryStockInput!): InventoryMutationResult!
   dismissRecommendation(id: String!): Boolean!
@@ -536,6 +595,7 @@ type Mutation {
   markNotificationRead(id: String!): NotificationItemType!
   planMeal(input: PlanMealInputType!): PlannedMealType!
   receivePurchaseOrderItem(input: ReceivePurchaseOrderItemInputType!): PurchaseReceiptType!
+  receiveReceipt(input: ReceiveReceiptInput!): ReceiveReceiptResultType!
 
   """
   Rotates the refresh token and returns a new access + refresh pair (Session-backed).
@@ -546,11 +606,18 @@ type Mutation {
   registerDevice(appVersion: String, platform: UserDevicePlatform!, pushToken: String!): UserDeviceType!
   removeAllergy(input: RemoveAllergyInputType!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
+  removePlannedMeal(id: ID!): Boolean!
+  removeShoppingItem(id: ID!): Boolean!
 
   """
   Re-sends the verification email to the logged-in user. No-op when already verified.
   """
   requestEmailVerification: Boolean!
+
+  """
+  Public verification-code resend. Always true for a validly formed email: unknown, verified and account-limited emails are indistinguishable.
+  """
+  requestEmailVerificationCode(input: RequestEmailVerificationCodeInput!): Boolean!
 
   """
   Step 1 of 2: get a presigned PUT URL, upload the bytes, then call confirmImageUpload.
@@ -560,20 +627,35 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
   revokeDevice(id: String!): Boolean!
   revokeInvitation(input: RevokeInvitationInput!): Boolean!
+  saveCookbookLeftover(input: SaveCookbookLeftoverInput!): CookbookLeftover!
+  saveImportedRecipe(input: SaveImportedRecipeInput!): RecipeType!
+  setCookbookLeftoverStatus(id: ID!, status: String!): CookbookLeftover!
   setDietaryPreferences(input: SetDietaryPreferencesInputType!): MyProfileType!
   setGoal(input: SetGoalInputType!): UserGoalType!
   setHealthConditions(input: SetHealthConditionsInputType!): MyProfileType!
+  submitCookbookFeedback(input: SubmitCookbookFeedbackInput!): CookbookFeedback!
 
   """
   OWNER only. The current owner becomes a MEMBER; the target member becomes the OWNER.
   """
   transferOwnership(input: TransferOwnershipInput!): Boolean!
   transitionPurchaseOrder(input: TransitionPurchaseOrderInputType!): PurchaseOrderType!
+  updateInventoryMetadata(input: InventoryMetadataInput!): InventoryItemType!
   updateNotificationPreference(channel: NotificationChannel!, isEnabled: Boolean!, quietHoursEnd: String, quietHoursStart: String, type: NotificationType!): NotificationPreferenceType!
   updateProfile(input: UpdateProfileInputType!): UserProfileDataType!
   updateShoppingList(input: UpdateShoppingListInputType!): ShoppingListType!
   updateShoppingListItem(input: UpdateShoppingItemInputType!): ShoppingListItemType!
   verifyEmail(input: TokenInput!): Boolean!
+
+  """
+  Public email verification by code. Invalid, expired, used or unknown-email challenges share one generic error.
+  """
+  verifyEmailCode(input: VerifyEmailCodeInput!): Boolean!
+
+  """
+  Public: exchanges a reset code from the email for a single-use resetPassword token valid for 10 minutes. Wrong, expired, used or malformed codes, unknown emails and locked accounts share one generic error.
+  """
+  verifyPasswordResetCode(input: VerifyPasswordResetCodeInput!): PasswordResetToken!
 }
 
 type MyHousehold {
@@ -648,14 +730,39 @@ enum NotificationType {
   SAFETY_REVIEW
 }
 
+type NutritionOverviewType {
+  avgCalories: Decimal!
+  avgCarbsG: Decimal!
+  avgFatG: Decimal!
+  avgFiberG: Decimal!
+  avgProteinG: Decimal!
+  avgSodiumMg: Decimal!
+  avgSugarG: Decimal!
+  daysLogged: Int!
+  firstDate: String
+  lastDate: String
+  mealCount: Int!
+}
+
 type NutritionProfile {
   caloriesPer100g: Decimal!
   carbsG: Decimal!
   fatG: Decimal!
-  fiberG: Decimal!
+
+  """Null when the source does not report it"""
+  fiberG: Decimal
   proteinG: Decimal!
   sodiumMg: Decimal!
-  sugarG: Decimal!
+
+  """Null when the source does not report it"""
+  sugarG: Decimal
+}
+
+type PasswordResetToken {
+  expiresAt: DateTime!
+
+  """Single-use token for resetPassword."""
+  resetToken: String!
 }
 
 input PlanMealInputType {
@@ -789,6 +896,8 @@ type PurchaseReceiptType {
 }
 
 type Query {
+  cookbookImages: [Image!]!
+  cookbookLeftovers: [CookbookLeftover!]!
   countries: [Country!]!
   cuisines: [Cuisine!]!
   currencies: [Currency!]!
@@ -806,16 +915,25 @@ type Query {
   inventoryItem(id: ID!, transactionAfter: String, transactionFirst: Int! = 20): InventoryItemDetailType!
   languages: [Language!]!
   locales: [Locale!]!
+  matchReceiptItems(names: [String!]!): [ReceiptLineMatchType!]!
   me: Me!
   mealPlans(from: String!, to: String!): [MealPlanTypeObject!]!
+  myCookbookFeedback: [CookbookFeedback!]!
   myDevices: [UserDeviceType!]!
   myHouseholds: [MyHousehold!]!
   myProfile: MyProfileType!
+
+  """The household's own recipes, newest first"""
+  myRecipes(after: String, first: Int! = 20): RecipeConnectionType!
   mySafetyHistory(after: String, first: Int! = 20): SafetyHistoryConnectionType!
   notificationBadge: NotificationBadgeType!
   notificationPreferences: [NotificationPreferenceType!]!
   notifications(after: String, first: Int! = 20): NotificationConnectionType!
+
+  """All-time nutrition averages over days with logged meals"""
+  nutritionOverview: NutritionOverviewType!
   predictions(after: String, first: Int! = 20, type: PredictionType!): PredictionConnectionType!
+  previewRecipeImport(url: String!): RecipeImportPreviewType!
 
   """
   Checks a scanned barcode against the caller's own safety profile. Null when the barcode is unknown.
@@ -829,11 +947,80 @@ type Query {
   search(first: Int! = 10, query: String!, types: [SearchDocumentType!]): [SearchResult!]!
   shoppingLists: [ShoppingListType!]!
   stockForecast(foodId: ID!): [FoodDepletionPredictionType!]!
+
+  """Recorded weights, oldest first (the latest `limit`, default 400)"""
+  weightHistory(limit: Int! = 400): [WeightEntryType!]!
+}
+
+type ReceiptFoodOptionType {
+  arabicName: String
+  categoryCode: String!
+  categoryName: String!
+  defaultUnit: Unit!
+  foodId: ID!
+  gramsPerPiece: Decimal
+  keeps: ReceiptKeepsType
+  name: String!
+  score: Float!
+  storageLocation: StorageLocation!
+}
+
+input ReceiptItemInput {
+  amount: Decimal!
+  estimatedExpiryAt: DateTime
+  foodId: ID!
+  storageLocation: StorageLocation!
+  unit: Unit!
+}
+
+type ReceiptKeepsType {
+  counter: Int
+  freezer: Int
+  fridge: Int
+  ripensAtRoomTemp: Boolean!
+}
+
+type ReceiptLineMatchType {
+  alternatives: [ReceiptFoodOptionType!]!
+  confidence: ReceiptMatchConfidence!
+  food: ReceiptFoodOptionType
+  inKitchen: [ReceiptStockType!]!
+  query: String!
+}
+
+enum ReceiptMatchConfidence {
+  HIGH
+  MEDIUM
+  NONE
+}
+
+type ReceiptStockType {
+  quantity: Decimal!
+  unit: Unit!
 }
 
 input ReceivePurchaseOrderItemInputType {
   idempotencyKey: String!
   purchaseOrderItemId: ID!
+  quantity: Decimal!
+  unit: Unit!
+}
+
+input ReceiveReceiptInput {
+  idempotencyKey: String!
+  items: [ReceiptItemInput!]!
+  purchaseDate: LocalDate
+}
+
+type ReceiveReceiptResultType {
+  added: Int!
+  items: [ReceivedReceiptItemType!]!
+  replayed: Boolean!
+}
+
+type ReceivedReceiptItemType {
+  foodId: ID!
+  inventoryItemId: ID!
   quantity: Decimal!
   unit: Unit!
 }
@@ -850,11 +1037,36 @@ enum RecipeDifficulty {
   MEDIUM
 }
 
+"""A recipe read from a web page, before it is saved."""
+type RecipeImportPreviewType {
+  author: String
+  cookTimeMin: Int
+  description: String
+  imageUrl: String
+  ingredients: [ImportedIngredientType!]!
+  name: String!
+  prepTimeMin: Int
+
+  """Set when this household already saved a recipe from the same link"""
+  savedRecipeId: ID
+  servings: Int
+  sourceName: String
+  sourceUrl: String!
+  steps: [String!]!
+}
+
 input RecipeIngredientInputType {
   foodId: ID!
   optional: Boolean! = false
   quantity: Decimal!
   unit: Unit!
+}
+
+type RecipeIngredientLineType {
+  """The catalogue food this line was matched to, if any"""
+  foodId: ID
+  position: Int!
+  text: String!
 }
 
 enum RecipeIngredientMatchStatus {
@@ -873,6 +1085,30 @@ type RecipeIngredientType {
   optional: Boolean!
   quantity: Decimal!
   unit: Unit!
+}
+
+"""
+Estimated nutrition per serving, summed from raw ingredient values (USDA FoodData Central).
+"""
+type RecipeNutritionType {
+  calories: Int!
+  carbsG: Float!
+
+  """Required ingredients included in the totals"""
+  countedIngredients: Int!
+  fatG: Float!
+  fiberG: Float!
+
+  """
+  Nutrients (FIBER, SUGAR) that some counted ingredient does not report; their totals are lower bounds
+  """
+  incompleteNutrients: [String!]!
+  proteinG: Float!
+  sodiumMg: Int!
+  sugarG: Float!
+
+  """Required ingredients in the recipe"""
+  totalIngredients: Int!
 }
 
 input RecipeStepInputType {
@@ -937,9 +1173,17 @@ type RecipeSummaryType {
   difficulty: RecipeDifficulty!
   householdId: ID
   id: ID!
+  imageUrl: String
   name: String!
+
+  """Null when no ingredient has nutrition data"""
+  nutrition: RecipeNutritionType
   prepTimeMin: Int
   servings: Int!
+  sourceName: String
+
+  """The page a saved recipe came from"""
+  sourceUrl: String
 }
 
 type RecipeType {
@@ -950,10 +1194,21 @@ type RecipeType {
   difficulty: RecipeDifficulty!
   householdId: ID
   id: ID!
+  imageUrl: String
+
+  """Ingredient lines as the source page printed them (saved recipes only)"""
+  ingredientLines: [RecipeIngredientLineType!]!
   ingredients: [RecipeIngredientType!]!
   name: String!
+
+  """Null when no ingredient has nutrition data"""
+  nutrition: RecipeNutritionType
   prepTimeMin: Int
   servings: Int!
+  sourceName: String
+
+  """The page a saved recipe came from"""
+  sourceUrl: String
   steps: [RecipeStepType!]!
 }
 
@@ -1010,6 +1265,10 @@ input RemoveMemberInput {
   userId: String!
 }
 
+input RequestEmailVerificationCodeInput {
+  email: String!
+}
+
 input RequestImageUploadInput {
   """One of IMAGE_ALLOWED_MIME, e.g. image/jpeg"""
   mimeType: String!
@@ -1059,6 +1318,29 @@ type SafetyHistoryEventType {
   entityType: SafetyEntityType!
   id: ID!
   occurredAt: DateTime!
+}
+
+input SaveCookbookLeftoverInput {
+  cookedOn: String!
+  id: ID!
+  name: String!
+  notes: String!
+  portions: Int!
+  storage: String!
+  useBy: String
+}
+
+input SaveImportedRecipeInput {
+  cookTimeMin: Int
+  description: String
+  imageUrl: String
+  ingredients: [ImportedIngredientInput!]!
+  name: String!
+  prepTimeMin: Int
+  servings: Int!
+  sourceName: String
+  sourceUrl: String!
+  steps: [String!]!
 }
 
 enum SearchDocumentType {
@@ -1154,6 +1436,12 @@ enum StorageLocation {
   FRIDGE
   OTHER
   PANTRY
+}
+
+input SubmitCookbookFeedbackInput {
+  id: ID!
+  message: String!
+  subject: String!
 }
 
 type Subscription {
@@ -1291,4 +1579,21 @@ type UserProfileDataType {
   gender: Gender
   heightCm: Decimal
   weightKg: Decimal
+}
+
+input VerifyEmailCodeInput {
+  """Six ASCII digits, including any leading zero."""
+  code: String!
+  email: String!
+}
+
+input VerifyPasswordResetCodeInput {
+  """Six ASCII digits, including any leading zero."""
+  code: String!
+  email: String!
+}
+
+type WeightEntryType {
+  measuredAt: DateTime!
+  weightKg: Decimal!
 }

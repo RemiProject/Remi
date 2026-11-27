@@ -81,6 +81,13 @@ export class ShoppingService {
     }, { householdId });
   }
 
+  async removeShoppingItem(householdId: string, id: string) {
+    return this.transactions.run(async (tx) => {
+      await tx.$executeRaw`DELETE FROM "ShoppingListItem" WHERE "id" = ${id}::uuid AND "householdId" = ${householdId}::uuid`;
+      return true;
+    }, { householdId });
+  }
+
   async shoppingLists(householdId: string) {
     return this.transactions.run(async (tx) => {
       const lists = await tx.$queryRaw<Array<{ id: string; name: string; status: string; createdAt: Date; updatedAt: Date }>>`SELECT "id", "name", "status"::text AS "status", "createdAt", "updatedAt" FROM "ShoppingList" WHERE "householdId" = ${householdId}::uuid ORDER BY "updatedAt" DESC, "id"`;

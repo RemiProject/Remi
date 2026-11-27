@@ -35,7 +35,8 @@ export class S3ObjectStorage implements ObjectStorage, OnModuleInit {
           : undefined,
     };
     this.internal = new S3Client({ ...base, endpoint: e.S3_ENDPOINT });
-    this.public = new S3Client({ ...base, endpoint: e.S3_PUBLIC_ENDPOINT ?? e.S3_ENDPOINT });
+    // The upload body arrives later; signing the SDK's empty-body CRC32 rejects real bytes.
+    this.public = new S3Client({ ...base, requestChecksumCalculation: 'WHEN_REQUIRED', endpoint: e.S3_PUBLIC_ENDPOINT ?? e.S3_ENDPOINT });
   }
 
   async onModuleInit(): Promise<void> {

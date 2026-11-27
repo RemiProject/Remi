@@ -21,6 +21,7 @@ function harness(transport, { factory = createAuthService, initial = null, login
   const calls = [];
   const storage = { read: async () => stored, write: async value => { stored = value; }, clear: async () => { stored = null; } };
   const client = createBackendClient('https://api.example.invalid', async (_url, init) => {
+    if (String(_url).endsWith('/health/live')) return Response.json({ status: 'ok' });
     const call = { ...JSON.parse(init.body), headers: init.headers };
     calls.push(call);
     if (call.query === authOperations.login) return loginResponse(call);

@@ -1,143 +1,109 @@
-import { recipeMessages } from '@/i18n/recipes';
-import { backendRecipeMessages } from '@/i18n/backend-recipes';
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import { router } from 'expo-router';
-import { Modal, Pressable, ScrollView, View, type TextProps } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, Button, Card, Chip, Screen, SearchField } from '@/components/ui/core';
-import { Icon } from '@/components/ui/icon';
-import { FoodImage } from '@/components/food-image';
-import { demoNutrition } from '@/data/kitchen-demo';
-import { kitchenPhoto, recipePhotos, recipeTitle, recipeDescription, searchHome } from '@/data/home-content';
-import { expirationStatus, storageOptions, useFirstItems, type InventoryItem } from '@/domain/inventory';
-import { useInventory, useToday } from '@/providers/inventory-provider';
-import { homeMessages, homeUnitLabels } from '@/i18n/home';
-import { useLanguage } from '@/providers/language-provider';
-import { useRemyTheme } from '@/theme/provider';
+import { recipeName, recipeNameMatches } from '@/i18n/recipe-names';
+import { RecipeArt, RecipeCard, RecipeGrid, RecipeTabs, filterRecipes, recipeMinutes, recipeTabs, useGridCardWidth } from '@/components/recipe-card';
+import { energyLabel } from '@/domain/nutrition';
+import { Brand } from '@/components/brand';
 import { radii, spacing } from '@/theme/tokens';
-import type { InventoryReadItem } from '@/domain/backend-inventory-read-model';
-
-export interface BackendHomeData {
-  items: InventoryReadItem[];
-  status: string;
-  today: string;
-  retry: () => Promise<void>;
-  notice: ReactNode;
-  deviceNotice: ReactNode;
-  recipeIdeas: ReactNode;
-  saved: string;
-  empty: string;
-  emptyBody: string;
-  writesSoon: string;
-  readOnly: string;
-  foodName: (item: InventoryReadItem) => string;
-  quantityLabel: (item: InventoryReadItem) => string;
-}
-type HomeFood = InventoryItem | InventoryReadItem;
-
-const HomeDirectionContext = createContext(false);
-function H({ style, ...props }: TextProps & { variant?: 'title' | 'heading' | 'body' | 'caption' | 'label'; muted?: boolean; dir?: 'rtl' | 'ltr' }) {
-  const rtl = useContext(HomeDirectionContext);
-  return <AppText {...props} style={[{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }, style]} />;
-}
-
-export default function HomeScreen({ backend }: { backend?: BackendHomeData } = {}) {
-  const { colors } = useRemyTheme();
-  const local = useInventory();
-  const localToday = useToday();
-  const { items, status, error, retryRead }: { items: readonly HomeFood[]; status: string; error: ReturnType<typeof useInventory>['error']; retryRead: () => Promise<void> } = backend
-    ? { items: backend.items, status: backend.status, error: null, retryRead: backend.retry } : local;
-  const today = backend ? backend.today : localToday;
-  const { language } = useLanguage();
-  const [query, setQuery] = useState('');
-  const [scope, setScope] = useState<'all' | 'foods' | 'recipes'>('all');
-  const [previewId, setPreviewId] = useState<string | null>(null);
-  const rtl = language === 'ar';
-  const t = backend ? { ...homeMessages[language], search: backendRecipeMessages[language].foodSearch, none: backendRecipeMessages[language].foodNone, saved: backend.saved, empty: backend.empty, emptyBody: backend.emptyBody } : homeMessages[language];
-  const row = { flexDirection: 'row' as const, direction: rtl ? 'rtl' as const : 'ltr' as const, alignItems: 'center' as const, gap: spacing.md };
-  const number = (value: number) => value.toLocaleString(language);
-  const heading = (title: string, action?: ReactNode) => <View style={[row, { flexWrap: 'wrap' }]}><H variant="heading" style={{ flex: 1 }}>{title}</H>{action}</View>;
-  const matches = backend ? { foods: [] as HomeFood[], recipes: [] as ReturnType<typeof searchHome>['recipes'] } : searchHome(status === 'ready' ? items : [], query, language, scope);
-  if (backend && status === 'ready' && scope !== 'recipes') {
-    const term = query.trim().toLocaleLowerCase(language);
-    matches.foods = backend.items.filter(item => [item.name, backend.foodName(item)].some(name => name.toLocaleLowerCase(language).includes(term)));
-  }
-  const searching = query.trim() !== '' || scope !== 'all';
-  const priority = useFirstItems(items, today);
-  const foodTile = (item: HomeFood) => {
-    const name = backend ? backend.foodName(item as InventoryReadItem) : item.name;
-    const expiry = expirationStatus(item, today);
-    const expiryText = expiry.kind === 'unknown' ? t.unknown : expiry.kind === 'expired' ? t.expired : expiry.kind === 'due' ? t.today : `${t.soon} ${number(expiry.days!)}`;
-    return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`${name}. ${expiryText}`}
-      onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })}
-      style={({ pressed }) => ({ width: 190, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.sm, backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
-      <View style={{ height: 58, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.selectedSurface, borderRadius: radii.md }}><Icon name="food" size={30} /></View>
-      <H variant="label">{name}</H><H variant="caption" muted dir={backend && rtl ? 'rtl' : undefined}>{backend ? backend.quantityLabel(item as InventoryReadItem) : <>{number(item.quantity as number)} {homeUnitLabels[language][item.unitId!]}</>}</H>
-      {backend && (item as InventoryReadItem).readOnly && <H variant="caption" muted>{backend.readOnly}</H>}
-      <H variant="caption" style={{ color: expiry.kind === 'expired' ? colors.errorText : expiry.days !== null && expiry.days <= 3 ? colors.warningText : colors.textSubtle }}>{expiryText}</H>
-    </Pressable>;
-  };
-  const recipeTile = (recipe: (typeof matches.recipes)[number]) => <Pressable key={recipe.id} accessibilityRole="button" accessibilityLabel={`${recipeTitle(recipe.id, language)}. ${t.preview}`}
-    onPress={() => setPreviewId(recipe.id)} style={({ pressed }) => ({ width: 258, borderRadius: radii.lg, overflow: 'hidden', backgroundColor: pressed ? colors.pressedSurface : colors.surface })}>
-    <FoodImage uri={recipePhotos[recipe.id]} label={t.photo} height={160} />
-    <View style={{ padding: spacing.lg, gap: spacing.sm }}><H variant="heading">{recipeTitle(recipe.id, language)}</H>
-      <View style={row}><Icon name="clock" size={16} /><H variant="caption" muted>{number(recipe.minutes)} {t.minutes}</H></View>
-      <H variant="caption" muted>{recipeDescription(recipe.id, language)}</H></View>
-  </Pressable>;
-  const selectedRecipe = matches.recipes.find((recipe) => recipe.id === previewId);
-  return <HomeDirectionContext.Provider value={rtl}><Screen><View style={{ gap: spacing.xl, direction: rtl ? 'rtl' : 'ltr' }}>
-    <View style={row}><H variant="title" style={{ flex: 1 }}>{t.greeting}</H>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.notifications} onPress={() => router.push({ pathname: '/feature', params: { feature: 'notifications' } })}
-        style={({ pressed }) => ({ width: 48, height: 48, borderRadius: radii.md, backgroundColor: pressed ? colors.pressedSurface : colors.surface, alignItems: 'center', justifyContent: 'center' })}><Icon name="bell" /></Pressable></View>
-    <View style={{ gap: spacing.sm }}><SearchField value={query} onChangeText={setQuery} placeholder={t.search} accessibilityLabel={t.search} autoCorrect={false}
-      style={{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }} />
-      <View style={[row, { flexWrap: 'wrap' }]}>{(backend ? ['all', 'foods'] as const : ['all', 'foods', 'recipes'] as const).map((value) => <Chip key={value} label={t[value]} selected={scope === value} onPress={() => setScope(value)} />)}</View>
+import { AppSkeleton } from '@/components/app-skeleton';
+import { BackendHomeRecipeIdeas } from './backend-home-recipe-ideas';
+import { ingredientImage } from '@/data/ingredient-images';
+import { useState, type ReactNode } from 'react';
+import { router } from 'expo-router';
+import { Image } from 'expo-image';
+import { Pressable, View } from 'react-native';
+import { AppText, Button, Card, Screen, SearchField, SectionHeader, uiStyles } from '@/components/ui/core';
+import { Icon } from '@/components/ui/icon';
+import { useRemyTheme } from '@/theme/provider';
+import { useLanguage } from '@/providers/language-provider';
+import { useAuth } from '@/providers/auth-provider';
+import { useBackendKitchen } from '@/providers/backend-kitchen-provider';
+import { backendExpiryDays, backendFoodName, backendQuantityLabel } from '@/utils/backend-kitchen-view';
+import { getCookbookContent } from '@/data/cookbook-content';
+import { loadRecipe, loadRecipes, loadPlans, loadShopping, shiftDay, todayKey } from '@/services/kitchen-api';
+import { addPlannedMealsToShopping } from '@/services/plan-shopping';
+import { recipesOnList, upcomingMeals } from '@/domain/home-plan';
+import { DataNotice, Feedback, useAction, useKitchenData } from './connected-ui';
+export interface BackendHomeData { recipeIdeas?: ReactNode; items: import('@/domain/backend-inventory-read-model').InventoryReadItem[]; status: string; today: string; retry: () => Promise<void>; notice: ReactNode; deviceNotice: ReactNode; saved: string; empty: string; emptyBody: string; writesSoon: string; readOnly: string; foodName: (item: import('@/domain/backend-inventory-read-model').InventoryReadItem) => string; quantityLabel: (item: import('@/domain/backend-inventory-read-model').InventoryReadItem) => string }
+const feature = (name: string) => router.push({ pathname: '/feature', params: { feature: name } });
+export default function HomeScreen(_props: { backend?: BackendHomeData } = {}) {
+  const { colors } = useRemyTheme(); const { language } = useLanguage(); const { user } = useAuth(); const kitchen = useBackendKitchen();
+  const rtl = language === 'ar'; const c = (en: string, ar: string) => rtl ? ar : en;
+  const [query, setQuery] = useState(''); const [tab, setTab] = useState('for-you');
+  const data = useKitchenData(async () => {
+    const today = todayKey();
+    const [recipes, plans, lists] = await Promise.all([loadRecipes(), loadPlans(today, shiftDay(today, 6)), loadShopping()]);
+    const upcoming = upcomingMeals(plans.flatMap(plan => plan.meals), today);
+    // One recipe failing to load only hides it from the list card; Home itself still renders.
+    const details = (await Promise.all([...new Set(upcoming.map(meal => meal.recipeId))].map(id => loadRecipe(id).catch(() => null)))).filter(recipe => recipe !== null);
+    return { recipes, upcoming, onList: recipesOnList(details, lists.filter(list => list.status === 'ACTIVE').flatMap(list => list.items)) };
+  }, 'home');
+  const shop = useAction(data.reload); const [shopNote, setShopNote] = useState<string | null>(null);
+  const addUpcoming = () => shop.run(async () => {
+    const result = await addPlannedMealsToShopping(kitchen.status === 'ready' ? kitchen.items.map(item => ({ foodId: item.foodId, quantity: item.quantity, unit: item.backendUnit })) : []);
+    setShopNote(result.added.length ? c(`Added ${result.added.length === 1 ? '1 ingredient' : `${result.added.length} ingredients`} to your shopping list.`, `المكونات المضافة إلى قائمة مشترياتك: ${result.added.length}.`) : c('Everything you need is already in Kitchen or on your list.', 'كل ما تحتاجه موجود في المطبخ أو في قائمتك.'));
+  });
+  const dayLabel = (date: string) => date === todayKey() ? c('Today', 'اليوم') : date === shiftDay(todayKey(), 1) ? c('Tomorrow', 'غدًا') : new Date(`${date}T12:00:00`).toLocaleDateString(language, { weekday: 'long' });
+  const mealLabel = (type: string) => ({ BREAKFAST: c('Breakfast', 'الإفطار'), LUNCH: c('Lunch', 'الغداء'), DINNER: c('Dinner', 'العشاء'), SNACK: c('Snack', 'وجبة خفيفة') } as Record<string, string>)[type] ?? c('Meal', 'وجبة');
+  const thumb = (name: string, id: string) => <RecipeArt id={id} name={name} width={56} height={56} radius={14} />;
+  const row = (key: string, title: string, caption: string, onPress: () => void, recipeId?: string) => <Pressable key={key} accessibilityRole="button" accessibilityLabel={`${recipeName(title, language)}. ${caption}`} onPress={onPress} style={({ pressed }) => [uiStyles.row, { paddingVertical: 8, borderRadius: 16, backgroundColor: pressed ? colors.pressedSurface : 'transparent' }]}>
+    {recipeId && thumb(title, recipeId)}<View style={{ flex: 1, gap: 2 }}><AppText variant="label">{recipeName(title, language)}</AppText><AppText variant="caption" muted>{caption}</AppText></View><Icon name="chevron" size={16} rtl={rtl} /></Pressable>;
+  const catalogue = [...(data.data?.recipes ?? [])].sort((a, b) => Number(!!getCookbookContent(b.name, b.id)) - Number(!!getCookbookContent(a.name, a.id)));
+  const recipes = catalogue.filter(recipe => recipeNameMatches(recipe.name, query, language));
+  const shown = filterRecipes(catalogue, tab); const cardWidth = useGridCardWidth();
+  const foods = kitchen.items.filter(item => backendFoodName(item, language).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const priority = kitchen.items.filter(item => { const days = backendExpiryDays(item, kitchen.today); return days !== null && days >= 0 && days <= 3; }).sort((a,b) => (backendExpiryDays(a,kitchen.today) ?? 99) - (backendExpiryDays(b,kitchen.today) ?? 99));
+  const upcoming = data.data?.upcoming ?? []; const onList = data.data?.onList ?? [];
+  if (user && (kitchen.status === 'loading' && !kitchen.items.length || data.loading && !data.data)) return <AppSkeleton navigation={false} />;
+  const time = (recipe: { prepTimeMin: number | null; cookTimeMin: number | null }) => { const m = recipeMinutes(recipe); return m === null ? null : `${m} ${c('min', 'دقيقة')}`; };
+  const card = (recipe: (typeof catalogue)[number]) => <RecipeCard key={recipe.id} id={recipe.id} name={recipe.name} image={recipe.imageUrl} time={time(recipe)} energy={energyLabel(recipe.nutrition, language)} caption={tab.startsWith('cuisine:') || !recipe.cuisineName ? c(`${recipe.servings} servings`, `${recipe.servings} حصص`) : recipe.cuisineName} width={cardWidth} onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } })} />;
+  const browse = (key: string) => router.push({ pathname: '/feature', params: key === 'for-you' ? { feature: 'recipes' } : { feature: 'recipes', browse: key } });
+  return <Screen rtl={rtl} contentGap={36}>
+    <View style={{ backgroundColor: colors.hero, marginHorizontal: -20, marginTop: -20, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 14, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
+      <View style={uiStyles.row}><View style={{ flex: 1 }}><Brand kind="wordmark" height={32} /></View>
+        <Pressable accessibilityRole="button" accessibilityLabel={c('Your account', 'حسابك')} onPress={() => feature('profile')} style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, opacity: pressed ? 0.8 : 1 })}><Icon name="profile" size={22} color={colors.text} /></Pressable></View>
+      <View style={[uiStyles.row, { alignItems: 'flex-end', marginVertical: -spacing.sm }]}><AppText variant="title" accessibilityRole="header" style={{ fontSize: 36, lineHeight: 40, color: colors.onHero, flex: 1 }}>{c('A good day\nto cook.', 'يوم جميل\nللطبخ.')}</AppText><Brand kind="mascot" height={104} /></View>
+      <SearchField value={query} onChangeText={setQuery} placeholder={c('Search food or recipes', 'ابحث عن طعام أو وصفة')} autoCorrect={false} />
     </View>
-    {backend ? <>{backend.notice}<H variant="caption" muted>{backend.writesSoon}</H></> : status !== 'ready' && <Card><H muted>{status === 'error' ? t.readError : t.loading}</H>{status === 'error' && <Button label={t.retry} onPress={() => { void retryRead(); }} />}</Card>}
-    {status === 'ready' && error && <H accessibilityRole="alert" style={{ color: colors.errorText }}>{t.writeError}</H>}
-    {searching ? <View style={{ gap: spacing.lg }}>{heading(t.results)}
-      {!matches.foods.length && !matches.recipes.length && <H muted>{t.none}</H>}
-      {matches.foods.length > 0 && <>{heading(t.foods)}<ScrollView horizontal style={{ direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ gap: spacing.md }}>{matches.foods.map(foodTile)}</ScrollView></>}
-      {matches.recipes.length > 0 && <><H variant="caption" muted>{t.sample}</H><ScrollView horizontal style={{ direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ gap: spacing.md }}>{matches.recipes.map(recipeTile)}</ScrollView></>}
-    </View> : <>
-      {status === 'ready' && <Card style={{ padding: 0, overflow: 'hidden' }}>
-        <FoodImage uri={kitchenPhoto} height={110} label={t.photo} />
-        <View style={{ padding: spacing.lg, gap: spacing.md }}>{heading(t.overview)}<H muted>{number(items.length)} {t.saved}</H>
-          <View style={[row, { flexWrap: 'wrap' }]}>{storageOptions.map((storage) => <View key={storage.id} style={{ flex: 1, minWidth: 80 }}>
-            <H variant="heading">{number(items.filter((item) => item.storageId === storage.id).length)}</H><H variant="caption" muted>{t[storage.id]}</H>
-          </View>)}</View>
-          <Button label={backend || items.length ? t.openKitchen : t.add} icon={backend || items.length ? 'kitchen' : 'add'} onPress={() => router.navigate(backend || items.length ? '/kitchen' : '/food/manual')} />
-          {backend && <Button label={t.add} icon="add" onPress={() => router.push('/food/manual')} />}
+    {!user ? <Card><AppText variant="heading">{c('Your kitchen, all together.', 'مطبخك في مكان واحد.')}</AppText><AppText>{c('Keep track of what you have, cook something good, and plan a little ahead.', 'تابع طعامك وحضّر وجباتك وخطط للأيام القادمة.')}</AppText><Button label={c('Sign in to your kitchen', 'تسجيل الدخول إلى مطبخك')} onPress={() => router.push('/login')} /><Button label={c('Create an account', 'إنشاء حساب')} variant="text" onPress={() => router.push('/signup')} /></Card> : <>
+      <DataNotice {...data} />
+      {kitchen.status === 'error' && <Card><AppText accessibilityRole="alert">{c('Could not load your kitchen.', 'تعذّر تحميل مطبخك.')}</AppText><Button label={c('Try again', 'حاول مجددًا')} onPress={() => { void kitchen.retry(); }} /></Card>}
+      {query.trim() ? <>
+        <SectionHeader title={c('Your food', 'طعامك')} />{foods.map(item => <Button key={item.id} label={`${backendFoodName(item, language)} · ${backendQuantityLabel(item, language)}`} variant="secondary" onPress={() => router.push({ pathname: '/food/[id]', params: { id: item.id } })} />)}{!foods.length && <AppText muted>{c('No matching food.', 'لا يوجد طعام مطابق.')}</AppText>}
+        <SectionHeader title={c('Recipes', 'الوصفات')} action={c('See all', 'عرض الكل')} onPress={() => browse('all')} />
+        <RecipeGrid>{recipes.slice(0, 10).map(card)}</RecipeGrid>
+        {!data.loading && !recipes.length && <AppText muted>{c('No recipes match yet. Try another search.', 'لا توجد وصفات مطابقة. جرّب بحثًا آخر.')}</AppText>}
+      </> : <>
+        {/* Use first: a slim strip; the food rows appear only when something is due within 3 days. */}
+        <Pressable accessibilityRole="button" accessibilityLabel={`${c('Use first', 'استخدم أولاً')}. ${kitchen.items.length ? c('View your food', 'عرض طعامك') : c('Add your first ingredient', 'أضف أول مكوّن')}`} onPress={() => router.navigate(kitchen.items.length ? '/kitchen' : '/food/manual')}
+          style={({ pressed }) => ({ backgroundColor: colors.accentSoft, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14, gap: 10, opacity: pressed ? 0.85 : 1 })}>
+          <View style={uiStyles.row}><View style={{ flex: 1, gap: 2 }}><AppText variant="label" style={{ color: colors.accentText }}>{c('Use first', 'استخدم أولاً')}</AppText>
+            <AppText variant="caption" style={{ color: colors.text }}>{priority.length ? (priority.length === 1 ? c('1 ingredient to use soon', 'مكوّن واحد للاستخدام قريبًا') : c(`${priority.length} ingredients to use soon`, `${priority.length} مكونات للاستخدام قريبًا`)) : kitchen.items.length ? c('Nothing needs using in the next 3 days.', 'لا شيء يحتاج إلى استخدام خلال ٣ أيام.') : c('Add your first ingredient', 'أضف أول مكوّن')}</AppText></View>
+            <Icon name="chevron" size={16} color={colors.accentText} rtl={rtl} /></View>
+          {priority.slice(0, 2).map(item => <View key={item.id} style={uiStyles.row}>{ingredientImage(item.name) && <Image source={ingredientImage(item.name)} contentFit="cover" style={{ width: 36, height: 36, borderRadius: radii.sm }} />}<AppText variant="label" style={{ flex: 1 }}>{backendFoodName(item, language)} · {backendQuantityLabel(item, language)}</AppText></View>)}
+          {priority.length > 0 && <AppText variant="caption" muted>{c('Based on dates you entered. Check food before use.', 'حسب التواريخ المسجلة. افحص الطعام قبل الاستخدام.')}</AppText>}
+        </Pressable>
+        <View style={{ gap: spacing.xs }}>
+          <SectionHeader title={c('Recipes', 'الوصفات')} action={c('See all', 'عرض الكل')} onPress={() => browse(tab)} />
+          <RecipeTabs tabs={[{ key: 'for-you', label: c('For you', 'لك') }, ...recipeTabs(catalogue, c)]} value={tab} onChange={setTab} rtl={rtl} />
+          {tab === 'for-you' ? <BackendHomeRecipeIdeas kitchenStatus={kitchen.status} title={c('Tonight, sorted.', 'وجبة الليلة جاهزة.')} header={false} limit={6} />
+            : <View style={{ gap: spacing.lg }}><RecipeGrid>{shown.slice(0, 10).map(card)}</RecipeGrid>
+              {shown.length > 10 && <Button label={c(`See all ${shown.length} recipes`, `عرض كل الوصفات (${shown.length})`)} variant="secondary" onPress={() => browse(tab)} />}</View>}
         </View>
-      </Card>}
-      {status === 'ready' && <View style={{ gap: spacing.md }}>{heading(t.useFirst, <Button label={t.viewAll} variant="text" onPress={() => router.navigate('/kitchen')} />)}
-        {priority.length ? <ScrollView horizontal style={{ direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ gap: spacing.md }}>{priority.map(foodTile)}</ScrollView> :
-          <View style={{ gap: spacing.sm }}><H variant="label">{items.length ? t.noPriority : t.empty}</H><H variant="caption" muted>{items.length ? t.dateNote : t.emptyBody}</H></View>}
-        {priority.length > 0 && <H variant="caption" muted>{t.dateNote}</H>}
-      </View>}
-      {backend ? backend.recipeIdeas : <View style={{ gap: spacing.md }}>{heading(t.ideas, <Button label={recipeMessages[language].viewAll} variant="text" onPress={() => router.push({ pathname: '/feature', params: { feature: 'recipes' } })} />)}<H variant="caption" muted>{t.sample}</H>
-        <ScrollView horizontal style={{ direction: rtl ? 'rtl' : 'ltr' }} contentContainerStyle={{ gap: spacing.md }}>{matches.recipes.map(recipeTile)}</ScrollView>
-      </View>}
-      <Card>{heading(t.nutrition)}<H variant="caption" muted>{t.lunch}</H>
-        <View style={[row, { flexWrap: 'wrap' }]}>{[[demoNutrition.calories, t.kcal], [demoNutrition.proteinGrams, t.protein], [demoNutrition.fiberGrams, t.fiber]].map(([value, label]) =>
-          <View key={label} style={{ flex: 1, minWidth: 75 }}><H variant="heading">{number(value as number)}</H><H variant="caption" muted>{label}</H></View>)}</View><H variant="caption" muted>{t.nutritionNote}</H>
-      </Card>
-      <View style={{ gap: spacing.md }}>{heading(t.shortcuts)}<Button label={t.plan} icon="calendar" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'planner' } })} />
-        <Button label={t.shop} icon="shopping" variant="secondary" onPress={() => router.push({ pathname: '/feature', params: { feature: 'shopping' } })} /></View>
-    </>}
-    {backend?.deviceNotice}
-    <Modal visible={previewId !== null} transparent animationType="fade" onRequestClose={() => setPreviewId(null)}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.overlay }}><ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing.lg }}>
-        <Card accessibilityViewIsModal style={{ backgroundColor: colors.modalSurface, maxWidth: 600, width: '100%', alignSelf: 'center', direction: rtl ? 'rtl' : 'ltr' }}>
-          <Button label={t.close} variant="text" onPress={() => setPreviewId(null)} />
-          <H variant="caption" muted>{t.preview}</H>
-          {selectedRecipe && <><FoodImage key={selectedRecipe.id} uri={recipePhotos[selectedRecipe.id]} label={t.photo} height={180} />
-            <H variant="title">{recipeTitle(selectedRecipe.id, language)}</H><H muted>{recipeDescription(selectedRecipe.id, language)}</H>
-            <H variant="caption" muted>{number(selectedRecipe.minutes)} {t.minutes}</H><H variant="heading">{t.ingredients}</H>
-            {selectedRecipe.ingredients.map((id) => <H key={id}>{t[id]}</H>)}</>}
-          {selectedRecipe && <Button label={recipeMessages[language].open} onPress={() => { setPreviewId(null); router.push({ pathname: '/recipes/[id]', params: { id: selectedRecipe.id } }); }} />}
+      </>}
+      {/* A heading sits above its card, never inside it: the card holds the content, the heading names it. */}
+      <View style={{ gap: spacing.md }}>
+        <SectionHeader title={c('Upcoming meals', 'الوجبات القادمة')} action={c('Plan', 'خطط')} onPress={() => router.navigate('/plan')} />
+        <Card style={{ gap: spacing.xs, paddingVertical: spacing.sm }}>
+          {upcoming.length ? upcoming.map(meal => row(meal.id, meal.recipeName, `${dayLabel(meal.mealDate)} · ${mealLabel(meal.mealType)} · ${Number(meal.servings)} ${c('servings', 'حصص')}`, () => router.push({ pathname: '/recipes/[id]', params: { id: meal.recipeId } }), meal.recipeId))
+            : <View style={{ gap: spacing.sm, paddingVertical: spacing.sm }}><AppText muted>{c('A little room for something good.', 'مساحة لوجبة لذيذة.')}</AppText>
+              <Button label={c('Plan a meal', 'خطط لوجبة')} variant="secondary" onPress={() => router.navigate('/plan')} /></View>}
+          {upcoming.length > 0 && <View style={{ alignItems: 'flex-start', paddingTop: spacing.xs }}><Button label={c('Add ingredients to shopping list', 'أضف المكونات إلى قائمة المشتريات')} icon="shopping" variant="text" disabled={shop.busy} onPress={() => { void addUpcoming(); }} /></View>}
+          <Feedback message={shop.message ?? shopNote} />
         </Card>
-      </ScrollView></SafeAreaView>
-    </Modal>
-  </View></Screen></HomeDirectionContext.Provider>;
+      </View>
+      {onList.length > 0 && <View style={{ gap: spacing.md }}>
+        <SectionHeader title={c('In your shopping list', 'في قائمة مشترياتك')} action={c('View list', 'عرض القائمة')} onPress={() => feature('shopping')} />
+        <Card style={{ gap: spacing.xs, paddingVertical: spacing.sm }}>{onList.map(recipe => row(recipe.id, recipe.name, c(`${recipe.onList} of ${recipe.total} ingredients on your list`, `${recipe.onList} من ${recipe.total} مكونات في قائمتك`), () => router.push({ pathname: '/recipes/[id]', params: { id: recipe.id } }), recipe.id))}</Card>
+      </View>}
+    </>}
+  </Screen>;
 }

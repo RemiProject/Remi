@@ -1,10 +1,11 @@
+import { foodName } from '../i18n/catalog-food-names';
 import type { InventoryReadItem } from '../domain/backend-inventory-read-model';
 import { backendKitchenMessages } from '../i18n/backend-kitchen';
 import { homeUnitLabels } from '../i18n/home';
 import { inventoryMessages } from '../i18n/inventory';
 
 export function backendFoodName(item: InventoryReadItem, language: 'en' | 'ar'): string {
-  return language === 'ar' ? item.arabicName?.trim() || item.name : item.name.charAt(0).toLocaleUpperCase('en') + item.name.slice(1);
+  return language === 'ar' ? item.arabicName?.trim() || foodName(item.name, language) : item.name.charAt(0).toLocaleUpperCase('en') + item.name.slice(1);
 }
 export function backendUnitLabel(item: InventoryReadItem, language: 'en' | 'ar'): string {
   if (item.unitId) return homeUnitLabels[language][item.unitId];

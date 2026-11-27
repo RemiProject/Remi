@@ -33,7 +33,10 @@ function harness() {
     $queryRaw: vi.fn(async (strings: TemplateStringsArray, ...values: unknown[]) => {
       const sql = strings.join('?'); queries.push({ sql, values });
       if (sql.includes('AS snapshot')) return [{ snapshot: data.profile }];
+      // The change key: any edit to the fixture data, the day or the scope changes it, as the real aggregates do.
+      if (sql.includes('AS state')) return [{ state: JSON.stringify([data, values]) }];
       if (sql.includes('FROM "Household"')) return [{ timezone: data.timezone }];
+      if (sql.includes('LEFT JOIN "NutritionProfile" n ON n."foodId" = f."id"\n    WHERE ri."recipeId" = ANY')) return [];
       if (sql.includes('FROM "Recipe"')) return data.recipes;
       if (sql.includes('FROM "RecipeIngredient"')) return data.ingredients;
       if (sql.includes('FROM "InventoryItem"')) return data.batches;
@@ -51,20 +54,38 @@ function harness() {
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('RecipeSuggestionsService', () => {
-  it('ranks the full set before paging, enriches aliases, and uses six batched reads with no writes', async () => {
+  it('ranks the full set before paging, enriches aliases, and uses six batched reads plus one nutrition read for the page, with no writes', async () => {
     const h = harness();
     const page = await h.service.list('household', 'user', 1);
     expect(page).toMatchObject({ totalCount: 2, hasNextPage: true, missingStapleNames: [] });
     expect(page.nodes[0]).toMatchObject({ recipe: { id: 'owned', servings: 4 }, coverageRatio: 1, haveCount: 1, requiredCount: 1,
       expiringSoon: [{ foodId: 'tomato', foodName: 'tomato', expiryDay: '2026-06-03', aliases: [{ alias: 'طماطم', languageCode: 'ar', isPrimary: true }] }], safetyWarnings: [] });
-    expect(h.queries).toHaveLength(6);
+    expect(h.queries).toHaveLength(8);
+    const nutrition = h.queries.filter(q => q.sql.includes('"NutritionProfile" n ON n."foodId" = f."id"\n    WHERE ri."recipeId" = ANY'));
+    expect(nutrition).toHaveLength(1);
+    expect(nutrition[0].values).toEqual([['owned']]); // only the returned page, never the whole catalogue
+    expect(page.nodes[0].recipe).toHaveProperty('nutrition', null);
     expect(h.transactions.run).toHaveBeenCalledWith(expect.any(Function), { householdId: 'household', userId: 'user', readOnly: true });
     expect(h.tx.$executeRaw).toHaveBeenCalledTimes(1); // shared safety lock, never an inventory write
-    const recipes = h.queries.find(q => q.sql.includes('FROM "Recipe"'))!;
+    const recipes = h.queries.find(q => q.sql.includes('FROM "Recipe" r'))!;
     expect(recipes.sql).toContain('r."householdId" IS NULL OR r."householdId" =');
     expect(recipes.values).toContain('household'); expect(recipes.sql).not.toContain('LIMIT');
-    expect(h.queries.find(q => q.sql.includes('FROM "InventoryItem"'))!.values).toEqual(['household']);
-    expect(h.queries.filter(q => q.sql.includes('FROM "Food"'))).toHaveLength(1);
+    expect(h.queries.find(q => q.sql.includes('quantity > 0 ORDER BY id'))!.values).toEqual(['household']);
+    expect(h.queries.filter(q => q.sql.includes('FROM "Food" f'))).toHaveLength(1);
+  });
+
+  it('reuses the ranking while nothing it depends on changes, and ranks again when the kitchen does', async () => {
+    const h = harness();
+    await h.service.list('household', 'user');
+    const heavy = () => h.queries.filter(q => q.sql.includes('FROM "RecipeIngredient" i JOIN')).length;
+    await h.service.list('household', 'user');
+    expect(heavy()).toBe(1);
+    h.data.batches[0].quantity = '0.500';
+    await h.service.list('household', 'user');
+    expect(heavy()).toBe(2);
+    vi.setSystemTime(new Date('2026-06-01T21:36:00Z')); // past the five-minute limit
+    await h.service.list('household', 'user');
+    expect(heavy()).toBe(3);
   });
 
   it('reports expired-only foods separately from missing using household calendar days and the server clock', async () => {

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <filter id="rough" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="23"/>
+      <feDisplacementMap in="SourceGraphic" scale="4.5"/>
+    </filter>
+    <marker id="arrowO" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L10,6 L1,11" fill="none" stroke="#E8731A" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+    <marker id="arrowB" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L10,6 L1,11" fill="none" stroke="#2F6FD6" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="900" fill="#fff"/>
+
+  <!-- the pneumatic tube: phone -> cabinet -->
+  <g filter="url(#rough)" fill="none" stroke-linecap="round">
+    <path id="tube" d="M250,330 C300,120 640,110 820,150 C1000,190 1200,200 1330,380" stroke="#111" stroke-width="50"/>
+    <path d="M250,330 C300,120 640,110 820,150 C1000,190 1200,200 1330,380" stroke="#fff" stroke-width="43"/>
+  </g>
+  <!-- orange flow inside the tube -->
+  <path d="M290,250 C360,150 600,130 700,140" fill="none" stroke="#E8731A" stroke-width="3" stroke-linecap="round" stroke-dasharray="10 9" marker-end="url(#arrowO)" filter="url(#rough)"/>
+
+  <g filter="url(#rough)" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- phone -->
+    <path d="M176,336 q0,-14 14,-14 l120,0 q14,0 14,14 l0,300 q0,14 -14,14 l-120,0 q-14,0 -14,-14 Z" fill="#fff"/>
+    <path d="M230,630 l40,0" stroke-width="2.5"/>
+    <path d="M226,446 l48,0 l0,48 l-48,0 Z"/>
+    <path d="M244,486 l0,-24 q4,-8 16,-6" stroke-width="3.5"/>
+
+    <!-- the capsule riding the tube -->
+    <path d="M736,112 q60,-12 124,12 q14,14 -4,46 q-60,12 -122,-12 q-14,-16 2,-46 Z" fill="#fff"/>
+
+    <!-- the gate on the tube (token check) -->
+    <path d="M1150,190 l60,32 l-30,62 l-62,-30 Z" fill="#fff"/>
+    <circle cx="1180" cy="236" r="9"/>
+    <path d="M1180,245 l-4,14" />
+
+    <!-- filing cabinet -->
+    <path d="M1250,380 L1460,382 L1458,780 L1252,778 Z" fill="#fff"/>
+    <path d="M1252,512 L1458,514 M1252,646 L1458,646"/>
+    <path d="M1330,418 l50,0 M1330,552 l50,0 M1330,684 l50,0" stroke-width="5"/>
+  </g>
+
+  <!-- Xiaohei squeezed into the capsule, clutching the request envelope -->
+  <g filter="url(#rough)">
+    <path d="M770,160 C762,132 774,112 800,112 C826,112 836,130 832,152 C830,166 820,170 800,170 C784,170 774,168 770,160 Z" fill="#111"/>
+    <circle cx="794" cy="134" r="5" fill="#fff"/>
+    <circle cx="814" cy="134" r="5" fill="#fff"/>
+    <g fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M830,148 q14,0 24,10"/>
+      <path d="M846,152 l60,-10 l8,40 l-60,10 Z" fill="#fff"/>
+      <path d="M846,152 l34,22 l26,-32" stroke-width="2.5"/>
+    </g>
+  </g>
+
+  <!-- the answer comes back along the floor -->
+  <path d="M1240,720 C1000,800 600,820 340,680" fill="none" stroke="#E8731A" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="12 10" marker-end="url(#arrowO)" filter="url(#rough)"/>
+
+  <!-- labels -->
+  <text x="900" y="232" font-family="Bradley Hand" font-weight="bold" font-size="30" fill="#111">GraphQL</text>
+  <path d="M906,206 q-10,-10 -6,-24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <text x="1250" y="128" font-family="Bradley Hand" font-weight="bold" font-size="28" fill="#2F6FD6">token checked</text>
+  <path d="M1300,140 q-20,30 -90,60" fill="none" stroke="#2F6FD6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowB)"/>
+  <text x="1290" y="484" font-family="Bradley Hand" font-weight="bold" font-size="26" fill="#111">851 foods</text>
+  <text x="1280" y="618" font-family="Bradley Hand" font-weight="bold" font-size="26" fill="#111">400 recipes</text>
+  <text x="1278" y="752" font-family="Bradley Hand" font-weight="bold" font-size="26" fill="#111">your kitchen</text>
+  <text x="760" y="842" font-family="Bradley Hand" font-weight="bold" font-size="36" fill="#E8731A">answer</text>
+  <text x="120" y="720" font-family="Bradley Hand" font-weight="bold" font-size="32" fill="#D93A2B">log in first</text>
+  <path d="M118,730 q90,10 180,0" fill="none" stroke="#D93A2B" stroke-width="2.5" stroke-linecap="round" filter="url(#rough)"/>
+</svg>

@@ -52,7 +52,7 @@ export default function ShoppingScreen() {
   const change = (field: keyof ShoppingDraft, value: string) => { setDraft((previous) => ({ ...previous, [field]: value })); setErrors((previous) => ({ ...previous, [field]: undefined })); };
   const writeError = shopping.writeError && <AppText accessibilityRole="alert" style={{ color: colors.errorText }}>{t.writeError}</AppText>;
   return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl} contentGap={spacing.lg}>
-    <PageHeader title={t.title} action={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
+    <PageHeader title={t.title} back={<Button label={t.back} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />} />
     {shopping.status !== 'ready' ? <Card><AppText accessibilityLiveRegion="polite">{shopping.status === 'error' ? t.readError : t.loading}</AppText>{shopping.status === 'error' && <Button label={t.retry} onPress={() => { void shopping.retry(); }} />}</Card> : <>
       <View style={[uiStyles.row, { flexWrap: 'wrap' }]}><AppText style={{ flex: 1 }}>{(shopping.items.length - purchased).toLocaleString(language)} {t.remaining} · {purchased.toLocaleString(language)} {t.bought}</AppText><Button label={t.add} icon="add" disabled={busy} onPress={() => open()} /></View>
       <SearchField value={query} onChangeText={setQuery} placeholder={t.search} accessibilityLabel={t.search} autoCorrect={false} style={{ textAlign: rtl ? 'right' : 'left', writingDirection: rtl ? 'rtl' : 'ltr' }} />

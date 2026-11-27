@@ -1,3 +1,4 @@
+import { LeftoversModule } from './modules/leftovers/leftovers.module.js';
 import { Module } from '@nestjs/common';
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { APP_GUARD } from '@nestjs/core';
@@ -18,6 +19,7 @@ import { PredictionsModule } from './modules/predictions/predictions.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { MediaModule } from './modules/media/media.module.js';
+import { ReceiptsModule } from './modules/receipts/receipts.module.js';
 import { AppConfigService } from './platform/config/app-config.service.js';
 import { ConfigModule } from './platform/config/config.module.js';
 import { DbModule } from './platform/db/db.module.js';
@@ -82,6 +84,8 @@ import { TenancyModule } from './platform/tenancy/tenancy.module.js';
         context: ({ req, res, extra }: any) => ({ req: req ?? extra?.request, res }),
       }),
     }),
+    LeftoversModule,
+    ReceiptsModule,
     ReferenceModule,
     IdentityModule,
     CatalogModule,

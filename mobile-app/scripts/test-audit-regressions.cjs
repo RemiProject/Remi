@@ -19,11 +19,6 @@ test('regression: ShoppingScreen modal styles category validation error with err
   assert.match(code, /\{errors\.category && <AppText accessibilityRole="alert" style=\{\{ color: colors\.errorText \}\}>\{t\[errors\.category\]\}<\/AppText>\}/);
 });
 
-test('regression: HomeScreen recipe modal Card has explicit direction: rtl ? "rtl" : "ltr"', () => {
-  const code = fs.readFileSync('src/screens/home-screen.tsx', 'utf8');
-  assert.match(code, /Card accessibilityViewIsModal style=\{\{[^}]*direction:\s*rtl \? 'rtl' : 'ltr'/);
-});
-
 test('regression: Route contracts verify all navigation destinations exist in src/app', () => {
   const routes = [
     'src/app/(tabs)/_layout.tsx',

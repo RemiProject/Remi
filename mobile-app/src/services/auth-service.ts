@@ -19,7 +19,7 @@ export interface AuthStorage {
   write(value: string): Promise<void>;
   clear(): Promise<void>;
 }
-type Client = Pick<ReturnType<typeof createBackendClient>, 'graphql'>;
+type Client = Pick<ReturnType<typeof createBackendClient>, 'graphql'> & { live?: () => Promise<void> };
 
 // Match identity.inputs.ts, identity.types.ts, and AuthResolver in the backend.
 export const authOperations = {
@@ -31,6 +31,7 @@ export const authOperations = {
   me: 'query Me { me { id email name timezone languageCode emailVerifiedAt } }',
   refresh: 'mutation RefreshAccessToken($input: RefreshAccessTokenInput!) { refreshAccessToken(input: $input) { accessToken refreshToken expiresInSeconds } }',
   logout: 'mutation Logout($input: LogoutInput!) { logout(input: $input) }',
+  deleteAccount: 'mutation DeleteAccount($input: DeleteAccountInput!) { deleteAccount(input: $input) }',
 } as const;
 
 export class AuthError extends Error {
@@ -56,6 +57,8 @@ function unauthenticated(error: unknown) {
  */
 export function createAuthService(client: Client, storage: AuthStorage, backendUrl: string, now = Date.now) {
   let session: Session | null = null;
+  // The last account details the server confirmed, kept with the session so Remi opens signed in without a connection.
+  let cachedUser: CurrentUser | null = null;
   let loaded = false;
   let queue: Promise<unknown> = Promise.resolve();
   let pendingRefresh: Promise<void> | undefined;
@@ -67,7 +70,7 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
     return result;
   }
   async function clear({ rotation = false }: { rotation?: boolean } = {}) {
-    if (!rotation) identityRevision++;
+    if (!rotation) { identityRevision++; cachedUser = null; }
     session = null;
     loaded = true;
     try { await storage.clear(); }
@@ -84,6 +87,7 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
       if (record?.version === 1 && record.backendUrl === backendUrl && isSession(record.session)) {
         identityRevision++;
         session = record.session;
+        cachedUser = record.user && typeof record.user.id === 'string' ? record.user : null;
       }
       else await clear();
     }
@@ -103,7 +107,7 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
     // Request start is conservative: network time does not extend server token lifetime.
     const next = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken,
       expiresAt: requestedAt + tokens.expiresInSeconds * 1000 };
-    try { await storage.write(JSON.stringify({ version: 1, backendUrl, session: next })); }
+    try { await storage.write(JSON.stringify({ version: 1, backendUrl, session: next, user: cachedUser })); }
     catch {
       await clear();
       throw new AuthError('STORAGE', 'Could not save secure session storage.');
@@ -114,6 +118,8 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
   }
   async function rotate() {
     const previous = requireSession();
+    // The refresh token is single-use and is dropped before the request. Offline, keep it: nothing has been sent yet.
+    if (client.live) await client.live();
     const previousRevision = identityRevision;
     // Remove the single-use token before dispatch, including from disk. A crash or
     // ambiguous network failure must never restore/reuse an already rotated token.
@@ -140,7 +146,10 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
   }
   async function refreshForRequest() {
     try { await rotate(); }
-    catch { throw signedOut(); } // rotate already discards the single-use refresh token.
+    catch (error) {
+      if (session) throw error; // unreachable before anything was sent: still signed in, just offline
+      throw signedOut(); // rotate already discarded the single-use refresh token.
+    }
   }
   async function authenticatedGraphql<T>(query: string, variables: Record<string, unknown> = {}, householdId?: string): Promise<T> {
     const initial = await serial(async () => {
@@ -222,14 +231,25 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
     },
     me(): Promise<CurrentUser> {
       return serial(async () => {
-        const current = await validSession();
+        const remember = async (user: CurrentUser) => {
+          cachedUser = user;
+          const current = session;
+          if (current) { try { await storage.write(JSON.stringify({ version: 1, backendUrl, session: current, user })); } catch { /* the session itself is already saved */ } }
+          return user;
+        };
+        // Unreachable server (no HTTP status or a 5xx): open with the account the server last confirmed.
+        const offline = (error: unknown) => error instanceof BackendError && !error.codes.length && (error.status === undefined || error.status >= 500);
+        let current: Session;
+        try { current = await validSession(); }
+        catch (error) { if (offline(error) && cachedUser && session) return cachedUser; throw error; }
         try {
-          return (await client.graphql<{ me: CurrentUser }>(authOperations.me, {}, current)).me;
+          return await remember((await client.graphql<{ me: CurrentUser }>(authOperations.me, {}, current)).me);
         } catch (error) {
+          if (offline(error) && cachedUser) return cachedUser;
           if (!unauthenticated(error)) throw error;
           await rotate();
           try {
-            return (await client.graphql<{ me: CurrentUser }>(authOperations.me, {}, requireSession())).me;
+            return await remember((await client.graphql<{ me: CurrentUser }>(authOperations.me, {}, requireSession())).me);
           } catch (retryError) {
             if (unauthenticated(retryError)) await clear();
             throw retryError;
@@ -259,6 +279,14 @@ export function createAuthService(client: Client, storage: AuthStorage, backendU
           // Local sign-out happens even when server revocation fails; failure is reported.
           await clear();
         }
+      });
+    },
+    deleteAccount(password: string): Promise<void> {
+      return serial(async () => {
+        const result = await client.graphql<{ deleteAccount: boolean }>(authOperations.deleteAccount, { input: { password } }, await validSession());
+        if (result.deleteAccount !== true) throw new AuthError('INVALID_RESPONSE', 'Deletion was not confirmed by the server.');
+        // The server has revoked every session; only the local copy is left.
+        await clear();
       });
     },
   };

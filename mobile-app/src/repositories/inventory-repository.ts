@@ -8,7 +8,7 @@ export interface KeyValueStorage {
   getItem(key: string): Promise<string | null>;
   setItem(key: string, value: string): Promise<void>;
 }
-export const INVENTORY_KEY = 'remy.inventory';
+export const INVENTORY_KEY = 'remi.cookbook.inventory';
 export const INVENTORY_SCHEMA_VERSION = 2;
 
 export function validateItems(value: unknown): value is InventoryItem[] {

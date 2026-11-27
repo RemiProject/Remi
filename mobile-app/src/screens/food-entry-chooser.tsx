@@ -28,7 +28,8 @@ export default function FoodEntryChooser() {
       <AppText variant="caption" muted>{t.intakeNote}</AppText>
       <FoodPhotoField photoRef={photoRef} disabled={false} onChange={setPhotoRef} onBusy={(value) => { busyRef.current = value; setBusy(value); }} Actions={IntakeActions} />
       {photoRef && <><Button label={t.usePhoto} disabled={busy} onPress={() => router.replace({ pathname: '/food/manual', params: { photoRef } })} /><Button label={t.removePhoto} variant="text" disabled={busy} onPress={() => setPhotoRef(undefined)} /></>}
-      <Card style={{ padding: 0 }}><ActionRow rtl={rtl} title={t.receipt} icon="receipt" disabled={busy} onPress={() => router.push('/receipt')} /></Card>
+      <Card style={{ padding: 0, gap: 0 }}><ActionRow rtl={rtl} title={t.receipt} icon="receipt" disabled={busy} onPress={() => router.push('/receipt')} />
+        <ActionRow rtl={rtl} title={rtl ? 'حفظ وصفة من رابط' : 'Save a recipe from a link'} icon="recipe" disabled={busy} onPress={() => router.push('/import-recipe')} divider /></Card>
     </View>
   </Screen></SafeAreaView>;
 }

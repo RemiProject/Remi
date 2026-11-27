@@ -41,14 +41,78 @@ country from the mobile prefix, timezone to Africa/Cairo or Asia/Riyadh, and loc
 to the existing ar-EG or en-US reference for the chosen language. Existing callers
 may still pass explicit country, locale and timezone. New registrations now need
 username and phone; legacy accounts keep email login and nullable new DB fields.
-Registration shows a success message and a separate login action without creating
-a session. Login errors include clear email-verification guidance. Email verification
-link handling, household selection, and feature sync remain outside this change.
-`/forgot-password` requests a reset email; `/reset-password?token=...` completes it
-and removes the token from the current URL after success. Configure backend
-`WEB_BASE_URL` to the actual hosted web origin for emailed links to reach these
-routes (local Expo web commonly uses http://localhost:8081). Production also needs
-working SMTP. No environment files were changed automatically.
+`register` itself never creates a session; signup continues straight to the code
+screen described below. Email verification link handling in the app, household
+selection, and feature sync remain outside this change.
+
+### Email verification code
+
+`email-verification-screen.tsx` asks for the 6-digit code from the verification email.
+It has three entry points:
+
+- **Sign-up** shows it in place on `/signup`, with the registered email. After a correct
+  code it logs in with the sign-up password and opens Profile. If that login fails, it
+  shows success and a login button.
+- **Refused login** (`EMAIL_NOT_VERIFIED`, from `loginWithResult`) opens
+  `/verify-email-code`. The email is prefilled when the person logged in with an email
+  and asked for when they used a username. After a correct code they log in again.
+- **Profile** has a **Verify email** button while the email is unverified. It uses the
+  account's email, reloads `me` after success and returns to Profile.
+
+The sign-up password is held in one ref of the mounted signup screen, handed over once
+to log in, and cleared on success, cancel and unmount. It never enters route params,
+storage or logs. The password of a refused login is not kept. The refused-login route
+does carry the email as a parameter, so it is visible in the address bar on web.
+
+`createEmailVerificationService(getBackend())` sends the public
+`requestEmailVerificationCode` and `verifyEmailCode` mutations without a session and
+returns `invalidCode`, `rateLimited`, `network` or `error` on failure. A successful
+request means only that the server accepted it: the answer is the same for unknown,
+verified and rate-limited accounts. Arabic-Indic and Persian digits are accepted.
+The resend wait is 60 seconds from an absolute deadline, so it stays right after
+backgrounding. `AuthStore.login` still returns a boolean; `loginWithResult` also says why.
+
+The backend needs migration 0035 and `EMAIL_VERIFICATION_CODE_SECRET`; see the
+[backend setup](../backend/README.md#required-for-email-verification-and-password-reset-codes).
+
+### Password reset
+
+"Forgot password?" on login opens `/forgot-password` (`forgot-password-screen.tsx`),
+three steps in one mounted screen:
+
+1. **Email.** `requestPasswordReset` always succeeds, so the screen always moves on and
+   starts the 60-second resend wait for that address.
+2. **Code.** The 6-digit code from the email (Arabic-Indic and Persian digits accepted),
+   **Change email**, and **Resend code** with the countdown. `verifyPasswordResetCode`
+   exchanges the code for a single-use reset token valid for 10 minutes.
+3. **New password.** New password and confirmation with the sign-up rules. A token
+   within 15 seconds of its expiry, or `INVALID_OR_EXPIRED_TOKEN` from the server, goes
+   back to the code step with an "expired" message. After `resetPassword` succeeds, the
+   screen logs in with the email and the new password and opens Profile; if that
+   login fails, it shows success and a **Log in** button.
+
+The reset token and the new password live only in the screen's state. They are cleared
+on success and when a step is left, and never enter route params, storage or logs.
+Back goes from the password step to the code step, from the code step to the email
+step, and from the email step out of the screen; it does nothing while a request runs.
+
+`createPasswordResetService(getBackend(), getAuth())` sends the three public mutations
+and returns typed failures: `invalidCode`, `expired`, `weakPassword`, `rateLimited`,
+`network` or `error`. Its `resetPassword` goes through the auth service, which also
+clears any session saved on the device. The resend countdown is the shared
+`useResendWait` hook, also used by the email verification screen.
+
+`/reset-password?token=...` still completes a reset from the emailed link and removes
+the token from the current URL after success. Configure backend `WEB_BASE_URL` to the
+actual hosted web origin for emailed links to reach this route (local Expo web commonly
+uses http://localhost:8081). Production also needs working SMTP. No environment files
+were changed automatically.
+
+The backend needs migration 0036 and `EMAIL_VERIFICATION_CODE_SECRET`; see the
+[backend setup](../backend/README.md#required-for-email-verification-and-password-reset-codes).
+
+### Social sign-in
+
 
 Google and Apple buttons are explicitly disabled. There are no provider auth
 operations, provider token verification, or account-linking implementation in the

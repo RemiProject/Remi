@@ -100,7 +100,7 @@ test('Kitchen modal stages selections, cancels without applying, and clears on e
 });
 
 function preferenceHarness(saved, failRead = false) {
-  const data = new Map([['remy.inventory', 'untouched-inventory'], ['remy.preferences.language', saved]]);
+  const data = new Map([['remi.cookbook.inventory', 'untouched-inventory'], ['remi.cookbook.preferences.language', saved]]);
   let failWrite = false;
   const slots = [];
   let cursor = 0;
@@ -134,13 +134,13 @@ test('shared language hydrates/persists without touching inventory; failed write
   harness.render(); harness.mount(); await tick();
   assert.equal(harness.render().language, 'ar');
   await harness.render().setLanguage('en');
-  assert.equal(harness.data.get('remy.preferences.language'), 'en');
+  assert.equal(harness.data.get('remi.cookbook.preferences.language'), 'en');
   harness.setFailWrite(true);
   await harness.render().setLanguage('ar');
   assert.equal(harness.render().language, 'en');
   assert.equal(harness.render().error, true);
-  assert.equal(harness.data.get('remy.inventory'), 'untouched-inventory');
-  const restarted = preferenceHarness(harness.data.get('remy.preferences.language'));
+  assert.equal(harness.data.get('remi.cookbook.inventory'), 'untouched-inventory');
+  const restarted = preferenceHarness(harness.data.get('remi.cookbook.preferences.language'));
   restarted.render(); restarted.mount(); await tick();
   assert.equal(restarted.render().language, 'en');
 });
@@ -149,7 +149,7 @@ test('failed preference hydration blocks writes and supports retry', async () =>
   harness.render(); harness.mount(); await tick();
   assert.equal(harness.render().ready, false);
   await harness.render().setLanguage('en');
-  assert.equal(harness.data.get('remy.preferences.language'), 'ar');
+  assert.equal(harness.data.get('remi.cookbook.preferences.language'), 'ar');
   harness.setFailRead(false);
   await harness.render().retry();
   assert.equal(harness.render().language, 'ar');
@@ -163,10 +163,10 @@ test('app/menu catalogs cover all existing feature destinations in both language
 });
 test('Settings selector persists English-Arabic-English and updates More, feature notices, Health and tabs without restart',async()=>{
  const {appMessages,featureMessages,menuGroupLabels}=require('../src/i18n/app.ts');const {menuItems,featureGroups}=require('../src/data/feature-menu.ts');const {homeMessages}=require('../src/i18n/home.ts');
- const preference=preferenceHarness('en');preference.render();preference.mount();await tick();let feature='settings';
- const core=Object.fromEntries(['AppText','Button','Chip','Card','PageHeader','SectionHeader','Screen','ActionRow','Badge'].map(name=>[name,name]));core.uiStyles={wrap:{},stack:{}};
- const mocks={'react':{...require('react'),useState:()=>[false,()=>{}]},'react-native':{View:'View',Pressable:'Pressable',StyleSheet:{create:value=>value}},'react-native-safe-area-context':{SafeAreaView:'SafeAreaView'},'expo-router':{router:{},useLocalSearchParams:()=>({feature})},'expo-router/ui':Object.fromEntries(['Tabs','TabList','TabTrigger','TabSlot'].map(name=>[name,name])),
- '@/providers/language-provider':{useLanguage:()=>preference.render()},'@/theme/provider':{useRemyTheme:()=>({colors:{},appearance:'system',setAppearance(){}})},'@/theme/tokens':{spacing:{},radii:{},layout:{}},'@/components/ui/core':core,'./ui/core':core,'@/components/ui/icon':{Icon:'Icon'},'@/data/feature-menu':{menuItems,featureGroups},'@/i18n/app':{appMessages,featureMessages,menuGroupLabels},'@/i18n/inventory':{inventoryMessages},'@/i18n/home':{homeMessages}};
+ const preference=preferenceHarness('en');preference.render();preference.mount();await tick();let feature='settings';let pathname='/';
+ const core=Object.fromEntries(['AppText','Button','Chip','Card','PageHeader','SectionHeader','Screen','ActionRow','Badge','Segmented'].map(name=>[name,name]));core.uiStyles={wrap:{},stack:{}};
+ const mocks={'@/components/feel-controls':{FeelControls:'FeelControls'},'react':{...require('react'),useState:()=>[false,()=>{}]},'react-native':{View:'View',Pressable:'Pressable',StyleSheet:{create:value=>value}},'react-native-safe-area-context':{SafeAreaView:'SafeAreaView',useSafeAreaInsets:()=>({top:59,bottom:34,left:0,right:0})},'expo-router':{router:{},usePathname:()=>pathname,useLocalSearchParams:()=>({feature})},'@/providers/auth-provider':{useAuth:()=>({user:null})},'@/providers/onboarding-provider':{useOnboarding:()=>({status:'ready',record:null})},'expo-router/ui':Object.fromEntries(['Tabs','TabList','TabTrigger','TabSlot'].map(name=>[name,name])),
+ '@/providers/language-provider':{useLanguage:()=>preference.render()},'@/theme/provider':{useRemyTheme:()=>({colors:{hero:'hero',background:'paper'},appearance:'system',setAppearance(){}})},'@/theme/tokens':{spacing:{},radii:{},layout:{}},'@/components/ui/core':core,'./ui/core':core,'@/components/ui/icon':{Icon:'Icon'},'@/data/feature-menu':{menuItems,featureGroups},'@/i18n/app':{appMessages,featureMessages,menuGroupLabels},'@/i18n/inventory':{inventoryMessages},'@/i18n/home':{homeMessages},'@/data/food-images':{sourcedImageCredits:[]},'@/data/app-version':{APP_VERSION:'3.0.0'}};
  function load(file){const exports={};const code=ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;new Function('require','exports',code)(id=>mocks[id]??require(id),exports);return exports;}
  mocks['@/components/language-controls']=load('src/components/language-controls.tsx');mocks['@/components/foundation-screen']=load('src/components/foundation-screen.tsx');
  mocks['@/screens/shopping-screen']={__esModule:true,default:'ShoppingScreen'};
@@ -175,20 +175,28 @@ test('Settings selector persists English-Arabic-English and updates More, featur
  mocks['@/screens/profile-screen']={__esModule:true,default:'ProfileScreen'};
  mocks['@/components/backend-connection']={BackendConnection:'BackendConnection'};
  mocks['@/i18n/cooking']=require('../src/i18n/cooking.ts');mocks['@/components/appearance-controls']={AppearanceControls:'AppearanceControls'};
+ for (const [file, names] of Object.entries({
+ './connected-recipes-screen':['ConnectedRecipesScreen'], './connected-planner-screen':['ConnectedPlannerScreen'], './connected-shopping-screen':['ConnectedShoppingScreen'], './connected-notifications-screen':['ConnectedNotificationsScreen'], './connected-household-screen':['ConnectedHouseholdScreen'], './connected-health-screen':['ConnectedHealthScreen'],
+ })) mocks[file]=Object.fromEntries(names.map(n=>[n,n]));
+ for (const file of ['./assistant-screen','./leftovers-screen','./contact-screen','./intake-photos-screen']) mocks[file]={__esModule:true,default:file};
+ mocks['@/screens/connected-health-screen']={ConnectedHealthScreen:'ConnectedHealthScreen'};
  const More=load('src/screens/more-screen.tsx').default,Preview=load('src/screens/feature-preview-screen.tsx').default,Health=load('src/app/(tabs)/health.tsx').default,Tabs=load('src/app/(tabs)/_layout.tsx').default;
  function nodes(tree){if(Array.isArray(tree))return tree.flatMap(nodes);if(!tree||typeof tree!=='object')return [];return [tree,...nodes(tree.props?.children)];}
  for(const language of ['en','ar','en']){
-  const controls=nodes(mocks['@/components/language-controls'].LanguageControls());controls.find(node=>node.type==='Chip'&&node.key===language).props.onPress();await tick();assert.equal(preference.data.get('remy.preferences.language'),language);assert.equal(preference.render().language,language);
-  const t=appMessages[language],rtl=language==='ar';const more=nodes(More());assert.equal(more[0].props.rtl,rtl);assert.ok(more.some(node=>node.props?.title===t.more));assert.ok(more.some(node=>node.props?.title===featureMessages[language].settings.title));
+  const controls=nodes(mocks['@/components/language-controls'].LanguageControls());controls.find(node=>node.type==='Segmented').props.onChange(language);await tick();assert.equal(preference.data.get('remi.cookbook.preferences.language'),language);assert.equal(preference.render().language,language);
+  const t=appMessages[language],rtl=language==='ar';const more=nodes(More());assert.equal(more[0].props.rtl,rtl);assert.ok(more.some(node=>node.props?.title===(rtl?'المزيد من Remi':'A little more Remi.')));assert.ok(more.some(node=>node.props?.title===(rtl?'الإعدادات':'Settings')));
   feature='settings';const settings=nodes(Preview());assert.equal(settings.find(node=>node.type==='Screen').props.rtl,rtl);assert.ok(settings.some(node=>node.props?.children===inventoryMessages[language].settings));assert.ok(settings.some(node=>node.props?.rtl===rtl&&node.props?.icon==='back'));
-  for(feature of ['chat','community','contact']){const preview=nodes(Preview());assert.ok(preview.some(node=>node.props?.children===featureMessages[language][feature].title));assert.ok(preview.some(node=>node.props?.children===featureMessages[language][feature].description));}
-  const health=Health();assert.equal(health.props.title,t.health);assert.equal(health.type(health.props).props.rtl,rtl);
-  feature='shopping';assert.equal(Preview().type,'ShoppingScreen');feature='recipes';assert.equal(Preview().type,'RecipesScreen');
+  for(const [destination, component] of [['chat','./assistant-screen'],['community','ConnectedHouseholdScreen'],['contact','./contact-screen'],['shopping','ConnectedShoppingScreen'],['recipes','ConnectedRecipesScreen']]) {feature=destination;assert.equal(Preview().type,component);}
+  assert.equal(Health,'ConnectedHealthScreen');
   feature='cooking';const cookingEntry=nodes(Preview());assert.ok(cookingEntry.some(node=>node.props?.label===mocks['@/i18n/cooking'].cookingMessages[language].choose));assert.ok(!cookingEntry.some(node=>node.type==='Badge'));assert.equal(cookingEntry.find(node=>node.type==='Screen').props.rtl,rtl);
-  const tabs=nodes(Tabs());const tabList=tabs.find(node=>node.type==='TabList');assert.equal(tabList.props.style[1].direction,'ltr');assert.equal(tabList.props.style[0].flexDirection,'row');
-  const triggers=tabs.filter(node=>node.type==='TabTrigger');assert.deepEqual(triggers.map(node=>[node.props.name,node.props.href]),[['home','/'],['kitchen','/kitchen'],['add','/add'],['health','/health'],['more','/more']]);
+  const tabs=nodes(Tabs());
+  // Version 3 uses the page-colored safe area on every tab, without a separate status background.
+  for(const path of ['/','/kitchen']){pathname=path;const safeArea=nodes(Tabs()).find(node=>node.type==='SafeAreaView');assert.ok(safeArea);assert.deepEqual(safeArea.props.edges,['top','bottom','left','right']);assert.equal(safeArea.props.style.backgroundColor,'paper');}pathname='/';
+  const tabList=tabs.find(node=>node.type==='TabList');assert.equal(tabList.props.style.flexDirection,rtl?'row-reverse':'row');
+  const plus=tabs.find(node=>node.props?.accessibilityLabel===(rtl?'إضافة سريعة':'Quick add'));assert.ok(plus);mocks['expo-router'].router.push=route=>assert.equal(route,'/quick-add');plus.props.onPress();assert.equal(tabList.props.children[2].props.children,plus);
+  const triggers=tabs.filter(node=>node.type==='TabTrigger');assert.deepEqual(triggers.map(node=>[node.props.name,node.props.href]),[['home','/'],['kitchen','/kitchen'],['nutrition','/nutrition'],['more','/more']]);
   for(const trigger of triggers){let pressed=false;const child=trigger.props.children;const rendered=child.type({...child.props,onPress:()=>pressed=true});if(trigger.props.name==='add'){mocks['expo-router'].router.push=path=>{assert.equal(path,'/food-entry');pressed=true;};}rendered.props.onPress();assert.equal(pressed,true);}
-const tabLabels=tabs.filter(node=>typeof node.type==='function').map(node=>node.props.children);assert.deepEqual(tabLabels,[t.home,t.kitchen,t.add,t.health,t.more]);
+const tabLabels=tabs.filter(node=>typeof node.type==='function').map(node=>node.props.children);assert.deepEqual(tabLabels,[t.home,t.kitchen,language==='ar'?'التغذية':'Nutrition',t.more]);
  }
- assert.equal(preference.data.get('remy.inventory'),'untouched-inventory');
+ assert.equal(preference.data.get('remi.cookbook.inventory'),'untouched-inventory');
 });

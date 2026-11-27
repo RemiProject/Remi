@@ -30,3 +30,9 @@ export function shoppingView(items: readonly ShoppingItem[], query: string, filt
   const term = query.trim().toLocaleLowerCase();
   return items.filter((item) => item.name.toLocaleLowerCase().includes(term) && (filter === 'all' || item.purchased === (filter === 'purchased')));
 }
+
+export function shoppingLines(text: string): ShoppingInput[] {
+  const names = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  if (!names.length || names.length > 50 || names.some(name => name.length > 100)) throw new Error('Use 1–50 lines, up to 100 characters per item.');
+  return names.map(name => ({ name }));
+}

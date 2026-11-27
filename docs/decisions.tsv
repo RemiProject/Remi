@@ -1,0 +1,7 @@
+date	area	decision	reason	verification
+2026-11-07	integration	Base Version 2 on main 780ca689	Preserve latest recipe ranking, expired statuses and cooking confirmation	upstream matcher and meal tests retained
+2026-11-07	design	Keep approved Living Cookbook identity	Preserve user-selected paper/color/type direction	native iOS screen inspection
+2026-11-07	recipes	Reuse backend suggestions alongside full catalogue	Preserve ranking/safety/pagination; eliminate local N+1 pantry matcher	12 live recipe integration checks
+2026-11-07	cooking	Carry selected servings through review and confirmation	Avoid resetting quantities to the recipe default	unit and native checks
+2026-11-07	auth	Keep Xcode simulator signing and keychain entitlement	Unsigned builds omit simulated capabilities	native sign-in and session restoration
+2026-11-07	data	Verify on an isolated local database	Preserve team and production data	live household isolation and retry checks

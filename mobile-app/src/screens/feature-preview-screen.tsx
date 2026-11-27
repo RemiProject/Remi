@@ -1,6 +1,13 @@
-import ShoppingScreen from '@/screens/shopping-screen';
-import PlannerScreen from '@/screens/planner-screen';
-import RecipesScreen from '@/screens/recipes-screen';
+import { ConnectedRecipesScreen } from './connected-recipes-screen';
+import { ConnectedPlannerScreen } from './connected-planner-screen';
+import { ConnectedShoppingScreen } from './connected-shopping-screen';
+import { ConnectedNotificationsScreen } from './connected-notifications-screen';
+import { ConnectedHouseholdScreen } from './connected-household-screen';
+import { ConnectedHealthScreen } from './connected-health-screen';
+import AssistantScreen from './assistant-screen';
+import LeftoversScreen from './leftovers-screen';
+import ContactScreen from './contact-screen';
+import IntakePhotosScreen from './intake-photos-screen';
 import { appMessages, featureMessages } from '@/i18n/app';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +20,7 @@ import { useLanguage } from '@/providers/language-provider';
 import { inventoryMessages } from '@/i18n/inventory';
 import { cookingMessages } from '@/i18n/cooking';
 import { AppearanceControls } from '@/components/appearance-controls';
+import { FeelControls } from '@/components/feel-controls';
 import { BackendConnection } from '@/components/backend-connection';
 import ProfileScreen from '@/screens/profile-screen';
 
@@ -25,9 +33,16 @@ export default function FeaturePreview() {
   const a = appMessages[language];
   const rtl = language === 'ar';
   const copy = item ? featureMessages[language][item.id] : undefined;
-  if (item?.id === 'shopping') return <ShoppingScreen />;
-  if (item?.id === 'planner') return <PlannerScreen />;
-  if (item?.id === 'recipes') return <RecipesScreen />;
+  if (feature === 'chat') return <AssistantScreen />;
+  if (feature === 'leftovers') return <LeftoversScreen />;
+  if (feature === 'contact') return <ContactScreen />;
+  if (feature === 'photos') return <IntakePhotosScreen />;
+  if (feature === 'notifications') return <ConnectedNotificationsScreen />;
+  if (feature === 'community' || feature === 'household') return <ConnectedHouseholdScreen />;
+  if (feature === 'health') return <ConnectedHealthScreen />;
+  if (item?.id === 'shopping') return <ConnectedShoppingScreen />;
+  if (item?.id === 'planner') return <ConnectedPlannerScreen />;
+  if (item?.id === 'recipes') return <ConnectedRecipesScreen />;
   if (item?.id === 'profile') return <ProfileScreen />;
   if (item?.id === 'cooking') return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><Screen rtl={rtl}>
     <Button label={a.backMore} icon="back" rtl={rtl} variant="text" onPress={() => router.canGoBack() ? router.back() : router.replace('/more')} />
@@ -39,6 +54,7 @@ export default function FeaturePreview() {
       <AppText variant="title">{t.settings}</AppText>
       <Card style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}><AppText variant="heading">{t.language}</AppText><LanguageControls /></Card>
       <Card><AppearanceControls /></Card>
+      <Card><FeelControls /></Card>
       <BackendConnection />
       <AppText muted>{t.settingsNote}</AppText>
     </Screen>

@@ -21,6 +21,24 @@ export interface HealthConditionInput { healthConditionId: string; status: Condi
 export class ProfileService {
   constructor(private readonly transactions: TransactionRunner, private readonly notes: NotesCipher, private readonly safetyProfile: SafetyProfileLoader) {}
 
+  /** Recorded weights, oldest first: the most recent `limit` entries (each change of weight in the profile adds one). */
+  weightHistory(userId: string, limit = 400) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 1000) throw new DomainError('INVALID_PAGE_SIZE', 'limit must be between 1 and 1000.');
+    return this.transactions.run(async (tx) => (await tx.$queryRaw<Array<{ measuredAt: Date; weightKg: string }>>`
+      SELECT "measuredAt", "weightKg"::text AS "weightKg" FROM "UserWeightLog" WHERE "userId" = ${userId}::uuid ORDER BY "measuredAt" DESC LIMIT ${limit}`).reverse(), { userId });
+  }
+
+  async nutritionOverview(userId: string) {
+    const [row] = await this.transactions.run((tx) => tx.$queryRaw<Array<Record<string, unknown>>>`
+      SELECT min("date")::text AS "firstDate", max("date")::text AS "lastDate", count(*)::int AS "daysLogged", COALESCE(sum("mealCount"), 0)::int AS "mealCount",
+        COALESCE(round(avg("calories"), 1), 0)::text AS "avgCalories", COALESCE(round(avg("proteinG"), 1), 0)::text AS "avgProteinG",
+        COALESCE(round(avg("carbsG"), 1), 0)::text AS "avgCarbsG", COALESCE(round(avg("fatG"), 1), 0)::text AS "avgFatG",
+        COALESCE(round(avg("fiberG"), 1), 0)::text AS "avgFiberG", COALESCE(round(avg("sugarG"), 1), 0)::text AS "avgSugarG",
+        COALESCE(round(avg("sodiumMg"), 0), 0)::text AS "avgSodiumMg"
+      FROM "UserDailyNutrition" WHERE "userId" = ${userId}::uuid AND "mealCount" > 0`, { userId });
+    return row;
+  }
+
   async myProfile(userId: string) {
     return this.transactions.run(async (tx) => {
       const rows = await tx.$queryRaw<Array<{ data: Record<string, any> }>>`

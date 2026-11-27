@@ -19,7 +19,7 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
   const states = [], effects = [], routes = [];
   let cursor = 0;
   const auth = snapshot || { user: null, ready: true, busy: false, error: null,
-    login: async () => true, logout: async () => {}, restore: async () => {} };
+    loginWithResult: async () => ({ ok: true }), logout: async () => {}, restore: async () => {} };
   const element = (type, props) => ({ type, props });
   const react = {
     useState(initial) {
@@ -35,7 +35,7 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
   };
   // Transpiled hooks are called as standalone functions.
   react.useRef = initial => { const [value] = react.useState(() => ({ current: initial })); return value; };
-  const mocks = {
+  const mocks = { '@/services/feedback': require('./native-ui-fixture.cjs').fixtureModule('@/services/feedback'),
     react, 'react/jsx-runtime': { jsx: element, jsxs: element },
     'react-native': { View: 'View', Pressable: 'Pressable', KeyboardAvoidingView: 'KeyboardAvoidingView', Platform: { OS: 'ios' } },
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },
@@ -51,6 +51,8 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
     '@/services/auth-form': authForm,
     '@/services/inventory-feature': { isBackendInventoryEnabled: () => backendInventory },
     './profile-screen': { __esModule: true, default: 'ProfileScreen' },
+    './email-verification-screen': { EmailVerificationFlow: 'EmailVerificationFlow' },
+    '@/i18n/email-verification': require('../src/i18n/email-verification.ts'),
   };
   function load(path) {
     const exports = {};
@@ -74,37 +76,38 @@ function screenHarness({ signup = false, service = {}, language = 'en', snapshot
 test('login validates, masks password, prevents duplicate requests, clears password and returns to Profile', async () => {
   let calls = 0, complete;
   const h = screenHarness();
-  h.auth.login = async input => { calls++; assert.deepEqual(input, { identifier: user.email, password: valid.password }); return new Promise(r => { complete = r; }); };
+  h.auth.loginWithResult = async input => { calls++; assert.deepEqual(input, { identifier: user.email, password: valid.password }); return new Promise(r => { complete = r; }); };
   h.press('login'); await tick(); assert.equal(calls, 0);
   assert.ok(h.render().some(n => n.props.error === authMessages.en.identifierInvalid));
   h.fill(valid);
   assert.equal(h.render().find(n => n.props.label === authMessages.en.password).props.password, true);
   h.press('login'); h.press('wait'); assert.equal(calls, 1);
   assert.ok(h.render().find(n => n.type === 'Button' && n.props.label === authMessages.en.wait).props.disabled);
-  complete(true); await tick();
+  complete({ ok: true }); await tick();
   assert.deepEqual(h.routes, [{ pathname: '/feature', params: { feature: 'profile' } }]);
   assert.equal(h.render().find(n => n.props.label === authMessages.en.password).props.value, '');
 });
 
 test('failed login stays on form and shows verification guidance without raw backend errors', async () => {
   const h = screenHarness();
-  h.auth.login = async () => { h.auth.error = 'verifyFirst'; return false; };
+  h.auth.loginWithResult = async () => { h.auth.error = 'verifyFirst'; return { ok: false, reason: 'failed', error: 'verifyFirst' }; };
   h.fill(valid); h.press('login'); await tick();
   assert.equal(h.routes.length, 0);
   assert.ok(h.render().some(n => n.props.children === authMessages.en.verifyFirst));
   assert.equal(h.render().find(n => n.props.label === authMessages.en.password).props.value, '');
 });
 
-test('signup validates six fields, hides locale/timezone and registers without logging in', async () => {
+test('signup validates six fields, hides locale/timezone and registers, then shows verification without logging in', async () => {
   let input, loginCalls = 0;
   const h = screenHarness({ signup: true, service: { register: async value => { input = value; return { userId: user.id }; } } });
-  h.auth.login = async () => { loginCalls++; };
+  h.auth.loginWithResult = async () => { loginCalls++; return { ok: true }; };
   h.render(); h.flush(); await tick();
   h.press('signup'); assert.equal(input, undefined);
   h.fill(valid); h.press('signup'); await tick();
   assert.deepEqual(input, { name: valid.name, username: valid.username, email: valid.email, password: valid.password, phoneNumber: '+201012345678', languageCode: 'en' }); assert.equal(loginCalls, 0);
-  assert.ok(h.render().some(n => n.props.children === authMessages.en.registered));
-  h.press('login'); assert.deepEqual(h.routes, ['/login']);
+  const flow = h.render().find(n => n.type === 'EmailVerificationFlow');
+  assert.deepEqual(flow.props.start, { origin: 'signup', email: valid.email }); assert.deepEqual(h.routes, []);
+  assert.equal(flow.props.takePassword(), valid.password); assert.equal(flow.props.takePassword(), null, 'handed over once');
 });
 
 test('signup handles duplicate usernames with friendly guidance', async () => {
@@ -141,6 +144,48 @@ test('auth store restores, logs in, clears state on logout failure, and can retr
   const restored = new AuthStore(() => service); await restored.restore(); assert.deepEqual(restored.getSnapshot().user, user);
   await store.logout(); assert.equal(store.getSnapshot().user, null); assert.equal(store.getSnapshot().error, 'logoutError');
   await store.restore(); assert.equal(store.getSnapshot().error, null);
+});
+
+test('structured login reports why it failed while boolean login and the published state stay the same', async () => {
+  const { BackendError } = require('../src/services/backend-core.ts');
+  const rejecting = error => new AuthStore(() => ({ login: async () => { throw error; }, me: async () => user }));
+  for (const [error, reason, key] of [
+    [new BackendError('Please verify your email first', undefined, ['EMAIL_NOT_VERIFIED']), 'emailNotVerified', 'verifyFirst'],
+    [new BackendError('Invalid credentials', undefined, ['INVALID_CREDENTIALS']), 'failed', 'credentials'],
+    [new BackendError('Too many', undefined, ['TOO_MANY_REQUESTS']), 'failed', 'rateLimit'],
+    [new BackendError('Backend request failed.'), 'failed', 'connectionError'],
+    [{ code: 'STORAGE' }, 'failed', 'storageError'],
+  ]) {
+    const structured = rejecting(error), boolean = rejecting(error);
+    assert.deepEqual(await structured.loginWithResult(valid), { ok: false, reason, error: key });
+    assert.equal(await boolean.login(valid), false);
+    assert.deepEqual(structured.getSnapshot(), { user: null, busy: false, ready: true, error: key });
+    assert.deepEqual(boolean.getSnapshot(), structured.getSnapshot());
+  }
+  const ok = new AuthStore(() => ({ login: async () => {}, me: async () => user }));
+  assert.deepEqual(await ok.loginWithResult(valid), { ok: true });
+  assert.deepEqual(ok.getSnapshot(), { user, busy: false, ready: true, error: null });
+});
+
+test('a login while another is running sends nothing and neither form changes state', async () => {
+  let finish, calls = 0;
+  const store = new AuthStore(() => ({ login: () => { calls++; return new Promise(resolve => { finish = resolve; }); }, me: async () => user }));
+  const first = store.loginWithResult(valid);
+  const busy = store.getSnapshot();
+  assert.deepEqual(await store.loginWithResult(valid), { ok: false, reason: 'busy' });
+  assert.equal(await store.login(valid), false);
+  assert.equal(store.getSnapshot(), busy);
+  finish();
+  assert.deepEqual(await first, { ok: true });
+  assert.equal(calls, 1);
+});
+
+test('login stays usable when detached, as screens receive it, and useAuth exposes both forms', async () => {
+  const { login, loginWithResult } = new AuthStore(() => ({ login: async () => {}, me: async () => user }));
+  assert.equal(await login(valid), true);
+  assert.deepEqual(await loginWithResult(valid), { ok: true });
+  const provider = fs.readFileSync('src/providers/auth-provider.tsx', 'utf8');
+  assert.match(provider, /login: store\.login, loginWithResult: store\.loginWithResult/);
 });
 
 test('signup validation enforces strength, confirmation, username and mobile formats', () => {

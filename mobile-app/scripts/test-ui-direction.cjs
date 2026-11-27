@@ -1,3 +1,4 @@
+const { fixtureModule } = require('./native-ui-fixture.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
@@ -21,6 +22,7 @@ function fixture(language = 'ar') {
     const exported = {}; cache.set(filename, exported);
     const output = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
     new Function('require', 'exports', output)(id => {
+      if (fixtureModule(id, typeof native === 'undefined' ? {} : native)) return fixtureModule(id, typeof native === 'undefined' ? {} : native);
       if (id === 'react-native') return native;
       if (id === 'expo-router') return { router: {}, useLocalSearchParams: () => ({ id: details.id }), useFocusEffect: () => {} };
       if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors }) };
@@ -28,6 +30,9 @@ function fixture(language = 'ar') {
       if (id === '@/providers/language-provider') return { useLanguage: () => ({ language }) };
       if (id === '@/providers/inventory-provider') return { useInventory: () => ({ items: [], status: 'ready' }) };
       if (id === '@/providers/backend-kitchen-provider') return { useBackendKitchen: () => ({ owner: 'user', status: 'ready', items: [item, spoon, pieces], today: '2026-10-31', detail: { id: details.id, status: 'ready', item: details }, loadDetail: () => {} }) };
+      if (id === '@/components/inventory-metadata-editor') return { InventoryMetadataEditor: () => null };
+      if (id === '@/data/ingredient-images') return { ingredientImage: () => undefined };
+      if (id === '@/data/food-images') return { recipeImages: {}, ingredientImages: {}, sourcedImageCredits: [] };
       if (id === '@/components/backend-stock-actions') return { BackendStockActions: () => null };
       if (id === '@/components/appearance-controls') return { AppearanceControls: () => null };
       if (id === './home-screen') return { __esModule: true, default: () => null };
@@ -58,7 +63,7 @@ function fixture(language = 'ar') {
   const stock = load('i18n/backend-stock-actions.ts').stockActionMessages[language];
   const number = load('utils/backend-kitchen-view.ts').inventoryNumberLabel;
   parts.push(wrap('insufficient', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.AppText, { dir: language === 'ar' ? 'rtl' : undefined }, stock.insufficient(`${number('1.25', language)} ${language === 'ar' ? 'كغ' : 'kg'}`)))));
-  parts.push(wrap('legacy-row', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.ActionRow, { title: 'Remy Chat', rtl: language === 'ar', onPress: () => {} }))));
+  parts.push(wrap('legacy-row', React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' }, React.createElement(core.ActionRow, { title: 'Remi Chat', rtl: language === 'ar', onPress: () => {} }))));
   parts.push(wrap('more', React.createElement(load('screens/more-screen.tsx').default)));
   const html = renderToStaticMarkup(React.createElement(React.Fragment, null, ...parts));
   return { html: `<!doctype html><html dir="ltr"><head><meta charset="utf-8"><style>${native.StyleSheet.getSheet().textContent}</style></head><body>${html}</body></html>`, load, native };
@@ -77,7 +82,7 @@ test('real React Native Web markup gives Arabic inventory paragraphs an explicit
 });
 test('English inventory labels and paragraphs stay unchanged', () => {
   const { html, load } = fixture('en');
-  for (const line of ['0.75 kg · Pantry', '2 pieces · Refrigerator', '2 tbsp · Counter', 'Days until expiration: 29']) assert(html.includes(line), line);
+  for (const line of ['0.75 kg · Pantry', '2 pieces · Refrigerator', '2 tbsp · Counter', '29 days left']) assert(html.includes(line), line);
   assert.equal(load('utils/backend-kitchen-view.ts').backendQuantityLabel({ quantity: '1.250', unitId: 'kg' }, 'en'), '1.25 kg');
 });
 test('explicit paragraph direction is opt-in; shared text without it keeps the existing default', () => {
@@ -93,8 +98,10 @@ test('ActionRow owns a single chevron direction, independent of missing or misma
       const exported = {};
       new Function('require', 'exports', compiled)(id => {
         if (id === 'react') return { ...React, useState: () => [false, () => {}], useContext: () => !rtl };
-        if (id === 'react-native') return { I18nManager: { isRTL }, Pressable: 'Pressable', View: 'View', StyleSheet: { create: value => value } };
+        if (fixtureModule(id, typeof native === 'undefined' ? {} : native)) return fixtureModule(id, typeof native === 'undefined' ? {} : native);
+      if (id === 'react-native') return { I18nManager: { isRTL }, Pressable: 'Pressable', View: 'View', StyleSheet: { create: value => value } };
         if (id === '@/theme/provider') return { useRemyTheme: () => ({ colors: {} }) };
+        if (id === '@/providers/language-provider') return { useLanguage: () => ({ language: rtl ? 'ar' : 'en' }) };
         if (id === '@/theme/fonts') return { useRemyFonts: () => ({}) };
         if (id === '@/theme/tokens') return { spacing: {}, layout: {}, radii: {}, typography: {} };
         if (id === './icon') return { Icon: 'Icon' };
@@ -107,5 +114,15 @@ test('ActionRow owns a single chevron direction, independent of missing or misma
       const custom = exported.ActionRow({ title: 'Row', rtl, onPress() {}, trailing: 'custom' });
       assert(!nodes(custom).some(node => node.type === 'Icon' && node.props.name === 'chevron'));
     }
+  }
+});
+
+test('back navigation precedes the page title and is separate from trailing actions in both languages', () => {
+  for (const language of ['en','ar']) {
+    const { load } = fixture(language), core = load('components/ui/core.tsx');
+    const html = renderToStaticMarkup(React.createElement(core.ScreenDirectionProvider, { value: language === 'ar' },
+      React.createElement(core.PageHeader, { title: 'Recipe details', back: React.createElement(core.Button, { label: 'Back', icon: 'back', rtl: language === 'ar', variant: 'text' }), action: React.createElement(core.Button, { label: 'Save' }) })));
+    assert(html.indexOf('Back') < html.indexOf('Recipe details'));
+    assert(html.indexOf('Recipe details') < html.indexOf('Save'));
   }
 });
