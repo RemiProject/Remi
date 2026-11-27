@@ -19,9 +19,9 @@ export class OneTimeTokenService {
     }
   }
 
-  /** Generates raw + hash + expiry. Nothing is persisted here: the caller inserts `row` inside its own TX. */
-  issue(purpose: TokenPurpose, userId: string | null, now: Date = new Date()): IssuedToken {
+  /** Generates raw + hash + expiry. Nothing is persisted here: the caller inserts `row` inside its own TX. `ttlMs` overrides the purpose's configured lifetime. */
+  issue(purpose: TokenPurpose, userId: string | null, now: Date = new Date(), ttlMs: number = this.ttlMs(purpose)): IssuedToken {
     const raw = generateRawToken();
-    return { raw, row: { id: newId(), userId, purpose, tokenHash: hashToken(raw), expiresAt: new Date(now.getTime() + this.ttlMs(purpose)) } };
+    return { raw, row: { id: newId(), userId, purpose, tokenHash: hashToken(raw), expiresAt: new Date(now.getTime() + ttlMs) } };
   }
 }

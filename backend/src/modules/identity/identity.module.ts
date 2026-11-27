@@ -4,6 +4,9 @@ import { RequestEmailVerificationCodeHandler } from './application/commands/requ
 import { VerifyEmailCodeHandler } from './application/commands/verify-email-code/verify-email-code.handler.js';
 import { EmailVerificationCodeService } from './application/services/email-verification-code.service.js';
 import { EMAIL_VERIFICATION_CODE_REPOSITORY } from './domain/ports/email-verification-code.repository.js';
+import { PasswordResetCodeService } from './application/services/password-reset-code.service.js';
+import { PASSWORD_RESET_CODE_REPOSITORY } from './domain/ports/password-reset-code.repository.js';
+import { PrismaPasswordResetCodeRepository } from './infrastructure/repositories/prisma-password-reset-code.repository.js';
 import { PrismaEmailVerificationCodeRepository } from './infrastructure/repositories/prisma-email-verification-code.repository.js';
 import { AcceptInvitationHandler } from './application/commands/accept-invitation/accept-invitation.handler.js';
 import { CreateHouseholdHandler } from './application/commands/create-household/create-household.handler.js';
@@ -43,6 +46,9 @@ import { JwtTokenSigner } from './infrastructure/adapters/jwt-token-signer.js';
 import { SendHouseholdInvitationEmailHandler } from './infrastructure/handlers/send-household-invitation-email.handler.js';
 import { SendPasswordChangedEmailHandler } from './infrastructure/handlers/send-password-changed-email.handler.js';
 import { SendPasswordResetEmailHandler } from './infrastructure/handlers/send-password-reset-email.handler.js';
+import { PasswordResetLookupHandler } from './infrastructure/handlers/password-reset-lookup.handler.js';
+import { VerifyPasswordResetCodeHandler } from './application/commands/verify-password-reset-code/verify-password-reset-code.handler.js';
+import { ProcessPasswordResetLookupHandler } from './application/commands/process-password-reset-lookup/process-password-reset-lookup.handler.js';
 import { SendVerificationEmailHandler } from './infrastructure/handlers/send-verification-email.handler.js';
 import { PrismaHouseholdInvitationRepository } from './infrastructure/repositories/prisma-household-invitation.repository.js';
 import { PrismaHouseholdMemberRepository } from './infrastructure/repositories/prisma-household-member.repository.js';
@@ -64,6 +70,8 @@ const CommandHandlers = [
   LogoutAllHandler,
   VerifyEmailHandler,
   RequestPasswordResetHandler,
+  ProcessPasswordResetLookupHandler,
+  VerifyPasswordResetCodeHandler,
   ResetPasswordHandler,
   CreateHouseholdHandler,
   InviteMemberHandler,
@@ -87,6 +95,7 @@ const EventHandlers = [IdentityAuditEventsHandler];
 const OutboxHandlers = [
   SendVerificationEmailHandler,
   SendPasswordResetEmailHandler,
+  PasswordResetLookupHandler,
   SendPasswordChangedEmailHandler,
   SendHouseholdInvitationEmailHandler,
 ];
@@ -100,6 +109,8 @@ const OutboxHandlers = [
     OneTimeTokenService,
     EmailVerificationCodeService,
     { provide: EMAIL_VERIFICATION_CODE_REPOSITORY, useClass: PrismaEmailVerificationCodeRepository },
+    PasswordResetCodeService,
+    { provide: PASSWORD_RESET_CODE_REPOSITORY, useClass: PrismaPasswordResetCodeRepository },
     LinkBuilder,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
     { provide: TOKEN_REPOSITORY, useClass: PrismaTokenRepository },

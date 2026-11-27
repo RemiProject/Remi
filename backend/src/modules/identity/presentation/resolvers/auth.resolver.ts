@@ -20,6 +20,7 @@ import { GetMeQuery } from '@/modules/identity/application/queries/get-me/get-me
 import { DeleteAccountCommand } from '@/modules/identity/application/commands/delete-account/delete-account.command.js';
 import { RequestEmailVerificationCodeCommand } from '@/modules/identity/application/commands/request-email-verification-code/request-email-verification-code.command.js';
 import { VerifyEmailCodeCommand } from '@/modules/identity/application/commands/verify-email-code/verify-email-code.command.js';
+import { VerifyPasswordResetCodeCommand } from '@/modules/identity/application/commands/verify-password-reset-code/verify-password-reset-code.command.js';
 import {
   DeleteAccountInput,
   LoginInput,
@@ -31,8 +32,9 @@ import {
   TokenInput,
   RequestEmailVerificationCodeInput,
   VerifyEmailCodeInput,
+  VerifyPasswordResetCodeInput,
 } from '@/modules/identity/presentation/inputs/identity.inputs.js';
-import { AuthTokensType, MeType, RegisterResultType } from '@/modules/identity/presentation/types/identity.types.js';
+import { AuthTokensType, MeType, PasswordResetTokenType, RegisterResultType } from '@/modules/identity/presentation/types/identity.types.js';
 
 /** Resolvers only translate GraphQL <-> commands/queries. No business logic here. */
 @Resolver()
@@ -123,6 +125,12 @@ export class AuthResolver {
   async requestPasswordReset(@Args('input') i: RequestPasswordResetInput) {
     await this.commandBus.execute(new RequestPasswordResetCommand(i.email));
     return true;
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => PasswordResetTokenType, { description: 'Public: exchanges a reset code from the email for a single-use resetPassword token valid for 10 minutes. Wrong, expired, used or malformed codes, unknown emails and locked accounts share one generic error.' })
+  verifyPasswordResetCode(@Args('input') i: VerifyPasswordResetCodeInput) {
+    return this.commandBus.execute(new VerifyPasswordResetCodeCommand(i.email, i.code));
   }
 
   @Throttle(AUTH_THROTTLE)

@@ -10,6 +10,12 @@ export class AuthTokensType {
   @Field(() => Int) expiresInSeconds!: number;
 }
 
+@ObjectType('PasswordResetToken')
+export class PasswordResetTokenType {
+  @Field({ description: 'Single-use token for resetPassword.' }) resetToken!: string;
+  @Field(() => Date) expiresAt!: Date;
+}
+
 @ObjectType('RegisterResult')
 export class RegisterResultType { @Field(() => ID) userId!: string }
 

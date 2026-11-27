@@ -77,6 +77,7 @@ async function app({ screen = 'verify', language = 'en', params = {}, canGoBack 
     new Function('require', 'exports', transpile(fs.readFileSync(path, 'utf8')))(id => { assert.ok(mocks[id], id); return mocks[id]; }, exports);
     return exports;
   };
+  mocks['@/hooks/use-resend-wait'] = load('src/hooks/use-resend-wait.ts');
   const verify = mocks['./email-verification-screen'] = load('src/screens/email-verification-screen.tsx');
   const profile = mocks['./profile-screen'] = { __esModule: true, ...load('src/screens/profile-screen.tsx') };
   const auth = load('src/screens/auth-screen.tsx').default;

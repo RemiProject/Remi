@@ -7,7 +7,8 @@ import { useLanguage } from '@/providers/language-provider';
 import { getBackend } from '@/services/backend';
 import { isEmailAddress } from '@/services/auth-form';
 import { createEmailVerificationService, type VerifyCodeFailure } from '@/services/email-verification';
-import { EMAIL_CODE_LENGTH, normalizeEmailCode, parseEmailCode, resendDeadline, resendSecondsLeft } from '@/domain/email-verification';
+import { parseEmailCode, toCodeInput } from '@/domain/email-verification';
+import { useResendWait } from '@/hooks/use-resend-wait';
 import { authMessages } from '@/i18n/auth';
 import { emailVerificationMessages } from '@/i18n/email-verification';
 
@@ -18,7 +19,6 @@ export interface EmailVerificationStart {
   verified?: boolean;
 }
 const profile = { pathname: '/feature', params: { feature: 'profile' } } as const;
-const addressKey = (email: string) => email.trim().toLowerCase();
 
 /** The /verify-email-code route: reached after a refused login or from Profile. Sign-up shows the flow below in place. */
 export default function EmailVerificationScreen() {
@@ -48,20 +48,12 @@ export function EmailVerificationFlow({ start, takePassword, onCancel }: { start
   const [notice, setNotice] = useState<VerifyCodeFailure | 'requested' | null>(null);
   const [busy, setBusy] = useState<'verify' | 'resend' | null>(null);
   const [done, setDone] = useState(!!verified);
-  // Registering already sent the first code.
-  const [wait, setWait] = useState(() => origin === 'signup' ? { address: addressKey(startEmail), until: resendDeadline() } : null);
-  const [now, setNow] = useState(() => Date.now());
+  // Registering already sent the first code. Another address has its own cooldown.
+  const resendWait = useResendWait(email, origin === 'signup');
+  const { secondsLeft, waiting } = resendWait;
   const pending = useRef(false);
   const unmounted = useRef(false);
   useEffect(() => { unmounted.current = false; return () => { unmounted.current = true; }; }, []);
-  // Another address has its own cooldown.
-  const secondsLeft = resendSecondsLeft(wait?.address === addressKey(email) ? wait.until : null, now);
-  const waiting = secondsLeft > 0;
-  useEffect(() => {
-    if (!waiting) return;
-    const timer = setInterval(() => setNow(Date.now()), 500);
-    return () => clearInterval(timer);
-  }, [waiting]);
 
   const service = () => createEmailVerificationService(getBackend());
   function leave() {
@@ -105,7 +97,7 @@ export function EmailVerificationFlow({ start, takePassword, onCancel }: { start
       const result = await service().requestEmailVerificationCode(email);
       if (unmounted.current) return;
       if (!result.ok) { setNotice(result.reason); return; }
-      setWait({ address: addressKey(email), until: resendDeadline() }); setNow(Date.now());
+      resendWait.start();
       setCode(''); setNotice('requested');
     } catch { setNotice('error'); }
     finally { pending.current = false; setBusy(null); }
@@ -116,7 +108,7 @@ export function EmailVerificationFlow({ start, takePassword, onCancel }: { start
     {origin === 'profile' ? <AuthAction label={t.backToProfile} onPress={leave} />
       : <AuthAction label={authMessages[language].login} onPress={() => router.dismissTo('/login')} />}
   </AuthShell>;
-  return <AuthShell title={t.title} subtitle={wait ? t.intro : t.introSend} onBack={() => { if (!busy) leave(); }}>
+  return <AuthShell title={t.title} subtitle={resendWait.sent ? t.intro : t.introSend} onBack={() => { if (!busy) leave(); }}>
     {origin === 'login' ? <AuthInput label={t.email} value={email} error={errors.email ? t.emailInvalid : undefined} editable={!busy}
       autoCapitalize="none" autoComplete="email" keyboardType="email-address" maxLength={254} placeholder="you@example.com"
       onChangeText={value => { setEmail(value); setErrors(previous => ({ ...previous, email: false })); setNotice(null); }} />
@@ -126,15 +118,15 @@ export function EmailVerificationFlow({ start, takePassword, onCancel }: { start
       keyboardType="number-pad" autoComplete="one-time-code" textContentType="oneTimeCode" autoCapitalize="none" selectTextOnFocus
       // No native maxLength: it would cut a pasted code that carries spaces or direction marks before they are removed.
       onChangeText={value => {
-        setCode(normalizeEmailCode(value).replace(/[^0-9]/g, '').slice(0, EMAIL_CODE_LENGTH));
+        setCode(toCodeInput(value));
         setErrors(previous => ({ ...previous, code: false })); setNotice(null);
       }} onSubmitEditing={() => { void verify(); }} />
     <AppText variant="caption" muted>{t.codeHint}</AppText>
     {notice && <AuthNotice success={notice === 'requested'}>{t[notice]}</AuthNotice>}
     <AuthAction label={busy === 'verify' ? t.verifying : t.verify} busy={busy === 'verify'} disabled={!!busy || auth.busy} onPress={() => { void verify(); }} />
-    <AuthLink label={busy === 'resend' ? t.resending : waiting ? t.resendIn(secondsLeft) : wait ? t.resend : t.sendCode}
+    <AuthLink label={busy === 'resend' ? t.resending : waiting ? t.resendIn(secondsLeft) : resendWait.sent ? t.resend : t.sendCode}
       disabled={!!busy || waiting} onPress={() => { void resend(); }} />
-    {wait && <AppText variant="caption" muted>{t.spam}</AppText>}
+    {resendWait.sent && <AppText variant="caption" muted>{t.spam}</AppText>}
     {origin !== 'profile' && <AuthLink label={t.backToLogin} disabled={!!busy} onPress={() => { if (onCancel) onCancel(); else router.dismissTo('/login'); }} />}
   </AuthShell>;
 }

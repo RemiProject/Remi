@@ -14,7 +14,7 @@ so that step has no screenshot.
   the Mac's Wi-Fi address built in (`EXPO_PUBLIC_API_URL`, for example `http://192.168.1.7:3000`). If that address
   changes, rebuild the app.
 - The API has migration 0035 applied and `EMAIL_VERIFICATION_CODE_SECRET` set, or the email has no code
-  ([backend setup](../../backend/README.md#required-for-email-verification-codes)).
+  ([backend setup](../../backend/README.md#required-for-email-verification-and-password-reset-codes)).
 - Verification mail goes to Mailpit on the Mac (`http://localhost:8025` there), not to a real inbox.
 - This dev server doesn't require a verified email to log in (`EMAIL_VERIFICATION_REQUIRED=false`), so you can also
   skip the code and verify later from Profile.
@@ -94,4 +94,7 @@ If your email isn't verified yet:
   - Phone number rejected: it doesn't match the Egypt or Saudi format above.
   - Connection error: the Mac is asleep, the API isn't running, the phone is on a different network, or Local Network
     access is off.
+- **Forgot your password:** on Log in, tap **Forgot password?**, enter your email, then the 6-digit code from the
+  newest Mailpit message, and choose a new password. Remi signs you in with it. The code is valid for 15 minutes;
+  **Resend code** becomes available after 60 seconds, and at most 5 reset emails are sent in 24 hours.
 - **Testing again from scratch:** Profile → **Log out**, then repeat from step 1 with a new username and email.

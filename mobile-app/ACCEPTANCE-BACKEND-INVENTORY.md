@@ -125,6 +125,8 @@ restoration; true logout/expired-session behavior is unchanged.
   Mailpit link token no longer has to be submitted through `verifyEmail`. Opening the
   default localhost:5173 link still does not lead to a mobile screen. The code needs
   `EMAIL_VERIFICATION_CODE_SECRET` on the backend; see [README](README.md#create-and-verify-a-local-test-account).
+  Forgot password likewise has an in-app 6-digit code flow (`/forgot-password`); the
+  emailed reset link reaches `/reset-password` only where `WEB_BASE_URL` points to the app.
 - **Editing date/storage/name and true batch delete/archive need backend support.**
   Edit remains disabled. Added by mistake is a ledger adjustment to zero, not deletion.
 - **Local-items import is not built.** Existing AsyncStorage inventory is retained

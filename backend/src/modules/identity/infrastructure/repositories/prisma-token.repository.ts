@@ -17,6 +17,10 @@ export class PrismaTokenRepository implements TokenRepository {
     return rows[0] ?? null;
   }
 
+  async invalidateOpenForUser(tx: Tx, userId: string, purpose: TokenPurpose): Promise<number> {
+    return tx.$executeRaw`UPDATE "Token" SET "usedAt" = now() WHERE "userId" = ${userId}::uuid AND "purpose" = ${purpose}::"TokenPurpose" AND "usedAt" IS NULL`;
+  }
+
   async consumeById(tx: Tx, id: string): Promise<boolean> {
     const n = await tx.$executeRaw`UPDATE "Token" SET "usedAt" = now() WHERE "id" = ${id}::uuid AND "usedAt" IS NULL AND "expiresAt" > now()`;
     return n === 1;
