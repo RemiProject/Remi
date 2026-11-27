@@ -923,8 +923,16 @@ type Query {
   myHouseholds: [MyHousehold!]!
   myProfile: MyProfileType!
 
-  """The household's own recipes, newest first"""
-  myRecipes(after: String, first: Int! = 20): RecipeConnectionType!
+  """
+  The household's own recipes, newest first. A person's recipes follow them into every household they join
+  """
+  myRecipes(
+    after: String
+
+    """Only the recipes you added"""
+    createdByMe: Boolean! = false
+    first: Int! = 20
+  ): RecipeConnectionType!
   mySafetyHistory(after: String, first: Int! = 20): SafetyHistoryConnectionType!
   notificationBadge: NotificationBadgeType!
   notificationPreferences: [NotificationPreferenceType!]!
@@ -1167,6 +1175,14 @@ type RecipeSuggestionsConnectionType {
 
 type RecipeSummaryType {
   cookTimeMin: Int
+
+  """The author's name. Kept after the author deletes their account"""
+  createdByName: String
+
+  """
+  Who added the recipe to a household (null for catalogue recipes). Compare with me.id for "added by you"
+  """
+  createdByUserId: ID
   cuisineId: ID
   cuisineName: String
   description: String
@@ -1188,6 +1204,14 @@ type RecipeSummaryType {
 
 type RecipeType {
   cookTimeMin: Int
+
+  """The author's name. Kept after the author deletes their account"""
+  createdByName: String
+
+  """
+  Who added the recipe to a household (null for catalogue recipes). Compare with me.id for "added by you"
+  """
+  createdByUserId: ID
   cuisineId: ID
   cuisineName: String
   description: String

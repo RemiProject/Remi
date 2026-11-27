@@ -118,6 +118,7 @@ jobs:
           node scripts/verify-phase7.mjs
           node scripts/verify-phase10.mjs
           node scripts/verify-safety-categories.mjs
+          node scripts/verify-personal-recipes-db.mjs
 
       - name: Check schema.graphql is up to date
         run: |
@@ -127,3 +128,4 @@ jobs:
           for i in $(seq 1 60); do curl -sf localhost:3000/health/live > /dev/null && break; sleep 1; done
           curl -sf localhost:3000/health/live > /dev/null || { cat api.log; exit 1; }
           git diff --exit-code -- schema.graphql || { echo "::error::schema.graphql is stale. Boot the API locally and commit the regenerated file."; exit 1; }
+          REMI_API_URL=http://localhost:3000/graphql DATABASE_URL_MIGRATOR="$DATABASE_URL_TEST" node scripts/verify-personal-recipes.mjs

@@ -19,7 +19,8 @@ const PERSONAL_TABLES = [
  * Deletes an account. Each household the person owns passes to its longest-standing other member, or is closed when
  * nobody else is in it. Their meals, notifications, health and safety data, preferences, devices and sessions are
  * removed. The user row is kept only as an anonymous placeholder, so shared household history (who added which food)
- * stays consistent without naming them. Sign-in with the old email, username or phone then fails.
+ * stays consistent without naming them. Recipes they added are the exception: they stay in each household under the
+ * author's name (Recipe.createdByName). Sign-in with the old email, username or phone then fails.
  */
 @CommandHandler(DeleteAccountCommand)
 export class DeleteAccountHandler implements ICommandHandler<DeleteAccountCommand> {
@@ -37,6 +38,7 @@ export class DeleteAccountHandler implements ICommandHandler<DeleteAccountComman
       await tx.$executeRaw`SELECT set_config('app.account_erasure', 'true', true)`;
       const memberships = await tx.$queryRaw<Array<{ householdId: string; role: string }>>`
         SELECT "householdId", "role"::text AS "role" FROM "HouseholdMember" WHERE "userId" = ${userId}::uuid AND "leftAt" IS NULL`;
+      await this.keepRecipeAuthorName(tx, userId);
       for (const { householdId, role } of memberships) await this.leave(tx, userId, householdId, role);
       await tx.$executeRaw`SELECT set_config('app.household_id', '', true)`;
       for (const table of PERSONAL_TABLES) await tx.$executeRawUnsafe(`DELETE FROM "${table}" WHERE "userId" = $1::uuid`, userId);
@@ -45,6 +47,17 @@ export class DeleteAccountHandler implements ICommandHandler<DeleteAccountComman
       await tx.$executeRaw`UPDATE "User" SET "email" = ${`deleted-${userId}@deleted.invalid`}, "username" = NULL, "phoneNumber" = NULL, "name" = 'Deleted user',
         "passwordHash" = 'deleted', "emailVerifiedAt" = NULL, "lastLoginAt" = NULL, "deletedAt" = now(), "updatedAt" = now() WHERE "id" = ${userId}::uuid`;
     }, { userId });
+  }
+
+  /** Snapshot the author's name on their recipes in every household they were ever in, before the name is erased. */
+  private async keepRecipeAuthorName(tx: Tx, userId: string) {
+    const households = await tx.$queryRaw<Array<{ householdId: string }>>`
+      SELECT DISTINCT "householdId" FROM "HouseholdMember" WHERE "userId" = ${userId}::uuid ORDER BY "householdId"`;
+    for (const { householdId } of households) {
+      await tx.$executeRaw`SELECT set_config('app.household_id', ${householdId}, true)`;
+      await tx.$executeRaw`UPDATE "Recipe" SET "createdByName" = (SELECT "name" FROM "User" WHERE "id" = ${userId}::uuid), "updatedAt" = now()
+        WHERE "householdId" = ${householdId}::uuid AND "createdByUserId" = ${userId}::uuid`;
+    }
   }
 
   private async leave(tx: Tx, userId: string, householdId: string, role: string) {
