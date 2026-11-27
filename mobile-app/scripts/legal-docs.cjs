@@ -10,7 +10,8 @@ const files = { privacy: '../../docs/privacy-policy.md', terms: '../../docs/term
 let stale = false;
 for (const [doc, file] of Object.entries(files)) {
   const target = path.join(__dirname, file), text = `<!-- Generated from mobile-app/src/data/legal.ts by mobile-app/scripts/legal-docs.cjs. Edit that file, then run the script. -->\n\n${render(doc)}`;
-  if (process.argv.includes('--check')) { if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== text) { console.error(`${file} is stale: run node scripts/legal-docs.cjs`); stale = true; } }
+  // --check ignores CRLF vs LF, so a Windows checkout with CRLF still passes; the written files are always LF.
+  if (process.argv.includes('--check')) { if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8').replace(/\r\n/g, '\n') !== text) { console.error(`${file} is stale: run node scripts/legal-docs.cjs`); stale = true; } }
   else fs.writeFileSync(target, text);
 }
 process.exitCode = stale ? 1 : 0;
